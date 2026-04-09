@@ -12,7 +12,8 @@ class UserModel(AbstractBaseUser):
     email = models.EmailField(unique=True)
     first_name = models.CharField(max_length=30, blank=True)
     last_name = models.CharField(max_length=30, blank=True)
-
+    is_staff = models.BooleanField(default=False)
+    
     USERNAME_FIELD = 'username, email'
     REQUIRED_FIELDS = ['email']
 
