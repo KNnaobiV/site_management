@@ -7,7 +7,6 @@ from rest_framework.permissions import IsAuthenticated
 from .models import (
     ConstructionProject,
     ConstructionSite,
-    Material,
     WorkItem,
     JobItem,
     JobReport,
@@ -15,7 +14,6 @@ from .models import (
 from .serializers import (
     ConstructionProjectSerializer,
     ConstructionSiteSerializer,
-    MaterialSerializer,
     WorkItemSerializer,
     JobItemSerializer,
     JobReportSerializer,
@@ -26,6 +24,9 @@ class ConstructionProjectViewSet(viewsets.ModelViewSet):
     queryset = ConstructionProject.objects.all()
     serializer_class = ConstructionProjectSerializer
     permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        """Filter by c"""
 
 
 class ConstructionSiteViewSet(viewsets.ModelViewSet):
@@ -40,12 +41,6 @@ class ConstructionSiteViewSet(viewsets.ModelViewSet):
         if project_id:
             queryset = queryset.filter(construction_project_id=project_id)
         return queryset
-
-
-class MaterialViewSet(viewsets.ModelViewSet):
-    queryset = Material.objects.all()
-    serializer_class = MaterialSerializer
-    permission_classes = [IsAuthenticated]
 
 
 class WorkItemViewSet(viewsets.ModelViewSet):

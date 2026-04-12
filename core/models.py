@@ -1,9 +1,14 @@
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.utils import timezone
 from datetime import timedelta
 
-from base.models import Picture
+
+from base.models import Picture, Video
+from .groups import create_company_group, create_project_group
 # Create your models here.
 
 User = get_user_model()
@@ -17,15 +22,14 @@ class StatusChoices(models.TextChoices):
         CANCELLED = "Cancelled"
 
 
-class Company(models.Model):
-    """Represents a construction company with associated users"""
-
-    name = models.CharField(max_length=100, default="")
-    motto = models.TextField(default="")
-    logo = models.ForeignKey(
-        Picture, on_delete=models.SET_NULL, null=True, blank=True
-    )
-    staff = models.ManyToManyField(User, related_name="company_staff")
+class RoleChoices(models.TextChoices):
+    INTERNAL_MEMBER = "Internal Member"
+    EXTERNAL_MEMBER = "External Member"
+    FOREMAN = "Foreman"
+    STOREKEEPER = "Storekeeper"
+    PROJECT_MANAGER = "Project Manager"
+    CLIENT = "Client"
+    CONSULTANT = "Consultant"
 
 
 class ConstructionProject(models.Model):
@@ -33,14 +37,17 @@ class ConstructionProject(models.Model):
     Represents a construction project with associated client 
     and project manager
     """
-    company = models.ForeignKey(
-        Company, on_delete=models.CASCADE, related_name="projects"
+    created_by = models.ForeignKey(
+        User, on_delete=models.DO_NOTHING, related_name="created_projects"
     )
     client = models.ForeignKey(
         User, on_delete=models.DO_NOTHING, related_name="project_owner"
     )
     project_manager = models.ForeignKey(
         User, on_delete=models.DO_NOTHING, related_name="project_manager"
+    )
+    consultants = models.ManyToManyField(
+        User, related_name="project_consultants", blank=True
     )
     project_status = models.CharField(
         max_length=20, choices=StatusChoices.choices, 
@@ -50,8 +57,22 @@ class ConstructionProject(models.Model):
     project_description = models.TextField(default="")
     project_start_date = models.DateField(auto_now=True)
     project_end_date = models.DateField(blank=True, null=True)
-    actual_start_date = models.DateField(default=timezone.now())
+    actual_start_date = models.DateField(default=timezone.now)
     # add project files
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(
+                    project_end_date__gte=models.F('project_start_date')
+                ) | models.Q(project_end_date__isnull=True),
+                name='end_date_after_start_date'
+            ),
+            models.UniqueConstraint(
+                fields=['created_by', 'project_name'], name='unique_project_name'
+            ),
+        ]
+
 
     def save(self, *args, **kwargs):
         if (self.project_end_date and 
@@ -65,6 +86,17 @@ class ConstructionProject(models.Model):
             )
         super().save(*args, **kwargs)
 
+    @receiver(post_save, sender='core.ConstructionProject')
+    def create_project_group(sender, instance, created, **kwargs):
+        """Create project-specific groups when a new project is created"""
+        group_suffixes = [
+            "Client", "Consultant", "Project Manager",
+        ]
+        if created:
+            for suffix in group_suffixes:
+                create_project_group(instance.project_name, group_suffix=suffix)
+
+
 
 class ConstructionSite(models.Model):
     construction_project = models.ForeignKey(
@@ -77,48 +109,33 @@ class ConstructionSite(models.Model):
         User, on_delete=models.DO_NOTHING, related_name="site_storekeeper"
         )
     address = models.CharField(max_length=255)
-    site_opening_date = models.DateField(default=timezone.now())
+    site_opening_date = models.DateField(default=timezone.now)
 
     def save(self, *args, **kwargs):
         if not self.address:
             raise ValueError("Construction site must have an address.")
         super().save(*args, **kwargs)
-
-
-class Material(models.Model):
-    """Represents a construction material needed for a project"""
-
-    class UnitsOfMeasure(models.TextChoices):
-        PIECE = "Piece"
-        KILOGRAM = "Kilogram"
-        LITER = "Liter"
-        METER = "Meter"
-        PCS = "Pcs"
-        SQUARE_METER = "Square Meter"
-        CUBIC_METER = "Cubic Meter"
-        BAG = "Bag"
-        LENGTH = "Length"
-        ROLL = "Roll"
-        OTHER = "Other"
-        
-    material_name = models.CharField(max_length=50, default="")
-    projected_quantity = models.PositiveSmallIntegerField()
-    actual_quantity = models.PositiveSmallIntegerField()
-    needed_by = models.CharField(max_length=50, default="")
-    unit_of_measure = models.CharField(
-        max_length=23, choices=UnitsOfMeasure.choices
-    )
     
-    def save(self, *args, **kwargs):
-        if self.projected_quantity < 0:
-            raise ValueError("Projected quantity cannot be negative.")
-        if self.actual_quantity < 0:
-            raise ValueError("Actual quantity cannot be negative.")
-        if not self.material_name:
-            raise ValueError("Material must have a name.")
-        if not self.needed_by:
-            raise ValueError("Material must specify who needs it.")
-        super().save(*args, **kwargs)
+    @receiver(post_save, sender='core.ConstructionSite')
+    def create_site_groups(sender, instance, created, **kwargs):
+        """Create site-specific groups when a new construction site is created"""
+        group_suffixes = ["Foreman", "Storekeeper"]
+        if created:
+            for suffix in group_suffixes:
+                create_project_group(
+                    instance.construction_project.project_name, 
+                    group_suffix=suffix
+                )
+    
+    def add_foreman_to_group(self):
+        foreman_group_name = f"{self.construction_project.project_name} Foreman"
+        foreman_group, _ = Group.objects.get_or_create(name=foreman_group_name)
+        foreman_group.user_set.add(self.foreman)
+    
+    def add_storekeeper_to_group(self):
+        storekeeper_group_name = f"{self.construction_project.project_name} Storekeeper"
+        storekeeper_group, _ = Group.objects.get_or_create(name=storekeeper_group_name)
+        storekeeper_group.user_set.add(self.storekeeper)
 
 
 class WorkItem(models.Model):
@@ -186,7 +203,6 @@ class JobItem(models.Model):
         max_length=20, choices=StatusChoices.choices, 
         default=StatusChoices.PLANNED
     )
-    material_needs = models.ManyToManyField(Material)
     job_artisan = models.CharField(max_length=20, choices=Artisans.choices)
     job_name = models.CharField(max_length=50, default="")
     job_description = models.TextField(default="")
@@ -231,16 +247,24 @@ class JobReport(models.Model):
         JobItem, on_delete=models.CASCADE, related_name="daily_reports"
     )
     job_image = models.ForeignKey(
-        Picture, on_delete=models.CASCADE, related_name="job_report_pictures"
+        Picture, 
+        on_delete=models.CASCADE, 
+        related_name="job_report_pictures",
+        blank=True, null=True
+    )
+    job_video = models.ForeignKey(
+        Video, 
+        on_delete=models.CASCADE, 
+        related_name="job_report_videos",
+        blank=True, null=True
     )
     reported_by = models.ForeignKey(User, on_delete=models.DO_NOTHING)
-
     # Report metadata
     report_status = models.CharField(
         max_length=20, choices=ReportStatusChoices.choices, 
         default=ReportStatusChoices.submitted
     )
-    report_date = models.DateField(default=timezone.now())
+    report_date = models.DateField(default=timezone.now)
     percentage_job_progress = models.PositiveSmallIntegerField()
     # Scheduling
     expected_completion_date = models.DateField(
@@ -252,7 +276,14 @@ class JobReport(models.Model):
     notes = models.TextField(
         blank=True, help_text="Additional notes or observations"
     )
+    created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    internal_comments = models.TextField(
+        blank=True, help_text="Internal comments for project team"
+    )
+    external_comments = models.TextField(
+        blank=True, help_text="Comments visible to client and consultants"
+    )
     
     class Meta:
         ordering = ['-report_date']
@@ -285,28 +316,3 @@ class JobReport(models.Model):
             )
         
         super().save(*args, **kwargs)
-
-
-class JobMaterialReport(models.Model):
-    """Track materials used in daily construction reports"""
-    
-    job_report = models.ForeignKey(
-        JobReport, on_delete=models.CASCADE, related_name="materials_used"
-    )
-    
-    material = models.ForeignKey(Material, on_delete=models.DO_NOTHING)
-    artisan = models.CharField(max_length=20, choices=JobItem.Artisans.choices)
-    actual_quantity_used = models.DecimalField(
-        max_digits=10, decimal_places=2,
-        help_text="Actual quantity used on this day"
-    )    
-    notes = models.TextField(blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    
-    class Meta:
-        verbose_name = "Daily Job Report Material"
-        verbose_name_plural = "Daily Job Report Materials"
-    
-    def __str__(self):
-        return f"{self.material.material_name} - {self.job_report.report_date}"
-    

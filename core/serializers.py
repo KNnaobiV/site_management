@@ -2,7 +2,6 @@ from rest_framework import serializers
 from .models import (
     ConstructionProject,
     ConstructionSite,
-    Material,
     WorkItem,
     JobItem,
     JobReport,
@@ -18,12 +17,6 @@ class ConstructionProjectSerializer(serializers.ModelSerializer):
 class ConstructionSiteSerializer(serializers.ModelSerializer):
     class Meta:
         model = ConstructionSite
-        fields = '__all__'
-
-
-class MaterialSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Material
         fields = '__all__'
 
 

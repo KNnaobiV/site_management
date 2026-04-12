@@ -5,13 +5,13 @@ from rest_framework.authtoken.models import Token
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth.models import User
 
-from .serializers import UserSerializer, RegisterSerializer, LoginSerializer, InvitationSerializer
+from .serializers import UserSerializer, RegisterSerializer, LoginSerializer
 
 
 class RegisterView(APIView):
     """
     API view for user registration.
-    POST: Register a new user with username, email, password and a valid invite code.
+    POST: Register a new user with username, email and password.
     """
     permission_classes = [AllowAny]
 
@@ -19,36 +19,11 @@ class RegisterView(APIView):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
-            token, created = Token.objects.get_or_create(user=user)
+            token, _ = Token.objects.get_or_create(user=user)
             return Response({
                 'user': UserSerializer(user).data,
                 'token': token.key,
                 'message': 'User registered successfully.'
-            }, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class InvitationCreateView(APIView):
-    """API view to create invitation codes.
-
-    Only admin or staff users may generate invitations. The invitation is sent
-    back in the response; the email provided is optional but can be used to
-    tie the code to a specific address.
-    """
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request):
-        # only allow staff or superusers
-        if not request.user.is_staff:
-            return Response({'detail': 'Not authorized to create invitations.'}, status=status.HTTP_403_FORBIDDEN)
-
-        serializer = InvitationSerializer(data=request.data)
-        if serializer.is_valid():
-            invite = serializer.save()
-            return Response({
-                'code': invite.code,
-                'email': invite.email,
-                'message': 'Invitation created.'
             }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -64,7 +39,7 @@ class LoginView(APIView):
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.validated_data['user']
-            token, created = Token.objects.get_or_create(user=user)
+            token, _ = Token.objects.get_or_create(user=user)
             return Response({
                 'user': UserSerializer(user).data,
                 'token': token.key,
