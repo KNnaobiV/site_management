@@ -90,7 +90,7 @@ class ConstructionProject(models.Model):
     class Meta:
         constraints = [
             models.CheckConstraint(
-                check=models.Q(
+                condition=models.Q(
                     project_end_date__gte=models.F('project_start_date')
                 ) | models.Q(project_end_date__isnull=True),
                 name='end_date_after_start_date'

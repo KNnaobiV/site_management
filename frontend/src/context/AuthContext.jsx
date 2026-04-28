@@ -1,72 +1,46 @@
-import { createContext, useContext, useEffect, useState } from 'react'
-import { login as authLogin, register as authRegister, getMe } from '../api/auth'
+import { createContext, useContext, useState, useEffect } from "react";
+import { fetchMe } from "../api/auth";
 
-const AuthContext = createContext(null)
-
-function setTokens({ access, refresh }) {
-  if (access) localStorage.setItem('access_token', access)
-  if (refresh) localStorage.setItem('refresh_token', refresh)
-}
-
-function clearTokens() {
-  localStorage.removeItem('access_token')
-  localStorage.removeItem('refresh_token')
-}
+const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null)
-  const [loading, setLoading] = useState(true)
+    const [user, setUser] = useState(null);
+    const [token, setToken] = useState(null);
+    const [ready, setReady] = useState(false);
 
-  useEffect(() => {
-    async function fetchUser() {
-      const token = localStorage.getItem('access_token')
-      if (!token) {
-        setLoading(false)
-        return
-      }
+    // Restore session from localStorage on first mount
+    useEffect(() => {
+        const stored = localStorage.getItem("access_token");
+        if (!stored) { setReady(true); return; }
 
-      try {
-        const data = await getMe()
-        setUser(data)
-      } catch {
-        clearTokens()
-        setUser(null)
-      } finally {
-        setLoading(false)
-      }
+        setToken(stored);
+        fetchMe(stored)
+            .then(u => setUser(u))
+            .catch(() => localStorage.removeItem("access_token"))
+            .finally(() => setReady(true));
+    }, []);
+
+    function login(user, access, refresh) {
+        localStorage.setItem("access_token", access);
+        if (refresh) localStorage.setItem("refresh_token", refresh);
+        setToken(access);
+        setUser(user);
     }
 
-    fetchUser()
-  }, [])
+    function logout() {
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+        setToken(null);
+        setUser(null);
+    }
 
-  async function login(username, password) {
-    const data = await authLogin(username, password)
-    setTokens(data)
-    const profile = await getMe()
-    setUser(profile)
-    return profile
-  }
-
-  async function register(payload) {
-    return authRegister(payload)
-  }
-
-  function logout() {
-    clearTokens()
-    setUser(null)
-  }
-
-  return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
-      {children}
-    </AuthContext.Provider>
-  )
+    return (
+        <AuthContext.Provider value={{ user, token, login, logout, ready }}>
+            {children}
+        </AuthContext.Provider>
+    );
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext)
-  if (!context) {
-    throw new Error('useAuth must be used within AuthProvider')
-  }
-  return context
+    return useContext(AuthContext);
 }

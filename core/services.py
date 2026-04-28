@@ -1,4 +1,5 @@
-from django.contrib.auth.models import get_user_model, Group
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.utils import timezone
 
@@ -9,10 +10,10 @@ from core.models import (
     SiteInvitation,
     ProjectRole,
     SiteRole,
-    ProjectMembership, 
-    Invitation,
-    RoleChoices,
-    SiteMembership,
+    # # ProjectMembership, 
+    # Invitation,
+    # RoleChoices,
+    # SiteMembership,
 )
 
 User = get_user_model()
