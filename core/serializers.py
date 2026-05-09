@@ -23,17 +23,18 @@ from rest_framework import serializers
  
 from core.models import (
     ConstructionProject,
-    ConstructionSite,
+    ConstructionPlot,
     WorkItem,
     JobItem,
     JobReport,
-
+    Notification,
+    JobReportComment,
     ProjectInvitation,
-    SiteInvitation,
+    PlotInvitation,
     ProjectRole,
-    SiteRole,
+    PlotRole,
 )
-from core.roles import get_project_role, get_site_role
+from core.roles import get_project_role, get_plot_role
  
 User = get_user_model()
  
@@ -47,9 +48,9 @@ class RoleFilteredSerializer(serializers.ModelSerializer):
     Serializer base that removes fields the requesting user cannot see.
  
     Subclasses declare:
-        ALWAYS_VISIBLE - fields every authenticated project/site member sees
+        ALWAYS_VISIBLE - fields every authenticated project/plot member sees
         ROLE_EXTRA     - dict mapping role label → extra field names (set/list)
-
+ 
     The view is responsible for setting `context["role"]` to the resolved
     role string (e.g. "project_manager") before the serializer is used.
     If no role is in context all fields default to ALWAYS_VISIBLE only.
@@ -85,7 +86,7 @@ class RoleFilteredSerializer(serializers.ModelSerializer):
 class UserSummarySerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["id", "username", "first_name", "last_name", "email"]
+        fields = ["id", "username", "first_name", "last_name", "email", "display_name", "profile_picture"]
         read_only_fields = ["id", "username", "email"]
  
  
@@ -100,7 +101,7 @@ class ConstructionProjectSerializer(RoleFilteredSerializer):
     owner      : all fields
     project_manager     : all fields
     client / consultant          : no financials, no internal notes
-    site_member         : basic info + status only
+    plot_member         : basic info + status only
     """
  
     created_by = UserSummarySerializer(read_only=True)
@@ -108,12 +109,29 @@ class ConstructionProjectSerializer(RoleFilteredSerializer):
     project_manager = UserSummarySerializer(read_only=True)
     consultants = UserSummarySerializer(many=True, read_only=True)
  
+    number_of_plots = serializers.IntegerField(required=False, default=1)
+    
+    role = serializers.SerializerMethodField()
+    
+    def get_role(self, obj):
+        user = self.context.get("request").user
+        if not user or not user.is_authenticated:
+            return "none"
+        from core.roles import get_project_role
+        return get_project_role(user, obj)
+ 
     # Write-only FK inputs
     client_id = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all(), source="client", write_only=True
+        queryset=User.objects.all(), 
+        source="client", 
+        write_only=True, 
+        required=False
     )
     project_manager_id = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all(), source="project_manager", write_only=True
+        queryset=User.objects.all(), 
+        source="project_manager", 
+        write_only=True,
+        required=False
     )
  
     ALWAYS_VISIBLE = {
@@ -121,9 +139,11 @@ class ConstructionProjectSerializer(RoleFilteredSerializer):
         "project_name",
         "project_description",
         "project_status",
-        "project_start_date",
-        "project_end_date",
+        "proposed_start_date",
+        "proposed_end_date",
         "actual_start_date",
+        "number_of_plots",
+        "role",
     }
  
     ROLE_EXTRA = {
@@ -140,7 +160,7 @@ class ConstructionProjectSerializer(RoleFilteredSerializer):
             "project_manager",
             "consultants",
         },
-        "site_member": set(),  # only ALWAYS_VISIBLE
+        "plot_member": set(),  # only ALWAYS_VISIBLE
     }
  
     class Meta:
@@ -150,8 +170,8 @@ class ConstructionProjectSerializer(RoleFilteredSerializer):
             "project_name",
             "project_description",
             "project_status",
-            "project_start_date",
-            "project_end_date",
+            "proposed_start_date",
+            "proposed_end_date",
             "actual_start_date",
             "created_by",
             "client",
@@ -159,43 +179,93 @@ class ConstructionProjectSerializer(RoleFilteredSerializer):
             "project_manager",
             "project_manager_id",
             "consultants",
+            "number_of_plots",
+            "is_deleted",
+            "role",
         ]
-        read_only_fields = ["id", "project_start_date", "created_by"]
+        read_only_fields = ["id", "proposed_start_date", "created_by", "is_deleted"]
+        extra_kwargs = {
+            "proposed_end_date": {"required": False, "allow_null": True},
+            "actual_start_date": {"required": False},
+        }
  
     def create(self, validated_data):
-        validated_data["created_by"] = self.context["request"].user
-        return super().create(validated_data)
+        # number_of_plots is saved directly to the model now
+        user = self.context["request"].user
+        validated_data["created_by"] = user
+        if not validated_data.get("project_manager"):
+            validated_data["project_manager"] = user
+        project = super().create(validated_data)
+        return project
+ 
+    def validate(self, data):
+        status = data.get("project_status")
+ 
+        client = data.get("client")
+        project_manager = data.get("project_manager")
+ 
+        # If status is NOT planned → these fields are required
+        
+        if status.lower() != "planned":
+            if not client:
+                raise serializers.ValidationError({
+                    "client_id": "Client is required unless project is in planned state."
+                })
+ 
+            if not project_manager:
+                raise serializers.ValidationError({
+                    "project_manager_id": "Project manager is required unless project is in planned state."
+                })
+        return data
  
  
 # ===========================================================================
-# ConstructionSite
+# ConstructionPlot
 # ===========================================================================
  
-class ConstructionSiteSerializer(RoleFilteredSerializer):
+class ConstructionPlotSerializer(RoleFilteredSerializer):
     """
     Field visibility by role
     ------------------------
     owner/client        : all fields
     project_manager     : all fields
-    foreman             : own site fields, no storekeeper details
-    storekeeper         : own site fields, no foreman details
+    foreman             : own plot fields, no storekeeper details
+    storekeeper         : own plot fields, no foreman details
     consultant          : address, dates, project link only
     """
  
     foreman = UserSummarySerializer(read_only=True)
     storekeeper = UserSummarySerializer(read_only=True)
     foreman_id = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all(), source="foreman", write_only=True
+        queryset=User.objects.all(), 
+        source="foreman", 
+        write_only=True,
+        allow_null=True,
+        required=False
     )
     storekeeper_id = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all(), source="storekeeper", write_only=True
+        queryset=User.objects.all(), 
+        source="storekeeper", 
+        write_only=True,
+        allow_null=True,
+        required=False
     )
+    
+    role = serializers.SerializerMethodField()
+    
+    def get_role(self, obj):
+        user = self.context.get("request").user
+        if not user or not user.is_authenticated:
+            return "none"
+        from core.roles import get_plot_role
+        return get_plot_role(user, obj)
  
     ALWAYS_VISIBLE = {
         "id",
         "construction_project",
         "address",
-        "site_opening_date",
+        "plot_opening_date",
+        "role",
     }
  
     ROLE_EXTRA = {
@@ -213,16 +283,17 @@ class ConstructionSiteSerializer(RoleFilteredSerializer):
     }
  
     class Meta:
-        model = ConstructionSite
+        model = ConstructionPlot
         fields = [
             "id",
             "construction_project",
             "address",
-            "site_opening_date",
+            "plot_opening_date",
             "foreman",
             "foreman_id",
             "storekeeper",
             "storekeeper_id",
+            "role",
         ]
         read_only_fields = ["id"]
  
@@ -242,12 +313,13 @@ class WorkItemSerializer(RoleFilteredSerializer):
  
     ALWAYS_VISIBLE = {
         "id",
-        "construction_site",
+        "construction_plot",
         "name",
         "description",
         "work_status",
         "proposed_start_date",
         "proposed_end_date",
+        "updated_at",
     }
  
     ROLE_EXTRA = {
@@ -257,11 +329,13 @@ class WorkItemSerializer(RoleFilteredSerializer):
         "consultant":      set(),
     }
  
+    construction_plot_name = serializers.ReadOnlyField(source="construction_plot.address")
+ 
     class Meta:
         model = WorkItem
         fields = [
             "id",
-            "construction_site",
+            "construction_plot",
             "name",
             "description",
             "work_status",
@@ -269,8 +343,11 @@ class WorkItemSerializer(RoleFilteredSerializer):
             "proposed_end_date",
             "start_date",
             "end_date",
+            "is_approved",
+            "updated_at",
+            "construction_plot_name",
         ]
-        read_only_fields = ["id", "proposed_start_date"]
+        read_only_fields = ["id", "updated_at", "construction_plot"]
  
  
 # ===========================================================================
@@ -293,9 +370,10 @@ class JobItemSerializer(RoleFilteredSerializer):
         "job_name",
         "job_description",
         "job_artisan",
-        "work_status",
+        "job_status",
         "projected_start_date",
         "projected_end_date",
+        "updated_at",
     }
  
     ROLE_EXTRA = {
@@ -305,6 +383,10 @@ class JobItemSerializer(RoleFilteredSerializer):
         "consultant":      set(),
     }
  
+    work_item_name = serializers.ReadOnlyField(source="work_item.name")
+    construction_plot = serializers.ReadOnlyField(source="work_item.construction_plot.id")
+    construction_plot_name = serializers.ReadOnlyField(source="work_item.construction_plot.address")
+ 
     class Meta:
         model = JobItem
         fields = [
@@ -313,13 +395,17 @@ class JobItemSerializer(RoleFilteredSerializer):
             "job_name",
             "job_description",
             "job_artisan",
-            "work_status",
+            "job_status",
             "projected_start_date",
             "projected_end_date",
             "actual_start_date",
             "actual_end_date",
+            "updated_at",
+            "work_item_name",
+            "construction_plot",
+            "construction_plot_name",
         ]
-        read_only_fields = ["id"]
+        read_only_fields = ["id", "updated_at", "work_item"]
  
  
 # ===========================================================================
@@ -345,11 +431,13 @@ class JobReportSerializer(RoleFilteredSerializer):
         "reported_by",
         "report_date",
         "report_status",
+        "priority",
         "percentage_job_progress",
         "expected_completion_date",
         "issues_encountered",
         "notes",
         "external_comments",
+        "days_elapsed",
         "updated_at",
     }
  
@@ -368,21 +456,39 @@ class JobReportSerializer(RoleFilteredSerializer):
             "reported_by",
             "report_date",
             "report_status",
+            "priority",
             "percentage_job_progress",
             "expected_completion_date",
             "issues_encountered",
             "notes",
             "external_comments",
             "internal_comments",
+            "days_elapsed",
             "job_image",
             "job_video",
             "updated_at",
         ]
-        read_only_fields = ["id", "reported_by", "updated_at"]
+        read_only_fields = ["id", "reported_by", "updated_at", "job_item"]
  
     def create(self, validated_data):
         validated_data["reported_by"] = self.context["request"].user
         return super().create(validated_data)
+ 
+ 
+class JobReportCommentSerializer(serializers.ModelSerializer):
+    user = UserSummarySerializer(read_only=True)
+ 
+    class Meta:
+        model = JobReportComment
+        fields = ["id", "report", "user", "text", "created_at"]
+        read_only_fields = ["id", "user", "created_at"]
+ 
+ 
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification
+        fields = ["id", "user", "project", "message", "priority", "is_read", "created_at"]
+        read_only_fields = ["id", "user", "created_at"]
  
  
 # ===========================================================================
@@ -419,7 +525,7 @@ class ProjectInvitationSerializer(serializers.ModelSerializer):
             "is_actionable",
         ]
         read_only_fields = [
-            "id", "invited_by", "token", "status",
+            "id", "project", "invited_by", "token", "status",
             "created_at", "expires_at", "responded_at",
             "is_expired", "is_actionable",
         ]
@@ -432,7 +538,7 @@ class ProjectInvitationSerializer(serializers.ModelSerializer):
         return value
  
  
-class SiteInvitationSerializer(serializers.ModelSerializer):
+class PlotInvitationSerializer(serializers.ModelSerializer):
     invited_by = UserSummarySerializer(read_only=True)
     invitee_id = serializers.PrimaryKeyRelatedField(
         queryset=User.objects.all(), source="invitee", write_only=True
@@ -443,10 +549,10 @@ class SiteInvitationSerializer(serializers.ModelSerializer):
     is_actionable = serializers.BooleanField(read_only=True)
  
     class Meta:
-        model = SiteInvitation
+        model = PlotInvitation
         fields = [
             "id",
-            "site",
+            "plot",
             "invited_by",
             "invitee",
             "invitee_id",
@@ -461,15 +567,19 @@ class SiteInvitationSerializer(serializers.ModelSerializer):
             "is_actionable",
         ]
         read_only_fields = [
-            "id", "invited_by", "token", "status",
+            "id", "plot", "invited_by", "token", "status",
             "created_at", "expires_at", "responded_at",
             "is_expired", "is_actionable",
         ]
  
     def validate_role(self, value):
-        if value not in SiteRole.values:
+        if value not in PlotRole.values:
             raise serializers.ValidationError(
-                f"Invalid role. Choose from: {SiteRole.values}"
+                f"Invalid role. Choose from: {PlotRole.values}"
             )
         return value
  
+ 
+# Backwards-compat aliases
+ConstructionSiteSerializer = ConstructionPlotSerializer
+SiteInvitationSerializer = PlotInvitationSerializer

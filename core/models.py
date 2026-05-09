@@ -6,7 +6,7 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
-from datetime import timedelta
+from datetime import timedelta, date
 
 
 from base.models import Picture, Video
@@ -14,6 +14,15 @@ from .groups import create_company_group, create_project_group
 # Create your models here.
 
 User = get_user_model()
+
+
+class TimestampedModel(models.Model):
+    """Abstract base model with created_at and updated_at timestamps."""
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        abstract = True
 
 
 class StatusChoices(models.TextChoices):
@@ -26,14 +35,14 @@ class StatusChoices(models.TextChoices):
 
 
 class ProjectRole(models.TextChoices):
-    PROJECT_MANAGER = "Project Manager"
-    CLIENT = "Client"
-    CONSULTANT = "Consultant"
+    PROJECT_MANAGER = "project_manager", "Project Manager"
+    CLIENT = "client", "Client"
+    CONSULTANT = "consultant", "Consultant"
 
 
-class SiteRole(models.TextChoices):
-    FOREMAN = "Foreman"
-    STOREKEEPER = "Storekeeper"
+class PlotRole(models.TextChoices):
+    FOREMAN = "foreman", "Foreman"
+    STOREKEEPER = "storekeeper", "Storekeeper"
 
 
 _PROJECT_ROLE_GROUP_SUFFIX = {
@@ -59,7 +68,7 @@ class InvitationStatus(models.TextChoices):
     EXPIRED = "expired", "Expired"
 
 
-class ConstructionProject(models.Model):
+class ConstructionProject(TimestampedModel):
     """
     Represents a construction project with associated client 
     and project manager
@@ -68,10 +77,12 @@ class ConstructionProject(models.Model):
         User, on_delete=models.DO_NOTHING, related_name="created_projects"
     )
     client = models.ForeignKey(
-        User, on_delete=models.DO_NOTHING, related_name="project_owner"
+        User, on_delete=models.DO_NOTHING, related_name="project_owner",
+        null=True, blank=True
     )
     project_manager = models.ForeignKey(
-        User, on_delete=models.DO_NOTHING, related_name="project_manager"
+        User, on_delete=models.DO_NOTHING, related_name="project_manager",
+        null=True, blank=True
     )
     consultants = models.ManyToManyField(
         User, related_name="project_consultants", blank=True
@@ -80,20 +91,29 @@ class ConstructionProject(models.Model):
         max_length=20, choices=StatusChoices.choices, 
         default=StatusChoices.PLANNED
     )
+    is_deleted = models.BooleanField(default=False)
     project_name = models.CharField(max_length=100, default="")
     project_description = models.TextField(default="")
-    project_start_date = models.DateField(auto_now=True)
-    project_end_date = models.DateField(blank=True, null=True)
-    actual_start_date = models.DateField(default=timezone.now)
+    proposed_start_date = models.DateField(default=date.today)
+    proposed_end_date = models.DateField(blank=True, null=True)
+    actual_start_date = models.DateField(blank=True, null=True)
+    actual_end_date = models.DateField(blank=True, null=True)
+    number_of_plots = models.PositiveSmallIntegerField(default=1)
     # add project files
 
     class Meta:
         constraints = [
             models.CheckConstraint(
                 condition=models.Q(
-                    project_end_date__gte=models.F('project_start_date')
-                ) | models.Q(project_end_date__isnull=True),
-                name='end_date_after_start_date'
+                    proposed_end_date__gte=models.F('proposed_start_date')
+                ) | models.Q(proposed_end_date__isnull=True),
+                name='proposed_end_date_after_proposed_start_date'
+            ),
+            models.CheckConstraint(
+                condition=models.Q(
+                    actual_end_date__gte=models.F('actual_start_date')
+                ) | models.Q(actual_end_date__isnull=True),
+                name='actual_end_date_after_actual_start_date'
             ),
             models.UniqueConstraint(
                 fields=['created_by', 'project_name'], name='unique_project_name'
@@ -102,15 +122,16 @@ class ConstructionProject(models.Model):
 
 
     def save(self, *args, **kwargs):
-        if (self.project_end_date and 
-            self.project_end_date < self.project_start_date
-        ):
+        if self.proposed_end_date and self.proposed_start_date and \
+                self.proposed_end_date < self.proposed_start_date:
+            raise ValueError("Project end date cannot be before start date.")
+        if self.actual_end_date and self.actual_start_date and \
+                self.actual_end_date < self.actual_start_date:
             raise ValueError("Project end date cannot be before start date.")
         if not self.project_name:
-            self.project_name = (
-                f"Project for {self.client.username} with "
-                f"{self.project_manager.username}"
-            )
+            client_name = self.client.username if self.client else "Unknown Client"
+            pm_name = self.project_manager.username if self.project_manager else "Unknown PM"
+            self.project_name = f"Project for {client_name} with {pm_name}"
         super().save(*args, **kwargs)
 
     @receiver(post_save, sender='core.ConstructionProject')
@@ -124,7 +145,7 @@ class ConstructionProject(models.Model):
                 create_project_group(instance.project_name, group_suffix=suffix)
 
 
-class ProjectInvitation(models.Model):
+class ProjectInvitation(TimestampedModel):
     """Invitation for a user to join a ConstructionProject with a specific role.
     Only the project owner (client field) or created_by user can send these.
     On acceptance, the invitee is assigned to the correct FK/M2M field
@@ -147,9 +168,9 @@ class ProjectInvitation(models.Model):
         max_length=20, choices=InvitationStatus.choices, 
         default=InvitationStatus.PENDING
     )
-    created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
     responded_at = models.DateTimeField(null=True, blank=True)
+    message = models.TextField(blank=True)
 
     class Meta:
         verbose_name = "Project Invitation"
@@ -176,24 +197,15 @@ class ProjectInvitation(models.Model):
 
     @property
     def is_expired(self) -> bool:
-        return self.status == self.Status.PENDING and \
+        return self.status == InvitationStatus.PENDING and \
             timezone.now() > self.expires_at
  
     @property
     def is_actionable(self) -> bool:
         """True if the invitee can still accept or decline."""
-        return self.status == self.Status.PENDING and not self.is_expired
- 
-    # ------------------------------------------------------------------
-    # State transitions
-    # ------------------------------------------------------------------
+        return self.status == InvitationStatus.PENDING and not self.is_expired
  
     def accept(self):
-        """
-        Accept the invitation: assign the invitee to the correct project
-        field and add them to the appropriate Django group.
-        Raises ValueError on invalid state.
-        """
         if not self.is_actionable:
             raise ValueError(
                 f"Invitation cannot be accepted (status={self.status}, "
@@ -202,7 +214,7 @@ class ProjectInvitation(models.Model):
  
         project = self.project
 
-        if self.role == ProjectRole.PROJECT_MANAGER: 
+        if self.role == ProjectRole.CLIENT:
             project.client = self.invitee
  
         elif self.role == ProjectRole.PROJECT_MANAGER:
@@ -217,7 +229,7 @@ class ProjectInvitation(models.Model):
         project.save()
         _add_user_to_project_group(self.invitee, project.project_name, self.role)
  
-        self.status = self.Status.ACCEPTED
+        self.status = InvitationStatus.ACCEPTED
         self.responded_at = timezone.now()
         self.save()
 
@@ -226,44 +238,44 @@ class ProjectInvitation(models.Model):
             raise ValueError(
                 f"Invitation cannot be declined (status={self.status})."
             )
-        self.status = self.Status.DECLINED
+        self.status = InvitationStatus.DECLINED
         self.responded_at = timezone.now()
         self.save()
  
     def revoke(self):
         """Called by the inviter to cancel a pending invitation."""
-        if self.status != self.Status.PENDING:
+        if self.status != InvitationStatus.PENDING:
             raise ValueError("Only pending invitations can be revoked.")
-        self.status = self.Status.REVOKED
+        self.status = InvitationStatus.REVOKED
         self.save()
  
 
-class SiteInvitation(models.Model):
+class PlotInvitation(TimestampedModel):
     """
-    Invitation for a user to join a ConstructionSite as Foreman or Storekeeper.
+    Invitation for a user to join a ConstructionPlot as Foreman or Storekeeper.
     On acceptance the invitee is set on the relevant FK field and added to
-    the site's permission group.
+    the plot's permission group.
     """
  
     # Relationships
-    site = models.ForeignKey(
-        "core.ConstructionSite",
+    plot = models.ForeignKey(
+        "core.ConstructionPlot",
         on_delete=models.CASCADE,
         related_name="invitations",
     )
     invited_by = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name="sent_site_invitations",
+        related_name="sent_plot_invitations",
     )
     invitee = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name="received_site_invitations",
+        related_name="received_plot_invitations",
     )
  
     # Role being offered
-    role = models.CharField(max_length=20, choices=SiteRole.choices)
+    role = models.CharField(max_length=20, choices=PlotRole.choices)
  
     # Tracking
     token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
@@ -272,26 +284,25 @@ class SiteInvitation(models.Model):
         choices=InvitationStatus.choices, 
         default=InvitationStatus.PENDING
     )
-    created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
     responded_at = models.DateTimeField(null=True, blank=True)
     message = models.TextField(blank=True)
  
     class Meta:
-        verbose_name = "Site Invitation"
-        verbose_name_plural = "Site Invitations"
+        verbose_name = "Plot Invitation"
+        verbose_name_plural = "Plot Invitations"
         constraints = [
             models.UniqueConstraint(
-                fields=["site", "invitee", "role"],
+                fields=["plot", "invitee", "role"],
                 condition=models.Q(status="pending"),
-                name="unique_pending_site_invitation",
+                name="unique_pending_plot_invitation",
             )
         ]
  
     def __str__(self):
         return (
             f"{self.invitee.username} invited as {self.role} "
-            f"on site {self.site.address}"
+            f"on plot {self.plot.address}"
         )
  
     def save(self, *args, **kwargs):
@@ -301,12 +312,12 @@ class SiteInvitation(models.Model):
  
     @property
     def is_expired(self) -> bool:
-        return self.status == self.Status.PENDING and \
+        return self.status == InvitationStatus.PENDING and \
             timezone.now() > self.expires_at
  
     @property
     def is_actionable(self) -> bool:
-        return self.status == self.Status.PENDING and not self.is_expired
+        return self.status == InvitationStatus.PENDING and not self.is_expired
  
     def accept(self):
         if not self.is_actionable:
@@ -315,22 +326,22 @@ class SiteInvitation(models.Model):
                 f"expired={self.is_expired})."
             )
  
-        site = self.site
+        plot = self.plot
  
-        if self.role == SiteRole.FOREMAN:
-            site.foreman = self.invitee
-            site.save()
-            site.add_foreman_to_group()
+        if self.role == PlotRole.FOREMAN:
+            plot.foreman = self.invitee
+            plot.save()
+            plot.add_foreman_to_group()
  
-        elif self.role == SiteRole.STOREKEEPER:
-            site.storekeeper = self.invitee
-            site.save()
-            site.add_storekeeper_to_group()
+        elif self.role == PlotRole.STOREKEEPER:
+            plot.storekeeper = self.invitee
+            plot.save()
+            plot.add_storekeeper_to_group()
  
         else:
-            raise ValueError(f"Unknown site role: {self.role}")
+            raise ValueError(f"Unknown plot role: {self.role}")
  
-        self.status = self.Status.ACCEPTED
+        self.status = InvitationStatus.ACCEPTED
         self.responded_at = timezone.now()
         self.save()
  
@@ -339,60 +350,40 @@ class SiteInvitation(models.Model):
             raise ValueError(
                 f"Invitation cannot be declined (status={self.status})."
             )
-        self.status = self.Status.DECLINED
+        self.status = InvitationStatus.DECLINED
         self.responded_at = timezone.now()
         self.save()
  
     def revoke(self):
-        if self.status != self.Status.PENDING:
+        if self.status != InvitationStatus.PENDING:
             raise ValueError("Only pending invitations can be revoked.")
-        self.status = self.Status.REVOKED
+        self.status = InvitationStatus.REVOKED
         self.save()
 
 
-# class Invitation(models.Model):
-#     """Represents an invitation for a user to join a project or site."""
-#     email = models.EmailField()
-#     project = models.ForeignKey(ConstructionProject, on_delete=models.CASCADE)
-#     site = models.ForeignKey(
-#         'ConstructionSite', on_delete=models.CASCADE, 
-#         blank=True, null=True, related_name='site_invitations'
-#     )
-#     role = models.CharField(max_length=20, choices=RoleChoices.choices)
-#     invited_by = models.ForeignKey(
-#         User, on_delete=models.DO_NOTHING, related_name="project_invitations_sent"
-#     )
-#     token = models.UUIDField(unique=True, default=uuid.uuid4)
-#     invited_at = models.DateTimeField(auto_now_add=True)
-#     accepted = models.BooleanField(default=False)
-#     class Meta:
-#         unique_together = ('email', 'project', 'role')
-
-#     def is_site_invitation(self):
-#         return self.site is not None
-
-
-class ConstructionSite(models.Model):
+class ConstructionPlot(TimestampedModel):
     construction_project = models.ForeignKey(
         ConstructionProject, on_delete=models.CASCADE
     )    
     foreman = models.ForeignKey(
-        User, on_delete=models.DO_NOTHING, related_name="site_foreman"
+        User, on_delete=models.DO_NOTHING, related_name="plot_foreman",
+        null=True, blank=True
     )
     storekeeper = models.ForeignKey(
-        User, on_delete=models.DO_NOTHING, related_name="site_storekeeper"
-        )
+        User, on_delete=models.DO_NOTHING, related_name="plot_storekeeper",
+        null=True, blank=True
+    )
     address = models.CharField(max_length=255)
-    site_opening_date = models.DateField(default=timezone.now)
+    plot_opening_date = models.DateField(default=timezone.now)
 
     def save(self, *args, **kwargs):
         if not self.address:
-            raise ValueError("Construction site must have an address.")
+            raise ValueError("Construction plot must have an address.")
         super().save(*args, **kwargs)
     
-    @receiver(post_save, sender='core.ConstructionSite')
-    def create_site_groups(sender, instance, created, **kwargs):
-        """Create site-specific groups when a new construction site is created"""
+    @receiver(post_save, sender='core.ConstructionPlot')
+    def create_plot_groups(sender, instance, created, **kwargs):
+        """Create plot-specific groups when a new construction plot is created"""
         group_suffixes = ["Foreman", "Storekeeper"]
         if created:
             for suffix in group_suffixes:
@@ -412,25 +403,27 @@ class ConstructionSite(models.Model):
         storekeeper_group.user_set.add(self.storekeeper)
 
 
-class WorkItem(models.Model):
+class WorkItem(TimestampedModel):
     """
-    Represents a specific work item or phase of construction at a site
+    Represents a specific work item or phase of construction at a plot
     """
-    construction_site = models.ForeignKey(
-        ConstructionSite, on_delete=models.CASCADE
+    construction_plot = models.ForeignKey(
+        ConstructionPlot, on_delete=models.CASCADE
     )
     work_status = models.CharField(
         max_length=20, choices=StatusChoices.choices, 
         default=StatusChoices.PLANNED
     )
     name = models.CharField(max_length=100, default="")
+    is_approved = models.BooleanField(default=False)
     description = models.TextField(default="")
-    proposed_start_date = models.DateField(auto_now=True)
+    proposed_start_date = models.DateField()
     start_date = models.DateField(null=True, blank=True)
-    proposed_end_date = models.DateField(
-        default=timezone.now() + timedelta(days=1)
-    )
+    proposed_end_date = models.DateField()
     end_date = models.DateField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-updated_at']
 
     def save(self, *args, **kwargs):
         if (
@@ -451,9 +444,9 @@ class WorkItem(models.Model):
         super().save(*args, **kwargs)
 
 
-class JobItem(models.Model):
+class JobItem(TimestampedModel):
     """
-    Represents a specific job or task to be performed at a construction site
+    Represents a specific job or task to be performed at a construction plot
     Each job item is associated with a work item and can have multiple
     material needs and a specific artisan assigned to it.    
     """
@@ -473,7 +466,7 @@ class JobItem(models.Model):
     work_item = models.ForeignKey(
         WorkItem, on_delete=models.CASCADE, related_name="job_items"
     )
-    work_status = models.CharField(
+    job_status = models.CharField(
         max_length=20, choices=StatusChoices.choices, 
         default=StatusChoices.PLANNED
     )
@@ -484,6 +477,9 @@ class JobItem(models.Model):
     projected_end_date = models.DateField()
     actual_start_date = models.DateField(null=True, blank=True)
     actual_end_date = models.DateField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-updated_at']
 
     def save(self, *args, **kwargs):
         if (
@@ -509,13 +505,18 @@ class JobItem(models.Model):
         super().save(*args, **kwargs)
 
 
-class JobReport(models.Model):
-    """Daily construction site report tracking work progress and materials"""
+class JobReport(TimestampedModel):
+    """Daily construction plot report tracking work progress and materials"""
 
     class ReportStatusChoices(models.TextChoices):
         submitted = "Submitted"
         approved = "Approved"
         rejected = "Rejected"
+
+    class PriorityChoices(models.TextChoices):
+        NORMAL = "Normal"
+        URGENT = "Urgent"
+        CRITICAL = "Critical"
 
     job_item = models.ForeignKey(
         JobItem, on_delete=models.CASCADE, related_name="daily_reports"
@@ -538,6 +539,10 @@ class JobReport(models.Model):
         max_length=20, choices=ReportStatusChoices.choices, 
         default=ReportStatusChoices.submitted
     )
+    priority = models.CharField(
+        max_length=10, choices=PriorityChoices.choices,
+        default=PriorityChoices.NORMAL
+    )
     report_date = models.DateField(default=timezone.now)
     percentage_job_progress = models.PositiveSmallIntegerField()
     # Scheduling
@@ -550,8 +555,6 @@ class JobReport(models.Model):
     notes = models.TextField(
         blank=True, help_text="Additional notes or observations"
     )
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
     internal_comments = models.TextField(
         blank=True, help_text="Internal comments for project team"
     )
@@ -560,7 +563,7 @@ class JobReport(models.Model):
     )
     
     class Meta:
-        ordering = ['-report_date']
+        ordering = ['-updated_at']
         verbose_name = "Daily Job Report"
         verbose_name_plural = "Daily Job Reports"
     
@@ -577,10 +580,6 @@ class JobReport(models.Model):
     
     def save(self, *args, **kwargs):
         """Calculate days elapsed when saving"""
-        if self.job_item.actual_start_date:
-            self.days_elapsed = (
-                self.report_date - self.job_item.actual_start_date
-            ).days
         if (
             self.job_item.actual_start_date and \
             self.report_date < self.job_item.actual_start_date
@@ -592,33 +591,61 @@ class JobReport(models.Model):
         super().save(*args, **kwargs)
 
 
+class Notification(models.Model):
+    class Priority(models.TextChoices):
+        LOW = "Low"
+        NORMAL = "Normal"
+        HIGH = "High"
+        URGENT = "Urgent"
 
-# class ProjectMembership(models.Model):
-#     """Associates users with construction projects and their roles"""
-#     user = models.ForeignKey(User, on_delete=models.CASCADE)
-#     project = models.ForeignKey(ConstructionProject, on_delete=models.CASCADE)
-#     role = models.CharField(max_length=20, choices=RoleChoices.choices)
-#     invited_by = models.ForeignKey(
-#         User, on_delete=models.DO_NOTHING, related_name="invitations_sent"
-#     )
-#     invited_at = models.DateTimeField(auto_now_add=True)
-#     accepted = models.BooleanField(default=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="notifications")
+    project = models.ForeignKey(ConstructionProject, on_delete=models.CASCADE, related_name="notifications")
+    message = models.TextField()
+    priority = models.CharField(max_length=10, choices=Priority.choices, default=Priority.NORMAL)
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
 
-#     class Meta:
-#         unique_together = ('user', 'project', 'role')
+    class Meta:
+        ordering = ['-created_at']
 
-# class SiteMembership(models.Model):
-#     """Associates users with construction sites and their roles"""
-#     user = models.ForeignKey(User, on_delete=models.CASCADE)
-#     construction_site = models.ForeignKey(
-#         ConstructionSite, on_delete=models.CASCADE
-#     )
-#     role = models.CharField(max_length=20, choices=RoleChoices.choices)
-#     assigned_by = models.ForeignKey(
-#         User, on_delete=models.DO_NOTHING, related_name="site_assignments_sent"
-#     )
-#     created_at = models.DateTimeField(auto_now_add=True)
+    def __str__(self):
+        return f"[{self.priority}] Notification for {self.user.username}: {self.message[:30]}..."
 
-#     class Meta:
-#         unique_together = ('user', 'construction_site', 'role')
 
+class JobReportComment(models.Model):
+    report = models.ForeignKey(JobReport, on_delete=models.CASCADE, related_name="comments")
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['created_at']
+
+    def __str__(self):
+        return f"Comment by {self.user.username} on {self.report}"
+
+
+# Backwards-compat alias so existing migrations don't break before re-running them
+ConstructionSite = ConstructionPlot
+SiteRole = PlotRole
+SiteInvitation = PlotInvitation
+
+@receiver(post_save, sender=ProjectInvitation)
+def create_project_invitation_notification(sender, instance, created, **kwargs):
+    if created:
+        Notification.objects.create(
+            user=instance.invitee,
+            project=instance.project,
+            message=f"You have been invited to join project '{instance.project.project_name}' as {instance.role}.",
+            priority=Notification.Priority.HIGH
+        )
+
+@receiver(post_save, sender=PlotInvitation)
+def create_plot_invitation_notification(sender, instance, created, **kwargs):
+    if created:
+        Notification.objects.create(
+            user=instance.invitee,
+            project=instance.plot.construction_project,
+            message=f"You have been invited to join plot '{instance.plot.address}' as {instance.role}.",
+            priority=Notification.Priority.HIGH
+        )

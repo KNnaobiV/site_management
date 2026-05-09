@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.utils import timezone
  
-from core.models import ProjectInvitation, SiteInvitation
+from core.models import ProjectInvitation, PlotInvitation
  
  
 class Command(BaseCommand):
@@ -11,18 +11,18 @@ class Command(BaseCommand):
         now = timezone.now()
  
         project_count = ProjectInvitation.objects.filter(
-            status=ProjectInvitation.Status.PENDING,
+            status="pending",
             expires_at__lt=now,
-        ).update(status=ProjectInvitation.Status.EXPIRED)
+        ).update(status="expired")
  
-        site_count = SiteInvitation.objects.filter(
-            status=SiteInvitation.Status.PENDING,
+        plot_count = PlotInvitation.objects.filter(
+            status="pending",
             expires_at__lt=now,
-        ).update(status=SiteInvitation.Status.EXPIRED)
+        ).update(status="expired")
  
         self.stdout.write(
             self.style.SUCCESS(
                 f"Expired {project_count} project invitation(s) "
-                f"and {site_count} site invitation(s)."
+                f"and {plot_count} plot invitation(s)."
             )
         )

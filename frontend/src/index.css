@@ -1,55 +1,49 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Outfit:wght@100..900&display=swap');
+
 :root {
-  /* Backgrounds */
-  --bg-canvas: #0d0d0d;
-  /* page background */
-  --bg-surface: #161616;
-  /* card / sidebar */
-  --bg-raised: #1f1f1f;
-  /* input, hover states */
-  --bg-overlay: #2a2a2a;
-  /* dropdown, tooltip */
-
-  /* Borders */
-  --border-subtle: rgba(255, 255, 255, 0.06);
-  --border-default: rgba(255, 255, 255, 0.10);
-  --border-strong: rgba(255, 255, 255, 0.18);
-
+  /* Brand Colors */
+  --brand-orange: #c14a1e;
+  --brand-orange-light: #e87b4f;
+  --brand-orange-subtle: rgba(193, 74, 30, 0.1);
+  
+  /* Neutral Palette - Refined Cream/Bone */
+  --bg-sidebar: #121212;
+  --bg-canvas: #fbf8f1;
+  --bg-card: #ffffff;
+  --bg-raised: #f5f2e9;
+  
   /* Text */
-  --text-primary: #f0f0f0;
-  --text-secondary: #888888;
-  --text-tertiary: #555555;
-  --text-inverse: #0d0d0d;
-
-  /* Interactive */
-  --interactive-default: #e0e0e0;
-  /* primary button bg */
-  --interactive-hover: #ffffff;
-  --interactive-pressed: #c4c4c4;
-  --interactive-muted: #2a2a2a;
-  /* ghost button bg */
-
-  /* Status — all desaturated */
-  --status-ok-bg: rgba(255, 255, 255, 0.05);
-  --status-ok-text: #a0a0a0;
-  --status-err-bg: rgba(255, 255, 255, 0.05);
-  --status-err-text: #b0b0b0;
-
-  /* Shape */
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
-
-  /* Type */
-  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial,
-    sans-serif, "Apple Color Emoji";
-  --font-mono: "SF Mono", "Fira Code", monospace;
+  --text-primary: #1a1a1a;
+  --text-secondary: #555555;
+  --text-tertiary: #888888;
+  --text-inverse: #ffffff;
+  
+  /* Borders & Accents */
+  --border-subtle: rgba(0, 0, 0, 0.04);
+  --border-default: rgba(0, 0, 0, 0.08);
+  --border-strong: rgba(0, 0, 0, 0.15);
+  
+  /* Status Colors (Refined) */
+  --status-pending: #8a8a8a;
+  --status-in-progress: #c14a1e;
+  --status-completed: #2d5a27;
+  --status-delayed: #a32a2a;
+  
+  /* Shape & Shadow */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-xl: 32px;
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.06);
+  
+  /* Typography */
+  --font-serif: "Instrument Serif", serif;
+  --font-sans: "Outfit", sans-serif;
 }
 
-/* ── Reset ───────────────────────────────────────────────── */
-*,
-*::before,
-*::after {
+/* --- Reset --- */
+*, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -61,208 +55,105 @@ html {
 }
 
 body {
-  font-family: var(--font);
+  font-family: var(--font-sans);
   background: var(--bg-canvas);
   color: var(--text-primary);
-  line-height: 1.5;
+  line-height: 1.6;
   min-height: 100vh;
 }
 
 #root {
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
 }
 
-/* ── Typography ──────────────────────────────────────────── */
-h1,
-h2,
-h3,
-h4 {
-  font-weight: 500;
-  letter-spacing: -0.02em;
+/* --- Typography --- */
+h1, h2, h3, h4 {
+  font-family: var(--font-serif);
+  font-weight: 400;
   color: var(--text-primary);
+  line-height: 1.1;
 }
+
+h1 { font-size: 3.5rem; margin-bottom: 0.5rem; }
+h2 { font-size: 2.5rem; }
+h3 { font-size: 1.75rem; }
 
 p {
   color: var(--text-secondary);
+  font-weight: 400;
 }
 
-a {
-  color: var(--text-primary);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-a:hover {
-  color: var(--interactive-hover);
-}
-
-/* ── Base inputs ─────────────────────────────────────────── */
-input,
-textarea,
-select {
-  font-family: var(--font);
-  font-size: 14px;
-  background: var(--bg-raised);
-  color: var(--text-primary);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-md);
-  padding: 9px 12px;
-  width: 100%;
-  outline: none;
-  transition: border-color 0.15s, box-shadow 0.15s;
-  appearance: none;
-  -webkit-appearance: none;
-}
-
-input::placeholder,
-textarea::placeholder {
-  color: var(--text-tertiary);
-}
-
-input:focus,
-textarea:focus,
-select:focus {
-  border-color: var(--border-strong);
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.04);
-}
-
-input:disabled,
-textarea:disabled,
-select:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-/* ── Buttons ─────────────────────────────────────────────── */
+/* --- Interactive --- */
 button {
-  font-family: var(--font);
-  font-size: 14px;
+  font-family: var(--font-sans);
+  font-weight: 500;
   cursor: pointer;
   border: none;
-  border-radius: var(--radius-md);
-  transition: background 0.12s, opacity 0.12s, color 0.12s;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Primary */
 .btn-primary {
-  background: var(--interactive-default);
-  color: var(--text-inverse);
-  font-weight: 500;
-  padding: 9px 16px;
-  width: 100%;
+  background: var(--brand-orange);
+  color: white;
+  padding: 10px 20px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.btn-primary:hover:not(:disabled) {
-  background: var(--interactive-hover);
+.btn-primary:hover {
+  background: var(--brand-orange-light);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px var(--brand-orange-subtle);
 }
 
-.btn-primary:active:not(:disabled) {
-  background: var(--interactive-pressed);
-}
-
-.btn-primary:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
-}
-
-/* Ghost */
 .btn-ghost {
   background: transparent;
   color: var(--text-secondary);
   border: 1px solid var(--border-default);
-  padding: 7px 14px;
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
 }
 
-.btn-ghost:hover:not(:disabled) {
-  background: var(--interactive-muted);
-  color: var(--text-primary);
+.btn-ghost:hover {
+  background: var(--bg-raised);
   border-color: var(--border-strong);
-}
-
-/* Icon-only */
-.btn-icon {
-  background: transparent;
-  color: var(--text-secondary);
-  padding: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-sm);
-}
-
-.btn-icon:hover {
-  background: var(--interactive-muted);
   color: var(--text-primary);
 }
 
-/* ── Utility classes ─────────────────────────────────────── */
-.surface {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-subtle);
+/* --- Cards --- */
+.card {
+  background: var(--bg-card);
   border-radius: var(--radius-lg);
+  padding: 24px;
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.label {
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--text-tertiary);
+.card:hover {
+  box-shadow: var(--shadow-md);
 }
 
-.divider {
-  border: none;
-  border-top: 1px solid var(--border-subtle);
-}
+/* --- Utility --- */
+.flex { display: flex; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.gap-4 { gap: 1rem; }
+.mt-4 { margin-top: 1rem; }
 
-/* ── Scrollbars ──────────────────────────────────────────── */
+/* --- Custom Scrollbar --- */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
 }
-
 ::-webkit-scrollbar-track {
   background: transparent;
 }
-
 ::-webkit-scrollbar-thumb {
-  background: var(--bg-overlay);
-  border-radius: 99px;
-}
-
-::-webkit-scrollbar-thumb:hover {
   background: var(--border-strong);
+  border-radius: 10px;
 }
-
-/* ── Animations ──────────────────────────────────────────── */
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes fadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.fade-up {
-  animation: fadeUp 0.22s ease both;
-}
-
-/* ── Select arrow ────────────────────────────────────────── */
-select {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23555' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  padding-right: 34px;
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-tertiary);
 }

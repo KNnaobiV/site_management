@@ -1,66 +1,57 @@
-import { useState } from "react";
+import React from "react";
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from "./context/AuthContext";
 import LoginPage from "./pages/LoginPage";
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-
-// Lazy page imports — swap these for real page components as you build them.
-// Pattern: each page receives { token } from context via useAuth().
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import Dashboard from "./pages/Dashboard";
+import ProjectsPage from "./pages/ProjectsPage";
+import PlotsPage from "./pages/PlotsPage";
+import WorkItemsPage from "./pages/WorkItemsPage";
+import JobItemsPage from "./pages/JobItemsPage";
+import NotificationsPage from "./pages/NotificationsPage";
+import { DashboardShell } from "./components";
 
-/**
- * App
- * ---
- * Single-page router driven by `active` state.
- * Replace the simple string-switch with React Router if the project grows.
- *
- * Auth flow:
- *  ready=false → blank screen (restoring session from localStorage)
- *  ready=true, user=null → <LoginPage />
- *  ready=true, user≠null → <DashboardShell /> with page routing inside
- */
 export default function App() {
-  const { user, ready } = useAuth();
+    const auth = useAuth();
+    console.log("App auth state:", auth);
 
-  // Not ready yet — session is being restored from localStorage.
-  if (!ready) return (
-    <div>
-      <BootScreen />
-    </div>
-  );
+    if (!auth || !auth.ready) return <BootScreen />;
 
-  // Unauthenticated → land on login.
-  if (!user) return (
-    <div>
-      <LoginPage />;
-    </div>
-  );
+    if (!auth.user) {
+        return (
+            <Routes>
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                <Route path="*" element={<Navigate to="/login" />} />
+            </Routes>
+        );
+    }
 
-  // Authenticated → enter the main app shell.
-  return (
-    <div>
-      <Dashboard />;
-    </div>
-  );
+    return (
+        <DashboardShell>
+            <Routes>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/projects" element={<ProjectsPage />} />
+                <Route path="/plots" element={<PlotsPage />} />
+                <Route path="/work-items" element={<WorkItemsPage />} />
+                <Route path="/job-items" element={<JobItemsPage />} />
+                <Route path="/notifications" element={<NotificationsPage />} />
+                <Route path="*" element={<Navigate to="/" />} />
+            </Routes>
+        </DashboardShell>
+    );
 }
 
-/** Minimal blank boot screen shown while we verify a stored token. */
 function BootScreen() {
-  return (
-    <div style={{
-      minHeight: "100vh",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      background: "var(--bg-canvas)",
-    }}>
-      <div style={{
-        width: 20,
-        height: 20,
-        borderRadius: "50%",
-        border: "2px solid var(--border-default)",
-        borderTopColor: "var(--text-secondary)",
-        animation: "spin 0.7s linear infinite",
-      }} />
-    </div>
-  );
+    return (
+        <div style={{
+            minHeight: "100vh",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: "#fbf8f1",
+        }}>
+            <p>Loading Ironwork...</p>
+        </div>
+    );
 }

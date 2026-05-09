@@ -13,6 +13,7 @@ export default function LoginPage() {
     const [form, setForm] = useState({
         username: "",
         password: "",
+        confirm_password: "",
         email: "",
         first_name: "",
         last_name: "",
@@ -43,10 +44,17 @@ export default function LoginPage() {
             return false;
         }
 
+        if (form.password !== form.confirm_password) {
+            showMessage("Passwords do not match.");
+            setForm(prev => ({ ...prev, confirm_password: "" }));
+            return false;
+        }
+
         return true;
     };
 
-    const handleSubmit = async () => {
+    const handleSubmit = async (e) => {
+        if (e && e.preventDefault) e.preventDefault();
         setMessage("");
 
         if (!form.username.trim()) {
@@ -74,7 +82,14 @@ export default function LoginPage() {
 
                 login(user, token);
             } else {
-                await registerUser(form);
+                // Map confirm_password to password2 for backend
+                const payload = {
+                    ...form,
+                    password2: form.confirm_password
+                };
+                delete payload.confirm_password;
+
+                await registerUser(payload);
                 showMessage(
                     "Account created successfully. Please sign in.",
                     "success"
@@ -82,15 +97,7 @@ export default function LoginPage() {
                 setTab("login");
             }
         } catch (error) {
-            if (tab === "login") {
-                showMessage(
-                    "Invalid username or password. Please check your details and try again."
-                );
-            } else {
-                showMessage(
-                    "We could not create your account right now. Please confirm your details and try again."
-                );
-            }
+            showMessage(error.message);
         } finally {
             setLoading(false);
         }
@@ -107,7 +114,9 @@ export default function LoginPage() {
                             <path d="M8 16V13H12V16" stroke="#FEFCF8" stroke-width="1.5" stroke-linejoin="round" />
                         </svg>
                     </div>
-                    <span class="brand-name">Buildstack</span>
+                    <span className="brand-name">
+                        <span class="panel-copy">Constro<em style={{ color: "var(--rust-light)", fontSize: "1.5em" }}>Pal</em></span>
+                    </span>
                 </div>
                 <div class="panel-copy">
                     <h1>Built for those who <em>build</em></h1>
@@ -148,50 +157,67 @@ export default function LoginPage() {
                         </div>
                     )}
 
-                    {tab === "register" && (
-                        <div className="field-row">
-                            <Field
-                                label="First Name"
-                                value={form.first_name}
-                                onChange={updateField("first_name")}
-                            />
-                            <Field
-                                label="Last Name"
-                                value={form.last_name}
-                                onChange={updateField("last_name")}
-                            />
-                        </div>
-                    )}
+                    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'inherit', width: '100%' }}>
+                        {tab === "register" && (
+                            <div className="field-row">
+                                <Field
+                                    label="First Name"
+                                    value={form.first_name}
+                                    onChange={updateField("first_name")}
+                                />
+                                <Field
+                                    label="Last Name"
+                                    value={form.last_name}
+                                    onChange={updateField("last_name")}
+                                />
+                            </div>
+                        )}
 
-                    {tab === "register" && (
+                        {tab === "register" && (
+                            <Field
+                                label="Email"
+                                type="email"
+                                value={form.email}
+                                onChange={updateField("email")}
+                            />
+                        )}
+
                         <Field
-                            label="Email"
-                            type="email"
-                            value={form.email}
-                            onChange={updateField("email")}
+                            label="Username"
+                            value={form.username}
+                            onChange={updateField("username")}
                         />
-                    )}
 
-                    <Field
-                        label="Username"
-                        value={form.username}
-                        onChange={updateField("username")}
-                    />
+                        <Field
+                            label="Password"
+                            type="password"
+                            value={form.password}
+                            onChange={updateField("password")}
+                        />
 
-                    <Field
-                        label="Password"
-                        type="password"
-                        value={form.password}
-                        onChange={updateField("password")}
-                    />
+                        {tab === "register" && (
+                            <Field
+                                label="Confirm Password"
+                                type="password"
+                                value={form.confirm_password}
+                                onChange={updateField("confirm_password")}
+                            />
+                        )}
 
-                    <button className="btn-primary" onClick={handleSubmit}>
-                        {loading
-                            ? "Please wait..."
-                            : tab === "login"
-                                ? "Sign In"
-                                : "Create Account"}
-                    </button>
+                        <div style={{ textAlign: "right", marginTop: -8, marginBottom: 12 }}>
+                            <a onClick={() => window.location.href = "/forgot-password"} style={{ fontSize: 13, color: "var(--rust)", cursor: "pointer", textDecoration: "none" }}>
+                                Forgot password?
+                            </a>
+                        </div>
+
+                        <button type="submit" className="btn-primary">
+                            {loading
+                                ? "Please wait..."
+                                : tab === "login"
+                                    ? "Sign In"
+                                    : "Create Account"}
+                        </button>
+                    </form>
 
                     <div className="auth-switch">
                         {tab === "login" ? (

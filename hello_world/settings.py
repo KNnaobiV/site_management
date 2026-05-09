@@ -41,13 +41,15 @@ INSTALLED_APPS = [
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
+    
+    # Custom User Model
+    "accounts",
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "corsheaders",
     "rest_framework",
     "rest_framework.authtoken",
     "django_browser_reload",
-    "accounts",
     "base",
     "core",
 ]
@@ -143,16 +145,29 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
         },
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': BASE_DIR / 'django.log',
+            'maxBytes': 1024 * 1024 * 5,  # 5MB
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
     },
     'loggers': {
         'django': {
-            'handlers': ['console'],
-            'level': 'INFO', # Use DEBUG for even more verbosity
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
             'propagate': True,
         },
         'django.db.backends': {
             'handlers': ['console'],
-            'level': 'DEBUG', # Logs all SQL queries
+            'level': 'INFO', # Changed from DEBUG to avoid huge log files
+        },
+        'core': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': True,
         },
     },
 }
@@ -176,6 +191,8 @@ MEDIA_ROOT = BASE_DIR / "hello_world" / "media"
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+AUTH_USER_MODEL = 'accounts.UserModel'
 
 # Django REST Framework Configuration
 REST_FRAMEWORK = {

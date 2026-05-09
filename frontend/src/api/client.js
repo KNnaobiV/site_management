@@ -2,7 +2,7 @@ export let API_BASE = "http://127.0.0.1:8000/api";
 
 export async function apiFetch(path, { token, ...options } = {}) {
     const headers = {
-        "Content-Type": "application/json",
+        ...(options.body instanceof FormData ? {} : { "Content-Type": "application/json" }),
         ...(token ? { Authorization: `Token ${token}` } : {}),
         ...options.headers,
     };

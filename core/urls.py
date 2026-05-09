@@ -10,10 +10,10 @@ Hierarchy
   projects/{project_pk}/
     invite/                                                    ProjectViewSet.invite
     invitations/                                               ProjectViewSet.list_invitations
-    sites/                                                     ConstructionSiteViewSet
-    sites/{site_pk}/
-      invite/                                                  SiteViewSet.invite
-      invitations/                                             SiteViewSet.list_invitations
+    plots/                                                     ConstructionPlotViewSet
+    plots/{plot_pk}/
+      invite/                                                  PlotViewSet.invite
+      invitations/                                             PlotViewSet.list_invitations
       workitems/                                               WorkItemViewSet
       workitems/{workitem_pk}/
         jobitems/                                              JobItemViewSet
@@ -25,8 +25,8 @@ Hierarchy
   invitations/
     projects/                                                  ProjectInvitationViewSet (list)
     projects/{pk}/accept|decline|revoke/
-    sites/                                                     SiteInvitationViewSet (list)
-    sites/{pk}/accept|decline|revoke/
+    plots/                                                     PlotInvitationViewSet (list)
+    plots/{pk}/accept|decline|revoke/
  
 Install
 -------
@@ -50,12 +50,13 @@ from django.urls import path, include
  
 from .views import (
     ConstructionProjectViewSet,
-    ConstructionSiteViewSet,
+    ConstructionPlotViewSet,
     WorkItemViewSet,
     JobItemViewSet,
     JobReportViewSet,
     ProjectInvitationViewSet,
-    SiteInvitationViewSet,
+    PlotInvitationViewSet,
+    NotificationViewSet,
 )
  
 # ---------------------------------------------------------------------------
@@ -63,6 +64,7 @@ from .views import (
 # ---------------------------------------------------------------------------
 router = DefaultRouter()
 router.register(r"projects", ConstructionProjectViewSet, basename="project")
+router.register(r"notifications", NotificationViewSet, basename="notification")
  
 # ---------------------------------------------------------------------------
 # Invitations (flat – user's own inbox/outbox)
@@ -74,37 +76,37 @@ invitation_router.register(
     basename="project-invitation",
 )
 invitation_router.register(
-    r"invitations/sites",
-    SiteInvitationViewSet,
-    basename="site-invitation",
+    r"invitations/plots",
+    PlotInvitationViewSet,
+    basename="plot-invitation",
 )
  
 # ---------------------------------------------------------------------------
-# /projects/{project_pk}/sites/
+# /projects/{project_pk}/plots/
 # ---------------------------------------------------------------------------
 project_router = nested_routers.NestedDefaultRouter(
     router, r"projects", lookup="project"
 )
-project_router.register(r"sites", ConstructionSiteViewSet, basename="project-sites")
+project_router.register(r"plots", ConstructionPlotViewSet, basename="project-plots")
  
 # ---------------------------------------------------------------------------
-# /projects/{project_pk}/sites/{site_pk}/workitems/
+# /projects/{project_pk}/plots/{plot_pk}/workitems/
 # ---------------------------------------------------------------------------
-site_router = nested_routers.NestedDefaultRouter(
-    project_router, r"sites", lookup="site"
+plot_router = nested_routers.NestedDefaultRouter(
+    project_router, r"plots", lookup="plot"
 )
-site_router.register(r"workitems", WorkItemViewSet, basename="site-workitems")
+plot_router.register(r"workitems", WorkItemViewSet, basename="plot-workitems")
  
 # ---------------------------------------------------------------------------
-# /projects/{project_pk}/sites/{site_pk}/workitems/{workitem_pk}/jobitems/
+# /projects/{project_pk}/plots/{plot_pk}/workitems/{workitem_pk}/jobitems/
 # ---------------------------------------------------------------------------
 workitem_router = nested_routers.NestedDefaultRouter(
-    site_router, r"workitems", lookup="workitem"
+    plot_router, r"workitems", lookup="workitem"
 )
 workitem_router.register(r"jobitems", JobItemViewSet, basename="workitem-jobitems")
  
 # ---------------------------------------------------------------------------
-# /projects/{project_pk}/sites/{site_pk}/workitems/{workitem_pk}/jobitems/{jobitem_pk}/reports/
+# /projects/{project_pk}/plots/{plot_pk}/workitems/{workitem_pk}/jobitems/{jobitem_pk}/reports/
 # ---------------------------------------------------------------------------
 jobitem_router = nested_routers.NestedDefaultRouter(
     workitem_router, r"jobitems", lookup="jobitem"
@@ -118,7 +120,7 @@ urlpatterns = [
     path("", include(router.urls)),
     path("", include(invitation_router.urls)),
     path("", include(project_router.urls)),
-    path("", include(site_router.urls)),
+    path("", include(plot_router.urls)),
     path("", include(workitem_router.urls)),
     path("", include(jobitem_router.urls)),
 ]

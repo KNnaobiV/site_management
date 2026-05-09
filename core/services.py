@@ -5,15 +5,11 @@ from django.utils import timezone
 
 from core.models import (
     ConstructionProject, 
-    ConstructionSite,
+    ConstructionPlot,
     ProjectInvitation,
-    SiteInvitation,
+    PlotInvitation,
     ProjectRole,
-    SiteRole,
-    # # ProjectMembership, 
-    # Invitation,
-    # RoleChoices,
-    # SiteMembership,
+    PlotRole,
 )
 
 User = get_user_model()
@@ -24,17 +20,17 @@ def _assert_can_invite_to_project(actor: User, project: ConstructionProject):
             "Only creators and project managers can add users to the project"
         )
 
-def _assert_can_invite_to_site(actor: User, site: ConstructionSite):
+def _assert_can_invite_to_plot(actor: User, plot: ConstructionPlot):
     """
-    Site invitations may be sent by the project owner, project creator,
+    Plot invitations may be sent by the project owner, project creator,
     or the project manager.
     """
-    project = site.construction_project
+    project = plot.construction_project
     allowed = {project.client, project.created_by, project.project_manager}
     if actor not in allowed:
         raise PermissionDenied(
             "Only the project owner, creator, or project manager can "
-            "invite members to this site."
+            "invite members to this plot."
         )
 
 
@@ -52,23 +48,6 @@ def invite_to_project(
 ) -> ProjectInvitation:
     """
     Create a ProjectInvitation.
- 
-    Parameters
-    ----------
-    actor   : the user sending the invitation (must be owner/creator)
-    project : the ConstructionProject to invite to
-    invitee : the user being invited
-    role    : one of ProjectRole choices ('client', 'project_manager', 'consultant')
-    message : optional personal message
- 
-    Returns
-    -------
-    The newly created ProjectInvitation instance.
- 
-    Raises
-    ------
-    PermissionDenied  – actor is not allowed to invite
-    ValidationError   – role is invalid or invitee already has the role
     """
     _assert_can_invite_to_project(actor, project)
  
@@ -89,53 +68,43 @@ def invite_to_project(
         message=message,
     )
  
-    # TODO: send email/notification here
-    # notify_invitation(invitation)
- 
     return invitation
  
  
-def invite_to_site(
+def invite_to_plot(
     *,
     actor: User,
-    site: ConstructionSite,
+    plot: ConstructionPlot,
     invitee: User,
     role: str,
     message: str = "",
-) -> SiteInvitation:
+) -> PlotInvitation:
     """
-    Create a SiteInvitation.
- 
-    Parameters
-    ----------
-    actor   : the user sending the invitation
-    site    : the ConstructionSite to invite to
-    invitee : the user being invited
-    role    : one of SiteRole choices ('foreman', 'storekeeper')
-    message : optional personal message
+    Create a PlotInvitation.
     """
-    _assert_can_invite_to_site(actor, site)
+    _assert_can_invite_to_plot(actor, plot)
  
-    if role not in SiteRole.values:
+    if role not in PlotRole.values:
         raise ValidationError(
-            f"'{role}' is not a valid site role. "
-            f"Choose from: {SiteRole.values}"
+            f"'{role}' is not a valid plot role. "
+            f"Choose from: {PlotRole.values}"
         )
  
-    _check_not_already_assigned_site(site, invitee, role)
+    _check_not_already_assigned_plot(plot, invitee, role)
  
-    invitation = SiteInvitation.objects.create(
-        site=site,
+    invitation = PlotInvitation.objects.create(
+        plot=plot,
         invited_by=actor,
         invitee=invitee,
         role=role,
         message=message,
     )
  
-    # TODO: send email/notification here
-    # notify_invitation(invitation)
- 
     return invitation
+
+
+# Backwards compat alias
+invite_to_site = invite_to_plot
  
  
 # ---------------------------------------------------------------------------
@@ -164,21 +133,21 @@ def revoke_project_invitation(*, actor: User, invitation: ProjectInvitation):
     invitation.revoke()
  
  
-def accept_site_invitation(*, actor: User, invitation: SiteInvitation):
+def accept_plot_invitation(*, actor: User, invitation: PlotInvitation):
     if actor != invitation.invitee:
         raise PermissionDenied("Only the invitee can accept this invitation.")
     invitation.accept()
  
  
-def decline_site_invitation(*, actor: User, invitation: SiteInvitation):
+def decline_plot_invitation(*, actor: User, invitation: PlotInvitation):
     if actor != invitation.invitee:
         raise PermissionDenied("Only the invitee can decline this invitation.")
     invitation.decline()
  
  
-def revoke_site_invitation(*, actor: User, invitation: SiteInvitation):
-    site = invitation.site
-    project = site.construction_project
+def revoke_plot_invitation(*, actor: User, invitation: PlotInvitation):
+    plot = invitation.plot
+    project = plot.construction_project
     allowed = {
         invitation.invited_by,
         project.client,
@@ -188,6 +157,12 @@ def revoke_site_invitation(*, actor: User, invitation: SiteInvitation):
     if actor not in allowed:
         raise PermissionDenied("You are not allowed to revoke this invitation.")
     invitation.revoke()
+
+
+# Backwards compat aliases
+accept_site_invitation = accept_plot_invitation
+decline_site_invitation = decline_plot_invitation
+revoke_site_invitation = revoke_plot_invitation
  
  
 # ---------------------------------------------------------------------------
@@ -209,82 +184,23 @@ def _check_not_already_assigned_project(project, invitee, role):
         )
  
  
-def _check_not_already_assigned_site(site, invitee, role):
-    if role == SiteRole.FOREMAN and site.foreman == invitee:
+def _check_not_already_assigned_plot(plot, invitee, role):
+    if role == PlotRole.FOREMAN and plot.foreman == invitee:
         raise ValidationError(
-            f"{invitee.username} is already the foreman on this site."
+            f"{invitee.username} is already the foreman on this plot."
         )
-    if role == SiteRole.STOREKEEPER and site.storekeeper == invitee:
+    if role == PlotRole.STOREKEEPER and plot.storekeeper == invitee:
         raise ValidationError(
-            f"{invitee.username} is already the storekeeper on this site."
+            f"{invitee.username} is already the storekeeper on this plot."
         )
 
-def invite_user_to_project_or_site(email, project, role, invited_by, site=None):
-    if not invited_by.has_perm('core.add_invitation', project):
-        raise PermissionDenied("You do not have permission to invite users to this project.")
 
-    if role not in RoleChoices.values:
-        raise ValueError("Invalid role specified.")
-    
-    if site:
-        # Create a site invitation
-        invitation = Invitation.objects.create(
-            email=email,
-            project=project,
-            site=site,
-            role=role,
-            invited_by=invited_by
-        )
+def assign_user_to_role_group(user, project_or_plot, role):
+    if hasattr(project_or_plot, 'project_name'):
+        group_name = f"{project_or_plot.project_name} {role}"
     else:
-        # Create a project invitation
-        invitation = Invitation.objects.create(
-            email=email,
-            project=project,
-            role=role,
-            invited_by=invited_by
-        )
-    return invitation
-
-
-def accept_invitation(token, user):
-    try:
-        invitation = Invitation.objects.get(token=token)
-    except Invitation.DoesNotExist:
-        raise ValueError("Invalid invitation token.")
-    if invitation.accepted:
-        raise ValueError("This invitation has already been accepted.")
-    if invitation.email != user.email:
-        raise ValueError("This invitation was not sent to your email address.")
-    invitation.accepted = True
-    invitation.save()
-
-    if invitation.site:
-        SiteMembership.objects.get_or_create(
-            user=user,
-            site=invitation.site,
-            role=invitation.role,
-            invited_by=invitation.invited_by
-        )
-    else:
-        ProjectMembership.objects.get_or_create(
-            user=user,
-            project=invitation.project,
-            role=invitation.role,
-            invited_by=invitation.invited_by
-        )
-
-    return invitation
-
-
-def assign_user_to_role_group(user, project_or_site, role):
-    if hasattr(project_or_site, 'project_name'):
-        # it is a site
-        group_name = f"{project_or_site.project_name} {role}"
-    else:
-        # it is a project
         group_name = (
-            f"{project_or_site.construction_project.project_name} {role}"
+            f"{project_or_plot.construction_project.project_name} {role}"
         )
     group, _ = Group.objects.get_or_create(name=group_name)
     group.user_set.add(user)
-

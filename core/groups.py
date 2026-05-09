@@ -24,6 +24,6 @@ def create_project_group(project_name, group_suffix=None):
         group_name = f"{project_name} {group_suffix}"
 
     _, created = Group.objects.get_or_create(name=group_name)
-    if created:
-        raise ValueError(f"Name: {group_name} already exists")
+    # if created:
+    #     raise ValueError(f"Name: {group_name} already exists")
     return
