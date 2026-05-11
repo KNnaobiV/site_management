@@ -1,15 +1,91 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { StatCard, ProjectCard, NotificationItem, Spinner } from '../components';
+import { apiFetch, unwrapList } from '../api/client';
+import { LayoutDashboard, TrendingUp, AlertCircle, Clock } from 'lucide-react';
 
 const Dashboard = () => {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
+  const [stats, setStats] = useState({
+    activeProjects: 0,
+    openIssues: 5,
+    pendingReports: 12
+  });
+  const [recentProjects, setRecentProjects] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [pRes, nRes] = await Promise.all([
+          apiFetch("/projects/", { token }),
+          apiFetch("/notifications/", { token })
+        ]);
+
+        if (pRes.ok) {
+          const projects = unwrapList(await pRes.json());
+          setRecentProjects(projects.slice(0, 3));
+          setStats(prev => ({ ...prev, activeProjects: projects.filter(p => p.project_status === 'In Progress').length }));
+        }
+
+        if (nRes.ok) {
+          setNotifications(unwrapList(await nRes.json()).slice(0, 4));
+        }
+      } catch (error) {
+        console.error("Dashboard fetch error:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [token]);
+
+  if (loading) return <Spinner />;
+
   return (
     <div className="fade-up">
-      <h1>Dashboard</h1>
-      <p>Welcome back, {user?.display_name || user?.username}</p>
-      <div className="card mt-4">
-        <h3>Overview</h3>
-        <p>This is the new refactored dashboard overview.</p>
+      <div style={{ marginBottom: '40px' }}>
+        <h1 style={{ fontSize: '48px', marginBottom: '8px' }}>Welcome back, {user?.display_name || user?.username}</h1>
+        <p style={{ fontSize: '18px', color: 'var(--text-tertiary)' }}>Here's what's happening across your sites today.</p>
+      </div>
+
+      {/* Quick Stats */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '24px', marginBottom: '48px' }}>
+        <StatCard label="Active Projects" value={stats.activeProjects} sub="+1 since last week" />
+        <StatCard label="Open Issues" value={stats.openIssues} color="var(--status-delayed)" />
+        <StatCard label="Pending Reports" value={stats.pendingReports} color="var(--brand-orange)" />
+        <StatCard label="On-site Teams" value="24" sub="Across 8 plots" />
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '40px' }}>
+        {/* Recent Projects */}
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+            <h3 style={{ fontSize: '24px' }}>Recent Projects</h3>
+            <button className="btn-ghost" style={{ fontSize: '14px' }}>View all</button>
+          </div>
+          <div style={{ display: 'grid', gap: '24px' }}>
+            {recentProjects.map(p => (
+              <ProjectCard key={p.id} project={p} />
+            ))}
+          </div>
+        </div>
+
+        {/* Activity Feed */}
+        <div>
+          <h3 style={{ fontSize: '24px', marginBottom: '24px' }}>Recent Activity</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {notifications.length > 0 ? (
+              notifications.map(n => (
+                <NotificationItem key={n.id} notification={n} />
+              ))
+            ) : (
+              <p style={{ color: 'var(--text-tertiary)', fontSize: '14px' }}>No recent activity.</p>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

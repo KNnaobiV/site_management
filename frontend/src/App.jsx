@@ -9,15 +9,14 @@ import PlotsPage from "./pages/PlotsPage";
 import WorkItemsPage from "./pages/WorkItemsPage";
 import JobItemsPage from "./pages/JobItemsPage";
 import NotificationsPage from "./pages/NotificationsPage";
-import { DashboardShell } from "./components";
+import { DashboardShell, Spinner } from "./components";
 
 export default function App() {
-    const auth = useAuth();
-    console.log("App auth state:", auth);
+    const { user, ready } = useAuth();
 
-    if (!auth || !auth.ready) return <BootScreen />;
+    if (!ready) return <BootScreen />;
 
-    if (!auth.user) {
+    if (!user) {
         return (
             <Routes>
                 <Route path="/login" element={<LoginPage />} />
@@ -47,11 +46,14 @@ function BootScreen() {
         <div style={{
             minHeight: "100vh",
             display: "flex",
+            flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            background: "#fbf8f1",
+            background: "var(--bg-canvas)",
+            gap: '20px'
         }}>
-            <p>Loading Ironwork...</p>
+            <Spinner />
+            <p style={{ fontFamily: 'var(--font-serif)', fontSize: '20px' }}>Ironwork</p>
         </div>
     );
 }

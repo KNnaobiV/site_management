@@ -11,6 +11,9 @@ import StatusBadge from "./StatusBadge";
 import Avatar from "./Avatar";
 import StatCard from "./StatCard";
 
+import Drawer from "./Drawer";
+import CommentsSection from "./CommentsSection";
+
 // ---------------------------------------------------------------------------
 // RoleBadge
 // ---------------------------------------------------------------------------
@@ -91,5 +94,7 @@ export {
   Badge,
   StatusBadge,
   Avatar,
-  StatCard
+  StatCard,
+  Drawer,
+  CommentsSection
 };
