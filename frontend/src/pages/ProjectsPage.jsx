@@ -17,16 +17,16 @@ const ProjectsPage = () => {
   const { user } = useAuth();
   const canEdit = user?.role === 'Project Manager' || true;
 
-  useEffect(() => {
-    if (isProjectModalOpen || selectedProject) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "auto";
-    }
-    return () => {
-      document.body.style.overflow = "auto";
-    };
-  }, [isProjectModalOpen, selectedProject]);
+  // useEffect(() => {
+  //   if (isProjectModalOpen || selectedProject) {
+  //     document.body.style.overflow = "hidden";
+  //   } else {
+  //     document.body.style.overflow = "auto";
+  //   }
+  //   return () => {
+  //     document.body.style.overflow = "auto";
+  //   };
+  // }, [isProjectModalOpen, selectedProject]);
 
   useEffect(() => {
     fetchProjects();

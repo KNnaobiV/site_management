@@ -10,12 +10,25 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/topics/settings/
 """
 
-import os
-from pathlib import Path
+
 from decouple import config
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+import configparser
+from datetime import timedelta
+import os
+from pathlib import Path
+
+# Build paths inside the project like this: BASE_DIR / "subdir".
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+APP_DIR = os.path.join(BASE_DIR, "apps")
+
+CFG = configparser.ConfigParser()
+
+if os.path.exists(os.path.join(BASE_DIR, "envs", "prod.env")):
+    CFG.read(os.path.join(BASE_DIR, "envs", "prod.env"))
+else:
+    CFG.read(os.path.join(BASE_DIR, "envs", "dev.env"))
 
 
 # Quick-start development settings - unsuitable for production
@@ -130,47 +143,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
-            'style': '{',
-        },
-    },
-    'handlers': {
-        'console': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
-            'formatter': 'verbose',
-        },
-        'file': {
-            'level': 'INFO',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': BASE_DIR / 'django.log',
-            'maxBytes': 1024 * 1024 * 5,  # 5MB
-            'backupCount': 5,
-            'formatter': 'verbose',
-        },
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['console', 'file'],
-            'level': 'INFO',
-            'propagate': True,
-        },
-        'django.db.backends': {
-            'handlers': ['console'],
-            'level': 'INFO', # Changed from DEBUG to avoid huge log files
-        },
-        'core': {
-            'handlers': ['console', 'file'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-    },
-}
 
 
 # Static files (CSS, JavaScript, Images)
@@ -204,14 +176,5 @@ REST_FRAMEWORK = {
     ],
 }
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:8000",
-    "http://localhost:5173",
-]
-
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:8000",
-    "http://localhost:5173",
-]
 
 
