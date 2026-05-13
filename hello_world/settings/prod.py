@@ -2,18 +2,15 @@ from .base import BASE_DIR, CFG
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    },
-    # 'postgres': {
-    #     'ENGINE': 'django.db.backends.postgis',
-    #     'NAME': 'apartments',
-    #     'USER': 'admin_username',
-    #     'PASSWORD': 'pwd',
-    #     'HOST': 'localhost',
-    #     'PORT': 'port_number'
-    # }
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'your_database_name',
+        'USER': 'your_mysql_username',
+        'PASSWORD': 'your_mysql_password',
+        'HOST': 'localhost',  # Or your DB host address
+        'PORT': '3306',       # Default MySQL port
+    }
 }
+
 
 ADMIN_URL = CFG.get("SITE", "DJANGO_ADMIN_URL")
 
