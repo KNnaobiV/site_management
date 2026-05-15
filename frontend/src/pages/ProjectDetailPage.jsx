@@ -150,6 +150,23 @@ const ProjectDetailPage = () => {
     } finally { setLoading(false); }
   };
 
+  const fetchReports = async () => {
+    try {
+      const res = await apiFetch(`/projects/${id}/reports/`, { token });
+      if (res.ok) {
+        const data = await res.json();
+        console.log('Project reports fetch:', data);
+        setReports(unwrapList(data));
+      } else {
+        console.warn('Failed fetching project reports', res.status);
+      }
+    } catch (e) { console.error('Error fetching project reports', e); }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'reports') fetchReports();
+  }, [activeTab]);
+
   const tabs = [
     { id: 'overview', label: 'Overview' },
     { id: 'plots', label: `Plots (${plots.length})` },

@@ -186,6 +186,23 @@ const PlotDetailPage = () => {
     } finally { setLoading(false); }
   };
 
+  const fetchReports = async () => {
+    try {
+      const res = await apiFetch(`/projects/${projectId}/plots/${id}/reports/`, { token });
+      if (res.ok) {
+        const data = await res.json();
+        console.log('Plot reports fetch:', data);
+        setReports(unwrapList(data));
+      } else {
+        console.warn('Failed fetching plot reports', res.status);
+      }
+    } catch (e) { console.error('Error fetching plot reports', e); }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'reports') fetchReports();
+  }, [activeTab, projectId]);
+
   const completedItems = workItems.filter(w => w.work_status === 'Completed').length;
   const progress = workItems.length ? Math.round((completedItems / workItems.length) * 100) : 0;
 
