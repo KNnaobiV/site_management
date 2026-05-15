@@ -626,7 +626,7 @@ class JobReportViewSet(PlotScopedMixin, viewsets.ModelViewSet):
         members = set([project.created_by, project.project_manager])
         
         prio = Notification.Priority.NORMAL
-        if report.priority in ["High", "Urgent"]:
+        if report.priority in ["Urgent", "Critical"]:
             prio = Notification.Priority.HIGH
             
         notifications = [

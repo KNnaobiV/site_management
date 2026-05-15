@@ -14675,3 +14675,10 @@ WARNING django.request 2026-05-15 08:06:35,658 log 42600 128823903377152 Not Fou
 WARNING django.request 2026-05-15 08:06:35,670 log 42600 128823903377152 Not Found: /.ada/
 WARNING django.request 2026-05-15 08:06:35,753 log 42600 128823903377152 Not Found: /.ssh/
 WARNING django.request 2026-05-15 08:06:35,766 log 42600 128823903377152 Not Found: /.midway/
+INFO django.utils.autoreload 2026-05-15 08:27:04,167 autoreload 42600 128824053224064 /workspaces/codespaces-django/core/views.py changed, reloading.
+INFO django.utils.autoreload 2026-05-15 08:27:04,613 autoreload 52929 133516021035648 Watching for file changes with StatReloader
+WARNING django.request 2026-05-15 08:27:05,712 log 52929 133515885319936 Not Found: /
+INFO django.utils.autoreload 2026-05-15 08:28:15,773 autoreload 52929 133516021035648 /workspaces/codespaces-django/hello_world/settings/dev.py changed, reloading.
+INFO django.utils.autoreload 2026-05-15 08:28:16,242 autoreload 53511 140274363392640 Watching for file changes with StatReloader
+WARNING django.request 2026-05-15 08:28:17,086 log 53511 140274227472128 Not Found: /
+INFO django.utils.autoreload 2026-05-15 08:28:18,767 autoreload 53511 140274363392640 /workspaces/codespaces-django/hello_world/settings/dev.py changed, reloading.

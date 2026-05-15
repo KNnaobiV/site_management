@@ -17,7 +17,7 @@ const CreateDailyReportPage = () => {
   
   const [formData, setFormData] = useState({
     report_date: new Date().toISOString().split('T')[0],
-    priority: 'normal',
+    priority: 'Normal',
     percentage_job_progress: '0',
     expected_completion_date: '',
     issues_encountered: '',
@@ -57,9 +57,9 @@ const CreateDailyReportPage = () => {
     };
 
     try {
-      const projectId = jobItem.work_item.construction_plot.construction_project.id;
-      const plotId = jobItem.work_item.construction_plot.id;
-      const workItemId = jobItem.work_item.id;
+      const projectId = jobItem.construction_project;
+      const plotId = jobItem.construction_plot;
+      const workItemId = jobItem.work_item;
       const url = `/projects/${projectId}/plots/${plotId}/workitems/${workItemId}/jobitems/${jobItemId}/reports/`;
       const res = await apiFetch(url, {
         method: 'POST',
@@ -151,10 +151,9 @@ const CreateDailyReportPage = () => {
                 onChange={e => setFormData({...formData, priority: e.target.value})} 
                 style={inputStyle}
               >
-                <option value="low">Low</option>
-                <option value="normal">Normal</option>
-                <option value="high">High</option>
-                <option value="critical">Critical</option>
+                <option value="Normal">Normal</option>
+                <option value="Urgent">Urgent</option>
+                <option value="Critical">Critical</option>
               </select>
             </div>
           </div>
