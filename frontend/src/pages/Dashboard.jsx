@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { StatCard, ProjectCard, NotificationItem, Spinner } from '../components';
 import { apiFetch, unwrapList } from '../api/client';
 import { LayoutDashboard, TrendingUp, AlertCircle, Clock } from 'lucide-react';
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const { user, token } = useAuth();
   const [stats, setStats] = useState({
     activeProjects: 0,
@@ -68,7 +70,11 @@ const Dashboard = () => {
           </div>
           <div style={{ display: 'grid', gap: '24px' }}>
             {recentProjects.map(p => (
-              <ProjectCard key={p.id} project={p} />
+              <ProjectCard 
+                key={p.id} 
+                project={p} 
+                onClick={() => navigate(`/projects/${p.id}`)}
+              />
             ))}
           </div>
         </div>

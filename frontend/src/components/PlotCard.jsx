@@ -4,6 +4,17 @@ import Avatar from './Avatar';
 import { MapPin, User, Calendar } from 'lucide-react';
 
 const PlotCard = ({ plot, onClick }) => {
+  const getFullName = (userObj) => {
+    if (!userObj) return 'N/A';
+    const first = userObj.first_name || '';
+    const last = userObj.last_name || '';
+    const full = `${first} ${last}`.trim();
+    return full || userObj.username || 'N/A';
+  };
+
+  const foremanName = getFullName(plot.foreman);
+  const storekeeperName = getFullName(plot.storekeeper);
+
   return (
     <div className="card" onClick={onClick} style={{ cursor: 'pointer', padding: 0, overflow: 'hidden' }}>
       <div style={{ 
@@ -20,28 +31,28 @@ const PlotCard = ({ plot, onClick }) => {
       </div>
 
       <div style={{ padding: '20px' }}>
-        <h3 style={{ fontSize: '20px', marginBottom: '4px' }}>{plot.address}</h3>
+        <h3 style={{ fontSize: '20px', marginBottom: '4px' }}>{plot.address || 'Address N/A'}</h3>
         <p style={{ fontSize: '13px', color: 'var(--text-tertiary)', marginBottom: '16px' }}>Project: {plot.project_name || 'Project Name'}</p>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}>
             <MapPin size={14} color="var(--brand-orange)" />
-            <span>Lagos, Nigeria</span>
+            <span>{plot.address || 'Location N/A'}</span>
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--border-default)', paddingTop: '12px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Avatar name="Foreman" size={24} />
+              <Avatar name={foremanName} size={24} />
               <div style={{ fontSize: '11px' }}>
                 <p style={{ margin: 0, color: 'var(--text-tertiary)' }}>Foreman</p>
-                <p style={{ margin: 0, fontWeight: 500 }}>J. Adeyemi</p>
+                <p style={{ margin: 0, fontWeight: 500 }}>{foremanName}</p>
               </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Avatar name="Storekeeper" size={24} />
+              <Avatar name={storekeeperName} size={24} />
               <div style={{ fontSize: '11px' }}>
                 <p style={{ margin: 0, color: 'var(--text-tertiary)' }}>Storekeeper</p>
-                <p style={{ margin: 0, fontWeight: 500 }}>M. Bello</p>
+                <p style={{ margin: 0, fontWeight: 500 }}>{storekeeperName}</p>
               </div>
             </div>
           </div>

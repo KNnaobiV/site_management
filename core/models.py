@@ -374,7 +374,15 @@ class ConstructionPlot(TimestampedModel):
         null=True, blank=True
     )
     address = models.CharField(max_length=255)
+    plot_number = models.CharField(max_length=50, blank=True, default="")
     plot_opening_date = models.DateField(default=timezone.now)
+    gps_latitude = models.DecimalField(
+        max_digits=9, decimal_places=6, null=True, blank=True
+    )
+    gps_longitude = models.DecimalField(
+        max_digits=9, decimal_places=6, null=True, blank=True
+    )
+    notes = models.TextField(blank=True, default="")
 
     def save(self, *args, **kwargs):
         if not self.address:
@@ -421,6 +429,8 @@ class WorkItem(TimestampedModel):
     start_date = models.DateField(null=True, blank=True)
     proposed_end_date = models.DateField()
     end_date = models.DateField(null=True, blank=True)
+    # Checklist: [{"text": "Pour footings", "done": false}, ...]
+    checklist = models.JSONField(default=list, blank=True)
 
     class Meta:
         ordering = ['-updated_at']
@@ -477,6 +487,11 @@ class JobItem(TimestampedModel):
     projected_end_date = models.DateField()
     actual_start_date = models.DateField(null=True, blank=True)
     actual_end_date = models.DateField(null=True, blank=True)
+    # Material requirements: [{"name": "Cement", "quantity": 50, "unit": "bags"}, ...]
+    material_requirements = models.JSONField(default=list, blank=True)
+    estimated_hours = models.DecimalField(
+        max_digits=6, decimal_places=1, null=True, blank=True
+    )
 
     class Meta:
         ordering = ['-updated_at']
@@ -629,6 +644,33 @@ class JobReportComment(models.Model):
 ConstructionSite = ConstructionPlot
 SiteRole = PlotRole
 SiteInvitation = PlotInvitation
+
+
+class WorkItemImage(models.Model):
+    """Photo attached to a WorkItem."""
+    work_item = models.ForeignKey(
+        WorkItem, on_delete=models.CASCADE, related_name="images"
+    )
+    image = models.ImageField(upload_to="work_items/%Y/%m/%d/")
+    caption = models.CharField(max_length=255, blank=True)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Image for {self.work_item.name}"
+
+
+class JobReportImage(models.Model):
+    """Photo attached to a JobReport (daily report)."""
+    report = models.ForeignKey(
+        JobReport, on_delete=models.CASCADE, related_name="images"
+    )
+    image = models.ImageField(upload_to="reports/%Y/%m/%d/")
+    caption = models.CharField(max_length=255, blank=True)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Image for report {self.report.id} ({self.report.report_date})"
+
 
 @receiver(post_save, sender=ProjectInvitation)
 def create_project_invitation_notification(sender, instance, created, **kwargs):

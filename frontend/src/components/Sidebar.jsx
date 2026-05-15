@@ -4,25 +4,26 @@ import {
   LayoutDashboard, 
   Briefcase, 
   Map as MapIcon, 
-  ClipboardList, 
   CheckSquare, 
+  ClipboardList, 
   Bell,
   ChevronRight,
-  HardHat
+  HardHat,
+  LogOut
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import Avatar from './Avatar';
 
 const Sidebar = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   const navItems = [
     { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
     { to: '/projects', icon: Briefcase, label: 'Projects' },
     { to: '/plots', icon: MapIcon, label: 'Plots' },
-    { to: '/work-items', icon: ClipboardList, label: 'Work Items' },
-    { to: '/job-items', icon: CheckSquare, label: 'Job Items' },
-    { to: '/notifications', icon: Bell, label: 'Notifications', badge: 12 },
+    { to: '/work-items', icon: CheckSquare, label: 'Work Items' },
+    { to: '/job-items', icon: ClipboardList, label: 'Job Items' },
+    { to: '/notifications', icon: Bell, label: 'Notifications' },
   ];
 
   return (
@@ -85,18 +86,6 @@ const Sidebar = () => {
                   <>
                     <item.icon size={20} color={isActive ? 'var(--brand-orange)' : 'currentColor'} />
                     <span>{item.label}</span>
-                    {item.badge && (
-                      <span style={{
-                        marginLeft: 'auto',
-                        background: 'var(--brand-orange)',
-                        color: '#fff',
-                        fontSize: '11px',
-                        padding: '2px 6px',
-                        borderRadius: '10px'
-                      }}>
-                        {item.badge}
-                      </span>
-                    )}
                   </>
                 )}
               </NavLink>
@@ -106,36 +95,68 @@ const Sidebar = () => {
       </nav>
 
       {/* Profile */}
-      <div style={{
-        marginTop: 'auto',
-        paddingTop: '24px',
-        borderTop: '1px solid rgba(255,255,255,0.1)',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '12px'
-      }}>
-        <Avatar name={user?.display_name || user?.username} size={40} />
-        <div style={{ overflow: 'hidden' }}>
-          <p style={{ 
-            color: '#fff', 
-            fontSize: '14px', 
-            fontWeight: 600, 
-            margin: 0,
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis'
-          }}>
-            {user?.display_name || user?.username}
-          </p>
-          <p style={{ 
-            color: 'var(--text-tertiary)', 
-            fontSize: '12px', 
-            margin: 0 
-          }}>
-            Project Manager
-          </p>
-        </div>
-        <ChevronRight size={16} color="var(--text-tertiary)" style={{ marginLeft: 'auto' }} />
+      <div style={{ marginTop: 'auto', paddingTop: '24px', borderTop: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <NavLink
+          to="/profile"
+          style={({ isActive }) => ({
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            textDecoration: 'none',
+            background: isActive ? 'rgba(193, 74, 30, 0.15)' : 'transparent',
+            borderRadius: '12px',
+            padding: '16px',
+            transition: 'all 0.2s'
+          })}
+        >
+          <Avatar name={user?.display_name || user?.username} size={40} />
+          <div style={{ overflow: 'hidden' }}>
+            <p style={{ 
+              color: '#fff', 
+              fontSize: '14px', 
+              fontWeight: 600, 
+              margin: 0,
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
+            }}>
+              {user?.display_name || user?.username}
+            </p>
+            <p style={{ 
+              color: 'var(--text-tertiary)', 
+              fontSize: '12px', 
+              margin: 0 
+            }}>
+              {user?.role || 'Team Member'}
+            </p>
+          </div>
+          <ChevronRight size={16} color="var(--text-tertiary)" style={{ marginLeft: 'auto' }} />
+        </NavLink>
+        
+        <button 
+          onClick={logout}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            padding: '12px 16px',
+            background: 'transparent',
+            border: 'none',
+            color: 'var(--text-tertiary)',
+            cursor: 'pointer',
+            borderRadius: '12px',
+            fontSize: '15px',
+            fontWeight: 500,
+            transition: 'all 0.2s',
+            width: '100%',
+            textAlign: 'left'
+          }}
+          onMouseOver={(e) => { e.currentTarget.style.color = '#EB5757'; e.currentTarget.style.background = 'rgba(235, 87, 87, 0.1)'; }}
+          onMouseOut={(e) => { e.currentTarget.style.color = 'var(--text-tertiary)'; e.currentTarget.style.background = 'transparent'; }}
+        >
+          <LogOut size={20} />
+          <span>Sign Out</span>
+        </button>
       </div>
     </div>
   );

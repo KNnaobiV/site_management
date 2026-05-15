@@ -47,3 +47,31 @@ export async function requestPasswordReset(email) {
     if (!res.ok) throw new Error(data.error || "Something went wrong");
     return data;
 }
+
+export async function updateProfile(token, profileData) {
+    const res = await apiFetch("/auth/user/", {
+        method: "PATCH",
+        token,
+        body: JSON.stringify(profileData),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+        const errorMsg = Object.values(data).flat().join(" ") || "Failed to update profile";
+        throw new Error(errorMsg);
+    }
+    return data;
+}
+
+export async function changePassword(token, passwords) {
+    const res = await apiFetch("/auth/change-password/", {
+        method: "POST",
+        token,
+        body: JSON.stringify(passwords),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+        const errorMsg = data.detail || Object.values(data).flat().join(" ") || "Failed to change password";
+        throw new Error(errorMsg);
+    }
+    return data;
+}

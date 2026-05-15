@@ -33,6 +33,8 @@ from core.models import (
     PlotInvitation,
     ProjectRole,
     PlotRole,
+    WorkItemImage,
+    JobReportImage,
 )
 from core.roles import get_project_role, get_plot_role
  
@@ -251,6 +253,7 @@ class ConstructionPlotSerializer(RoleFilteredSerializer):
         required=False
     )
     
+    project_name = serializers.ReadOnlyField(source="construction_project.project_name")
     role = serializers.SerializerMethodField()
     
     def get_role(self, obj):
@@ -264,8 +267,13 @@ class ConstructionPlotSerializer(RoleFilteredSerializer):
         "id",
         "construction_project",
         "address",
+        "plot_number",
         "plot_opening_date",
+        "gps_latitude",
+        "gps_longitude",
+        "notes",
         "role",
+        "project_name",
     }
  
     ROLE_EXTRA = {
@@ -288,16 +296,32 @@ class ConstructionPlotSerializer(RoleFilteredSerializer):
             "id",
             "construction_project",
             "address",
+            "plot_number",
             "plot_opening_date",
+            "gps_latitude",
+            "gps_longitude",
+            "notes",
             "foreman",
             "foreman_id",
             "storekeeper",
             "storekeeper_id",
             "role",
+            "project_name",
         ]
         read_only_fields = ["id"]
  
  
+# ===========================================================================
+# WorkItemImage
+# ===========================================================================
+
+class WorkItemImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WorkItemImage
+        fields = ["id", "work_item", "image", "caption", "uploaded_at"]
+        read_only_fields = ["id", "work_item", "uploaded_at"]
+
+
 # ===========================================================================
 # WorkItem
 # ===========================================================================
@@ -319,7 +343,11 @@ class WorkItemSerializer(RoleFilteredSerializer):
         "work_status",
         "proposed_start_date",
         "proposed_end_date",
+        "checklist",
         "updated_at",
+        "images",
+        "construction_plot_name",
+        "construction_project",
     }
  
     ROLE_EXTRA = {
@@ -330,6 +358,8 @@ class WorkItemSerializer(RoleFilteredSerializer):
     }
  
     construction_plot_name = serializers.ReadOnlyField(source="construction_plot.address")
+    construction_project = serializers.ReadOnlyField(source="construction_plot.construction_project.id")
+    images = WorkItemImageSerializer(many=True, read_only=True)
  
     class Meta:
         model = WorkItem
@@ -344,12 +374,26 @@ class WorkItemSerializer(RoleFilteredSerializer):
             "start_date",
             "end_date",
             "is_approved",
+            "checklist",
             "updated_at",
             "construction_plot_name",
+            "construction_project",
+            "images",
         ]
         read_only_fields = ["id", "updated_at", "construction_plot"]
  
  
+# ===========================================================================
+# JobReportImage
+# ===========================================================================
+
+class JobReportImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = JobReportImage
+        fields = ["id", "report", "image", "caption", "uploaded_at"]
+        read_only_fields = ["id", "report", "uploaded_at"]
+
+
 # ===========================================================================
 # JobItem
 # ===========================================================================
@@ -373,7 +417,13 @@ class JobItemSerializer(RoleFilteredSerializer):
         "job_status",
         "projected_start_date",
         "projected_end_date",
+        "material_requirements",
+        "estimated_hours",
         "updated_at",
+        "construction_plot",
+        "construction_project",
+        "work_item_name",
+        "construction_plot_name",
     }
  
     ROLE_EXTRA = {
@@ -386,6 +436,7 @@ class JobItemSerializer(RoleFilteredSerializer):
     work_item_name = serializers.ReadOnlyField(source="work_item.name")
     construction_plot = serializers.ReadOnlyField(source="work_item.construction_plot.id")
     construction_plot_name = serializers.ReadOnlyField(source="work_item.construction_plot.address")
+    construction_project = serializers.ReadOnlyField(source="work_item.construction_plot.construction_project.id")
  
     class Meta:
         model = JobItem
@@ -400,10 +451,13 @@ class JobItemSerializer(RoleFilteredSerializer):
             "projected_end_date",
             "actual_start_date",
             "actual_end_date",
+            "material_requirements",
+            "estimated_hours",
             "updated_at",
             "work_item_name",
             "construction_plot",
             "construction_plot_name",
+            "construction_project",
         ]
         read_only_fields = ["id", "updated_at", "work_item"]
  
@@ -424,6 +478,7 @@ class JobReportSerializer(RoleFilteredSerializer):
     """
  
     reported_by = UserSummarySerializer(read_only=True)
+    images = JobReportImageSerializer(many=True, read_only=True)
  
     ALWAYS_VISIBLE = {
         "id",
@@ -439,6 +494,7 @@ class JobReportSerializer(RoleFilteredSerializer):
         "external_comments",
         "days_elapsed",
         "updated_at",
+        "images",
     }
  
     ROLE_EXTRA = {
@@ -466,6 +522,7 @@ class JobReportSerializer(RoleFilteredSerializer):
             "days_elapsed",
             "job_image",
             "job_video",
+            "images",
             "updated_at",
         ]
         read_only_fields = ["id", "reported_by", "updated_at", "job_item"]
@@ -583,3 +640,23 @@ class PlotInvitationSerializer(serializers.ModelSerializer):
 # Backwards-compat aliases
 ConstructionSiteSerializer = ConstructionPlotSerializer
 SiteInvitationSerializer = PlotInvitationSerializer
+
+
+# ===========================================================================
+# Image upload serializers (standalone — used by upload actions in views)
+# ===========================================================================
+
+class WorkItemImageUploadSerializer(serializers.ModelSerializer):
+    """Used for POST /workitems/{pk}/images/ — expects multipart form data."""
+    class Meta:
+        model = WorkItemImage
+        fields = ["id", "image", "caption", "uploaded_at"]
+        read_only_fields = ["id", "uploaded_at"]
+
+
+class JobReportImageUploadSerializer(serializers.ModelSerializer):
+    """Used for POST /reports/{pk}/images/ — expects multipart form data."""
+    class Meta:
+        model = JobReportImage
+        fields = ["id", "image", "caption", "uploaded_at"]
+        read_only_fields = ["id", "uploaded_at"]

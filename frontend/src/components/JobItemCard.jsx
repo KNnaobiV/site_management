@@ -1,7 +1,7 @@
 import React from 'react';
 import StatusBadge from './StatusBadge';
 import Avatar from './Avatar';
-import { Calendar, User, Zap } from 'lucide-react';
+import { Calendar, User, Zap, CheckSquare } from 'lucide-react';
 
 const ProgressRing = ({ progress, size = 60, strokeWidth = 5 }) => {
   const radius = (size - strokeWidth) / 2;
@@ -60,9 +60,16 @@ const JobItemCard = ({ job, onClick }) => {
         <div style={{ flex: 1 }}>
           <h3 style={{ fontSize: '20px', marginBottom: '12px' }}>{job.job_artisan} — {job.job_name}</h3>
           
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'var(--bg-raised)', padding: '4px 12px', borderRadius: '8px', fontSize: '13px', marginBottom: '16px' }}>
-            <Zap size={14} color="var(--brand-orange)" />
-            <span>{job.job_artisan}</span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: 'var(--text-secondary)' }}>
+              <CheckSquare size={14} color="var(--brand-orange)" />
+              <span>{job.work_item_name || 'Work Item N/A'}</span>
+            </div>
+            
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'var(--bg-raised)', padding: '4px 12px', borderRadius: '8px', fontSize: '13px', width: 'fit-content' }}>
+              <Zap size={14} color="var(--brand-orange)" />
+              <span>{job.job_artisan}</span>
+            </div>
           </div>
         </div>
         

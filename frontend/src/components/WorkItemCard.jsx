@@ -1,6 +1,6 @@
 import React from 'react';
 import StatusBadge from './StatusBadge';
-import { Calendar, CheckCircle2, ArrowRight } from 'lucide-react';
+import { Calendar, CheckCircle2, ArrowRight, MapPin } from 'lucide-react';
 
 const WorkItemCard = ({ item, onClick }) => {
   return (
@@ -9,7 +9,11 @@ const WorkItemCard = ({ item, onClick }) => {
         <StatusBadge status={item.work_status} />
       </div>
 
-      <h3 style={{ fontSize: '24px', marginBottom: '12px' }}>{item.name}</h3>
+      <h3 style={{ fontSize: '24px', marginBottom: '8px' }}>{item.name}</h3>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: 'var(--brand-orange)', marginBottom: '12px' }}>
+        <MapPin size={14} />
+        <span>{item.construction_plot_name || 'Plot N/A'}</span>
+      </div>
       <p style={{ fontSize: '14px', color: 'var(--text-tertiary)', marginBottom: '20px', lineHeight: 1.5 }}>
         {item.description || 'Phase description goes here...'}
       </p>

@@ -83,6 +83,29 @@ class UserDetailView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class ChangePasswordView(APIView):
+    """
+    API view to change authenticated user's password.
+    POST: Update the user's password.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        old_password = request.data.get("old_password")
+        new_password = request.data.get("new_password")
+        
+        if not old_password or not new_password:
+            return Response({"detail": "Old and new passwords are required."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        user = request.user
+        if not user.check_password(old_password):
+            return Response({"detail": "Incorrect old password."}, status=status.HTTP_400_BAD_REQUEST)
+            
+        user.set_password(new_password)
+        user.save()
+        return Response({"detail": "Password changed successfully."}, status=status.HTTP_200_OK)
+
+
 class PasswordResetRequestView(APIView):
     """
     API view to request a password reset.

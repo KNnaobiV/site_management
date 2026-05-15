@@ -10,6 +10,7 @@ and delegates to `get_project_role` / `get_plot_role` from core.roles.
 This keeps all role logic in one place.
 """
 from rest_framework.permissions import BasePermission, IsAuthenticated
+from core.models import ConstructionProject, ConstructionPlot
  
 from core.roles import (
     get_project_role,
@@ -59,9 +60,12 @@ class IsProjectMember(BasePermission):
         return get_project_role(request.user, project) in PROJECT_READ_ROLES
  
     def has_object_permission(self, request, view, obj):
-        project = getattr(obj, "project", None) or getattr(
-            obj, "construction_project", None
-        )
+        if isinstance(obj, ConstructionProject):
+            project = obj
+        else:
+            project = getattr(obj, "project", None) or getattr(
+                obj, "construction_project", None
+            )
         if project is None:
             return False
         return get_project_role(request.user, project) in PROJECT_READ_ROLES
@@ -80,9 +84,12 @@ class CanManageProject(BasePermission):
         return get_project_role(request.user, project) in PROJECT_MANAGE_ROLES
  
     def has_object_permission(self, request, view, obj):
-        project = getattr(obj, "project", None) or getattr(
-            obj, "construction_project", None
-        )
+        if isinstance(obj, ConstructionProject):
+            project = obj
+        else:
+            project = getattr(obj, "project", None) or getattr(
+                obj, "construction_project", None
+            )
         if project is None:
             return False
         return get_project_role(request.user, project) in PROJECT_MANAGE_ROLES
@@ -101,9 +108,12 @@ class IsProjectOwnerOrCreator(BasePermission):
         return get_project_role(request.user, project) in {"owner"}
  
     def has_object_permission(self, request, view, obj):
-        project = getattr(obj, "project", None) or getattr(
-            obj, "construction_project", None
-        )
+        if isinstance(obj, ConstructionProject):
+            project = obj
+        else:
+            project = getattr(obj, "project", None) or getattr(
+                obj, "construction_project", None
+            )
         if project is None:
             return False
         return get_project_role(request.user, project) in {"owner"}
@@ -126,9 +136,17 @@ class IsPlotMember(BasePermission):
         return get_plot_role(request.user, plot) in PLOT_READ_ROLES
  
     def has_object_permission(self, request, view, obj):
-        plot = getattr(obj, "plot", None) or getattr(
-            obj, "construction_plot", None
-        )
+        if isinstance(obj, ConstructionPlot):
+            plot = obj
+        elif hasattr(obj, "construction_plot"):
+            plot = obj.construction_plot
+        elif hasattr(obj, "work_item"):
+            plot = obj.work_item.construction_plot
+        elif hasattr(obj, "job_item"):
+            plot = obj.job_item.work_item.construction_plot
+        else:
+            plot = getattr(obj, "plot", None)
+            
         if plot is None:
             return False
         return get_plot_role(request.user, plot) in PLOT_READ_ROLES
@@ -147,9 +165,17 @@ class CanManagePlot(BasePermission):
         return get_plot_role(request.user, plot) in PLOT_MANAGE_ROLES
  
     def has_object_permission(self, request, view, obj):
-        plot = getattr(obj, "plot", None) or getattr(
-            obj, "construction_plot", None
-        )
+        if isinstance(obj, ConstructionPlot):
+            plot = obj
+        elif hasattr(obj, "construction_plot"):
+            plot = obj.construction_plot
+        elif hasattr(obj, "work_item"):
+            plot = obj.work_item.construction_plot
+        elif hasattr(obj, "job_item"):
+            plot = obj.job_item.work_item.construction_plot
+        else:
+            plot = getattr(obj, "plot", None)
+            
         if plot is None:
             return False
         return get_plot_role(request.user, plot) in PLOT_MANAGE_ROLES

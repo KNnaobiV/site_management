@@ -64,6 +64,9 @@ from .views import (
 # ---------------------------------------------------------------------------
 router = DefaultRouter()
 router.register(r"projects", ConstructionProjectViewSet, basename="project")
+router.register(r"plots", ConstructionPlotViewSet, basename="plot-flat")
+router.register(r"workitems", WorkItemViewSet, basename="workitem-flat")
+router.register(r"jobitems", JobItemViewSet, basename="jobitem-flat")
 router.register(r"notifications", NotificationViewSet, basename="notification")
  
 # ---------------------------------------------------------------------------

@@ -12191,3 +12191,2469 @@ INFO 2026-05-11 07:37:27,970 log 2808 9300 "GET /api/projects/ HTTP/1.1" 200 118
 INFO 2026-05-11 07:37:27,975 log 2808 12648 "GET /api/notifications/ HTTP/1.1" 200 510
 INFO 2026-05-11 07:37:27,989 log 2808 9300 "GET /api/projects/ HTTP/1.1" 200 1189
 INFO django.utils.autoreload 2026-05-13 06:02:27,863 autoreload 22068 14232 Watching for file changes with StatReloader
+WARNING django.request 2026-05-13 06:38:21,211 log 22068 17000 Not Found: /api/jobitems/
+INFO django.utils.autoreload 2026-05-13 06:51:45,726 autoreload 22068 14232 C:\Users\Chike\Ekene\maccaferra\hello_world\settings\base.py changed, reloading.
+INFO django.utils.autoreload 2026-05-13 06:51:47,392 autoreload 5028 20484 Watching for file changes with StatReloader
+WARNING django.request 2026-05-13 06:54:03,160 log 5028 34916 Not Found: /api/jobitems/
+WARNING django.request 2026-05-13 06:56:44,233 log 5028 31176 Not Found: /api/jobitems/
+WARNING django.request 2026-05-13 06:56:44,261 log 5028 34916 Not Found: /api/jobitems/
+WARNING django.request 2026-05-13 06:56:46,824 log 5028 34916 Forbidden: /api/projects/1/
+WARNING django.request 2026-05-13 06:56:49,117 log 5028 31176 Not Found: /api/plots/
+WARNING django.request 2026-05-13 06:56:49,147 log 5028 31176 Not Found: /api/plots/
+WARNING django.request 2026-05-13 06:56:55,915 log 5028 31176 Forbidden: /api/projects/1/
+WARNING django.request 2026-05-13 06:56:58,112 log 5028 31176 Not Found: /api/plots/
+WARNING django.request 2026-05-13 06:56:58,138 log 5028 34916 Not Found: /api/plots/
+WARNING django.request 2026-05-13 06:57:18,268 log 5028 34916 Not Found: /api/plots/1778651835913/
+WARNING django.request 2026-05-13 06:57:20,507 log 5028 31176 Not Found: /api/workitems/
+WARNING django.request 2026-05-13 06:57:20,536 log 5028 34916 Not Found: /api/workitems/
+WARNING django.request 2026-05-13 06:57:22,145 log 5028 34916 Not Found: /api/plots/
+WARNING django.request 2026-05-13 06:57:58,551 log 5028 34916 Not Found: /api/jobitems/
+WARNING django.request 2026-05-13 06:57:58,572 log 5028 31176 Not Found: /api/jobitems/
+WARNING django.request 2026-05-13 06:58:00,029 log 5028 31176 Not Found: /api/workitems/
+INFO django.utils.autoreload 2026-05-13 07:10:33,537 autoreload 5028 20484 C:\Users\Chike\Ekene\maccaferra\core\views.py changed, reloading.
+INFO django.utils.autoreload 2026-05-13 07:10:35,025 autoreload 31268 31420 Watching for file changes with StatReloader
+INFO django.utils.autoreload 2026-05-13 07:10:44,241 autoreload 31268 31420 C:\Users\Chike\Ekene\maccaferra\core\views.py changed, reloading.
+INFO django.utils.autoreload 2026-05-13 07:10:45,312 autoreload 29064 34200 Watching for file changes with StatReloader
+INFO django.utils.autoreload 2026-05-13 07:10:57,879 autoreload 29064 34200 C:\Users\Chike\Ekene\maccaferra\core\views.py changed, reloading.
+INFO django.utils.autoreload 2026-05-13 07:10:59,036 autoreload 3416 11228 Watching for file changes with StatReloader
+INFO django.utils.autoreload 2026-05-13 07:11:11,527 autoreload 3416 11228 C:\Users\Chike\Ekene\maccaferra\core\views.py changed, reloading.
+INFO django.utils.autoreload 2026-05-13 07:11:12,638 autoreload 13140 14632 Watching for file changes with StatReloader
+INFO django.utils.autoreload 2026-05-13 07:11:19,747 autoreload 13140 14632 C:\Users\Chike\Ekene\maccaferra\core\urls.py changed, reloading.
+INFO django.utils.autoreload 2026-05-13 07:11:21,248 autoreload 7100 22784 Watching for file changes with StatReloader
+WARNING django.request 2026-05-13 07:13:17,068 log 7100 17752 Forbidden: /api/projects/1/
+WARNING django.request 2026-05-13 07:13:41,467 log 7100 17752 Not Found: /api/plots/2/workitems/
+WARNING django.request 2026-05-13 07:13:59,550 log 7100 29940 Forbidden: /api/jobitems/2/
+WARNING django.request 2026-05-13 07:14:16,767 log 7100 29940 Not Found: /api/jobitems/2/reports/
+INFO django.utils.autoreload 2026-05-13 07:18:05,485 autoreload 7100 22784 C:\Users\Chike\Ekene\maccaferra\core\views.py changed, reloading.
+INFO django.utils.autoreload 2026-05-13 07:18:07,173 autoreload 22228 34772 Watching for file changes with StatReloader
+WARNING django.request 2026-05-13 07:18:28,080 log 22228 9948 Forbidden: /api/jobitems/2/
+INFO django.utils.autoreload 2026-05-13 07:20:03,402 autoreload 22228 34772 C:\Users\Chike\Ekene\maccaferra\core\serializers.py changed, reloading.
+INFO django.utils.autoreload 2026-05-13 07:20:05,162 autoreload 23388 22588 Watching for file changes with StatReloader
+INFO django.utils.autoreload 2026-05-13 07:20:29,304 autoreload 23388 22588 C:\Users\Chike\Ekene\maccaferra\core\serializers.py changed, reloading.
+INFO django.utils.autoreload 2026-05-13 07:20:30,942 autoreload 5660 27372 Watching for file changes with StatReloader
+INFO django.utils.autoreload 2026-05-13 07:22:13,346 autoreload 5660 27372 C:\Users\Chike\Ekene\maccaferra\core\views.py changed, reloading.
+INFO django.utils.autoreload 2026-05-13 07:22:15,015 autoreload 33556 9588 Watching for file changes with StatReloader
+WARNING django.request 2026-05-13 07:37:45,447 log 33556 1556 Not Found: /api/jobitems/2/reports/
+WARNING django.request 2026-05-13 07:37:45,477 log 33556 1556 Not Found: /api/jobitems/2/reports/
+INFO django.utils.autoreload 2026-05-13 07:38:41,433 autoreload 33556 9588 C:\Users\Chike\Ekene\maccaferra\core\views.py changed, reloading.
+INFO django.utils.autoreload 2026-05-13 07:38:42,111 autoreload 15120 32512 Watching for file changes with StatReloader
+WARNING django.request 2026-05-13 07:38:42,424 log 15120 34440 Not Found: /api/jobitems/2/reports/
+WARNING django.request 2026-05-13 07:45:55,103 log 15120 21448 Not Found: /api/jobitems/2/reports/
+INFO django.utils.autoreload 2026-05-13 07:47:08,375 autoreload 15120 32512 C:\Users\Chike\Ekene\maccaferra\core\views.py changed, reloading.
+INFO django.utils.autoreload 2026-05-13 07:47:09,024 autoreload 35168 5932 Watching for file changes with StatReloader
+INFO django.utils.autoreload 2026-05-13 07:47:15,844 autoreload 35168 5932 C:\Users\Chike\Ekene\maccaferra\core\views.py changed, reloading.
+INFO django.utils.autoreload 2026-05-13 07:47:16,558 autoreload 22776 34300 Watching for file changes with StatReloader
+INFO django.utils.autoreload 2026-05-13 07:47:31,692 autoreload 22776 34300 C:\Users\Chike\Ekene\maccaferra\core\urls.py changed, reloading.
+INFO django.utils.autoreload 2026-05-13 07:47:32,280 autoreload 25668 21260 Watching for file changes with StatReloader
+INFO django.utils.autoreload 2026-05-14 00:11:35,477 autoreload 16804 8752 Watching for file changes with StatReloader
+WARNING django.request 2026-05-14 01:30:45,255 log 16804 6040 Not Found: /api/jobitems/
+WARNING django.request 2026-05-14 01:30:45,273 log 16804 13760 Not Found: /api/jobitems/
+WARNING django.request 2026-05-14 01:30:47,708 log 16804 6040 Not Found: /api/workitems/
+WARNING django.request 2026-05-14 01:30:47,722 log 16804 6040 Not Found: /api/workitems/
+WARNING django.request 2026-05-14 01:30:53,838 log 16804 13760 Not Found: /api/plots/
+WARNING django.request 2026-05-14 01:30:53,851 log 16804 13760 Not Found: /api/plots/
+WARNING django.request 2026-05-14 01:30:59,361 log 16804 13760 Not Found: /api/plots/
+WARNING django.request 2026-05-14 01:30:59,377 log 16804 6040 Not Found: /api/plots/
+WARNING django.request 2026-05-14 01:31:41,808 log 16804 6040 Not Found: /api/workitems/
+WARNING django.request 2026-05-14 01:31:41,823 log 16804 13760 Not Found: /api/workitems/
+WARNING django.request 2026-05-14 01:31:46,533 log 16804 13760 Not Found: /api/plots/
+WARNING django.request 2026-05-14 01:31:52,123 log 16804 13760 Not Found: /api/plots/
+WARNING django.request 2026-05-14 01:31:52,135 log 16804 13760 Not Found: /api/plots/
+WARNING django.request 2026-05-14 01:31:55,836 log 16804 13760 Not Found: /api/jobitems/
+WARNING django.request 2026-05-14 01:31:55,853 log 16804 6040 Not Found: /api/jobitems/
+WARNING django.request 2026-05-14 01:31:56,907 log 16804 6040 Not Found: /api/workitems/
+INFO django.utils.autoreload 2026-05-14 02:02:11,479 autoreload 16804 8752 C:\Users\Chike\Ekene\maccaferra\core\models.py changed, reloading.
+INFO django.utils.autoreload 2026-05-14 02:02:12,322 autoreload 4556 15516 Watching for file changes with StatReloader
+INFO django.utils.autoreload 2026-05-14 02:14:26,245 autoreload 12208 5592 Watching for file changes with StatReloader
+WARNING django.request 2026-05-14 02:14:36,870 log 12208 17520 Bad Request: /api/auth/login/
+WARNING django.request 2026-05-14 02:15:09,440 log 12208 6556 Not Found: /api/plots/
+WARNING django.request 2026-05-14 02:15:09,516 log 12208 17520 Not Found: /api/plots/
+WARNING django.request 2026-05-14 02:15:18,851 log 12208 17520 Not Found: /api/workitems/
+WARNING django.request 2026-05-14 02:15:18,893 log 12208 6556 Not Found: /api/workitems/
+WARNING django.request 2026-05-14 02:15:20,882 log 12208 6556 Not Found: /api/plots/
+WARNING django.request 2026-05-14 02:15:28,489 log 12208 6556 Not Found: /api/jobitems/
+WARNING django.request 2026-05-14 02:15:28,513 log 12208 6556 Not Found: /api/jobitems/
+INFO django.utils.autoreload 2026-05-14 20:20:12,959 autoreload 12300 11712 Watching for file changes with StatReloader
+WARNING django.request 2026-05-14 21:00:41,822 log 12300 1660 Not Found: /api/plots/
+WARNING django.request 2026-05-14 21:00:41,850 log 12300 7480 Not Found: /api/plots/
+WARNING django.request 2026-05-15 05:59:27,447 log 12300 14748 Forbidden: /api/projects/1/
+WARNING django.request 2026-05-15 05:59:27,465 log 12300 14748 Forbidden: /api/projects/1/
+WARNING django.request 2026-05-15 05:59:34,841 log 12300 14732 Forbidden: /api/projects/2/
+WARNING django.request 2026-05-15 05:59:34,857 log 12300 14732 Forbidden: /api/projects/2/
+WARNING django.request 2026-05-15 05:59:42,451 log 12300 14748 Forbidden: /api/projects/5/
+WARNING django.request 2026-05-15 05:59:42,464 log 12300 14748 Forbidden: /api/projects/5/
+WARNING django.request 2026-05-15 06:00:22,519 log 12300 14732 Forbidden: /api/projects/6/
+WARNING django.request 2026-05-15 06:00:22,533 log 12300 14732 Forbidden: /api/projects/6/
+WARNING django.request 2026-05-15 06:01:29,616 log 12300 10560 Not Found: /api/plots/
+WARNING django.request 2026-05-15 06:01:29,635 log 12300 14732 Not Found: /api/plots/
+WARNING django.request 2026-05-15 06:02:57,254 log 12300 14732 Forbidden: /api/projects/1/
+WARNING django.request 2026-05-15 06:02:57,271 log 12300 14732 Forbidden: /api/projects/1/
+WARNING django.request 2026-05-15 06:05:29,189 log 12300 5556 Forbidden: /api/projects/1/
+WARNING django.request 2026-05-15 06:05:29,202 log 12300 5556 Forbidden: /api/projects/1/
+WARNING django.request 2026-05-15 06:05:38,504 log 12300 23976 Not Found: /api/plots/
+WARNING django.request 2026-05-15 06:05:38,537 log 12300 5556 Not Found: /api/plots/
+WARNING django.request 2026-05-15 06:05:48,029 log 12300 23976 Not Found: /api/workitems/
+WARNING django.request 2026-05-15 06:05:48,043 log 12300 5556 Not Found: /api/workitems/
+WARNING django.request 2026-05-15 06:05:50,875 log 12300 23976 Not Found: /api/plots/2/
+WARNING django.request 2026-05-15 06:05:50,886 log 12300 5556 Not Found: /api/plots/2/
+WARNING django.request 2026-05-15 06:07:09,082 log 12300 2548 Not Found: /api/jobitems/2/
+WARNING django.request 2026-05-15 06:07:09,098 log 12300 3760 Not Found: /api/jobitems/2/reports/
+WARNING django.request 2026-05-15 06:07:09,099 log 12300 23976 Not Found: /api/projects/undefined/
+WARNING django.request 2026-05-15 06:07:09,118 log 12300 3304 Not Found: /api/jobitems/2/
+WARNING django.request 2026-05-15 06:07:09,133 log 12300 2548 Not Found: /api/jobitems/2/reports/
+WARNING django.request 2026-05-15 06:07:09,162 log 12300 23976 Not Found: /api/projects/undefined/
+ERROR django.request 2026-05-15 06:07:09,437 log 12300 5556 Internal Server Error: /api/projects/undefined/plots/undefined/
+Traceback (most recent call last):
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\fields\__init__.py", line 2128, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: 'undefined'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 503, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 421, in initial
+    self.check_permissions(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 338, in check_permissions
+    if not permission.has_permission(request, self):
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\Ekene\maccaferra\core\permissions.py", line 56, in has_permission
+    project = _get_project(view)
+  File "C:\Users\Chike\Ekene\maccaferra\core\permissions.py", line 34, in _get_project
+    return view.get_project()
+           ~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\Ekene\maccaferra\core\views.py", line 93, in get_project
+    self._project_cache = get_object_or_404(
+                          ~~~~~~~~~~~~~~~~~^
+        ConstructionProject, pk=self.kwargs["project_pk"]
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\shortcuts.py", line 90, in get_object_or_404
+    return queryset.get(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 625, in get
+    clone = self._chain() if self.query.combinator else self.filter(*args, **kwargs)
+                                                        ~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1542, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1560, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1570, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1676, in add_q
+    clause, _ = self._add_q(q_object, can_reuse)
+                ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1708, in _add_q
+    child_clause, needed_inner = self.build_filter(
+                                 ~~~~~~~~~~~~~~~~~^
+        child,
+        ^^^^^^
+    ...<7 lines>...
+        update_join_types=update_join_types,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1618, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1445, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 35, in __init__
+    self.rhs = self.get_prep_lookup()
+               ~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 391, in get_prep_lookup
+    return super().get_prep_lookup()
+           ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 93, in get_prep_lookup
+    return self.lhs.output_field.get_prep_value(self.rhs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\fields\__init__.py", line 2130, in get_prep_value
+    raise e.__class__(
+        "Field '%s' expected a number but got %r." % (self.name, value),
+    ) from e
+ValueError: Field 'id' expected a number but got 'undefined'.
+ERROR django.request 2026-05-15 06:07:09,449 log 12300 19832 Internal Server Error: /api/projects/undefined/plots/undefined/workitems/undefined/
+Traceback (most recent call last):
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\fields\__init__.py", line 2128, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: 'undefined'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 503, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 421, in initial
+    self.check_permissions(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 338, in check_permissions
+    if not permission.has_permission(request, self):
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\Ekene\maccaferra\core\permissions.py", line 123, in has_permission
+    plot = _get_plot(view)
+  File "C:\Users\Chike\Ekene\maccaferra\core\permissions.py", line 41, in _get_plot
+    return view.get_plot()
+           ~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\Ekene\maccaferra\core\views.py", line 115, in get_plot
+    self._plot_cache = get_object_or_404(
+                       ~~~~~~~~~~~~~~~~~^
+        ConstructionPlot,
+        ^^^^^^^^^^^^^^^^^
+        pk=self.kwargs["plot_pk"],
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+        construction_project__pk=self.kwargs["project_pk"],
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\shortcuts.py", line 90, in get_object_or_404
+    return queryset.get(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 625, in get
+    clone = self._chain() if self.query.combinator else self.filter(*args, **kwargs)
+                                                        ~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1542, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1560, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1570, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1676, in add_q
+    clause, _ = self._add_q(q_object, can_reuse)
+                ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1708, in _add_q
+    child_clause, needed_inner = self.build_filter(
+                                 ~~~~~~~~~~~~~~~~~^
+        child,
+        ^^^^^^
+    ...<7 lines>...
+        update_join_types=update_join_types,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1618, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1445, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 35, in __init__
+    self.rhs = self.get_prep_lookup()
+               ~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 391, in get_prep_lookup
+    return super().get_prep_lookup()
+           ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 93, in get_prep_lookup
+    return self.lhs.output_field.get_prep_value(self.rhs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\fields\__init__.py", line 2130, in get_prep_value
+    raise e.__class__(
+        "Field '%s' expected a number but got %r." % (self.name, value),
+    ) from e
+ValueError: Field 'id' expected a number but got 'undefined'.
+ERROR django.request 2026-05-15 06:07:09,575 log 12300 23976 Internal Server Error: /api/projects/undefined/plots/undefined/
+Traceback (most recent call last):
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\fields\__init__.py", line 2128, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: 'undefined'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 503, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 421, in initial
+    self.check_permissions(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 338, in check_permissions
+    if not permission.has_permission(request, self):
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\Ekene\maccaferra\core\permissions.py", line 56, in has_permission
+    project = _get_project(view)
+  File "C:\Users\Chike\Ekene\maccaferra\core\permissions.py", line 34, in _get_project
+    return view.get_project()
+           ~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\Ekene\maccaferra\core\views.py", line 93, in get_project
+    self._project_cache = get_object_or_404(
+                          ~~~~~~~~~~~~~~~~~^
+        ConstructionProject, pk=self.kwargs["project_pk"]
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\shortcuts.py", line 90, in get_object_or_404
+    return queryset.get(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 625, in get
+    clone = self._chain() if self.query.combinator else self.filter(*args, **kwargs)
+                                                        ~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1542, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1560, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1570, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1676, in add_q
+    clause, _ = self._add_q(q_object, can_reuse)
+                ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1708, in _add_q
+    child_clause, needed_inner = self.build_filter(
+                                 ~~~~~~~~~~~~~~~~~^
+        child,
+        ^^^^^^
+    ...<7 lines>...
+        update_join_types=update_join_types,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1618, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1445, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 35, in __init__
+    self.rhs = self.get_prep_lookup()
+               ~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 391, in get_prep_lookup
+    return super().get_prep_lookup()
+           ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 93, in get_prep_lookup
+    return self.lhs.output_field.get_prep_value(self.rhs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\fields\__init__.py", line 2130, in get_prep_value
+    raise e.__class__(
+        "Field '%s' expected a number but got %r." % (self.name, value),
+    ) from e
+ValueError: Field 'id' expected a number but got 'undefined'.
+ERROR django.request 2026-05-15 06:07:09,618 log 12300 5556 Internal Server Error: /api/projects/undefined/plots/undefined/workitems/undefined/
+Traceback (most recent call last):
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\fields\__init__.py", line 2128, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: 'undefined'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 503, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 421, in initial
+    self.check_permissions(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 338, in check_permissions
+    if not permission.has_permission(request, self):
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\Ekene\maccaferra\core\permissions.py", line 123, in has_permission
+    plot = _get_plot(view)
+  File "C:\Users\Chike\Ekene\maccaferra\core\permissions.py", line 41, in _get_plot
+    return view.get_plot()
+           ~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\Ekene\maccaferra\core\views.py", line 115, in get_plot
+    self._plot_cache = get_object_or_404(
+                       ~~~~~~~~~~~~~~~~~^
+        ConstructionPlot,
+        ^^^^^^^^^^^^^^^^^
+        pk=self.kwargs["plot_pk"],
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+        construction_project__pk=self.kwargs["project_pk"],
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\shortcuts.py", line 90, in get_object_or_404
+    return queryset.get(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 625, in get
+    clone = self._chain() if self.query.combinator else self.filter(*args, **kwargs)
+                                                        ~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1542, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1560, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1570, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1676, in add_q
+    clause, _ = self._add_q(q_object, can_reuse)
+                ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1708, in _add_q
+    child_clause, needed_inner = self.build_filter(
+                                 ~~~~~~~~~~~~~~~~~^
+        child,
+        ^^^^^^
+    ...<7 lines>...
+        update_join_types=update_join_types,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1618, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1445, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 35, in __init__
+    self.rhs = self.get_prep_lookup()
+               ~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 391, in get_prep_lookup
+    return super().get_prep_lookup()
+           ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 93, in get_prep_lookup
+    return self.lhs.output_field.get_prep_value(self.rhs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\fields\__init__.py", line 2130, in get_prep_value
+    raise e.__class__(
+        "Field '%s' expected a number but got %r." % (self.name, value),
+    ) from e
+ValueError: Field 'id' expected a number but got 'undefined'.
+WARNING django.request 2026-05-15 06:07:11,912 log 12300 23976 Not Found: /api/jobitems/
+WARNING django.request 2026-05-15 06:07:11,930 log 12300 5556 Not Found: /api/jobitems/
+WARNING django.request 2026-05-15 06:07:19,543 log 12300 5556 Not Found: /api/plots/
+WARNING django.request 2026-05-15 06:07:19,558 log 12300 5556 Not Found: /api/plots/
+WARNING django.request 2026-05-15 06:07:23,365 log 12300 5556 Not Found: /api/workitems/
+WARNING django.request 2026-05-15 06:07:23,377 log 12300 23976 Not Found: /api/workitems/
+WARNING django.request 2026-05-15 06:07:26,996 log 12300 23976 Not Found: /api/jobitems/
+WARNING django.request 2026-05-15 06:07:27,011 log 12300 23976 Not Found: /api/jobitems/
+WARNING django.request 2026-05-15 06:13:43,320 log 12300 16568 Not Found: /api/plots/
+WARNING django.request 2026-05-15 06:13:43,334 log 12300 16568 Not Found: /api/plots/
+WARNING django.request 2026-05-15 06:13:46,498 log 12300 16568 Not Found: /api/workitems/
+WARNING django.request 2026-05-15 06:13:46,514 log 12300 14008 Not Found: /api/workitems/
+WARNING django.request 2026-05-15 06:13:49,892 log 12300 14008 Not Found: /api/jobitems/
+WARNING django.request 2026-05-15 06:13:49,905 log 12300 16568 Not Found: /api/jobitems/
+WARNING django.request 2026-05-15 06:14:42,393 log 12300 16568 Not Found: /api/plots/
+WARNING django.request 2026-05-15 06:14:42,407 log 12300 14008 Not Found: /api/plots/
+WARNING django.request 2026-05-15 06:14:52,244 log 12300 14008 Not Found: /api/plots/
+WARNING django.request 2026-05-15 06:14:52,259 log 12300 16568 Not Found: /api/plots/
+WARNING django.request 2026-05-15 06:14:53,425 log 12300 16568 Not Found: /api/workitems/
+WARNING django.request 2026-05-15 06:14:53,441 log 12300 14008 Not Found: /api/workitems/
+WARNING django.request 2026-05-15 06:15:17,995 log 12300 14008 Forbidden: /api/projects/1/
+WARNING django.request 2026-05-15 06:15:18,009 log 12300 14008 Forbidden: /api/projects/1/
+WARNING django.request 2026-05-15 06:15:25,568 log 12300 16568 Forbidden: /api/projects/6/
+WARNING django.request 2026-05-15 06:15:25,582 log 12300 14008 Forbidden: /api/projects/6/
+WARNING django.request 2026-05-15 06:16:02,222 log 12300 16568 Not Found: /api/plots/
+WARNING django.request 2026-05-15 06:16:02,236 log 12300 14008 Not Found: /api/plots/
+WARNING django.request 2026-05-15 06:16:41,345 log 12300 14008 Bad Request: /api/projects/1/plots/
+WARNING django.request 2026-05-15 06:17:06,966 log 12300 14008 Not Found: /api/workitems/
+WARNING django.request 2026-05-15 06:17:06,982 log 12300 16568 Not Found: /api/workitems/
+WARNING django.request 2026-05-15 06:17:08,453 log 12300 16568 Not Found: /api/plots/
+WARNING django.request 2026-05-15 06:17:08,471 log 12300 16568 Not Found: /api/plots/
+INFO django.utils.autoreload 2026-05-15 06:17:14,691 autoreload 12300 11712 C:\Users\Chike\Ekene\maccaferra\core\serializers.py changed, reloading.
+INFO django.utils.autoreload 2026-05-15 06:17:16,533 autoreload 22872 8852 Watching for file changes with StatReloader
+WARNING django.request 2026-05-15 06:17:18,873 log 22872 11168 Not Found: /api/jobitems/
+WARNING django.request 2026-05-15 06:17:18,888 log 22872 11168 Not Found: /api/jobitems/
+WARNING django.request 2026-05-15 06:17:21,038 log 22872 11168 Not Found: /api/workitems/
+WARNING django.request 2026-05-15 06:17:21,056 log 22872 11168 Not Found: /api/workitems/
+WARNING django.request 2026-05-15 06:17:24,571 log 22872 14748 Not Found: /api/plots/
+WARNING django.request 2026-05-15 06:17:24,586 log 22872 11168 Not Found: /api/plots/
+WARNING django.request 2026-05-15 06:20:55,781 log 22872 19748 Not Found: /api/plots/
+WARNING django.request 2026-05-15 06:20:55,802 log 22872 19748 Not Found: /api/plots/
+WARNING django.request 2026-05-15 06:21:30,821 log 22872 21484 Forbidden: /api/projects/1/
+WARNING django.request 2026-05-15 06:21:30,847 log 22872 15992 Forbidden: /api/projects/1/
+WARNING django.request 2026-05-15 06:21:34,191 log 22872 19748 Not Found: /api/plots/
+WARNING django.request 2026-05-15 06:21:34,204 log 22872 15992 Not Found: /api/plots/
+WARNING django.request 2026-05-15 06:21:39,828 log 22872 15992 Not Found: /api/plots/
+WARNING django.request 2026-05-15 06:21:39,848 log 22872 15992 Not Found: /api/plots/
+WARNING django.request 2026-05-15 06:21:41,063 log 22872 15992 Not Found: /api/workitems/
+WARNING django.request 2026-05-15 06:21:41,080 log 22872 19748 Not Found: /api/workitems/
+WARNING django.request 2026-05-15 06:21:44,585 log 22872 19748 Not Found: /api/plots/
+WARNING django.request 2026-05-15 06:21:44,596 log 22872 15992 Not Found: /api/plots/
+WARNING django.request 2026-05-15 06:22:53,247 log 22872 19748 Forbidden: /api/projects/6/
+WARNING django.request 2026-05-15 06:22:53,264 log 22872 15992 Forbidden: /api/projects/6/
+WARNING django.request 2026-05-15 06:22:56,160 log 22872 19748 Not Found: /api/plots/
+WARNING django.request 2026-05-15 06:22:56,176 log 22872 15992 Not Found: /api/plots/
+WARNING django.request 2026-05-15 06:23:04,615 log 22872 15992 Forbidden: /api/projects/6/
+WARNING django.request 2026-05-15 06:23:04,647 log 22872 15992 Forbidden: /api/projects/6/
+WARNING django.request 2026-05-15 06:23:09,981 log 22872 19748 Not Found: /api/plots/
+WARNING django.request 2026-05-15 06:23:09,999 log 22872 19748 Not Found: /api/plots/
+WARNING django.request 2026-05-15 06:23:14,922 log 22872 19748 Forbidden: /api/projects/6/
+WARNING django.request 2026-05-15 06:23:14,941 log 22872 19748 Forbidden: /api/projects/6/
+WARNING django.request 2026-05-15 06:23:46,588 log 22872 15992 Forbidden: /api/projects/1/
+WARNING django.request 2026-05-15 06:23:46,605 log 22872 15992 Forbidden: /api/projects/1/
+WARNING django.request 2026-05-15 06:25:54,380 log 22872 6408 Unauthorized: /api/projects/
+WARNING django.request 2026-05-15 06:26:02,674 log 22872 19748 Forbidden: /api/projects/1/
+WARNING django.request 2026-05-15 06:26:02,690 log 22872 19748 Forbidden: /api/projects/1/
+WARNING django.request 2026-05-15 06:26:26,010 log 22872 15428 Not Found: /api/auth/token/
+WARNING django.request 2026-05-15 06:26:26,290 log 22872 15428 Unauthorized: /api/projects/
+WARNING django.request 2026-05-15 06:30:29,841 log 22872 9540 Not Found: /api/auth/token/login/
+WARNING django.request 2026-05-15 06:31:51,581 log 22872 4916 Not Found: /api/auth/jwt/create/
+WARNING django.request 2026-05-15 06:32:30,769 log 22872 13404 Not Found: /api/auth/jwt/create/
+WARNING django.request 2026-05-15 06:32:50,010 log 22872 5680 Not Found: /api/auth/jwt/create/
+WARNING django.request 2026-05-15 06:33:02,362 log 22872 5072 Forbidden: /api/projects/1/
+WARNING django.request 2026-05-15 06:33:02,380 log 22872 5072 Forbidden: /api/projects/1/
+WARNING django.request 2026-05-15 06:33:05,513 log 22872 15748 Forbidden: /api/projects/1/
+WARNING django.request 2026-05-15 06:33:05,530 log 22872 15748 Forbidden: /api/projects/1/
+WARNING django.request 2026-05-15 06:33:11,804 log 22872 12564 Not Found: /api/auth/token/login/
+INFO django.utils.autoreload 2026-05-15 06:34:00,740 autoreload 22872 8852 C:\Users\Chike\Ekene\maccaferra\core\permissions.py changed, reloading.
+INFO django.utils.autoreload 2026-05-15 06:34:01,505 autoreload 10308 23816 Watching for file changes with StatReloader
+INFO django.utils.autoreload 2026-05-15 06:34:28,746 autoreload 10308 23816 C:\Users\Chike\Ekene\maccaferra\core\permissions.py changed, reloading.
+INFO django.utils.autoreload 2026-05-15 06:34:29,541 autoreload 10288 13704 Watching for file changes with StatReloader
+WARNING django.request 2026-05-15 06:35:11,416 log 10288 24528 Not Found: /api/plots/
+WARNING django.request 2026-05-15 06:35:11,432 log 10288 24528 Not Found: /api/plots/
+WARNING django.request 2026-05-15 06:35:25,324 log 10288 24528 Not Found: /api/plots/
+WARNING django.request 2026-05-15 06:35:25,337 log 10288 17888 Not Found: /api/plots/
+WARNING django.request 2026-05-15 06:35:35,251 log 10288 17888 Not Found: /api/plots/
+WARNING django.request 2026-05-15 06:35:35,265 log 10288 24528 Not Found: /api/plots/
+WARNING django.request 2026-05-15 06:35:37,363 log 10288 24528 Not Found: /api/workitems/
+WARNING django.request 2026-05-15 06:35:37,379 log 10288 17888 Not Found: /api/workitems/
+WARNING django.request 2026-05-15 06:35:46,312 log 10288 3864 Not Found: /api/auth/jwt/create/
+WARNING django.request 2026-05-15 06:38:13,620 log 10288 17888 Not Found: /api/plots/
+WARNING django.request 2026-05-15 06:38:13,635 log 10288 17888 Not Found: /api/plots/
+WARNING django.request 2026-05-15 06:38:19,788 log 10288 17888 Not Found: /api/plots/2/
+WARNING django.request 2026-05-15 06:38:19,803 log 10288 17888 Not Found: /api/plots/2/
+WARNING django.request 2026-05-15 06:38:22,961 log 10288 17888 Not Found: /api/plots/2/
+WARNING django.request 2026-05-15 06:38:22,978 log 10288 24528 Not Found: /api/plots/2/
+WARNING django.request 2026-05-15 06:38:29,314 log 10288 20552 Not Found: /api/plots/3/
+WARNING django.request 2026-05-15 06:38:29,332 log 10288 17888 Not Found: /api/plots/3/
+WARNING django.request 2026-05-15 06:39:09,420 log 10288 17888 Not Found: /api/plots/
+WARNING django.request 2026-05-15 06:39:09,432 log 10288 20552 Not Found: /api/plots/
+WARNING django.request 2026-05-15 06:39:30,717 log 10288 20552 Not Found: /api/plots/2/
+WARNING django.request 2026-05-15 06:39:30,729 log 10288 17888 Not Found: /api/plots/2/
+WARNING django.request 2026-05-15 06:39:33,593 log 10288 17888 Not Found: /api/plots/
+WARNING django.request 2026-05-15 06:39:33,611 log 10288 20552 Not Found: /api/plots/
+WARNING django.request 2026-05-15 06:39:40,326 log 10288 20552 Not Found: /api/workitems/
+WARNING django.request 2026-05-15 06:39:40,342 log 10288 17888 Not Found: /api/workitems/
+WARNING django.request 2026-05-15 06:39:41,612 log 10288 17888 Not Found: /api/plots/
+WARNING django.request 2026-05-15 06:39:41,627 log 10288 24528 Not Found: /api/plots/
+WARNING django.request 2026-05-15 06:39:49,704 log 10288 24528 Not Found: /api/jobitems/
+WARNING django.request 2026-05-15 06:39:49,720 log 10288 20552 Not Found: /api/jobitems/
+WARNING django.request 2026-05-15 06:39:50,884 log 10288 20552 Not Found: /api/workitems/
+WARNING django.request 2026-05-15 06:39:50,897 log 10288 24528 Not Found: /api/workitems/
+WARNING django.request 2026-05-15 06:39:53,490 log 10288 24528 Not Found: /api/jobitems/
+WARNING django.request 2026-05-15 06:39:53,509 log 10288 24528 Not Found: /api/jobitems/
+WARNING django.request 2026-05-15 06:39:54,927 log 10288 24528 Not Found: /api/workitems/
+WARNING django.request 2026-05-15 06:39:54,943 log 10288 24528 Not Found: /api/workitems/
+INFO django.utils.autoreload 2026-05-15 06:40:03,194 autoreload 10288 13704 C:\Users\Chike\Ekene\maccaferra\core\views.py changed, reloading.
+INFO django.utils.autoreload 2026-05-15 06:40:04,045 autoreload 22868 22660 Watching for file changes with StatReloader
+WARNING django.request 2026-05-15 06:40:08,427 log 22868 24084 Not Found: /api/plots/2/
+WARNING django.request 2026-05-15 06:40:08,442 log 22868 17972 Not Found: /api/plots/2/
+INFO django.utils.autoreload 2026-05-15 06:40:09,193 autoreload 22868 22660 C:\Users\Chike\Ekene\maccaferra\core\urls.py changed, reloading.
+INFO django.utils.autoreload 2026-05-15 06:40:09,990 autoreload 17648 24552 Watching for file changes with StatReloader
+WARNING django.request 2026-05-15 06:44:14,539 log 17648 22816 Not Found: /api/projects/undefined/
+WARNING django.request 2026-05-15 06:44:14,562 log 17648 22816 Not Found: /api/projects/undefined/
+WARNING django.request 2026-05-15 06:44:14,583 log 17648 17928 Not Found: /api/projects/undefined/
+ERROR django.request 2026-05-15 06:44:14,859 log 17648 21680 Internal Server Error: /api/projects/undefined/plots/2/
+Traceback (most recent call last):
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\fields\__init__.py", line 2128, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: 'undefined'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 503, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 421, in initial
+    self.check_permissions(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 338, in check_permissions
+    if not permission.has_permission(request, self):
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\Ekene\maccaferra\core\permissions.py", line 57, in has_permission
+    project = _get_project(view)
+  File "C:\Users\Chike\Ekene\maccaferra\core\permissions.py", line 35, in _get_project
+    return view.get_project()
+           ~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\Ekene\maccaferra\core\views.py", line 96, in get_project
+    self._project_cache = get_object_or_404(
+                          ~~~~~~~~~~~~~~~~~^
+        ConstructionProject, pk=project_pk
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\shortcuts.py", line 90, in get_object_or_404
+    return queryset.get(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 625, in get
+    clone = self._chain() if self.query.combinator else self.filter(*args, **kwargs)
+                                                        ~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1542, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1560, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1570, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1676, in add_q
+    clause, _ = self._add_q(q_object, can_reuse)
+                ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1708, in _add_q
+    child_clause, needed_inner = self.build_filter(
+                                 ~~~~~~~~~~~~~~~~~^
+        child,
+        ^^^^^^
+    ...<7 lines>...
+        update_join_types=update_join_types,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1618, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1445, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 35, in __init__
+    self.rhs = self.get_prep_lookup()
+               ~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 391, in get_prep_lookup
+    return super().get_prep_lookup()
+           ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 93, in get_prep_lookup
+    return self.lhs.output_field.get_prep_value(self.rhs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\fields\__init__.py", line 2130, in get_prep_value
+    raise e.__class__(
+        "Field '%s' expected a number but got %r." % (self.name, value),
+    ) from e
+ValueError: Field 'id' expected a number but got 'undefined'.
+ERROR django.request 2026-05-15 06:44:14,870 log 17648 23624 Internal Server Error: /api/projects/undefined/plots/2/workitems/1/jobitems/
+Traceback (most recent call last):
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\fields\__init__.py", line 2128, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: 'undefined'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 503, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 421, in initial
+    self.check_permissions(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 338, in check_permissions
+    if not permission.has_permission(request, self):
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\Ekene\maccaferra\core\permissions.py", line 133, in has_permission
+    plot = _get_plot(view)
+  File "C:\Users\Chike\Ekene\maccaferra\core\permissions.py", line 42, in _get_plot
+    return view.get_plot()
+           ~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\Ekene\maccaferra\core\views.py", line 131, in get_plot
+    self._plot_cache = get_object_or_404(ConstructionPlot, **filter_kwargs)
+                       ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\shortcuts.py", line 90, in get_object_or_404
+    return queryset.get(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 625, in get
+    clone = self._chain() if self.query.combinator else self.filter(*args, **kwargs)
+                                                        ~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1542, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1560, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1570, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1676, in add_q
+    clause, _ = self._add_q(q_object, can_reuse)
+                ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1708, in _add_q
+    child_clause, needed_inner = self.build_filter(
+                                 ~~~~~~~~~~~~~~~~~^
+        child,
+        ^^^^^^
+    ...<7 lines>...
+        update_join_types=update_join_types,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1618, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1445, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 35, in __init__
+    self.rhs = self.get_prep_lookup()
+               ~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 391, in get_prep_lookup
+    return super().get_prep_lookup()
+           ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 93, in get_prep_lookup
+    return self.lhs.output_field.get_prep_value(self.rhs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\fields\__init__.py", line 2130, in get_prep_value
+    raise e.__class__(
+        "Field '%s' expected a number but got %r." % (self.name, value),
+    ) from e
+ValueError: Field 'id' expected a number but got 'undefined'.
+ERROR django.request 2026-05-15 06:44:15,089 log 17648 22816 Internal Server Error: /api/projects/undefined/plots/2/workitems/1/jobitems/
+Traceback (most recent call last):
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\fields\__init__.py", line 2128, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: 'undefined'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 503, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 421, in initial
+    self.check_permissions(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 338, in check_permissions
+    if not permission.has_permission(request, self):
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\Ekene\maccaferra\core\permissions.py", line 133, in has_permission
+    plot = _get_plot(view)
+  File "C:\Users\Chike\Ekene\maccaferra\core\permissions.py", line 42, in _get_plot
+    return view.get_plot()
+           ~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\Ekene\maccaferra\core\views.py", line 131, in get_plot
+    self._plot_cache = get_object_or_404(ConstructionPlot, **filter_kwargs)
+                       ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\shortcuts.py", line 90, in get_object_or_404
+    return queryset.get(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 625, in get
+    clone = self._chain() if self.query.combinator else self.filter(*args, **kwargs)
+                                                        ~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1542, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1560, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1570, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1676, in add_q
+    clause, _ = self._add_q(q_object, can_reuse)
+                ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1708, in _add_q
+    child_clause, needed_inner = self.build_filter(
+                                 ~~~~~~~~~~~~~~~~~^
+        child,
+        ^^^^^^
+    ...<7 lines>...
+        update_join_types=update_join_types,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1618, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1445, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 35, in __init__
+    self.rhs = self.get_prep_lookup()
+               ~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 391, in get_prep_lookup
+    return super().get_prep_lookup()
+           ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 93, in get_prep_lookup
+    return self.lhs.output_field.get_prep_value(self.rhs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\fields\__init__.py", line 2130, in get_prep_value
+    raise e.__class__(
+        "Field '%s' expected a number but got %r." % (self.name, value),
+    ) from e
+ValueError: Field 'id' expected a number but got 'undefined'.
+ERROR django.request 2026-05-15 06:44:15,127 log 17648 17928 Internal Server Error: /api/projects/undefined/plots/2/
+Traceback (most recent call last):
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\fields\__init__.py", line 2128, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: 'undefined'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 503, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 421, in initial
+    self.check_permissions(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 338, in check_permissions
+    if not permission.has_permission(request, self):
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\Ekene\maccaferra\core\permissions.py", line 57, in has_permission
+    project = _get_project(view)
+  File "C:\Users\Chike\Ekene\maccaferra\core\permissions.py", line 35, in _get_project
+    return view.get_project()
+           ~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\Ekene\maccaferra\core\views.py", line 96, in get_project
+    self._project_cache = get_object_or_404(
+                          ~~~~~~~~~~~~~~~~~^
+        ConstructionProject, pk=project_pk
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\shortcuts.py", line 90, in get_object_or_404
+    return queryset.get(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 625, in get
+    clone = self._chain() if self.query.combinator else self.filter(*args, **kwargs)
+                                                        ~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1542, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1560, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1570, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1676, in add_q
+    clause, _ = self._add_q(q_object, can_reuse)
+                ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1708, in _add_q
+    child_clause, needed_inner = self.build_filter(
+                                 ~~~~~~~~~~~~~~~~~^
+        child,
+        ^^^^^^
+    ...<7 lines>...
+        update_join_types=update_join_types,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1618, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1445, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 35, in __init__
+    self.rhs = self.get_prep_lookup()
+               ~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 391, in get_prep_lookup
+    return super().get_prep_lookup()
+           ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 93, in get_prep_lookup
+    return self.lhs.output_field.get_prep_value(self.rhs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\fields\__init__.py", line 2130, in get_prep_value
+    raise e.__class__(
+        "Field '%s' expected a number but got %r." % (self.name, value),
+    ) from e
+ValueError: Field 'id' expected a number but got 'undefined'.
+ERROR django.request 2026-05-15 06:44:15,230 log 17648 23624 Internal Server Error: /api/projects/undefined/plots/2/workitems/1/jobitems/
+Traceback (most recent call last):
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\fields\__init__.py", line 2128, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: 'undefined'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 503, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 421, in initial
+    self.check_permissions(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 338, in check_permissions
+    if not permission.has_permission(request, self):
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\Ekene\maccaferra\core\permissions.py", line 133, in has_permission
+    plot = _get_plot(view)
+  File "C:\Users\Chike\Ekene\maccaferra\core\permissions.py", line 42, in _get_plot
+    return view.get_plot()
+           ~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\Ekene\maccaferra\core\views.py", line 131, in get_plot
+    self._plot_cache = get_object_or_404(ConstructionPlot, **filter_kwargs)
+                       ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\shortcuts.py", line 90, in get_object_or_404
+    return queryset.get(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 625, in get
+    clone = self._chain() if self.query.combinator else self.filter(*args, **kwargs)
+                                                        ~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1542, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1560, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1570, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1676, in add_q
+    clause, _ = self._add_q(q_object, can_reuse)
+                ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1708, in _add_q
+    child_clause, needed_inner = self.build_filter(
+                                 ~~~~~~~~~~~~~~~~~^
+        child,
+        ^^^^^^
+    ...<7 lines>...
+        update_join_types=update_join_types,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1618, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1445, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 35, in __init__
+    self.rhs = self.get_prep_lookup()
+               ~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 391, in get_prep_lookup
+    return super().get_prep_lookup()
+           ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 93, in get_prep_lookup
+    return self.lhs.output_field.get_prep_value(self.rhs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\fields\__init__.py", line 2130, in get_prep_value
+    raise e.__class__(
+        "Field '%s' expected a number but got %r." % (self.name, value),
+    ) from e
+ValueError: Field 'id' expected a number but got 'undefined'.
+ERROR django.request 2026-05-15 06:44:15,283 log 17648 22816 Internal Server Error: /api/projects/undefined/plots/2/
+Traceback (most recent call last):
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\fields\__init__.py", line 2128, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: 'undefined'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 503, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 421, in initial
+    self.check_permissions(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 338, in check_permissions
+    if not permission.has_permission(request, self):
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\Ekene\maccaferra\core\permissions.py", line 57, in has_permission
+    project = _get_project(view)
+  File "C:\Users\Chike\Ekene\maccaferra\core\permissions.py", line 35, in _get_project
+    return view.get_project()
+           ~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\Ekene\maccaferra\core\views.py", line 96, in get_project
+    self._project_cache = get_object_or_404(
+                          ~~~~~~~~~~~~~~~~~^
+        ConstructionProject, pk=project_pk
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\shortcuts.py", line 90, in get_object_or_404
+    return queryset.get(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 625, in get
+    clone = self._chain() if self.query.combinator else self.filter(*args, **kwargs)
+                                                        ~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1542, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1560, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1570, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1676, in add_q
+    clause, _ = self._add_q(q_object, can_reuse)
+                ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1708, in _add_q
+    child_clause, needed_inner = self.build_filter(
+                                 ~~~~~~~~~~~~~~~~~^
+        child,
+        ^^^^^^
+    ...<7 lines>...
+        update_join_types=update_join_types,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1618, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1445, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 35, in __init__
+    self.rhs = self.get_prep_lookup()
+               ~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 391, in get_prep_lookup
+    return super().get_prep_lookup()
+           ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 93, in get_prep_lookup
+    return self.lhs.output_field.get_prep_value(self.rhs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\fields\__init__.py", line 2130, in get_prep_value
+    raise e.__class__(
+        "Field '%s' expected a number but got %r." % (self.name, value),
+    ) from e
+ValueError: Field 'id' expected a number but got 'undefined'.
+ERROR django.request 2026-05-15 06:44:53,443 log 17648 22816 Internal Server Error: /api/projects/undefined/plots/2/workitems/1/jobitems/
+Traceback (most recent call last):
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\fields\__init__.py", line 2128, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: 'undefined'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 503, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 421, in initial
+    self.check_permissions(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 338, in check_permissions
+    if not permission.has_permission(request, self):
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\Ekene\maccaferra\core\permissions.py", line 157, in has_permission
+    plot = _get_plot(view)
+  File "C:\Users\Chike\Ekene\maccaferra\core\permissions.py", line 42, in _get_plot
+    return view.get_plot()
+           ~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\Ekene\maccaferra\core\views.py", line 131, in get_plot
+    self._plot_cache = get_object_or_404(ConstructionPlot, **filter_kwargs)
+                       ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\shortcuts.py", line 90, in get_object_or_404
+    return queryset.get(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 625, in get
+    clone = self._chain() if self.query.combinator else self.filter(*args, **kwargs)
+                                                        ~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1542, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1560, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1570, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1676, in add_q
+    clause, _ = self._add_q(q_object, can_reuse)
+                ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1708, in _add_q
+    child_clause, needed_inner = self.build_filter(
+                                 ~~~~~~~~~~~~~~~~~^
+        child,
+        ^^^^^^
+    ...<7 lines>...
+        update_join_types=update_join_types,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1618, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1445, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 35, in __init__
+    self.rhs = self.get_prep_lookup()
+               ~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 391, in get_prep_lookup
+    return super().get_prep_lookup()
+           ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 93, in get_prep_lookup
+    return self.lhs.output_field.get_prep_value(self.rhs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\fields\__init__.py", line 2130, in get_prep_value
+    raise e.__class__(
+        "Field '%s' expected a number but got %r." % (self.name, value),
+    ) from e
+ValueError: Field 'id' expected a number but got 'undefined'.
+ERROR django.request 2026-05-15 06:46:16,124 log 17648 22816 Internal Server Error: /api/projects/undefined/plots/2/workitems/1/jobitems/
+Traceback (most recent call last):
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\fields\__init__.py", line 2128, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: 'undefined'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 503, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 421, in initial
+    self.check_permissions(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 338, in check_permissions
+    if not permission.has_permission(request, self):
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\Ekene\maccaferra\core\permissions.py", line 157, in has_permission
+    plot = _get_plot(view)
+  File "C:\Users\Chike\Ekene\maccaferra\core\permissions.py", line 42, in _get_plot
+    return view.get_plot()
+           ~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\Ekene\maccaferra\core\views.py", line 131, in get_plot
+    self._plot_cache = get_object_or_404(ConstructionPlot, **filter_kwargs)
+                       ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\shortcuts.py", line 90, in get_object_or_404
+    return queryset.get(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 625, in get
+    clone = self._chain() if self.query.combinator else self.filter(*args, **kwargs)
+                                                        ~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1542, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1560, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1570, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1676, in add_q
+    clause, _ = self._add_q(q_object, can_reuse)
+                ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1708, in _add_q
+    child_clause, needed_inner = self.build_filter(
+                                 ~~~~~~~~~~~~~~~~~^
+        child,
+        ^^^^^^
+    ...<7 lines>...
+        update_join_types=update_join_types,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1618, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1445, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 35, in __init__
+    self.rhs = self.get_prep_lookup()
+               ~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 391, in get_prep_lookup
+    return super().get_prep_lookup()
+           ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 93, in get_prep_lookup
+    return self.lhs.output_field.get_prep_value(self.rhs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\fields\__init__.py", line 2130, in get_prep_value
+    raise e.__class__(
+        "Field '%s' expected a number but got %r." % (self.name, value),
+    ) from e
+ValueError: Field 'id' expected a number but got 'undefined'.
+WARNING django.request 2026-05-15 06:46:49,264 log 17648 23624 Not Found: /api/projects/undefined/
+WARNING django.request 2026-05-15 06:46:49,304 log 17648 23624 Not Found: /api/projects/undefined/
+WARNING django.request 2026-05-15 06:46:49,325 log 17648 22816 Not Found: /api/projects/undefined/
+ERROR django.request 2026-05-15 06:46:49,422 log 17648 21680 Internal Server Error: /api/projects/undefined/plots/2/workitems/1/jobitems/
+Traceback (most recent call last):
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\fields\__init__.py", line 2128, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: 'undefined'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 503, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 421, in initial
+    self.check_permissions(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 338, in check_permissions
+    if not permission.has_permission(request, self):
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\Ekene\maccaferra\core\permissions.py", line 133, in has_permission
+    plot = _get_plot(view)
+  File "C:\Users\Chike\Ekene\maccaferra\core\permissions.py", line 42, in _get_plot
+    return view.get_plot()
+           ~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\Ekene\maccaferra\core\views.py", line 131, in get_plot
+    self._plot_cache = get_object_or_404(ConstructionPlot, **filter_kwargs)
+                       ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\shortcuts.py", line 90, in get_object_or_404
+    return queryset.get(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 625, in get
+    clone = self._chain() if self.query.combinator else self.filter(*args, **kwargs)
+                                                        ~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1542, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1560, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1570, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1676, in add_q
+    clause, _ = self._add_q(q_object, can_reuse)
+                ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1708, in _add_q
+    child_clause, needed_inner = self.build_filter(
+                                 ~~~~~~~~~~~~~~~~~^
+        child,
+        ^^^^^^
+    ...<7 lines>...
+        update_join_types=update_join_types,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1618, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1445, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 35, in __init__
+    self.rhs = self.get_prep_lookup()
+               ~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 391, in get_prep_lookup
+    return super().get_prep_lookup()
+           ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 93, in get_prep_lookup
+    return self.lhs.output_field.get_prep_value(self.rhs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\fields\__init__.py", line 2130, in get_prep_value
+    raise e.__class__(
+        "Field '%s' expected a number but got %r." % (self.name, value),
+    ) from e
+ValueError: Field 'id' expected a number but got 'undefined'.
+ERROR django.request 2026-05-15 06:46:49,488 log 17648 17928 Internal Server Error: /api/projects/undefined/plots/2/
+Traceback (most recent call last):
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\fields\__init__.py", line 2128, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: 'undefined'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 503, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 421, in initial
+    self.check_permissions(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 338, in check_permissions
+    if not permission.has_permission(request, self):
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\Ekene\maccaferra\core\permissions.py", line 57, in has_permission
+    project = _get_project(view)
+  File "C:\Users\Chike\Ekene\maccaferra\core\permissions.py", line 35, in _get_project
+    return view.get_project()
+           ~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\Ekene\maccaferra\core\views.py", line 96, in get_project
+    self._project_cache = get_object_or_404(
+                          ~~~~~~~~~~~~~~~~~^
+        ConstructionProject, pk=project_pk
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\shortcuts.py", line 90, in get_object_or_404
+    return queryset.get(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 625, in get
+    clone = self._chain() if self.query.combinator else self.filter(*args, **kwargs)
+                                                        ~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1542, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1560, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1570, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1676, in add_q
+    clause, _ = self._add_q(q_object, can_reuse)
+                ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1708, in _add_q
+    child_clause, needed_inner = self.build_filter(
+                                 ~~~~~~~~~~~~~~~~~^
+        child,
+        ^^^^^^
+    ...<7 lines>...
+        update_join_types=update_join_types,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1618, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1445, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 35, in __init__
+    self.rhs = self.get_prep_lookup()
+               ~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 391, in get_prep_lookup
+    return super().get_prep_lookup()
+           ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 93, in get_prep_lookup
+    return self.lhs.output_field.get_prep_value(self.rhs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\fields\__init__.py", line 2130, in get_prep_value
+    raise e.__class__(
+        "Field '%s' expected a number but got %r." % (self.name, value),
+    ) from e
+ValueError: Field 'id' expected a number but got 'undefined'.
+ERROR django.request 2026-05-15 06:46:49,587 log 17648 22816 Internal Server Error: /api/projects/undefined/plots/2/workitems/1/jobitems/
+Traceback (most recent call last):
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\fields\__init__.py", line 2128, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: 'undefined'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 503, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 421, in initial
+    self.check_permissions(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 338, in check_permissions
+    if not permission.has_permission(request, self):
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\Ekene\maccaferra\core\permissions.py", line 133, in has_permission
+    plot = _get_plot(view)
+  File "C:\Users\Chike\Ekene\maccaferra\core\permissions.py", line 42, in _get_plot
+    return view.get_plot()
+           ~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\Ekene\maccaferra\core\views.py", line 131, in get_plot
+    self._plot_cache = get_object_or_404(ConstructionPlot, **filter_kwargs)
+                       ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\shortcuts.py", line 90, in get_object_or_404
+    return queryset.get(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 625, in get
+    clone = self._chain() if self.query.combinator else self.filter(*args, **kwargs)
+                                                        ~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1542, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1560, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1570, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1676, in add_q
+    clause, _ = self._add_q(q_object, can_reuse)
+                ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1708, in _add_q
+    child_clause, needed_inner = self.build_filter(
+                                 ~~~~~~~~~~~~~~~~~^
+        child,
+        ^^^^^^
+    ...<7 lines>...
+        update_join_types=update_join_types,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1618, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1445, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 35, in __init__
+    self.rhs = self.get_prep_lookup()
+               ~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 391, in get_prep_lookup
+    return super().get_prep_lookup()
+           ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 93, in get_prep_lookup
+    return self.lhs.output_field.get_prep_value(self.rhs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\fields\__init__.py", line 2130, in get_prep_value
+    raise e.__class__(
+        "Field '%s' expected a number but got %r." % (self.name, value),
+    ) from e
+ValueError: Field 'id' expected a number but got 'undefined'.
+ERROR django.request 2026-05-15 06:46:49,674 log 17648 21680 Internal Server Error: /api/projects/undefined/plots/2/
+Traceback (most recent call last):
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\fields\__init__.py", line 2128, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: 'undefined'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 503, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 421, in initial
+    self.check_permissions(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 338, in check_permissions
+    if not permission.has_permission(request, self):
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\Ekene\maccaferra\core\permissions.py", line 57, in has_permission
+    project = _get_project(view)
+  File "C:\Users\Chike\Ekene\maccaferra\core\permissions.py", line 35, in _get_project
+    return view.get_project()
+           ~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\Ekene\maccaferra\core\views.py", line 96, in get_project
+    self._project_cache = get_object_or_404(
+                          ~~~~~~~~~~~~~~~~~^
+        ConstructionProject, pk=project_pk
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\shortcuts.py", line 90, in get_object_or_404
+    return queryset.get(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 625, in get
+    clone = self._chain() if self.query.combinator else self.filter(*args, **kwargs)
+                                                        ~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1542, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1560, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1570, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1676, in add_q
+    clause, _ = self._add_q(q_object, can_reuse)
+                ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1708, in _add_q
+    child_clause, needed_inner = self.build_filter(
+                                 ~~~~~~~~~~~~~~~~~^
+        child,
+        ^^^^^^
+    ...<7 lines>...
+        update_join_types=update_join_types,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1618, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1445, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 35, in __init__
+    self.rhs = self.get_prep_lookup()
+               ~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 391, in get_prep_lookup
+    return super().get_prep_lookup()
+           ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 93, in get_prep_lookup
+    return self.lhs.output_field.get_prep_value(self.rhs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\fields\__init__.py", line 2130, in get_prep_value
+    raise e.__class__(
+        "Field '%s' expected a number but got %r." % (self.name, value),
+    ) from e
+ValueError: Field 'id' expected a number but got 'undefined'.
+ERROR django.request 2026-05-15 06:46:49,837 log 17648 17928 Internal Server Error: /api/projects/undefined/plots/2/workitems/1/jobitems/
+Traceback (most recent call last):
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\fields\__init__.py", line 2128, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: 'undefined'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 503, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 421, in initial
+    self.check_permissions(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 338, in check_permissions
+    if not permission.has_permission(request, self):
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\Ekene\maccaferra\core\permissions.py", line 133, in has_permission
+    plot = _get_plot(view)
+  File "C:\Users\Chike\Ekene\maccaferra\core\permissions.py", line 42, in _get_plot
+    return view.get_plot()
+           ~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\Ekene\maccaferra\core\views.py", line 131, in get_plot
+    self._plot_cache = get_object_or_404(ConstructionPlot, **filter_kwargs)
+                       ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\shortcuts.py", line 90, in get_object_or_404
+    return queryset.get(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 625, in get
+    clone = self._chain() if self.query.combinator else self.filter(*args, **kwargs)
+                                                        ~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1542, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1560, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1570, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1676, in add_q
+    clause, _ = self._add_q(q_object, can_reuse)
+                ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1708, in _add_q
+    child_clause, needed_inner = self.build_filter(
+                                 ~~~~~~~~~~~~~~~~~^
+        child,
+        ^^^^^^
+    ...<7 lines>...
+        update_join_types=update_join_types,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1618, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1445, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 35, in __init__
+    self.rhs = self.get_prep_lookup()
+               ~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 391, in get_prep_lookup
+    return super().get_prep_lookup()
+           ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 93, in get_prep_lookup
+    return self.lhs.output_field.get_prep_value(self.rhs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\fields\__init__.py", line 2130, in get_prep_value
+    raise e.__class__(
+        "Field '%s' expected a number but got %r." % (self.name, value),
+    ) from e
+ValueError: Field 'id' expected a number but got 'undefined'.
+ERROR django.request 2026-05-15 06:46:49,891 log 17648 22816 Internal Server Error: /api/projects/undefined/plots/2/
+Traceback (most recent call last):
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\fields\__init__.py", line 2128, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: 'undefined'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 503, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 421, in initial
+    self.check_permissions(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 338, in check_permissions
+    if not permission.has_permission(request, self):
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\Ekene\maccaferra\core\permissions.py", line 57, in has_permission
+    project = _get_project(view)
+  File "C:\Users\Chike\Ekene\maccaferra\core\permissions.py", line 35, in _get_project
+    return view.get_project()
+           ~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\Ekene\maccaferra\core\views.py", line 96, in get_project
+    self._project_cache = get_object_or_404(
+                          ~~~~~~~~~~~~~~~~~^
+        ConstructionProject, pk=project_pk
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\shortcuts.py", line 90, in get_object_or_404
+    return queryset.get(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 625, in get
+    clone = self._chain() if self.query.combinator else self.filter(*args, **kwargs)
+                                                        ~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1542, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1560, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1570, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1676, in add_q
+    clause, _ = self._add_q(q_object, can_reuse)
+                ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1708, in _add_q
+    child_clause, needed_inner = self.build_filter(
+                                 ~~~~~~~~~~~~~~~~~^
+        child,
+        ^^^^^^
+    ...<7 lines>...
+        update_join_types=update_join_types,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1618, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1445, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 35, in __init__
+    self.rhs = self.get_prep_lookup()
+               ~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 391, in get_prep_lookup
+    return super().get_prep_lookup()
+           ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 93, in get_prep_lookup
+    return self.lhs.output_field.get_prep_value(self.rhs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\fields\__init__.py", line 2130, in get_prep_value
+    raise e.__class__(
+        "Field '%s' expected a number but got %r." % (self.name, value),
+    ) from e
+ValueError: Field 'id' expected a number but got 'undefined'.
+WARNING django.request 2026-05-15 06:47:05,819 log 17648 17928 Forbidden: /api/jobitems/1/
+WARNING django.request 2026-05-15 06:47:05,832 log 17648 17928 Forbidden: /api/jobitems/1/
+WARNING django.request 2026-05-15 06:47:41,664 log 17648 9876 Not Found: /api/projects/undefined/
+WARNING django.request 2026-05-15 06:47:41,707 log 17648 9876 Not Found: /api/projects/undefined/
+WARNING django.request 2026-05-15 06:47:41,734 log 17648 3736 Not Found: /api/projects/undefined/
+ERROR django.request 2026-05-15 06:47:41,786 log 17648 3796 Internal Server Error: /api/projects/undefined/plots/2/
+Traceback (most recent call last):
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\fields\__init__.py", line 2128, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: 'undefined'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 503, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 421, in initial
+    self.check_permissions(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 338, in check_permissions
+    if not permission.has_permission(request, self):
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\Ekene\maccaferra\core\permissions.py", line 57, in has_permission
+    project = _get_project(view)
+  File "C:\Users\Chike\Ekene\maccaferra\core\permissions.py", line 35, in _get_project
+    return view.get_project()
+           ~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\Ekene\maccaferra\core\views.py", line 96, in get_project
+    self._project_cache = get_object_or_404(
+                          ~~~~~~~~~~~~~~~~~^
+        ConstructionProject, pk=project_pk
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\shortcuts.py", line 90, in get_object_or_404
+    return queryset.get(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 625, in get
+    clone = self._chain() if self.query.combinator else self.filter(*args, **kwargs)
+                                                        ~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1542, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1560, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1570, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1676, in add_q
+    clause, _ = self._add_q(q_object, can_reuse)
+                ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1708, in _add_q
+    child_clause, needed_inner = self.build_filter(
+                                 ~~~~~~~~~~~~~~~~~^
+        child,
+        ^^^^^^
+    ...<7 lines>...
+        update_join_types=update_join_types,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1618, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1445, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 35, in __init__
+    self.rhs = self.get_prep_lookup()
+               ~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 391, in get_prep_lookup
+    return super().get_prep_lookup()
+           ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 93, in get_prep_lookup
+    return self.lhs.output_field.get_prep_value(self.rhs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\fields\__init__.py", line 2130, in get_prep_value
+    raise e.__class__(
+        "Field '%s' expected a number but got %r." % (self.name, value),
+    ) from e
+ValueError: Field 'id' expected a number but got 'undefined'.
+ERROR django.request 2026-05-15 06:47:41,827 log 17648 10940 Internal Server Error: /api/projects/undefined/plots/2/workitems/1/jobitems/
+Traceback (most recent call last):
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\fields\__init__.py", line 2128, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: 'undefined'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 503, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 421, in initial
+    self.check_permissions(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 338, in check_permissions
+    if not permission.has_permission(request, self):
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\Ekene\maccaferra\core\permissions.py", line 133, in has_permission
+    plot = _get_plot(view)
+  File "C:\Users\Chike\Ekene\maccaferra\core\permissions.py", line 42, in _get_plot
+    return view.get_plot()
+           ~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\Ekene\maccaferra\core\views.py", line 131, in get_plot
+    self._plot_cache = get_object_or_404(ConstructionPlot, **filter_kwargs)
+                       ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\shortcuts.py", line 90, in get_object_or_404
+    return queryset.get(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 625, in get
+    clone = self._chain() if self.query.combinator else self.filter(*args, **kwargs)
+                                                        ~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1542, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1560, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1570, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1676, in add_q
+    clause, _ = self._add_q(q_object, can_reuse)
+                ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1708, in _add_q
+    child_clause, needed_inner = self.build_filter(
+                                 ~~~~~~~~~~~~~~~~~^
+        child,
+        ^^^^^^
+    ...<7 lines>...
+        update_join_types=update_join_types,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1618, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1445, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 35, in __init__
+    self.rhs = self.get_prep_lookup()
+               ~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 391, in get_prep_lookup
+    return super().get_prep_lookup()
+           ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 93, in get_prep_lookup
+    return self.lhs.output_field.get_prep_value(self.rhs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\fields\__init__.py", line 2130, in get_prep_value
+    raise e.__class__(
+        "Field '%s' expected a number but got %r." % (self.name, value),
+    ) from e
+ValueError: Field 'id' expected a number but got 'undefined'.
+ERROR django.request 2026-05-15 06:47:41,934 log 17648 3736 Internal Server Error: /api/projects/undefined/plots/2/
+Traceback (most recent call last):
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\fields\__init__.py", line 2128, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: 'undefined'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 503, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 421, in initial
+    self.check_permissions(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 338, in check_permissions
+    if not permission.has_permission(request, self):
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\Ekene\maccaferra\core\permissions.py", line 57, in has_permission
+    project = _get_project(view)
+  File "C:\Users\Chike\Ekene\maccaferra\core\permissions.py", line 35, in _get_project
+    return view.get_project()
+           ~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\Ekene\maccaferra\core\views.py", line 96, in get_project
+    self._project_cache = get_object_or_404(
+                          ~~~~~~~~~~~~~~~~~^
+        ConstructionProject, pk=project_pk
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\shortcuts.py", line 90, in get_object_or_404
+    return queryset.get(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 625, in get
+    clone = self._chain() if self.query.combinator else self.filter(*args, **kwargs)
+                                                        ~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1542, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1560, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1570, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1676, in add_q
+    clause, _ = self._add_q(q_object, can_reuse)
+                ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1708, in _add_q
+    child_clause, needed_inner = self.build_filter(
+                                 ~~~~~~~~~~~~~~~~~^
+        child,
+        ^^^^^^
+    ...<7 lines>...
+        update_join_types=update_join_types,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1618, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1445, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 35, in __init__
+    self.rhs = self.get_prep_lookup()
+               ~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 391, in get_prep_lookup
+    return super().get_prep_lookup()
+           ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 93, in get_prep_lookup
+    return self.lhs.output_field.get_prep_value(self.rhs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\fields\__init__.py", line 2130, in get_prep_value
+    raise e.__class__(
+        "Field '%s' expected a number but got %r." % (self.name, value),
+    ) from e
+ValueError: Field 'id' expected a number but got 'undefined'.
+ERROR django.request 2026-05-15 06:47:41,974 log 17648 3796 Internal Server Error: /api/projects/undefined/plots/2/workitems/1/jobitems/
+Traceback (most recent call last):
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\fields\__init__.py", line 2128, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: 'undefined'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 503, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 421, in initial
+    self.check_permissions(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 338, in check_permissions
+    if not permission.has_permission(request, self):
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\Ekene\maccaferra\core\permissions.py", line 133, in has_permission
+    plot = _get_plot(view)
+  File "C:\Users\Chike\Ekene\maccaferra\core\permissions.py", line 42, in _get_plot
+    return view.get_plot()
+           ~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\Ekene\maccaferra\core\views.py", line 131, in get_plot
+    self._plot_cache = get_object_or_404(ConstructionPlot, **filter_kwargs)
+                       ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\shortcuts.py", line 90, in get_object_or_404
+    return queryset.get(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 625, in get
+    clone = self._chain() if self.query.combinator else self.filter(*args, **kwargs)
+                                                        ~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1542, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1560, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1570, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1676, in add_q
+    clause, _ = self._add_q(q_object, can_reuse)
+                ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1708, in _add_q
+    child_clause, needed_inner = self.build_filter(
+                                 ~~~~~~~~~~~~~~~~~^
+        child,
+        ^^^^^^
+    ...<7 lines>...
+        update_join_types=update_join_types,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1618, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1445, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 35, in __init__
+    self.rhs = self.get_prep_lookup()
+               ~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 391, in get_prep_lookup
+    return super().get_prep_lookup()
+           ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 93, in get_prep_lookup
+    return self.lhs.output_field.get_prep_value(self.rhs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\fields\__init__.py", line 2130, in get_prep_value
+    raise e.__class__(
+        "Field '%s' expected a number but got %r." % (self.name, value),
+    ) from e
+ValueError: Field 'id' expected a number but got 'undefined'.
+ERROR django.request 2026-05-15 06:47:42,074 log 17648 10940 Internal Server Error: /api/projects/undefined/plots/2/
+Traceback (most recent call last):
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\fields\__init__.py", line 2128, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: 'undefined'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 503, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 421, in initial
+    self.check_permissions(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 338, in check_permissions
+    if not permission.has_permission(request, self):
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\Ekene\maccaferra\core\permissions.py", line 57, in has_permission
+    project = _get_project(view)
+  File "C:\Users\Chike\Ekene\maccaferra\core\permissions.py", line 35, in _get_project
+    return view.get_project()
+           ~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\Ekene\maccaferra\core\views.py", line 96, in get_project
+    self._project_cache = get_object_or_404(
+                          ~~~~~~~~~~~~~~~~~^
+        ConstructionProject, pk=project_pk
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\shortcuts.py", line 90, in get_object_or_404
+    return queryset.get(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 625, in get
+    clone = self._chain() if self.query.combinator else self.filter(*args, **kwargs)
+                                                        ~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1542, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1560, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1570, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1676, in add_q
+    clause, _ = self._add_q(q_object, can_reuse)
+                ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1708, in _add_q
+    child_clause, needed_inner = self.build_filter(
+                                 ~~~~~~~~~~~~~~~~~^
+        child,
+        ^^^^^^
+    ...<7 lines>...
+        update_join_types=update_join_types,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1618, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1445, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 35, in __init__
+    self.rhs = self.get_prep_lookup()
+               ~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 391, in get_prep_lookup
+    return super().get_prep_lookup()
+           ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 93, in get_prep_lookup
+    return self.lhs.output_field.get_prep_value(self.rhs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\fields\__init__.py", line 2130, in get_prep_value
+    raise e.__class__(
+        "Field '%s' expected a number but got %r." % (self.name, value),
+    ) from e
+ValueError: Field 'id' expected a number but got 'undefined'.
+ERROR django.request 2026-05-15 06:47:42,124 log 17648 3736 Internal Server Error: /api/projects/undefined/plots/2/workitems/1/jobitems/
+Traceback (most recent call last):
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\fields\__init__.py", line 2128, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: 'undefined'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 503, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 421, in initial
+    self.check_permissions(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rest_framework\views.py", line 338, in check_permissions
+    if not permission.has_permission(request, self):
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\Ekene\maccaferra\core\permissions.py", line 133, in has_permission
+    plot = _get_plot(view)
+  File "C:\Users\Chike\Ekene\maccaferra\core\permissions.py", line 42, in _get_plot
+    return view.get_plot()
+           ~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\Ekene\maccaferra\core\views.py", line 131, in get_plot
+    self._plot_cache = get_object_or_404(ConstructionPlot, **filter_kwargs)
+                       ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\shortcuts.py", line 90, in get_object_or_404
+    return queryset.get(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 625, in get
+    clone = self._chain() if self.query.combinator else self.filter(*args, **kwargs)
+                                                        ~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1542, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1560, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\query.py", line 1570, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1676, in add_q
+    clause, _ = self._add_q(q_object, can_reuse)
+                ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1708, in _add_q
+    child_clause, needed_inner = self.build_filter(
+                                 ~~~~~~~~~~~~~~~~~^
+        child,
+        ^^^^^^
+    ...<7 lines>...
+        update_join_types=update_join_types,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1618, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\sql\query.py", line 1445, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 35, in __init__
+    self.rhs = self.get_prep_lookup()
+               ~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 391, in get_prep_lookup
+    return super().get_prep_lookup()
+           ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\lookups.py", line 93, in get_prep_lookup
+    return self.lhs.output_field.get_prep_value(self.rhs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Chike\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\db\models\fields\__init__.py", line 2130, in get_prep_value
+    raise e.__class__(
+        "Field '%s' expected a number but got %r." % (self.name, value),
+    ) from e
+ValueError: Field 'id' expected a number but got 'undefined'.
+WARNING django.request 2026-05-15 06:47:45,299 log 17648 3736 Forbidden: /api/jobitems/2/
+WARNING django.request 2026-05-15 06:47:45,311 log 17648 3736 Forbidden: /api/jobitems/2/
+INFO django.utils.autoreload 2026-05-15 06:49:44,010 autoreload 17648 24552 C:\Users\Chike\Ekene\maccaferra\core\serializers.py changed, reloading.
+INFO django.utils.autoreload 2026-05-15 06:49:44,742 autoreload 14392 18372 Watching for file changes with StatReloader
+WARNING django.request 2026-05-15 07:16:05,543 log 14392 24500 Forbidden: /api/jobitems/2/
+WARNING django.request 2026-05-15 07:16:05,548 log 14392 24500 Forbidden: /api/jobitems/2/
+WARNING django.request 2026-05-15 07:16:08,522 log 14392 24500 Forbidden: /api/jobitems/2/
+WARNING django.request 2026-05-15 07:16:08,528 log 14392 24500 Forbidden: /api/jobitems/2/
+WARNING django.request 2026-05-15 07:16:12,735 log 14392 24500 Forbidden: /api/jobitems/2/
+WARNING django.request 2026-05-15 07:16:12,740 log 14392 24500 Forbidden: /api/jobitems/2/
+WARNING django.request 2026-05-15 07:24:14,828 log 14392 1912 Forbidden: /api/jobitems/2/
+WARNING django.request 2026-05-15 07:24:14,838 log 14392 1912 Forbidden: /api/jobitems/2/
+WARNING django.request 2026-05-15 07:24:17,898 log 14392 1912 Forbidden: /api/jobitems/2/
+WARNING django.request 2026-05-15 07:24:17,909 log 14392 1912 Forbidden: /api/jobitems/2/
+WARNING django.request 2026-05-15 07:24:38,207 log 14392 23072 Not Found: /api/work-items/1/
+WARNING django.request 2026-05-15 07:24:38,228 log 14392 8184 Not Found: /api/work-items/1/
+WARNING django.request 2026-05-15 07:24:43,260 log 14392 8184 Forbidden: /api/jobitems/1/
+WARNING django.request 2026-05-15 07:24:43,270 log 14392 8184 Forbidden: /api/jobitems/1/
+INFO django.utils.autoreload 2026-05-15 07:27:32,647 autoreload 14392 18372 C:\Users\Chike\Ekene\maccaferra\core\permissions.py changed, reloading.
+INFO django.utils.autoreload 2026-05-15 07:27:33,391 autoreload 8224 16992 Watching for file changes with StatReloader
+INFO django.utils.autoreload 2026-05-15 07:30:33,310 autoreload 8224 16992 C:\Users\Chike\Ekene\maccaferra\accounts\views.py changed, reloading.
+INFO django.utils.autoreload 2026-05-15 07:30:34,011 autoreload 16180 14892 Watching for file changes with StatReloader
+INFO django.utils.autoreload 2026-05-15 07:30:52,705 autoreload 16180 14892 C:\Users\Chike\Ekene\maccaferra\accounts\urls.py changed, reloading.
+INFO django.utils.autoreload 2026-05-15 07:30:53,434 autoreload 15000 19764 Watching for file changes with StatReloader
+WARNING django.request 2026-05-15 07:31:24,652 log 15000 1144 Not Found: /api/jobitems/1/reports/
+WARNING django.request 2026-05-15 07:31:24,670 log 15000 1144 Not Found: /api/jobitems/1/reports/
+WARNING django.request 2026-05-15 07:31:24,723 log 15000 11216 Not Found: /api/jobitems/1/reports/
+WARNING django.request 2026-05-15 07:31:46,463 log 15000 16168 Not Found: /api/jobitems/1/reports/
+WARNING django.request 2026-05-15 07:31:46,501 log 15000 16168 Not Found: /api/jobitems/1/reports/
+WARNING django.request 2026-05-15 07:31:46,556 log 15000 9492 Not Found: /api/jobitems/1/reports/
+WARNING django.request 2026-05-15 07:32:20,624 log 15000 11216 Not Found: /api/jobitems/1/reports/
+WARNING django.request 2026-05-15 07:32:20,691 log 15000 11472 Not Found: /api/jobitems/1/reports/
+WARNING django.request 2026-05-15 07:32:20,744 log 15000 11216 Not Found: /api/jobitems/1/reports/
+WARNING django.request 2026-05-15 07:32:23,894 log 15000 9492 Not Found: /api/jobitems/2/reports/
+WARNING django.request 2026-05-15 07:32:23,986 log 15000 13768 Not Found: /api/jobitems/2/reports/
+WARNING django.request 2026-05-15 07:32:24,073 log 15000 9492 Not Found: /api/jobitems/2/reports/
+WARNING django.request 2026-05-15 07:32:52,965 log 15000 16168 Not Found: /api/jobitems/2/reports/
+WARNING django.request 2026-05-15 07:32:53,036 log 15000 16168 Not Found: /api/jobitems/2/reports/
+WARNING django.request 2026-05-15 07:32:53,097 log 15000 11216 Not Found: /api/jobitems/2/reports/
+WARNING django.request 2026-05-15 07:41:05,940 log 15000 17860 Not Found: /api/jobitems/2/reports/
+WARNING django.request 2026-05-15 07:41:05,990 log 15000 17860 Not Found: /api/jobitems/2/reports/
+WARNING django.request 2026-05-15 07:41:06,051 log 15000 11472 Not Found: /api/jobitems/2/reports/
+WARNING django.request 2026-05-15 07:41:43,570 log 15000 3608 Not Found: /api/jobitems/2/reports/
+INFO django.utils.autoreload 2026-05-15 07:44:02,889 autoreload 15000 19764 C:\Users\Chike\Ekene\maccaferra\core\serializers.py changed, reloading.
+INFO django.utils.autoreload 2026-05-15 07:44:03,730 autoreload 23876 19952 Watching for file changes with StatReloader
+WARNING django.request 2026-05-15 07:46:55,479 log 23876 14980 Not Found: /api/jobitems/1/reports/
+WARNING django.request 2026-05-15 07:46:55,549 log 23876 19128 Not Found: /api/jobitems/1/reports/
+WARNING django.request 2026-05-15 07:46:55,601 log 23876 14980 Not Found: /api/jobitems/1/reports/
+WARNING django.request 2026-05-15 07:47:23,236 log 23876 23984 Not Found: /api/jobitems/1/reports/
+WARNING django.request 2026-05-15 07:57:45,762 log 23876 5176 Not Found: /api/jobitems/1/reports/

@@ -13,6 +13,13 @@ import StatCard from "./StatCard";
 
 import Drawer from "./Drawer";
 import CommentsSection from "./CommentsSection";
+import SearchableSelect from "./SearchableSelect";
+import ProgressDonut from "./ProgressDonut";
+import Breadcrumb from "./Breadcrumb";
+import InviteModal from "./InviteModal";
+import ImageUploader from "./ImageUploader";
+import ChecklistEditor from "./ChecklistEditor";
+import MaterialsEditor from "./MaterialsEditor";
 
 // ---------------------------------------------------------------------------
 // RoleBadge
@@ -96,5 +103,12 @@ export {
   Avatar,
   StatCard,
   Drawer,
-  CommentsSection
-};
+  CommentsSection,
+  SearchableSelect,
+  ProgressDonut,
+  Breadcrumb,
+  InviteModal,
+  ImageUploader,
+  ChecklistEditor,
+  MaterialsEditor,
+};

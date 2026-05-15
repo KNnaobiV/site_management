@@ -32,6 +32,8 @@ from core.models import (
     JobReportComment,
     ProjectInvitation, 
     PlotInvitation,
+    WorkItemImage,
+    JobReportImage,
 )
 from core.roles import get_project_role, get_plot_role
 from core.services import (
@@ -68,6 +70,8 @@ from .serializers import (
     NotificationSerializer,
     ProjectInvitationSerializer,
     PlotInvitationSerializer,
+    WorkItemImageUploadSerializer,
+    JobReportImageUploadSerializer,
 )
 
 from django.db.models import Q as models_Q
@@ -84,18 +88,25 @@ class ProjectScopedMixin:
     """
     _project_cache = None
 
-    def get_project(self) -> ConstructionProject:
+    def get_project(self) -> ConstructionProject | None:
         if self._project_cache is None:
+            project_pk = self.kwargs.get("project_pk")
+            if not project_pk:
+                return None
             self._project_cache = get_object_or_404(
-                ConstructionProject, pk=self.kwargs["project_pk"]
+                ConstructionProject, pk=project_pk
             )
         return self._project_cache
 
     def get_serializer_context(self):
         ctx = super().get_serializer_context()
         project = self.get_project()
-        ctx["role"] = get_project_role(self.request.user, project)
-        ctx["project"] = project
+        if project:
+            ctx["role"] = get_project_role(self.request.user, project)
+            ctx["project"] = project
+        else:
+            # Fallback for flat access or when project context isn't available
+            ctx["role"] = "none"
         return ctx
 
 
@@ -106,23 +117,32 @@ class PlotScopedMixin:
     """
     _plot_cache = None
 
-    def get_plot(self) -> ConstructionPlot:
+    def get_plot(self) -> ConstructionPlot | None:
         if self._plot_cache is None:
-            self._plot_cache = get_object_or_404(
-                ConstructionPlot,
-                pk=self.kwargs["plot_pk"],
-                construction_project__pk=self.kwargs["project_pk"],
-            )
+            plot_pk = self.kwargs.get("plot_pk")
+            project_pk = self.kwargs.get("project_pk")
+            if not plot_pk:
+                return None
+            
+            filter_kwargs = {"pk": plot_pk}
+            if project_pk:
+                filter_kwargs["construction_project__pk"] = project_pk
+                
+            self._plot_cache = get_object_or_404(ConstructionPlot, **filter_kwargs)
         return self._plot_cache
 
-    def get_project(self) -> ConstructionProject:
-        return self.get_plot().construction_project
+    def get_project(self) -> ConstructionProject | None:
+        plot = self.get_plot()
+        return plot.construction_project if plot else None
 
     def get_serializer_context(self):
         ctx = super().get_serializer_context()
         plot = self.get_plot()
-        ctx["role"] = get_plot_role(self.request.user, plot)
-        ctx["plot"] = plot
+        if plot:
+            ctx["role"] = get_plot_role(self.request.user, plot)
+            ctx["plot"] = plot
+        else:
+            ctx["role"] = "none"
         return ctx
 
 
@@ -320,23 +340,38 @@ class ConstructionPlotViewSet(ProjectScopedMixin, viewsets.ModelViewSet):
     def get_queryset(self):
         project = self.get_project()
         user = self.request.user
-        role = get_project_role(user, project)
-        if role in {"owner", "client", "project_manager", "consultant"}:
-            return ConstructionPlot.objects.filter(construction_project=project)
-        # foreman/storekeeper see only their own plot
-        return ConstructionPlot.objects.filter(
-            construction_project=project
-        ).filter(
-            models_Q(foreman=user) | models_Q(storekeeper=user)
-        )
+        
+        if project:
+            role = get_project_role(user, project)
+            if role in {"owner", "client", "project_manager", "consultant"}:
+                return ConstructionPlot.objects.filter(construction_project=project)
+            # foreman/storekeeper see only their own plot
+            return ConstructionPlot.objects.filter(
+                construction_project=project
+            ).filter(
+                models_Q(foreman=user) | models_Q(storekeeper=user)
+            )
+        else:
+            # Top-level list: all plots user belongs to across all projects
+            return ConstructionPlot.objects.filter(
+                models_Q(construction_project__created_by=user) |
+                models_Q(construction_project__client=user) |
+                models_Q(construction_project__project_manager=user) |
+                models_Q(construction_project__consultants=user) |
+                models_Q(foreman=user) |
+                models_Q(storekeeper=user)
+            ).distinct()
 
     def get_serializer_context(self):
         ctx = super().get_serializer_context()  # ProjectScopedMixin sets role
-        # For plot detail actions, re-resolve with plot-level role
-        if self.kwargs.get("pk"):
+        
+        # For plot detail actions or retrieve, resolve with plot-level role
+        plot_pk = self.kwargs.get("pk")
+        if plot_pk:
             try:
-                plot = ConstructionPlot.objects.get(pk=self.kwargs["pk"])
+                plot = ConstructionPlot.objects.get(pk=plot_pk)
                 ctx["role"] = get_plot_role(self.request.user, plot)
+                ctx["plot"] = plot
             except ConstructionPlot.DoesNotExist:
                 pass
         return ctx
@@ -422,7 +457,20 @@ class WorkItemViewSet(PlotScopedMixin, viewsets.ModelViewSet):
 
     def get_queryset(self):
         plot = self.get_plot()
-        return WorkItem.objects.filter(construction_plot=plot).order_by('-updated_at')
+        user = self.request.user
+        
+        if plot:
+            return WorkItem.objects.filter(construction_plot=plot).order_by('-updated_at')
+        
+        # Global access: all work items user has plot-level access to
+        return WorkItem.objects.filter(
+            models_Q(construction_plot__construction_project__created_by=user) |
+            models_Q(construction_plot__construction_project__client=user) |
+            models_Q(construction_plot__construction_project__project_manager=user) |
+            models_Q(construction_plot__construction_project__consultants=user) |
+            models_Q(construction_plot__foreman=user) |
+            models_Q(construction_plot__storekeeper=user)
+        ).distinct().order_by('-updated_at')
 
     def perform_create(self, serializer):
         work_item = serializer.save(construction_plot=self.get_plot())
@@ -457,6 +505,20 @@ class WorkItemViewSet(PlotScopedMixin, viewsets.ModelViewSet):
         work_item.save()
         return Response({"status": "approved"})
 
+    @action(detail=True, methods=["post", "get"], url_path="images")
+    def images(self, request, **kwargs):
+        """GET/POST images for a work item. POST expects multipart/form-data."""
+        work_item = self.get_object()
+        if request.method == "GET":
+            from .serializers import WorkItemImageSerializer
+            qs = WorkItemImage.objects.filter(work_item=work_item)
+            return Response(WorkItemImageSerializer(qs, many=True, context=self.get_serializer_context()).data)
+        # POST
+        serializer = WorkItemImageUploadSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(work_item=work_item)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
 
 # ---------------------------------------------------------------------------
 # JobItem ViewSet
@@ -474,10 +536,25 @@ class JobItemViewSet(PlotScopedMixin, viewsets.ModelViewSet):
         return [IsAuthenticated(), CanManagePlot()]
 
     def get_queryset(self):
+        plot = self.get_plot()
+        user = self.request.user
+        wi_pk = self.kwargs.get("workitem_pk")
+        
+        if plot and wi_pk:
+            return JobItem.objects.filter(
+                work_item__construction_plot=plot,
+                work_item__pk=wi_pk,
+            ).order_by('-updated_at')
+            
+        # Global access
         return JobItem.objects.filter(
-            work_item__construction_plot=self.get_plot(),
-            work_item__pk=self.kwargs["workitem_pk"],
-        ).order_by('-updated_at')
+            models_Q(work_item__construction_plot__construction_project__created_by=user) |
+            models_Q(work_item__construction_plot__construction_project__client=user) |
+            models_Q(work_item__construction_plot__construction_project__project_manager=user) |
+            models_Q(work_item__construction_plot__construction_project__consultants=user) |
+            models_Q(work_item__construction_plot__foreman=user) |
+            models_Q(work_item__construction_plot__storekeeper=user)
+        ).distinct().order_by('-updated_at')
 
     def perform_create(self, serializer):
         work_item = get_object_or_404(
@@ -574,6 +651,20 @@ class JobReportViewSet(PlotScopedMixin, viewsets.ModelViewSet):
         comments = report.comments.all()
         serializer = JobReportCommentSerializer(comments, many=True)
         return Response(serializer.data)
+
+    @action(detail=True, methods=["post", "get"], url_path="images")
+    def images(self, request, **kwargs):
+        """GET/POST images for a daily report. POST expects multipart/form-data."""
+        report = self.get_object()
+        if request.method == "GET":
+            from .serializers import JobReportImageSerializer
+            qs = JobReportImage.objects.filter(report=report)
+            return Response(JobReportImageSerializer(qs, many=True, context=self.get_serializer_context()).data)
+        # POST
+        serializer = JobReportImageUploadSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(report=report)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 # ---------------------------------------------------------------------------
