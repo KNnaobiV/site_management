@@ -30,6 +30,7 @@ const NotificationsPage = () => {
     Alerts: notifications.filter(n => getNotificationType(n.message) === 'Alerts').length,
     Mentions: notifications.filter(n => getNotificationType(n.message) === 'Mentions').length,
     Approvals: notifications.filter(n => getNotificationType(n.message) === 'Approvals').length,
+    Reports: notifications.filter(n => getNotificationType(n.message) === 'Reports').length,
     Invitations: notifications.filter(n => getNotificationType(n.message) === 'Invitations').length,
   };
 
@@ -38,6 +39,7 @@ const NotificationsPage = () => {
     { label: 'Alerts', count: tabCounts.Alerts },
     { label: 'Mentions', count: tabCounts.Mentions },
     { label: 'Approvals', count: tabCounts.Approvals },
+    { label: 'Reports', count: tabCounts.Reports },
     { label: 'Invitations', count: tabCounts.Invitations },
   ];
 
@@ -55,6 +57,19 @@ const NotificationsPage = () => {
     } catch (error) {
       console.error(error);
     }
+  };
+
+  const handleViewNotification = (notification) => {
+    const type = getNotificationType(notification.message);
+    if (type === 'Invitations') {
+      navigate('/invitations');
+      return;
+    }
+    if (notification.project) {
+      navigate(`/projects/${notification.project}?tab=reports`);
+      return;
+    }
+    navigate('/projects');
   };
 
   return (
@@ -114,7 +129,7 @@ const NotificationsPage = () => {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
         {filteredNotifications.length > 0 ? (
           filteredNotifications.map(n => (
-            <NotificationItem key={n.id} notification={n} />
+            <NotificationItem key={n.id} notification={n} onView={handleViewNotification} />
           ))
         ) : (
           <div style={{ padding: '40px', borderRadius: '20px', background: 'var(--bg-card)', color: 'var(--text-tertiary)', textAlign: 'center' }}>

@@ -1,12 +1,13 @@
 import React from 'react';
 import Avatar from './Avatar';
-import { UserPlus, ClipboardCheck, MessageSquare, AlertTriangle, CheckCircle2, Bell } from 'lucide-react';
+import { UserPlus, ClipboardCheck, MessageSquare, AlertTriangle, CheckCircle2, Bell, FileText } from 'lucide-react';
 
-const NotificationItem = ({ notification }) => {
+const NotificationItem = ({ notification, onView }) => {
   const getIcon = () => {
     const msg = notification.message?.toLowerCase() || '';
     if (msg.includes('invited')) return { icon: UserPlus, color: '#c14a1e', bg: '#fdf1ec' };
     if (msg.includes('approval') || msg.includes('approved')) return { icon: ClipboardCheck, color: '#8a6d3b', bg: '#fff8e1' };
+    if (msg.includes('report')) return { icon: FileText, color: '#1a1a1a', bg: '#f0f0f0' };
     if (msg.includes('mentioned')) return { icon: MessageSquare, color: '#1a1a1a', bg: '#f0f0f0' };
     if (msg.includes('urgent') || msg.includes('delayed') || msg.includes('alert')) return { icon: AlertTriangle, color: '#a32a2a', bg: '#fdeded' };
     if (msg.includes('accepted')) return { icon: CheckCircle2, color: '#2d5a27', bg: '#edf5ed' };
@@ -17,6 +18,7 @@ const NotificationItem = ({ notification }) => {
     const msg = notification.message?.toLowerCase() || '';
     if (msg.includes('invited')) return 'Invitations';
     if (msg.includes('approval') || msg.includes('approved')) return 'Approvals';
+    if (msg.includes('report')) return 'Reports';
     if (msg.includes('mentioned')) return 'Mentions';
     if (msg.includes('urgent') || msg.includes('delayed') || msg.includes('alert')) return 'Alerts';
     return 'System';
@@ -69,7 +71,14 @@ const NotificationItem = ({ notification }) => {
         {notification.message?.toLowerCase().includes('approval') && (
           <button className="btn-ghost" style={{ fontSize: '12px', padding: '6px 12px', borderColor: 'var(--brand-orange)', color: 'var(--brand-orange)' }}>Approve</button>
         )}
-        <button className="btn-ghost" style={{ fontSize: '12px', padding: '6px 12px' }}>View</button>
+        <button
+          className="btn-ghost"
+          style={{ fontSize: '12px', padding: '6px 12px' }}
+          onClick={() => onView?.(notification)}
+          type="button"
+        >
+          View
+        </button>
       </div>
     </div>
   );

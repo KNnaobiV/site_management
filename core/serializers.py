@@ -479,10 +479,16 @@ class JobReportSerializer(RoleFilteredSerializer):
  
     reported_by = UserSummarySerializer(read_only=True)
     images = JobReportImageSerializer(many=True, read_only=True)
- 
+    job_item_name = serializers.ReadOnlyField(source='job_item.job_name')
+    work_item_name = serializers.ReadOnlyField(source='job_item.work_item.name')
+    construction_plot = serializers.ReadOnlyField(source='job_item.work_item.construction_plot.address')
+
     ALWAYS_VISIBLE = {
         "id",
         "job_item",
+        "job_item_name",
+        "work_item_name",
+        "construction_plot",
         "reported_by",
         "report_date",
         "report_status",
@@ -509,6 +515,9 @@ class JobReportSerializer(RoleFilteredSerializer):
         fields = [
             "id",
             "job_item",
+            "job_item_name",
+            "work_item_name",
+            "construction_plot",
             "reported_by",
             "report_date",
             "report_status",
