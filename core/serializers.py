@@ -542,9 +542,11 @@ class JobReportCommentSerializer(serializers.ModelSerializer):
  
  
 class NotificationSerializer(serializers.ModelSerializer):
+    project_name = serializers.ReadOnlyField(source="project.project_name")
+
     class Meta:
         model = Notification
-        fields = ["id", "user", "project", "message", "priority", "is_read", "created_at"]
+        fields = ["id", "user", "project", "project_name", "message", "priority", "is_read", "created_at"]
         read_only_fields = ["id", "user", "created_at"]
  
  
@@ -558,6 +560,7 @@ class ProjectInvitationSerializer(serializers.ModelSerializer):
         queryset=User.objects.all(), source="invitee", write_only=True
     )
     invitee = UserSummarySerializer(read_only=True)
+    project_name = serializers.ReadOnlyField(source="project.project_name")
     # token is read-only; useful for deep-link emails
     token = serializers.UUIDField(read_only=True)
     is_expired = serializers.BooleanField(read_only=True)
@@ -568,6 +571,7 @@ class ProjectInvitationSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "project",
+            "project_name",
             "invited_by",
             "invitee",
             "invitee_id",
@@ -582,7 +586,7 @@ class ProjectInvitationSerializer(serializers.ModelSerializer):
             "is_actionable",
         ]
         read_only_fields = [
-            "id", "project", "invited_by", "token", "status",
+            "id", "project", "project_name", "invited_by", "token", "status",
             "created_at", "expires_at", "responded_at",
             "is_expired", "is_actionable",
         ]
@@ -601,6 +605,8 @@ class PlotInvitationSerializer(serializers.ModelSerializer):
         queryset=User.objects.all(), source="invitee", write_only=True
     )
     invitee = UserSummarySerializer(read_only=True)
+    plot_address = serializers.ReadOnlyField(source="plot.address")
+    project_name = serializers.ReadOnlyField(source="plot.construction_project.project_name")
     token = serializers.UUIDField(read_only=True)
     is_expired = serializers.BooleanField(read_only=True)
     is_actionable = serializers.BooleanField(read_only=True)
@@ -610,6 +616,8 @@ class PlotInvitationSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "plot",
+            "plot_address",
+            "project_name",
             "invited_by",
             "invitee",
             "invitee_id",
@@ -624,7 +632,7 @@ class PlotInvitationSerializer(serializers.ModelSerializer):
             "is_actionable",
         ]
         read_only_fields = [
-            "id", "plot", "invited_by", "token", "status",
+            "id", "plot", "plot_address", "project_name", "invited_by", "token", "status",
             "created_at", "expires_at", "responded_at",
             "is_expired", "is_actionable",
         ]
@@ -659,4 +667,4 @@ class JobReportImageUploadSerializer(serializers.ModelSerializer):
     class Meta:
         model = JobReportImage
         fields = ["id", "image", "caption", "uploaded_at"]
-        read_only_fields = ["id", "uploaded_at"]
+        read_only_fields = ["id", "uploaded_at"]

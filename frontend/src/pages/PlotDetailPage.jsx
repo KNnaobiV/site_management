@@ -189,6 +189,7 @@ const PlotDetailPage = () => {
   const tabs = [
     { id: 'overview', label: 'Overview' },
     { id: 'workitems', label: `Work Items (${workItems.length})` },
+    { id: 'team', label: 'Team' },
     { id: 'reports', label: 'Reports' },
     { id: 'media', label: 'Media' },
   ];
@@ -323,6 +324,54 @@ const PlotDetailPage = () => {
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {/* Team Tab */}
+      {activeTab === 'team' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h2 style={{ fontSize: '24px', margin: 0 }}>Team Members</h2>
+            <button className="btn-primary" onClick={() => setShowInvite(true)} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <UserPlus size={15} /> Invite
+            </button>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
+            {/* Foreman */}
+            {plot.foreman && (
+              <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '20px', padding: '24px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <Avatar name={plot.foreman.display_name || plot.foreman.username} size={48} />
+                  <div style={{ flex: 1 }}>
+                    <p style={{ margin: '0 0 4px', fontWeight: 700, fontSize: '16px', color: 'var(--text-primary)' }}>{plot.foreman.display_name || plot.foreman.username}</p>
+                    <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-secondary)' }}>Foreman</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Storekeeper */}
+            {plot.storekeeper && (
+              <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '20px', padding: '24px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <Avatar name={plot.storekeeper.display_name || plot.storekeeper.username} size={48} />
+                  <div style={{ flex: 1 }}>
+                    <p style={{ margin: '0 0 4px', fontWeight: 700, fontSize: '16px', color: 'var(--text-primary)' }}>{plot.storekeeper.display_name || plot.storekeeper.username}</p>
+                    <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-secondary)' }}>Storekeeper</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* If no team members */}
+            {!plot.foreman && !plot.storekeeper && (
+              <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px', color: 'var(--text-tertiary)' }}>
+                <p style={{ fontWeight: 600 }}>No team members assigned</p>
+                <p style={{ fontSize: '14px' }}>Invite team members to get started.</p>
+              </div>
+            )}
+          </div>
         </div>
       )}
 

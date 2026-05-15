@@ -70,18 +70,36 @@ const ProjectsPage = () => {
         </div>
 
         {/* Grid */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: "32px" }}>
-          {projects.map((project) => (
-            <ProjectCard
-              key={project.id}
-              project={project}
-              onClick={() => {
-                console.log("Navigating to project:", project.id);
-                navigate(`/projects/${project.id}`);
-              }}
-            />
-          ))}
-        </div>
+        {projects.length > 0 ? (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: "32px" }}>
+            {projects.map((project) => (
+              <ProjectCard
+                key={project.id}
+                project={project}
+                onClick={() => navigate(`/projects/${project.id}`)}
+              />
+            ))}
+          </div>
+        ) : (
+          <div style={{
+            minHeight: '320px',
+            border: '1px dashed var(--border-default)',
+            borderRadius: '24px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '16px',
+            padding: '40px',
+            color: 'var(--text-tertiary)'
+          }}>
+            <h2 style={{ margin: 0, fontSize: '28px' }}>No projects yet</h2>
+            <p style={{ maxWidth: '420px', textAlign: 'center' }}>Create a project to start managing your site activity, teams, and daily reports.</p>
+            <button className="btn-primary" onClick={() => navigate('/projects/new')} style={{ padding: '14px 40px' }}>
+              Create project to start
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

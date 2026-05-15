@@ -18,6 +18,7 @@ import CreateJobItemPage from "./pages/CreateJobItemPage";
 import JobItemDetailPage from "./pages/JobItemDetailPage";
 import CreateDailyReportPage from "./pages/CreateDailyReportPage";
 import NotificationsPage from "./pages/NotificationsPage";
+import InvitationsPage from "./pages/InvitationsPage";
 import InviteTeamMemberPage from "./pages/InviteTeamMemberPage";
 import ProfilePage from "./pages/ProfilePage";
 import { DashboardShell, Spinner } from "./components";
@@ -63,6 +64,7 @@ export default function App() {
                 <Route path="/job-items/:jobItemId" element={<JobItemDetailPage />} />
                 <Route path="/job-items/:jobItemId/reports/new" element={<CreateDailyReportPage />} />
                 <Route path="/notifications" element={<NotificationsPage />} />
+                <Route path="/invitations" element={<InvitationsPage />} />
                 <Route path="/team/invite" element={<InviteTeamMemberPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="*" element={<Navigate to="/" />} />

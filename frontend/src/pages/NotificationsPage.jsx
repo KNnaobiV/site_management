@@ -1,20 +1,44 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { NotificationItem } from '../components';
 import { Filter, CheckCheck } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { apiFetch, unwrapList } from '../api/client';
 
 const NotificationsPage = () => {
+  const navigate = useNavigate();
   const { token } = useAuth();
   const [notifications, setNotifications] = useState([]);
   const [activeTab, setActiveTab] = useState('All');
 
+  const getNotificationType = (message) => {
+    const msg = (message || '').toLowerCase();
+    if (msg.includes('invited')) return 'Invitations';
+    if (msg.includes('approval') || msg.includes('approved')) return 'Approvals';
+    if (msg.includes('mentioned')) return 'Mentions';
+    if (msg.includes('urgent') || msg.includes('delayed') || msg.includes('alert')) return 'Alerts';
+    return 'System';
+  };
+
+  const filteredNotifications = notifications.filter((notification) => {
+    if (activeTab === 'All') return true;
+    return getNotificationType(notification.message) === activeTab;
+  });
+
+  const tabCounts = {
+    All: notifications.length,
+    Alerts: notifications.filter(n => getNotificationType(n.message) === 'Alerts').length,
+    Mentions: notifications.filter(n => getNotificationType(n.message) === 'Mentions').length,
+    Approvals: notifications.filter(n => getNotificationType(n.message) === 'Approvals').length,
+    Invitations: notifications.filter(n => getNotificationType(n.message) === 'Invitations').length,
+  };
+
   const tabs = [
-    { label: 'All', count: 12 },
-    { label: 'Alerts', count: 4 },
-    { label: 'Mentions', count: 3 },
-    { label: 'Approvals', count: 3 },
-    { label: 'Urgent', count: 2 },
+    { label: 'All', count: tabCounts.All },
+    { label: 'Alerts', count: tabCounts.Alerts },
+    { label: 'Mentions', count: tabCounts.Mentions },
+    { label: 'Approvals', count: tabCounts.Approvals },
+    { label: 'Invitations', count: tabCounts.Invitations },
   ];
 
   useEffect(() => {
@@ -33,16 +57,6 @@ const NotificationsPage = () => {
     }
   };
 
-  // Mocking more detailed notifications for display
-  const displayNotifications = [
-    { id: 1, message: "You've been invited to 'Maple Heights Tower' as Consultant", project_name: 'Maple Heights Tower', type: 'Invitations' },
-    { id: 2, message: "Job report on Plot B-14 awaits your approval", project_name: 'Maple Heights Tower', type: 'Job Items' },
-    { id: 3, message: "Sarah mentioned you in a comment on 'Roofing & Waterproofing'", project_name: 'Maple Heights Tower', type: 'Work Items' },
-    { id: 4, message: "URGENT: Concrete pour delayed on Plot A-02", project_name: 'Maple Heights Tower', type: 'Alerts' },
-    { id: 5, message: "Foreman invitation accepted by J. Adeyemi", project_name: 'Maple Heights Tower', type: 'Invitations' },
-    { id: 6, message: "Daily progress report is overdue for Plot C-07", project_name: 'Maple Heights Tower', type: 'Alerts' },
-  ];
-
   return (
     <div className="fade-up">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '40px' }}>
@@ -54,6 +68,9 @@ const NotificationsPage = () => {
           <button className="btn-ghost" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <CheckCheck size={18} color="var(--brand-orange)" />
             <span style={{ color: 'var(--brand-orange)' }}>Mark all as read</span>
+          </button>
+          <button className="btn-ghost" onClick={() => navigate('/invitations')}>
+            View invitations
           </button>
           <button className="btn-ghost">
             <Filter size={18} />
@@ -95,9 +112,15 @@ const NotificationsPage = () => {
 
       {/* List */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        {displayNotifications.map(n => (
-          <NotificationItem key={n.id} notification={n} />
-        ))}
+        {filteredNotifications.length > 0 ? (
+          filteredNotifications.map(n => (
+            <NotificationItem key={n.id} notification={n} />
+          ))
+        ) : (
+          <div style={{ padding: '40px', borderRadius: '20px', background: 'var(--bg-card)', color: 'var(--text-tertiary)', textAlign: 'center' }}>
+            No notifications match this category yet.
+          </div>
+        )}
       </div>
     </div>
   );
