@@ -305,6 +305,15 @@ class ConstructionProjectViewSet(viewsets.ModelViewSet):
         serializer = JobItemSerializer(qs, many=True, context=self.get_serializer_context())
         return Response(serializer.data)
 
+    @action(detail=True, methods=["get"], url_path="reports")
+    def reports(self, request, pk=None):
+        project = self.get_project()
+        qs = JobReport.objects.filter(
+            job_item__work_item__construction_plot__construction_project=project
+        ).select_related("reported_by", "job_item", "job_item__work_item").order_by('-report_date')
+        serializer = JobReportSerializer(qs, many=True, context=self.get_serializer_context())
+        return Response(serializer.data)
+
 
 # ---------------------------------------------------------------------------
 # ConstructionPlot ViewSet
@@ -634,7 +643,8 @@ class JobReportViewSet(PlotScopedMixin, viewsets.ModelViewSet):
                 user=m, 
                 project=project, 
                 message=f"New {report.priority} report for {job_item.job_name} in {job_item.work_item.name}",
-                priority=prio
+                priority=prio,
+                target_url=(f"/job-items/{job_item.pk}?report={report.pk}")
             ) for m in members if m
         ]
         Notification.objects.bulk_create(notifications)

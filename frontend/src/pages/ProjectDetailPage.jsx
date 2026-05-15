@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Edit2, Plus, FileText, UserPlus, MoreHorizontal, MapPin, Calendar, Users } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { apiFetch, unwrapList } from '../api/client';
@@ -109,11 +109,13 @@ const ProjectDetailPage = () => {
   const { projectId } = useParams();
   const id = projectId; // Alias for backward compatibility if needed
   const { token } = useAuth();
+  const location = useLocation();
   console.log("ProjectDetailPage ID:", id);
   const navigate = useNavigate();
 
   const [project, setProject] = useState(null);
   const [plots, setPlots] = useState([]);
+  const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
   const [showNewPlot, setShowNewPlot] = useState(false);
@@ -121,12 +123,18 @@ const ProjectDetailPage = () => {
 
   useEffect(() => { fetchAll(); }, [id]);
 
+  useEffect(() => {
+    const tab = new URLSearchParams(location.search).get('tab');
+    if (tab) setActiveTab(tab);
+  }, [location.search]);
+
   const fetchAll = async () => {
     setLoading(true);
     try {
-      const [projRes, plotsRes] = await Promise.all([
+      const [projRes, plotsRes, reportsRes] = await Promise.all([
         apiFetch(`/projects/${id}/`, { token }),
         apiFetch(`/projects/${id}/plots/`, { token }),
+        apiFetch(`/projects/${id}/reports/`, { token }),
       ]);
       if (projRes.ok) {
         const data = await projRes.json();
@@ -136,6 +144,7 @@ const ProjectDetailPage = () => {
         console.error("Project fetch failed:", projRes.status, id);
       }
       if (plotsRes.ok) setPlots(unwrapList(await plotsRes.json()));
+      if (reportsRes.ok) setReports(unwrapList(await reportsRes.json()));
     } catch (e) { 
       console.error("Fetch error in ProjectDetailPage:", e); 
     } finally { setLoading(false); }
@@ -145,7 +154,7 @@ const ProjectDetailPage = () => {
     { id: 'overview', label: 'Overview' },
     { id: 'plots', label: `Plots (${plots.length})` },
     { id: 'team', label: 'Team' },
-    { id: 'reports', label: 'Reports' },
+    { id: 'reports', label: `Reports (${reports.length})` },
   ];
 
   if (loading) return <div style={{ padding: '60px', display: 'flex', justifyContent: 'center' }}><Spinner /></div>;
@@ -380,10 +389,35 @@ const ProjectDetailPage = () => {
 
       {/* Reports Tab */}
       {activeTab === 'reports' && (
-        <div style={{ textAlign: 'center', padding: '60px', color: 'var(--text-tertiary)' }}>
-          <FileText size={40} style={{ margin: '0 auto 16px', display: 'block', opacity: 0.3 }} />
-          <p style={{ fontWeight: 600 }}>Reports coming soon</p>
-          <p style={{ fontSize: '14px' }}>View aggregated daily reports from all plots.</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          {reports.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '60px', color: 'var(--text-tertiary)' }}>
+              <FileText size={40} style={{ margin: '0 auto 16px', display: 'block', opacity: 0.3 }} />
+              <p style={{ fontWeight: 600 }}>No reports available yet</p>
+              <p style={{ fontSize: '14px' }}>Daily reports from work items will appear here once created.</p>
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gap: '16px' }}>
+              {reports.map(report => (
+                <div key={report.id} style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '18px', padding: '22px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '18px', flexWrap: 'wrap' }}>
+                    <div>
+                      <p style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: 'var(--text-primary)' }}>{report.report_date}</p>
+                      <p style={{ margin: '6px 0 0', fontSize: '13px', color: 'var(--text-secondary)' }}>
+                        {report.job_item_name || 'Job report'} • {report.work_item_name || 'Work item'} • {report.construction_plot || project.project_name}
+                      </p>
+                    </div>
+                    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
+                      <span style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>{report.percentage_job_progress}% complete</span>
+                      <StatusPill status={report.priority || 'Planned'} />
+                    </div>
+                  </div>
+                  {report.notes && <p style={{ margin: '16px 0 0', fontSize: '14px', color: 'var(--text-secondary)', lineHeight: 1.7 }}>{report.notes}</p>}
+                  {report.issues_encountered && <p style={{ margin: '10px 0 0', fontSize: '13px', color: 'var(--status-delayed)' }}>⚠ {report.issues_encountered}</p>}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 

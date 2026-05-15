@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 // Optimized Job Item Detail View
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Plus, Image as ImageIcon, ArrowLeft, CheckCircle2, Loader as SpinnerIcon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { apiFetch, unwrapList } from '../api/client';
@@ -43,6 +43,8 @@ const JobItemDetailPage = () => {
   const [jobItem, setJobItem] = useState(null);
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
+  const location = useLocation();
+  const [highlightReportId, setHighlightReportId] = useState(null);
 
   useEffect(() => { fetchAll(); }, [projectId, plotId, workItemId, id]);
 
@@ -77,6 +79,27 @@ const JobItemDetailPage = () => {
       console.error("JobItemDetailPage fetch error:", e); 
     } finally { setLoading(false); }
   };
+
+  useEffect(() => {
+    const q = new URLSearchParams(location.search);
+    const rid = q.get('report');
+    if (rid) setHighlightReportId(rid);
+  }, [location.search]);
+
+  useEffect(() => {
+    if (!highlightReportId) return;
+    // Wait until reports are rendered into DOM
+    setTimeout(() => {
+      const el = document.getElementById(`report-${highlightReportId}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        const prevBg = el.style.boxShadow;
+        el.style.boxShadow = '0 6px 30px rgba(66,153,225,0.18)';
+        el.style.transition = 'box-shadow 300ms ease-in-out';
+        setTimeout(() => { el.style.boxShadow = prevBg || 'none'; }, 3000);
+      }
+    }, 350);
+  }, [reports, highlightReportId]);
 
   const handleMarkComplete = async () => {
     if (!window.confirm("Mark this job as completed?")) return;
@@ -186,7 +209,7 @@ const JobItemDetailPage = () => {
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxHeight: '500px', overflowY: 'auto' }}>
               {reports.map(r => (
-                <div key={r.id} style={{ padding: '16px', background: 'var(--bg-raised)', borderRadius: '14px', position: 'relative', paddingLeft: '20px' }}>
+                <div id={`report-${r.id}`} key={r.id} style={{ padding: '16px', background: 'var(--bg-raised)', borderRadius: '14px', position: 'relative', paddingLeft: '20px' }}>
                   <div style={{ position: 'absolute', left: '8px', top: '50%', transform: 'translateY(-50%)', width: '4px', height: '60%', background: 'var(--brand-orange)', borderRadius: '4px' }} />
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                     <p style={{ margin: 0, fontWeight: 700, fontSize: '14px', color: 'var(--text-primary)' }}>{r.report_date}</p>

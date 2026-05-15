@@ -552,10 +552,11 @@ class JobReportCommentSerializer(serializers.ModelSerializer):
  
 class NotificationSerializer(serializers.ModelSerializer):
     project_name = serializers.ReadOnlyField(source="project.project_name")
+    target_url = serializers.ReadOnlyField()
 
     class Meta:
         model = Notification
-        fields = ["id", "user", "project", "project_name", "message", "priority", "is_read", "created_at"]
+        fields = ["id", "user", "project", "project_name", "message", "priority", "is_read", "created_at", "target_url"]
         read_only_fields = ["id", "user", "created_at"]
  
  

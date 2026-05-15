@@ -60,6 +60,12 @@ const NotificationsPage = () => {
   };
 
   const handleViewNotification = (notification) => {
+    // If backend provided a deep-link, use it first
+    if (notification.target_url) {
+      navigate(notification.target_url);
+      return;
+    }
+
     const type = getNotificationType(notification.message);
     if (type === 'Invitations') {
       navigate('/invitations');

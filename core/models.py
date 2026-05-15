@@ -616,6 +616,8 @@ class Notification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="notifications")
     project = models.ForeignKey(ConstructionProject, on_delete=models.CASCADE, related_name="notifications")
     message = models.TextField()
+    # Optional SPA route or URL that the frontend can navigate to
+    target_url = models.CharField(max_length=512, null=True, blank=True)
     priority = models.CharField(max_length=10, choices=Priority.choices, default=Priority.NORMAL)
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
