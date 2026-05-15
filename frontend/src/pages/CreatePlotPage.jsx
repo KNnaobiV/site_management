@@ -9,10 +9,13 @@ import { showSuccessMessage } from '../utils/successMessage';
 const CreatePlotPage = () => {
   const { token } = useAuth();
   const navigate = useNavigate();
-  const { projectId } = useParams();
+  const { projectId, plotId } = useParams();
+  const isEditing = !!plotId;
   const [loading, setLoading] = useState(false);
   const [fetchingProject, setFetchingProject] = useState(!!projectId);
+  const [fetchingPlot, setFetchingPlot] = useState(isEditing);
   const [project, setProject] = useState(null);
+  const [plot, setPlot] = useState(null);
   const [error, setError] = useState(null);
   const [users, setUsers] = useState([]);
   const [projectsList, setProjectsList] = useState([]);
@@ -39,7 +42,38 @@ const CreatePlotPage = () => {
       fetchProjects();
     }
     fetchUsers();
-  }, [projectId]);
+    if (isEditing) {
+      fetchPlot();
+    }
+  }, [projectId, plotId]);
+
+  const fetchPlot = async () => {
+    try {
+      const res = await apiFetch(`/plots/${plotId}/`, { token });
+      if (res.ok) {
+        const plotData = await res.json();
+        setFormData({
+          plot_number: plotData.plot_number || '',
+          plot_name: plotData.plot_name || '',
+          construction_project: plotData.construction_project?.id || '',
+          address: plotData.address || '',
+          gps_latitude: plotData.gps_latitude || '',
+          gps_longitude: plotData.gps_longitude || '',
+          status: plotData.status || 'Planned',
+          foreman: plotData.foreman?.id || '',
+          plot_opening_date: plotData.plot_opening_date || new Date().toISOString().split('T')[0],
+          end_date: plotData.end_date || '',
+          notes: plotData.notes || ''
+        });
+      } else {
+        setError('Failed to load plot for editing.');
+      }
+    } catch (err) {
+      setError('Connection error while loading plot.');
+    } finally {
+      setFetchingPlot(false);
+    }
+  };
 
   const fetchProjects = async () => {
     try {
@@ -96,15 +130,21 @@ const CreatePlotPage = () => {
     };
 
     try {
-      const res = await apiFetch(`/projects/${formData.construction_project}/plots/`, {
-        method: 'POST',
+      const url = isEditing ? `/plots/${plotId}/` : `/projects/${formData.construction_project}/plots/`;
+      const method = isEditing ? 'PUT' : 'POST';
+      const res = await apiFetch(url, {
+        method,
         token,
         body: JSON.stringify(payload),
       });
 
       if (res.ok) {
-        showSuccessMessage("Plot created successfully!");
-        navigate(`/projects/${formData.construction_project}`);
+        showSuccessMessage(isEditing ? "Plot updated successfully!" : "Plot created successfully!");
+        if (isEditing) {
+          navigate(`/plots/${plotId}`);
+        } else {
+          navigate(`/projects/${formData.construction_project}`);
+        }
       } else {
         const data = await res.json();
         setError(Object.entries(data).map(([k, v]) => `${k}: ${v}`).join(', '));
@@ -116,7 +156,7 @@ const CreatePlotPage = () => {
     }
   };
 
-  if (fetchingProject) return <div style={{ display: 'flex', justifyContent: 'center', padding: '100px' }}><Spinner /></div>;
+  if (fetchingProject || fetchingPlot) return <div style={{ display: 'flex', justifyContent: 'center', padding: '100px' }}><Spinner /></div>;
 
   return (
     <div className="fade-up" style={{ padding: '0 0 80px' }}>
@@ -124,9 +164,9 @@ const CreatePlotPage = () => {
         <Breadcrumb items={[
           { label: 'Projects', path: '/projects' }, 
           { label: project?.project_name || 'Project', path: `/projects/${projectId}` },
-          { label: 'New Plot' }
+          { label: isEditing ? 'Edit Plot' : 'New Plot' }
         ]} />
-        <h1 style={{ fontSize: '64px', marginTop: '12px' }}>Create Plot</h1>
+        <h1 style={{ fontSize: '64px', marginTop: '12px' }}>{isEditing ? 'Edit Plot' : 'Create Plot'}</h1>
       </div>
 
       <form onSubmit={handleSubmit} style={{ 

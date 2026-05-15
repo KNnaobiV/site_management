@@ -43,9 +43,11 @@ export default function App() {
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/projects" element={<ProjectsPage />} />
                 <Route path="/projects/new" element={<CreateProjectPage />} />
+                <Route path="/projects/:projectId/edit" element={<CreateProjectPage />} />
                 <Route path="/projects/:projectId" element={<ProjectDetailPage />} />
                 <Route path="/projects/:projectId/plots/new" element={<CreatePlotPage />} />
                 <Route path="/plots/new" element={<CreatePlotPage />} />
+                <Route path="/plots/:plotId/edit" element={<CreatePlotPage />} />
                 
                 <Route path="/plots" element={<PlotsPage />} />
                 <Route path="/plots/:plotId" element={<PlotDetailPage />} />

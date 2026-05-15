@@ -66,7 +66,7 @@ const JobItemDetailPage = () => {
           apiFetch(`/projects/${pid}/`, { token }),
           apiFetch(`/projects/${pid}/plots/${plid}/`, { token }),
           apiFetch(`/projects/${pid}/plots/${plid}/workitems/${wiid}/`, { token }),
-          apiFetch(`/jobitems/${id}/reports/`, { token }),
+          apiFetch(`/projects/${pid}/plots/${plid}/workitems/${wiid}/jobitems/${id}/reports/`, { token }),
         ]);
         if (projRes.ok) setProject(await projRes.json());
         if (plotRes.ok) setPlot(await plotRes.json());

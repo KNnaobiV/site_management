@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Breadcrumb, Spinner, SearchableSelect } from '../components';
 import { Upload, X, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -9,7 +9,10 @@ import { showSuccessMessage } from '../utils/successMessage';
 const CreateProjectPage = () => {
   const { token } = useAuth();
   const navigate = useNavigate();
+  const { projectId } = useParams();
+  const isEditing = !!projectId;
   const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(isEditing);
   const [error, setError] = useState(null);
   const [users, setUsers] = useState([]);
   
@@ -28,7 +31,37 @@ const CreateProjectPage = () => {
 
   useEffect(() => {
     fetchUsers();
+    if (isEditing) {
+      fetchProject();
+    }
   }, []);
+
+  const fetchProject = async () => {
+    try {
+      const res = await apiFetch(`/projects/${projectId}/`, { token });
+      if (res.ok) {
+        const project = await res.json();
+        setFormData({
+          project_name: project.project_name || '',
+          client: project.client?.id || '',
+          project_description: project.project_description || '',
+          project_status: project.project_status || 'Planned',
+          proposed_start_date: project.proposed_start_date || new Date().toISOString().split('T')[0],
+          proposed_end_date: project.proposed_end_date || '',
+          project_manager: project.project_manager?.id || '',
+          foreman: '',
+          address: project.address || '',
+          cover_image: null
+        });
+      } else {
+        setError('Failed to load project for editing.');
+      }
+    } catch (err) {
+      setError('Connection error while loading project.');
+    } finally {
+      setFetching(false);
+    }
+  };
 
   const fetchUsers = async () => {
     try {
@@ -62,14 +95,14 @@ const CreateProjectPage = () => {
     };
 
     try {
-      const res = await apiFetch('/projects/', {
-        method: 'POST',
+      const res = await apiFetch(isEditing ? `/projects/${projectId}/` : '/projects/', {
+        method: isEditing ? 'PUT' : 'POST',
         token,
         body: JSON.stringify(payload),
       });
 
       if (res.ok) {
-        showSuccessMessage("Project created successfully!");
+        showSuccessMessage(isEditing ? "Project updated successfully!" : "Project created successfully!");
         navigate('/projects');
       } else {
         const data = await res.json();
@@ -82,11 +115,13 @@ const CreateProjectPage = () => {
     }
   };
 
+  if (fetching) return <div style={{ display: 'flex', justifyContent: 'center', padding: '100px' }}><Spinner /></div>;
+
   return (
     <div className="fade-up" style={{ padding: '0 0 80px' }}>
       <div style={{ marginBottom: '32px' }}>
-        <Breadcrumb items={[{ label: 'Projects', path: '/projects' }, { label: 'New Project' }]} />
-        <h1 style={{ fontSize: '64px', marginTop: '12px' }}>Create Project</h1>
+        <Breadcrumb items={[{ label: 'Projects', path: '/projects' }, { label: isEditing ? 'Edit Project' : 'New Project' }]} />
+        <h1 style={{ fontSize: '64px', marginTop: '12px' }}>{isEditing ? 'Edit Project' : 'Create Project'}</h1>
       </div>
 
       <form onSubmit={handleSubmit} style={{ 

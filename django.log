@@ -14657,3 +14657,21 @@ WARNING django.request 2026-05-15 07:46:55,549 log 23876 19128 Not Found: /api/j
 WARNING django.request 2026-05-15 07:46:55,601 log 23876 14980 Not Found: /api/jobitems/1/reports/
 WARNING django.request 2026-05-15 07:47:23,236 log 23876 23984 Not Found: /api/jobitems/1/reports/
 WARNING django.request 2026-05-15 07:57:45,762 log 23876 5176 Not Found: /api/jobitems/1/reports/
+INFO django.utils.autoreload 2026-05-15 07:59:36,807 autoreload 39703 124713090626176 Watching for file changes with StatReloader
+WARNING django.request 2026-05-15 07:59:37,897 log 39703 124712954881792 Unauthorized: /api/
+WARNING django.request 2026-05-15 07:59:41,751 log 39703 124712963274496 Not Found: /
+INFO django.utils.autoreload 2026-05-15 08:00:23,596 autoreload 40285 131719995716224 Watching for file changes with StatReloader
+INFO django.utils.autoreload 2026-05-15 08:00:47,221 autoreload 40662 140716854047360 Watching for file changes with StatReloader
+WARNING django.request 2026-05-15 08:00:48,096 log 40662 140716785514240 Not Found: /
+WARNING django.request 2026-05-15 08:00:50,573 log 40662 140716785514240 Not Found: /
+INFO django.utils.autoreload 2026-05-15 08:02:46,337 autoreload 40662 140716854047360 /workspaces/codespaces-django/hello_world/settings/dev.py changed, reloading.
+INFO django.utils.autoreload 2026-05-15 08:02:46,725 autoreload 41756 128188772184704 Watching for file changes with StatReloader
+WARNING django.request 2026-05-15 08:02:47,473 log 41756 128188703651584 Not Found: /
+INFO django.utils.autoreload 2026-05-15 08:02:49,232 autoreload 41756 128188772184704 /workspaces/codespaces-django/hello_world/settings/dev.py changed, reloading.
+INFO django.utils.autoreload 2026-05-15 08:04:38,132 autoreload 42600 128824053224064 Watching for file changes with StatReloader
+WARNING django.request 2026-05-15 08:04:39,669 log 42600 128823911769856 Not Found: /
+WARNING django.request 2026-05-15 08:04:41,838 log 42600 128823903377152 Not Found: /
+WARNING django.request 2026-05-15 08:06:35,658 log 42600 128823903377152 Not Found: /.aws/
+WARNING django.request 2026-05-15 08:06:35,670 log 42600 128823903377152 Not Found: /.ada/
+WARNING django.request 2026-05-15 08:06:35,753 log 42600 128823903377152 Not Found: /.ssh/
+WARNING django.request 2026-05-15 08:06:35,766 log 42600 128823903377152 Not Found: /.midway/

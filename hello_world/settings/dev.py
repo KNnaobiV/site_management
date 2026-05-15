@@ -20,7 +20,7 @@ ADMIN_URL = CFG.get("SITE", "DJANGO_ADMIN_URL")
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
-ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1"]
+ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1", "https://turbo-space-goldfish-4wv67xrww64c5r97-5173.app.github.dev/"]
 
 LOGGING = {
     "version": 1,

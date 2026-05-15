@@ -57,7 +57,11 @@ const CreateDailyReportPage = () => {
     };
 
     try {
-      const res = await apiFetch(`/jobitems/${jobItemId}/reports/`, {
+      const projectId = jobItem.work_item.construction_plot.construction_project.id;
+      const plotId = jobItem.work_item.construction_plot.id;
+      const workItemId = jobItem.work_item.id;
+      const url = `/projects/${projectId}/plots/${plotId}/workitems/${workItemId}/jobitems/${jobItemId}/reports/`;
+      const res = await apiFetch(url, {
         method: 'POST',
         token,
         body: JSON.stringify(payload)
@@ -69,7 +73,7 @@ const CreateDailyReportPage = () => {
         for (const img of reportImages) {
           const fd = new FormData();
           fd.append('image', img);
-          await apiFetch(`/jobitems/${jobItemId}/reports/${report.id}/images/`, {
+          await apiFetch(`/projects/${projectId}/plots/${plotId}/workitems/${workItemId}/jobitems/${jobItemId}/reports/${report.id}/images/`, {
             method: 'POST',
             token,
             body: fd

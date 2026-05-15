@@ -175,7 +175,7 @@ const ProjectDetailPage = () => {
         </div>
         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
           <StatusPill status={project.project_status} />
-          <button className="btn-ghost" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <button className="btn-ghost" style={{ display: 'flex', alignItems: 'center', gap: '8px' }} onClick={() => navigate(`/projects/${id}/edit`)}>
             <Edit2 size={15} /> Edit
           </button>
           <button className="btn-ghost" onClick={() => navigate('/team/invite')} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
