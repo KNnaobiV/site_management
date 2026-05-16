@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Avatar from './Avatar';
 import { Send, MessageCircle, ChevronDown, ChevronUp, Loader } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -31,11 +31,7 @@ export default function CommentsSection({
   // Build the API URL for comments
   const commentsUrl = `/projects/${projectId}/plots/${plotId}/workitems/${workitemId}/jobitems/${jobitemId}/reports/${reportId}/comments/`;
 
-  useEffect(() => {
-    fetchComments();
-  }, [reportId]);
-
-  const fetchComments = async () => {
+  const fetchComments = useCallback(async () => {
     if (!reportId) return;
     setLoading(true);
     try {
@@ -49,7 +45,13 @@ export default function CommentsSection({
     } finally {
       setLoading(false);
     }
-  };
+  }, [commentsUrl, reportId, token]);
+
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    fetchComments();
+  }, [fetchComments]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const handleSubmitComment = async (e) => {
     e.preventDefault();
@@ -65,11 +67,13 @@ export default function CommentsSection({
           parent: null,
         }),
       });
-      if (res.ok) {
-        const comment = await res.json();
-        setComments([...comments, comment]);
-        setNewComment('');
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(`Failed to post comment: ${res.status} ${errorText}`);
       }
+      const comment = await res.json();
+      setComments([...comments, comment]);
+      setNewComment('');
     } catch (e) {
       console.error('Error posting comment', e);
     } finally {
@@ -91,11 +95,13 @@ export default function CommentsSection({
           parent: parentCommentId,
         }),
       });
-      if (res.ok) {
-        fetchComments();
-        setReplyingTo(null);
-        setReplyText('');
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(`Failed to post reply: ${res.status} ${errorText}`);
       }
+      fetchComments();
+      setReplyingTo(null);
+      setReplyText('');
     } catch (e) {
       console.error('Error posting reply', e);
     } finally {

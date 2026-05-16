@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { NotificationItem, InvitationDetailModal } from '../components';
 import { Filter, CheckCheck } from 'lucide-react';
@@ -47,19 +47,37 @@ const NotificationsPage = () => {
   ];
 
   useEffect(() => {
-    fetchNotifications();
-  }, []);
-
-  const fetchNotifications = async () => {
-    try {
-      const res = await apiFetch("/notifications/", { token });
-      if (res.ok) {
-        const data = await res.json();
-        setNotifications(unwrapList(data));
+    const loadNotifications = async () => {
+      try {
+        const res = await apiFetch("/notifications/", { token });
+        if (res.ok) {
+          const data = await res.json();
+          setNotifications(unwrapList(data));
+        }
+      } catch (error) {
+        console.error(error);
       }
-    } catch (error) {
-      console.error(error);
+    };
+    loadNotifications();
+  }, [token]);
+
+  const findInvitationFromNotification = async (notification) => {
+    const isInvitation = getNotificationType(notification.message) === 'Invitations';
+    if (!isInvitation) return null;
+
+    const paths = ['/invitations/projects/', '/invitations/plots/'];
+    for (const path of paths) {
+      try {
+        const res = await apiFetch(path, { token });
+        if (!res.ok) continue;
+        const items = unwrapList(await res.json());
+        const match = items.find(inv => inv.message === notification.message);
+        if (match) return match;
+      } catch (err) {
+        console.error('Failed to lookup invitation list', err);
+      }
     }
+    return null;
   };
 
   const handleViewNotification = async (notification) => {
@@ -73,6 +91,12 @@ const NotificationsPage = () => {
       } catch (error) {
         console.error('Failed to load invitation details', error);
       }
+    }
+
+    const fallbackInvitation = await findInvitationFromNotification(notification);
+    if (fallbackInvitation) {
+      setSelectedInvitation(fallbackInvitation);
+      return;
     }
 
     if (notification.target_url) {

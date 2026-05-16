@@ -693,6 +693,7 @@ def create_project_invitation_notification(sender, instance, created, **kwargs):
             user=instance.invitee,
             project=instance.project,
             message=f"You have been invited to join project '{instance.project.project_name}' as {instance.role}.",
+            target_url=instance.target_url,
             priority=Notification.Priority.HIGH
         )
 
@@ -703,5 +704,6 @@ def create_plot_invitation_notification(sender, instance, created, **kwargs):
             user=instance.invitee,
             project=instance.plot.construction_project,
             message=f"You have been invited to join plot '{instance.plot.address}' as {instance.role}.",
+            target_url=instance.target_url,
             priority=Notification.Priority.HIGH
         )
