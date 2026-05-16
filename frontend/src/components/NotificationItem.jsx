@@ -10,7 +10,7 @@ const NotificationItem = ({ notification, onView }) => {
     if (msg.includes('report')) return { icon: FileText, color: '#1a1a1a', bg: '#f0f0f0' };
     if (msg.includes('mentioned')) return { icon: MessageSquare, color: '#1a1a1a', bg: '#f0f0f0' };
     if (msg.includes('urgent') || msg.includes('delayed') || msg.includes('alert')) return { icon: AlertTriangle, color: '#a32a2a', bg: '#fdeded' };
-    if (msg.includes('accepted')) return { icon: CheckCircle2, color: '#2d5a27', bg: '#edf5ed' };
+    if (msg.includes('accepted') || msg.includes('declined')) return { icon: CheckCircle2, color: '#2d5a27', bg: '#edf5ed' };
     return { icon: Bell, color: '#8a8a8a', bg: '#f0f0f0' };
   };
 
@@ -21,6 +21,7 @@ const NotificationItem = ({ notification, onView }) => {
     if (msg.includes('report')) return 'Reports';
     if (msg.includes('mentioned')) return 'Mentions';
     if (msg.includes('urgent') || msg.includes('delayed') || msg.includes('alert')) return 'Alerts';
+    if (msg.includes('accepted') || msg.includes('declined')) return 'Invitations';
     return 'System';
   };
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { NotificationItem } from '../components';
+import { NotificationItem, InvitationDetailModal } from '../components';
 import { Filter, CheckCheck } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { apiFetch, unwrapList } from '../api/client';
@@ -10,11 +10,14 @@ const NotificationsPage = () => {
   const { token } = useAuth();
   const [notifications, setNotifications] = useState([]);
   const [activeTab, setActiveTab] = useState('All');
+  const [selectedInvitation, setSelectedInvitation] = useState(null);
 
   const getNotificationType = (message) => {
     const msg = (message || '').toLowerCase();
     if (msg.includes('invited')) return 'Invitations';
+    if (msg.includes('accepted') || msg.includes('declined')) return 'Invitations';
     if (msg.includes('approval') || msg.includes('approved')) return 'Approvals';
+    if (msg.includes('report')) return 'Reports';
     if (msg.includes('mentioned')) return 'Mentions';
     if (msg.includes('urgent') || msg.includes('delayed') || msg.includes('alert')) return 'Alerts';
     return 'System';
@@ -59,8 +62,19 @@ const NotificationsPage = () => {
     }
   };
 
-  const handleViewNotification = (notification) => {
-    // If backend provided a deep-link, use it first
+  const handleViewNotification = async (notification) => {
+    if (notification.target_url && notification.target_url.startsWith('/invitations/')) {
+      try {
+        const res = await apiFetch(notification.target_url, { token });
+        if (res.ok) {
+          setSelectedInvitation(await res.json());
+          return;
+        }
+      } catch (error) {
+        console.error('Failed to load invitation details', error);
+      }
+    }
+
     if (notification.target_url) {
       navigate(notification.target_url);
       return;
@@ -68,7 +82,7 @@ const NotificationsPage = () => {
 
     const type = getNotificationType(notification.message);
     if (type === 'Invitations') {
-      navigate('/invitations');
+      navigate('/notifications');
       return;
     }
     if (notification.project) {
@@ -89,9 +103,6 @@ const NotificationsPage = () => {
           <button className="btn-ghost" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <CheckCheck size={18} color="var(--brand-orange)" />
             <span style={{ color: 'var(--brand-orange)' }}>Mark all as read</span>
-          </button>
-          <button className="btn-ghost" onClick={() => navigate('/invitations')}>
-            View invitations
           </button>
           <button className="btn-ghost">
             <Filter size={18} />
@@ -143,6 +154,12 @@ const NotificationsPage = () => {
           </div>
         )}
       </div>
+
+      <InvitationDetailModal
+        invitation={selectedInvitation}
+        isOpen={!!selectedInvitation}
+        onClose={() => setSelectedInvitation(null)}
+      />
     </div>
   );
 };

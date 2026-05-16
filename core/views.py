@@ -615,7 +615,7 @@ class JobReportViewSet(PlotScopedMixin, viewsets.ModelViewSet):
         if self.action == "destroy":
             return [IsAuthenticated(), CanManagePlot()]
         if self.action == "comments":
-            return [IsAuthenticated(), IsPlotMember()]
+            return [IsAuthenticated(), IsProjectMember()]
         return [IsAuthenticated()]
 
     def get_queryset(self):

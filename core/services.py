@@ -10,6 +10,7 @@ from core.models import (
     PlotInvitation,
     ProjectRole,
     PlotRole,
+    Notification,
 )
 
 User = get_user_model()
@@ -116,12 +117,26 @@ def accept_project_invitation(*, actor: User, invitation: ProjectInvitation):
     if actor != invitation.invitee:
         raise PermissionDenied("Only the invitee can accept this invitation.")
     invitation.accept()  # all logic lives in the model method
+    Notification.objects.create(
+        user=invitation.invited_by,
+        project=invitation.project,
+        message=f"{invitation.invitee.username} accepted your project invitation.",
+        target_url=invitation.target_url,
+        priority=Notification.Priority.NORMAL,
+    )
  
  
 def decline_project_invitation(*, actor: User, invitation: ProjectInvitation):
     if actor != invitation.invitee:
         raise PermissionDenied("Only the invitee can decline this invitation.")
     invitation.decline()
+    Notification.objects.create(
+        user=invitation.invited_by,
+        project=invitation.project,
+        message=f"{invitation.invitee.username} declined your project invitation.",
+        target_url=invitation.target_url,
+        priority=Notification.Priority.NORMAL,
+    )
  
  
 def revoke_project_invitation(*, actor: User, invitation: ProjectInvitation):
@@ -137,12 +152,26 @@ def accept_plot_invitation(*, actor: User, invitation: PlotInvitation):
     if actor != invitation.invitee:
         raise PermissionDenied("Only the invitee can accept this invitation.")
     invitation.accept()
+    Notification.objects.create(
+        user=invitation.invited_by,
+        project=invitation.plot.construction_project,
+        message=f"{invitation.invitee.username} accepted your plot invitation.",
+        target_url=invitation.target_url,
+        priority=Notification.Priority.NORMAL,
+    )
  
  
 def decline_plot_invitation(*, actor: User, invitation: PlotInvitation):
     if actor != invitation.invitee:
         raise PermissionDenied("Only the invitee can decline this invitation.")
     invitation.decline()
+    Notification.objects.create(
+        user=invitation.invited_by,
+        project=invitation.plot.construction_project,
+        message=f"{invitation.invitee.username} declined your plot invitation.",
+        target_url=invitation.target_url,
+        priority=Notification.Priority.NORMAL,
+    )
  
  
 def revoke_plot_invitation(*, actor: User, invitation: PlotInvitation):

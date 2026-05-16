@@ -189,6 +189,10 @@ class ProjectInvitation(TimestampedModel):
             f"{self.invitee.username} invited as {self.role} "
             f"on {self.project.project_name}"
         )
+
+    @property
+    def target_url(self):
+        return f"/invitations/projects/{self.pk}/"
     
     def save(self, *args, **kwargs):
         if not self.expires_at:
@@ -304,6 +308,10 @@ class PlotInvitation(TimestampedModel):
             f"{self.invitee.username} invited as {self.role} "
             f"on plot {self.plot.address}"
         )
+
+    @property
+    def target_url(self):
+        return f"/invitations/plots/{self.pk}/"
  
     def save(self, *args, **kwargs):
         if not self.expires_at:
