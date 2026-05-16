@@ -7,7 +7,7 @@ import { apiFetch, unwrapList } from '../api/client';
 
 const NotificationsPage = () => {
   const navigate = useNavigate();
-  const { token } = useAuth();
+  const { user, token } = useAuth();
   const [notifications, setNotifications] = useState([]);
   const [activeTab, setActiveTab] = useState('All');
   const [selectedInvitation, setSelectedInvitation] = useState(null);
@@ -65,14 +65,29 @@ const NotificationsPage = () => {
     const isInvitation = getNotificationType(notification.message) === 'Invitations';
     if (!isInvitation) return null;
 
-    const paths = ['/invitations/projects/', '/invitations/plots/'];
-    for (const path of paths) {
+    const preferredOrder = notification.message?.toLowerCase().includes('plot')
+      ? ['/invitations/plots/', '/invitations/projects/']
+      : ['/invitations/projects/', '/invitations/plots/'];
+
+    for (const path of preferredOrder) {
       try {
         const res = await apiFetch(path, { token });
         if (!res.ok) continue;
+
         const items = unwrapList(await res.json());
-        const match = items.find(inv => inv.message === notification.message);
-        if (match) return match;
+        const matches = items.filter(inv => (
+          inv.invitee?.id === user?.id || inv.invited_by?.id === user?.id
+        ));
+
+        if (matches.length > 0) {
+          const exactMessage = matches.find(inv => inv.message === notification.message);
+          if (exactMessage) return exactMessage;
+
+          const byProject = matches.find(inv => inv.project === notification.project);
+          if (byProject) return byProject;
+
+          return matches[0];
+        }
       } catch (err) {
         console.error('Failed to lookup invitation list', err);
       }
