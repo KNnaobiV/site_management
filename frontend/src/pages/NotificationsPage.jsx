@@ -11,6 +11,7 @@ const NotificationsPage = () => {
   const [notifications, setNotifications] = useState([]);
   const [activeTab, setActiveTab] = useState('All');
   const [selectedInvitation, setSelectedInvitation] = useState(null);
+  const [actionError, setActionError] = useState(null);
 
   const getNotificationType = (message) => {
     const msg = (message || '').toLowerCase();
@@ -169,7 +170,7 @@ const NotificationsPage = () => {
             }}
           >
             {tab.label}
-            <span style={{ 
+            <span style={{
               background: activeTab === tab.label ? 'rgba(255,255,255,0.2)' : 'var(--bg-raised)',
               padding: '2px 8px',
               borderRadius: '10px',
@@ -197,8 +198,32 @@ const NotificationsPage = () => {
       <InvitationDetailModal
         invitation={selectedInvitation}
         isOpen={!!selectedInvitation}
-        onClose={() => setSelectedInvitation(null)}
+        onClose={() => {
+          setSelectedInvitation(null);
+          setActionError(null);
+        }}
+        onAction={async (invitation, action) => {
+          setActionError(null);
+          const kind = invitation.plot ? 'plots' : 'projects';
+          const res = await apiFetch(`/invitations/${kind}/${invitation.id}/${action}/`, {
+            method: 'POST',
+            token,
+          });
+          if (!res.ok) {
+            const data = await res.json().catch(() => null);
+            throw new Error(data?.detail || 'Unable to perform action.');
+          }
+          const updated = await res.json();
+          setSelectedInvitation(updated);
+          setNotifications((prev) => prev.map((n) => n.id === updated.id ? n : n));
+          return updated;
+        }}
       />
+      {actionError && (
+        <div style={{ marginTop: '16px', color: '#dc2626', fontSize: '14px' }}>
+          {actionError}
+        </div>
+      )}
     </div>
   );
 };

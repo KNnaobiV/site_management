@@ -38,17 +38,17 @@ const NotificationItem = ({ notification, onView }) => {
   const typeLabel = notification.type || getTypeLabel();
 
   return (
-    <div className="card" style={{ 
-      display: 'flex', 
-      gap: '20px', 
+    <div className="card" style={{
+      display: 'flex',
+      gap: '20px',
       padding: '20px',
       borderLeft: `4px solid ${color}`,
       alignItems: 'center'
     }}>
-      <div style={{ 
-        width: '48px', 
-        height: '48px', 
-        borderRadius: '50%', 
+      <div style={{
+        width: '48px',
+        height: '48px',
+        borderRadius: '50%',
         background: bg,
         display: 'flex',
         alignItems: 'center',

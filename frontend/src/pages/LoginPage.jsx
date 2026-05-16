@@ -106,41 +106,41 @@ export default function LoginPage() {
 
     return (
         <div className="auth-wrap">
-            <div class="auth-panel">
-                <div class="brand-mark">
-                    <div class="brand-icon">
+            <div className="auth-panel">
+                <div className="brand-mark">
+                    <div className="brand-icon">
                         <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M2 16L10 4L18 16" stroke="#FEFCF8" stroke-width="1.5" stroke-linejoin="round" />
-                            <path d="M5 16V11H15V16" stroke="#FEFCF8" stroke-width="1.5" stroke-linejoin="round" />
-                            <path d="M8 16V13H12V16" stroke="#FEFCF8" stroke-width="1.5" stroke-linejoin="round" />
+                            <path d="M2 16L10 4L18 16" stroke="#FEFCF8" strokeWidth="1.5" strokeLinejoin="round" />
+                            <path d="M5 16V11H15V16" stroke="#FEFCF8" strokeWidth="1.5" strokeLinejoin="round" />
+                            <path d="M8 16V13H12V16" stroke="#FEFCF8" strokeWidth="1.5" strokeLinejoin="round" />
                         </svg>
                     </div>
                     <span className="brand-name">
-                        <span class="panel-copy">Constro<em style={{ color: "var(--rust-light)", fontSize: "1.5em" }}>Pal</em></span>
+                        <span className="panel-copy">Constro<em style={{ color: "var(--rust-light)", fontSize: "1.5em" }}>Pal</em></span>
                     </span>
                 </div>
-                <div class="panel-copy">
-                    <h1>Built for those who <em>build</em></h1>
+                <div className="panel-copy">
+                    <h1 style={{ color: "white" }}>Built for those who <em>build</em></h1>
                     <p>Manage projects, sites, teams, and daily reports — all in one unified workspace designed for modern construction management.</p>
                 </div>
-                <div class="panel-stats">
-                    <div class="stat-item">
-                        <div class="stat-num">1.2k</div>
-                        <div class="stat-label">Projects</div>
+                <div className="panel-stats">
+                    <div className="stat-item">
+                        <div className="stat-num">1.2k</div>
+                        <div className="stat-label">Projects</div>
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-num">94%</div>
-                        <div class="stat-label">On-time delivery</div>
+                    <div className="stat-item">
+                        <div className="stat-num">94%</div>
+                        <div className="stat-label">On-time delivery</div>
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-num">48h</div>
-                        <div class="stat-label">Avg. report cycle</div>
+                    <div className="stat-item">
+                        <div className="stat-num">48h</div>
+                        <div className="stat-label">Avg. report cycle</div>
                     </div>
                 </div>
             </div>
 
-            <div class="auth-form-wrap">
-                <div class="auth-form-inner fade-in" id="login-form">
+            <div className="auth-form-wrap">
+                <div className="auth-form-inner fade-in" id="login-form">
                     <h2 style={{ color: "black" }}>{tab === "login" ? "Welcome back" : "Create account"}</h2>
                     <p>
                         {tab === "login"

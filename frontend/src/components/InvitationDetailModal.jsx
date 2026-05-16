@@ -1,11 +1,16 @@
-import React from 'react';
-import { X, Calendar, User, MessageSquare, Clock } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, Calendar, Clock } from 'lucide-react';
 import Avatar from './Avatar';
+import { useAuth } from '../context/AuthContext';
 
 /**
  * InvitationDetailModal - Display detailed information about an invitation
  */
-const InvitationDetailModal = ({ invitation, isOpen, onClose }) => {
+const InvitationDetailModal = ({ invitation, isOpen, onClose, onAction }) => {
+  const { user } = useAuth();
+  const [actionLoading, setActionLoading] = useState(false);
+  const [modalError, setModalError] = useState(null);
+
   if (!isOpen || !invitation) return null;
 
   const formatDate = (dateString) => {
@@ -30,6 +35,24 @@ const InvitationDetailModal = ({ invitation, isOpen, onClose }) => {
   };
 
   const statusColor = getStatusColor(invitation.status);
+  const isInvitee = invitation.invitee?.id === user?.id;
+  const isInviter = invitation.invited_by?.id === user?.id;
+  const canAcceptOrDecline = invitation.status === 'Pending' && isInvitee;
+  const canRevoke = invitation.status === 'Pending' && isInviter;
+
+  const handleAction = async (action) => {
+    if (!onAction) return;
+    if (actionLoading) return;
+    setModalError(null);
+    setActionLoading(true);
+    try {
+      await onAction(invitation, action);
+    } catch (err) {
+      setModalError(err?.message || 'Unable to complete action.');
+    } finally {
+      setActionLoading(false);
+    }
+  };
 
   return (
     <div
@@ -287,6 +310,44 @@ const InvitationDetailModal = ({ invitation, isOpen, onClose }) => {
               >
                 {invitation.message}
               </div>
+            </div>
+          )}
+
+          {(canAcceptOrDecline || canRevoke) && (
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '12px' }}>
+              {canAcceptOrDecline && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => handleAction('decline')}
+                    disabled={actionLoading}
+                    className="btn-ghost"
+                    style={{ color: 'var(--status-delayed)', padding: '10px 18px' }}
+                  >
+                    Decline
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleAction('accept')}
+                    disabled={actionLoading}
+                    className="btn-primary"
+                    style={{ padding: '10px 18px' }}
+                  >
+                    Accept
+                  </button>
+                </>
+              )}
+              {canRevoke && (
+                <button
+                  type="button"
+                  onClick={() => handleAction('revoke')}
+                  disabled={actionLoading}
+                  className="btn-danger"
+                  style={{ padding: '10px 18px' }}
+                >
+                  Revoke
+                </button>
+              )}
             </div>
           )}
 

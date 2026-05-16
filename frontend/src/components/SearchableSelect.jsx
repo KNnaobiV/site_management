@@ -9,7 +9,7 @@ const SearchableSelect = ({ options, value, onChange, onSearch, placeholder, lab
 
   const selectedOption = options.find(opt => String(opt.id) === String(value));
 
-  const filteredOptions = options.filter(opt => 
+  const filteredOptions = options.filter(opt =>
     opt.label.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -26,7 +26,7 @@ const SearchableSelect = ({ options, value, onChange, onSearch, placeholder, lab
   return (
     <div ref={containerRef} style={{ position: 'relative', width: '100%' }}>
       {label && <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>{label} {required && "*"}</label>}
-      <div 
+      <div
         onClick={() => setIsOpen(!isOpen)}
         style={{
           width: "100%",
@@ -67,7 +67,7 @@ const SearchableSelect = ({ options, value, onChange, onSearch, placeholder, lab
         }}>
           <div style={{ padding: '12px', borderBottom: '1px solid var(--border-subtle)', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Search size={16} color="var(--text-tertiary)" />
-            <input 
+            <input
               autoFocus
               placeholder="Search..."
               value={search}
@@ -89,7 +89,7 @@ const SearchableSelect = ({ options, value, onChange, onSearch, placeholder, lab
           <div style={{ maxHeight: '240px', overflowY: 'auto' }}>
             {filteredOptions.length > 0 ? (
               filteredOptions.map(opt => (
-                <div 
+                <div
                   key={opt.id}
                   onClick={(e) => {
                     e.stopPropagation();

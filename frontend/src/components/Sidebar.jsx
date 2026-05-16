@@ -59,7 +59,7 @@ const Sidebar = () => {
           fontSize: '28px',
           margin: 0,
           color: '#fff'
-        }}>ConstroPal</h2>
+        }}>Constro<em style={{ color: "var(--rust-light)" }}>Pal</em></h2>
       </div>
 
       {/* Navigation */}

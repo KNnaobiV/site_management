@@ -121,6 +121,11 @@ const InvitationsPage = () => {
         invitation={selectedInvitation}
         isOpen={!!selectedInvitation}
         onClose={() => setSelectedInvitation(null)}
+        onAction={(invitation, action) => handleAction({
+          id: invitation.id,
+          kind: invitation.plot ? 'plots' : 'projects',
+          action,
+        })}
       />
     </div>
   );
@@ -149,9 +154,9 @@ const InvitationSection = ({ title, subtitle, invites, onAction, actionMode, onV
           </thead>
           <tbody>
             {invites.length > 0 ? invites.map((invite) => (
-              <tr 
-                key={`${invite.id}-${invite.plot ?? invite.project}`} 
-                style={{ 
+              <tr
+                key={`${invite.id}-${invite.plot ?? invite.project}`}
+                style={{
                   borderBottom: '1px solid var(--border-default)',
                   cursor: 'pointer',
                   transition: 'background-color 0.2s'

@@ -8,12 +8,12 @@ import { Breadcrumb, Avatar, MaterialsEditor, Spinner, CommentsSection } from '.
 import { showSuccessMessage } from '../utils/successMessage';
 
 const statusColors = {
-  'Planned':    { bg: '#e8e8e8', text: '#555' },
-  'In Progress':{ bg: '#fef3ec', text: '#c14a1e' },
-  'Completed':  { bg: '#e8f5e9', text: '#2d5a27' },
-  'On Hold':    { bg: '#fff3e0', text: '#e65100' },
-  'Delayed':    { bg: '#fce4ec', text: '#a32a2a' },
-  'Cancelled':  { bg: '#f5f5f5', text: '#9e9e9e' },
+  'Planned': { bg: '#e8e8e8', text: '#555' },
+  'In Progress': { bg: '#fef3ec', text: '#c14a1e' },
+  'Completed': { bg: '#e8f5e9', text: '#2d5a27' },
+  'On Hold': { bg: '#fff3e0', text: '#e65100' },
+  'Delayed': { bg: '#fce4ec', text: '#a32a2a' },
+  'Cancelled': { bg: '#f5f5f5', text: '#9e9e9e' },
 };
 const StatusPill = ({ status }) => {
   const c = statusColors[status] || statusColors['Planned'];
@@ -56,11 +56,11 @@ const JobItemDetailPage = () => {
       if (jiRes.ok) {
         const jiData = await jiRes.json();
         setJobItem(jiData);
-        
+
         const pid = pidFromUrl || jiData.construction_project;
         const plid = plidFromUrl || jiData.construction_plot;
         const wiid = wiidFromUrl || jiData.work_item;
-        
+
         setProjectId(pid);
         setPlotId(plid);
         setWorkItemId(wiid);
@@ -76,8 +76,8 @@ const JobItemDetailPage = () => {
         if (wiRes.ok) setWorkItem(await wiRes.json());
         if (repRes.ok) setReports(unwrapList(await repRes.json()));
       }
-    } catch (e) { 
-      console.error("JobItemDetailPage fetch error:", e); 
+    } catch (e) {
+      console.error("JobItemDetailPage fetch error:", e);
     } finally { setLoading(false); }
   };
 
@@ -187,7 +187,7 @@ const JobItemDetailPage = () => {
           {materials.length > 0 && (
             <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '20px', padding: '24px' }}>
               <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', color: 'var(--text-tertiary)', textTransform: 'uppercase', margin: '0 0 16px' }}>Material Requirements</p>
-              <MaterialsEditor items={materials} onChange={() => {}} readOnly />
+              <MaterialsEditor items={materials} onChange={() => { }} readOnly />
             </div>
           )}
         </div>
@@ -210,15 +210,15 @@ const JobItemDetailPage = () => {
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxHeight: '500px', overflowY: 'auto' }}>
               {reports.map(r => (
-                <div 
-                  id={`report-${r.id}`} 
-                  key={r.id} 
+                <div
+                  id={`report-${r.id}`}
+                  key={r.id}
                   onClick={() => setSelectedReport(r)}
-                  style={{ 
-                    padding: '16px', 
-                    background: 'var(--bg-raised)', 
-                    borderRadius: '14px', 
-                    position: 'relative', 
+                  style={{
+                    padding: '16px',
+                    background: 'var(--bg-raised)',
+                    borderRadius: '14px',
+                    position: 'relative',
                     paddingLeft: '20px',
                     cursor: 'pointer',
                     transition: 'all 0.2s',
