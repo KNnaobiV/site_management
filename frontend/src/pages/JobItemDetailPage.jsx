@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 // Optimized Job Item Detail View
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { Plus, Image as ImageIcon, ArrowLeft, CheckCircle2, Loader as SpinnerIcon } from 'lucide-react';
+import { Plus, Image as ImageIcon, ArrowLeft, CheckCircle2, Loader as SpinnerIcon, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { apiFetch, unwrapList } from '../api/client';
-import { Breadcrumb, Avatar, MaterialsEditor, Spinner } from '../components';
+import { Breadcrumb, Avatar, MaterialsEditor, Spinner, CommentsSection } from '../components';
 import { showSuccessMessage } from '../utils/successMessage';
 
 const statusColors = {
@@ -45,6 +45,7 @@ const JobItemDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const location = useLocation();
   const [highlightReportId, setHighlightReportId] = useState(null);
+  const [selectedReport, setSelectedReport] = useState(null);
 
   useEffect(() => { fetchAll(); }, [projectId, plotId, workItemId, id]);
 
@@ -209,7 +210,22 @@ const JobItemDetailPage = () => {
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxHeight: '500px', overflowY: 'auto' }}>
               {reports.map(r => (
-                <div id={`report-${r.id}`} key={r.id} style={{ padding: '16px', background: 'var(--bg-raised)', borderRadius: '14px', position: 'relative', paddingLeft: '20px' }}>
+                <div 
+                  id={`report-${r.id}`} 
+                  key={r.id} 
+                  onClick={() => setSelectedReport(r)}
+                  style={{ 
+                    padding: '16px', 
+                    background: 'var(--bg-raised)', 
+                    borderRadius: '14px', 
+                    position: 'relative', 
+                    paddingLeft: '20px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-canvas)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.08)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--bg-raised)'; e.currentTarget.style.boxShadow = 'none'; }}
+                >
                   <div style={{ position: 'absolute', left: '8px', top: '50%', transform: 'translateY(-50%)', width: '4px', height: '60%', background: 'var(--brand-orange)', borderRadius: '4px' }} />
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                     <p style={{ margin: 0, fontWeight: 700, fontSize: '14px', color: 'var(--text-primary)' }}>{r.report_date}</p>
@@ -231,6 +247,184 @@ const JobItemDetailPage = () => {
           )}
         </div>
       </div>
+
+      {/* Report Detail Modal */}
+      {selectedReport && (
+        <div
+          onClick={() => setSelectedReport(null)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0, 0, 0, 0.45)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 2000,
+            padding: '24px',
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="fade-in"
+            style={{
+              background: 'var(--bg-card)',
+              borderRadius: '24px',
+              padding: '40px',
+              maxWidth: '700px',
+              width: '100%',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              boxShadow: '0 24px 60px rgba(0, 0, 0, 0.15)',
+              position: 'relative',
+            }}
+          >
+            {/* Close Button */}
+            <button
+              onClick={() => setSelectedReport(null)}
+              style={{
+                position: 'absolute',
+                top: '20px',
+                right: '20px',
+                background: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                padding: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'var(--text-tertiary)',
+                transition: 'color 0.2s',
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--text-primary)')}
+              onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-tertiary)')}
+            >
+              <X size={24} />
+            </button>
+
+            {/* Report Details */}
+            <h2 style={{ fontSize: '28px', marginBottom: '6px', marginTop: 0 }}>
+              Report Details
+            </h2>
+            <p style={{ color: 'var(--text-tertiary)', marginBottom: '24px' }}>
+              {selectedReport.report_date}
+            </p>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '28px' }}>
+              <div>
+                <p
+                  style={{
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    letterSpacing: '0.08em',
+                    color: 'var(--text-tertiary)',
+                    textTransform: 'uppercase',
+                    margin: '0 0 8px',
+                  }}
+                >
+                  Progress
+                </p>
+                <p
+                  style={{
+                    fontSize: '24px',
+                    fontWeight: 700,
+                    color: 'var(--brand-orange)',
+                    margin: 0,
+                  }}
+                >
+                  {selectedReport.percentage_job_progress}%
+                </p>
+              </div>
+              <div>
+                <p
+                  style={{
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    letterSpacing: '0.08em',
+                    color: 'var(--text-tertiary)',
+                    textTransform: 'uppercase',
+                    margin: '0 0 8px',
+                  }}
+                >
+                  Priority
+                </p>
+                <StatusPill status={selectedReport.priority} />
+              </div>
+            </div>
+
+            {selectedReport.notes && (
+              <div style={{ marginBottom: '24px' }}>
+                <p
+                  style={{
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    letterSpacing: '0.08em',
+                    color: 'var(--text-tertiary)',
+                    textTransform: 'uppercase',
+                    margin: '0 0 8px',
+                  }}
+                >
+                  Notes
+                </p>
+                <p
+                  style={{
+                    fontSize: '14px',
+                    color: 'var(--text-secondary)',
+                    margin: 0,
+                    lineHeight: 1.6,
+                  }}
+                >
+                  {selectedReport.notes}
+                </p>
+              </div>
+            )}
+
+            {selectedReport.issues_encountered && (
+              <div
+                style={{
+                  background: 'rgba(220,38,38,0.08)',
+                  border: '1px solid rgba(220,38,38,0.2)',
+                  borderRadius: '12px',
+                  padding: '16px',
+                  marginBottom: '24px',
+                }}
+              >
+                <p
+                  style={{
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    letterSpacing: '0.08em',
+                    color: '#dc2626',
+                    textTransform: 'uppercase',
+                    margin: '0 0 8px',
+                  }}
+                >
+                  ⚠ Issues Encountered
+                </p>
+                <p
+                  style={{
+                    fontSize: '13px',
+                    color: '#7f1d1d',
+                    margin: 0,
+                    lineHeight: 1.6,
+                  }}
+                >
+                  {selectedReport.issues_encountered}
+                </p>
+              </div>
+            )}
+
+            {/* Comments Section */}
+            <CommentsSection
+              reportId={selectedReport.id}
+              projectId={projectId}
+              plotId={plotId}
+              workitemId={workItemId}
+              jobitemId={id}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

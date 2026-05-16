@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Breadcrumb, Spinner } from '../components';
+import { Breadcrumb, Spinner, InvitationDetailModal } from '../components';
 import { CheckCircle2, XCircle, UserPlus } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { apiFetch, unwrapList } from '../api/client';
@@ -13,6 +13,7 @@ const InvitationsPage = () => {
   const [projectInvites, setProjectInvites] = useState([]);
   const [plotInvites, setPlotInvites] = useState([]);
   const [error, setError] = useState(null);
+  const [selectedInvitation, setSelectedInvitation] = useState(null);
 
   useEffect(() => {
     fetchInvitations();
@@ -103,6 +104,7 @@ const InvitationsPage = () => {
         invites={[...receivedProjectInvites, ...receivedPlotInvites]}
         onAction={handleAction}
         actionMode="received"
+        onViewDetails={setSelectedInvitation}
       />
 
       <InvitationSection
@@ -111,12 +113,20 @@ const InvitationsPage = () => {
         invites={[...sentProjectInvites, ...sentPlotInvites]}
         onAction={handleAction}
         actionMode="sent"
+        onViewDetails={setSelectedInvitation}
+      />
+
+      {/* Invitation Detail Modal */}
+      <InvitationDetailModal
+        invitation={selectedInvitation}
+        isOpen={!!selectedInvitation}
+        onClose={() => setSelectedInvitation(null)}
       />
     </div>
   );
 };
 
-const InvitationSection = ({ title, subtitle, invites, onAction, actionMode }) => {
+const InvitationSection = ({ title, subtitle, invites, onAction, actionMode, onViewDetails }) => {
   return (
     <div style={{ marginBottom: '56px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '24px' }}>
@@ -139,7 +149,17 @@ const InvitationSection = ({ title, subtitle, invites, onAction, actionMode }) =
           </thead>
           <tbody>
             {invites.length > 0 ? invites.map((invite) => (
-              <tr key={`${invite.id}-${invite.plot ?? invite.project}`} style={{ borderBottom: '1px solid var(--border-default)' }}>
+              <tr 
+                key={`${invite.id}-${invite.plot ?? invite.project}`} 
+                style={{ 
+                  borderBottom: '1px solid var(--border-default)',
+                  cursor: 'pointer',
+                  transition: 'background-color 0.2s'
+                }}
+                onClick={() => onViewDetails(invite)}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.02)'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+              >
                 <td style={tdStyle}>{invite.plot ? 'Plot' : 'Project'}</td>
                 <td style={tdStyle}>
                   {invite.project_name || invite.plot_address || 'Unknown'}
@@ -147,7 +167,7 @@ const InvitationSection = ({ title, subtitle, invites, onAction, actionMode }) =
                 <td style={tdStyle}>{invite.role}</td>
                 <td style={tdStyle}>{invite.invited_by?.display_name || invite.invited_by?.username || 'System'}</td>
                 <td style={tdStyle}>{new Date(invite.created_at).toLocaleDateString()}</td>
-                <td style={tdStyle}>
+                <td style={tdStyle} onClick={(e) => e.stopPropagation()}>
                   <div style={{ display: 'flex', gap: '10px' }}>
                     {actionMode === 'received' ? (
                       <>

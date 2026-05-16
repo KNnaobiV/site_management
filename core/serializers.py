@@ -543,11 +543,17 @@ class JobReportSerializer(RoleFilteredSerializer):
  
 class JobReportCommentSerializer(serializers.ModelSerializer):
     user = UserSummarySerializer(read_only=True)
+    replies = serializers.SerializerMethodField()
+ 
+    def get_replies(self, obj):
+        if obj.replies.exists():
+            return JobReportCommentSerializer(obj.replies.all(), many=True).data
+        return []
  
     class Meta:
         model = JobReportComment
-        fields = ["id", "report", "user", "text", "created_at"]
-        read_only_fields = ["id", "user", "created_at"]
+        fields = ["id", "report", "user", "text", "created_at", "parent", "replies"]
+        read_only_fields = ["id", "user", "created_at", "replies"]
  
  
 class NotificationSerializer(serializers.ModelSerializer):

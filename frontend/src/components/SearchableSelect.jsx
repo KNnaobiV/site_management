@@ -58,7 +58,7 @@ const SearchableSelect = ({ options, value, onChange, onSearch, placeholder, lab
           top: 'calc(100% + 8px)',
           left: 0,
           right: 0,
-          background: 'var(--bg-surface)',
+          background: 'var(--bg-card)',
           borderRadius: '16px',
           border: '1px solid var(--border-subtle)',
           boxShadow: '0 10px 30px rgba(0,0,0,0.3)',

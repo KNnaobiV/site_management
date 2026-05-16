@@ -17,6 +17,7 @@ import SearchableSelect from "./SearchableSelect";
 import ProgressDonut from "./ProgressDonut";
 import Breadcrumb from "./Breadcrumb";
 import InviteModal from "./InviteModal";
+import InvitationDetailModal from "./InvitationDetailModal";
 import ImageUploader from "./ImageUploader";
 import ChecklistEditor from "./ChecklistEditor";
 import MaterialsEditor from "./MaterialsEditor";
@@ -108,7 +109,8 @@ export {
   ProgressDonut,
   Breadcrumb,
   InviteModal,
+  InvitationDetailModal,
   ImageUploader,
   ChecklistEditor,
   MaterialsEditor,
-};
+};

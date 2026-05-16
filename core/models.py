@@ -634,6 +634,10 @@ class JobReportComment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+    parent = models.ForeignKey(
+        'self', on_delete=models.CASCADE, related_name='replies',
+        null=True, blank=True
+    )
 
     class Meta:
         ordering = ['created_at']

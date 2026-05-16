@@ -416,7 +416,14 @@ const ProjectDetailPage = () => {
           ) : (
             <div style={{ display: 'grid', gap: '16px' }}>
               {reports.map(report => (
-                <div key={report.id} style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '18px', padding: '22px' }}>
+                <div
+                  key={report.id}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => navigate(`/job-items/${report.job_item}?report=${report.id}`)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') navigate(`/job-items/${report.job_item}?report=${report.id}`); }}
+                  style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '18px', padding: '22px', cursor: 'pointer' }}
+                >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '18px', flexWrap: 'wrap' }}>
                     <div>
                       <p style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: 'var(--text-primary)' }}>{report.report_date}</p>
