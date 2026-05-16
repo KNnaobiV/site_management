@@ -14712,3 +14712,5 @@ INFO django.utils.autoreload 2026-05-16 06:36:11,977 autoreload 7421 12977599545
 INFO django.utils.autoreload 2026-05-16 06:36:12,380 autoreload 7492 134055618675328 Watching for file changes with StatReloader
 INFO django.utils.autoreload 2026-05-16 06:54:15,224 autoreload 7492 134055618675328 /workspaces/codespaces-django/core/models.py changed, reloading.
 INFO django.utils.autoreload 2026-05-16 06:54:15,583 autoreload 16531 125184263045760 Watching for file changes with StatReloader
+INFO django.utils.autoreload 2026-05-16 07:09:23,606 autoreload 16531 125184263045760 /workspaces/codespaces-django/core/views.py changed, reloading.
+INFO django.utils.autoreload 2026-05-16 07:09:23,978 autoreload 23747 129650201211520 Watching for file changes with StatReloader
