@@ -52,11 +52,11 @@ LOGGING = {
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8000",
     "http://localhost:5173",
-    "https://turbo-space-goldfish-4wv67xrww64c5r97-5173.app.github.dev/"
+    # "https://turbo-space-goldfish-4wv67xrww64c5r97-5173.app.github.dev/"
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:8000",
     "http://localhost:5173",
-    "https://turbo-space-goldfish-4wv67xrww64c5r97-5173.app.github.dev/"
+    # "https://turbo-space-goldfish-4wv67xrww64c5r97-5173.app.github.dev/"
 ]

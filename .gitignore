@@ -3,4 +3,4 @@ __pycache__/
 staticfiles/
 .env
 venv/
-django.log
+*.log

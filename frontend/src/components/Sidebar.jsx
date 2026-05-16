@@ -1,11 +1,11 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Briefcase, 
-  Map as MapIcon, 
-  CheckSquare, 
-  ClipboardList, 
+import {
+  LayoutDashboard,
+  Briefcase,
+  Map as MapIcon,
+  CheckSquare,
+  ClipboardList,
   Bell,
   UserPlus,
   ChevronRight,
@@ -54,12 +54,12 @@ const Sidebar = () => {
         }}>
           <HardHat size={24} color="#fff" />
         </div>
-        <h2 style={{ 
-          fontFamily: 'var(--font-serif)', 
-          fontSize: '28px', 
+        <h2 style={{
+          fontFamily: 'var(--font-serif)',
+          fontSize: '28px',
           margin: 0,
           color: '#fff'
-        }}>Ironwork</h2>
+        }}>ConstroPal</h2>
       </div>
 
       {/* Navigation */}
@@ -112,10 +112,10 @@ const Sidebar = () => {
         >
           <Avatar name={user?.display_name || user?.username} size={40} />
           <div style={{ overflow: 'hidden' }}>
-            <p style={{ 
-              color: '#fff', 
-              fontSize: '14px', 
-              fontWeight: 600, 
+            <p style={{
+              color: '#fff',
+              fontSize: '14px',
+              fontWeight: 600,
               margin: 0,
               whiteSpace: 'nowrap',
               overflow: 'hidden',
@@ -123,18 +123,18 @@ const Sidebar = () => {
             }}>
               {user?.display_name || user?.username}
             </p>
-            <p style={{ 
-              color: 'var(--text-tertiary)', 
-              fontSize: '12px', 
-              margin: 0 
+            <p style={{
+              color: 'var(--text-tertiary)',
+              fontSize: '12px',
+              margin: 0
             }}>
               {user?.role || 'Team Member'}
             </p>
           </div>
           <ChevronRight size={16} color="var(--text-tertiary)" style={{ marginLeft: 'auto' }} />
         </NavLink>
-        
-        <button 
+
+        <button
           onClick={logout}
           style={{
             display: 'flex',
