@@ -15,6 +15,7 @@ Architecture
 """
 from __future__ import annotations
 
+<<<<<<< HEAD
 import io
 import os
 import datetime
@@ -27,6 +28,10 @@ from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import inch
 from reportlab.platypus import Image as PDFImage, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+=======
+from django.core.exceptions import PermissionDenied, ValidationError
+from django.shortcuts import get_object_or_404
+>>>>>>> 452d9c2 (updated api with always data)
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -460,6 +465,7 @@ class ConstructionPlotViewSet(ProjectScopedMixin, viewsets.ModelViewSet):
         serializer = JobReportSerializer(qs, many=True, context=self.get_serializer_context())
         return Response(serializer.data)
 
+<<<<<<< HEAD
     @action(detail=True, methods=["get"], url_path="export-reports")
     def export_reports(self, request, project_pk=None, pk=None):
         plot = self.get_object()
@@ -584,6 +590,8 @@ class ConstructionPlotViewSet(ProjectScopedMixin, viewsets.ModelViewSet):
         filename = f"plot_{plot.id}_reports_{start_date.isoformat()}_{end_date.isoformat()}.pdf"
         return FileResponse(buffer, as_attachment=True, filename=filename)
 
+=======
+>>>>>>> 452d9c2 (updated api with always data)
 
 # ---------------------------------------------------------------------------
 # WorkItem ViewSet
@@ -758,6 +766,7 @@ class JobReportViewSet(PlotScopedMixin, viewsets.ModelViewSet):
             job_item__pk=self.kwargs["jobitem_pk"],
         ).select_related("reported_by", "job_item").order_by('-updated_at')
 
+<<<<<<< HEAD
     @action(detail=True, methods=["get"], url_path="export-reports")
     def export_reports(self, request, **kwargs):
         plot = self.get_plot()
@@ -885,6 +894,8 @@ class JobReportViewSet(PlotScopedMixin, viewsets.ModelViewSet):
         ]
         Notification.objects.bulk_create(notifications)
 
+=======
+>>>>>>> 452d9c2 (updated api with always data)
     def perform_create(self, serializer):
         job_item = get_object_or_404(
             JobItem,
@@ -912,6 +923,7 @@ class JobReportViewSet(PlotScopedMixin, viewsets.ModelViewSet):
         ]
         Notification.objects.bulk_create(notifications)
 
+<<<<<<< HEAD
         if project.project_manager and project.project_manager != self.request.user:
             Notification.objects.create(
                 user=project.project_manager,
@@ -924,14 +936,20 @@ class JobReportViewSet(PlotScopedMixin, viewsets.ModelViewSet):
                 target_url=(f"/job-items/{job_item.pk}?report={report.pk}")
             )
 
+=======
+>>>>>>> 452d9c2 (updated api with always data)
     @action(detail=True, methods=["get", "post"])
     def comments(self, request, **kwargs):
         report = self.get_object()
         if request.method == "POST":
             serializer = JobReportCommentSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
+<<<<<<< HEAD
             comment = serializer.save(report=report, user=request.user)
             self._notify_report_comment(report, comment)
+=======
+            serializer.save(report=report, user=request.user)
+>>>>>>> 452d9c2 (updated api with always data)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         
         comments = report.comments.all()

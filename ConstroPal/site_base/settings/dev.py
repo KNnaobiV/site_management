@@ -20,11 +20,7 @@ ADMIN_URL = CFG.get("SITE", "DJANGO_ADMIN_URL")
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
-<<<<<<< HEAD
-ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1", "https://turbo-space-goldfish-4wv67xrww64c5r97-5173.app.github.dev/"]
-=======
-ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1", ".vercel.app"]
->>>>>>> 452d9c2 (updated api with always data)
+ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1"]
 
 LOGGING = {
     "version": 1,
@@ -56,11 +52,9 @@ LOGGING = {
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8000",
     "http://localhost:5173",
-    # "https://turbo-space-goldfish-4wv67xrww64c5r97-5173.app.github.dev/"
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:8000",
     "http://localhost:5173",
-    # "https://turbo-space-goldfish-4wv67xrww64c5r97-5173.app.github.dev/"
 ]

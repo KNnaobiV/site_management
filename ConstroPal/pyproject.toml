@@ -1,5 +1,9 @@
 [tool.vercel]
+<<<<<<< HEAD
 entrypoint = "site_base.wsgi:application"
 
 [build]
 dedicated_build_command = "pip install -r requirements.txt"
+=======
+entrypoint = "site_base.wsgi:application"
+>>>>>>> 452d9c2 (updated api with always data)

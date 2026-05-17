@@ -6,6 +6,9 @@ djangorestframework
 drf-nested-routers
 pillow
 python-decouple
+<<<<<<< HEAD
 reportlab
+=======
+>>>>>>> 452d9c2 (updated api with always data)
 sqlparse
 tzdata
