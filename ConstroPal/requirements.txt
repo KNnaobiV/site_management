@@ -1,0 +1,10 @@
+asgiref
+Django
+django-browser-reload
+django-cors-headers
+djangorestframework
+drf-nested-routers
+pillow
+python-decouple
+sqlparse
+tzdata
