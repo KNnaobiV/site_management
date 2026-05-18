@@ -1,4 +1,4 @@
-export let API_BASE = "constropal.pythonanywhere.com/api";
+export let API_BASE = "https://constropal.alwaysdata.net/api";
 
 export async function apiFetch(path, { token, ...options } = {}) {
     const headers = {
