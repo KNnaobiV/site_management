@@ -414,6 +414,37 @@ const JobItemDetailPage = () => {
               </div>
             )}
 
+            {selectedReport.images?.length > 0 && (
+              <div style={{ marginBottom: '24px' }}>
+                <p
+                  style={{
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    letterSpacing: '0.08em',
+                    color: 'var(--text-tertiary)',
+                    textTransform: 'uppercase',
+                    margin: '0 0 12px',
+                  }}
+                >
+                  Report Photos
+                </p>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '12px' }}>
+                  {selectedReport.images.map(image => (
+                    <div key={image.id} style={{ cursor: 'pointer' }} onClick={() => window.open(image.image, '_blank')}>
+                      <img
+                        src={image.image}
+                        alt={image.caption || 'Report photo'}
+                        style={{ width: '100%', height: '130px', objectFit: 'cover', borderRadius: '16px', border: '1px solid var(--border-subtle)' }}
+                      />
+                      {image.caption && (
+                        <p style={{ margin: '8px 0 0', fontSize: '12px', color: 'var(--text-tertiary)' }}>{image.caption}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Comments Section */}
             <CommentsSection
               reportId={selectedReport.id}

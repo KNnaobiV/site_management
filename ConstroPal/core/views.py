@@ -511,25 +511,46 @@ class ConstructionPlotViewSet(ProjectScopedMixin, viewsets.ModelViewSet):
         if not queryset.exists():
             story.append(Paragraph("No reports found for the selected scope and date range.", styles["BodyText"]))
         else:
+            reports_by_job = {}
             for report in queryset:
-                story.append(Paragraph(f"Report Date: {report.report_date}", styles["Heading2"]))
-                story.append(Paragraph(f"Job Item: {report.job_item.job_name}", styles["Heading3"]))
-                story.append(Paragraph(f"Work Item: {report.job_item.work_item.name}", styles["Normal"]))
-                story.append(Paragraph(f"Reported by: {report.reported_by.display_name or report.reported_by.username}", styles["Normal"]))
-                story.append(Paragraph(f"Priority: {report.priority}", styles["Normal"]))
-                story.append(Paragraph(f"Status: {report.report_status}", styles["Normal"]))
-                story.append(Paragraph(f"Completion: {report.percentage_job_progress}%", styles["Normal"]))
-                story.append(Paragraph(f"Expected completion: {report.expected_completion_date}", styles["Normal"]))
+                key = report.job_item.id
+                if key not in reports_by_job:
+                    reports_by_job[key] = {
+                        "job_name": report.job_item.job_name,
+                        "work_item_name": report.job_item.work_item.name,
+                        "plot_name": plot.address,
+                        "reports": [],
+                    }
+                reports_by_job[key]["reports"].append(report)
+
+            for group in reports_by_job.values():
+                story.append(Paragraph(
+                    f"{group['job_name']} for {group['work_item_name']} at {group['plot_name']}",
+                    styles["Heading2"]
+                ))
                 story.append(Spacer(1, 8))
 
-                report_table_data = [
-                    ["Field", "Value"],
-                    ["Notes", report.notes or "—"],
-                    ["External comments", report.external_comments or "—"],
-                    ["Internal comments", report.internal_comments or "—"],
-                    ["Days elapsed", report.days_elapsed if report.days_elapsed is not None else "—"],
-                ]
-                table = Table(report_table_data, colWidths=[130, 340])
+                table_data = [[
+                    "Date",
+                    "Progress %",
+                    "Notes",
+                    "Blockers",
+                    "Days elapsed",
+                    "Projected end",
+                    "Priority",
+                ]]
+                for report in group["reports"]:
+                    table_data.append([
+                        report.report_date.isoformat() if hasattr(report.report_date, "isoformat") else str(report.report_date),
+                        f"{report.percentage_job_progress}%",
+                        report.notes or "—",
+                        report.issues_encountered or "—",
+                        report.days_elapsed if report.days_elapsed is not None else "—",
+                        report.expected_completion_date or "—",
+                        report.priority or "—",
+                    ])
+
+                table = Table(table_data, colWidths=[70, 60, 140, 110, 55, 80, 50])
                 table.setStyle(TableStyle([
                     ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#f3f4f6")),
                     ("TEXTCOLOR", (0, 0), (-1, 0), colors.black),
@@ -538,22 +559,24 @@ class ConstructionPlotViewSet(ProjectScopedMixin, viewsets.ModelViewSet):
                     ("BOTTOMPADDING", (0, 0), (-1, 0), 6),
                     ("BACKGROUND", (0, 1), (-1, -1), colors.whitesmoke),
                     ("GRID", (0, 0), (-1, -1), 0.25, colors.grey),
+                    ("VALIGN", (0, 0), (-1, -1), "TOP"),
                 ]))
                 story.append(table)
                 story.append(Spacer(1, 12))
 
-                if report.images.exists():
-                    story.append(Paragraph("Photos:", styles["Heading4"]))
-                    for image in report.images.all():
-                        image_path = getattr(image.image, 'path', None)
-                        if image_path and os.path.exists(image_path):
-                            try:
-                                story.append(PDFImage(image_path, width=5 * inch, height=3 * inch))
-                                if image.caption:
-                                    story.append(Paragraph(image.caption, styles["Italic"]))
-                                story.append(Spacer(1, 8))
-                            except Exception:
-                                continue
+                for report in group["reports"]:
+                    if report.images.exists():
+                        story.append(Paragraph(f"Photos for {report.report_date}:", styles["Heading4"]))
+                        for image in report.images.all():
+                            image_path = getattr(image.image, 'path', None)
+                            if image_path and os.path.exists(image_path):
+                                try:
+                                    story.append(PDFImage(image_path, width=5 * inch, height=3 * inch))
+                                    if image.caption:
+                                        story.append(Paragraph(image.caption, styles["Italic"]))
+                                    story.append(Spacer(1, 8))
+                                except Exception:
+                                    continue
                 story.append(Spacer(1, 20))
 
         doc.build(story)
