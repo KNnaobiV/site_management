@@ -23,22 +23,37 @@ const InvitationDetailModal = ({ invitation, isOpen, onClose, onAction }) => {
     });
   };
 
+  const normalizeStatus = (status) => (status || '').toString().toLowerCase();
+
   const getStatusColor = (status) => {
     const colors = {
-      'Pending': { bg: '#fef3ec', text: '#c14a1e' },
-      'Accepted': { bg: '#e8f5e9', text: '#2d5a27' },
-      'Declined': { bg: '#fce4ec', text: '#a32a2a' },
-      'Revoked': { bg: '#f5f5f5', text: '#9e9e9e' },
-      'Expired': { bg: '#fff3e0', text: '#e65100' },
+      pending: { bg: '#fef3ec', text: '#c14a1e' },
+      accepted: { bg: '#e8f5e9', text: '#2d5a27' },
+      declined: { bg: '#fce4ec', text: '#a32a2a' },
+      revoked: { bg: '#f5f5f5', text: '#9e9e9e' },
+      expired: { bg: '#fff3e0', text: '#e65100' },
     };
-    return colors[status] || colors['Pending'];
+    return colors[normalizeStatus(status)] || colors.pending;
+  };
+
+  const getStatusLabel = (status) => {
+    const labels = {
+      pending: 'Pending',
+      accepted: 'Accepted',
+      declined: 'Declined',
+      revoked: 'Revoked',
+      expired: 'Expired',
+    };
+    return labels[normalizeStatus(status)] || status;
   };
 
   const statusColor = getStatusColor(invitation.status);
+  const statusLabel = getStatusLabel(invitation.status);
   const isInvitee = invitation.invitee?.id === user?.id;
   const isInviter = invitation.invited_by?.id === user?.id;
-  const canAcceptOrDecline = invitation.status === 'Pending' && isInvitee;
-  const canRevoke = invitation.status === 'Pending' && isInviter;
+  const isPending = normalizeStatus(invitation.status) === 'pending';
+  const canAcceptOrDecline = isPending && isInvitee;
+  const canRevoke = isPending && isInviter;
 
   const handleAction = async (action) => {
     if (!onAction) return;
@@ -135,7 +150,7 @@ const InvitationDetailModal = ({ invitation, isOpen, onClose, onAction }) => {
                 background: statusColor.text,
               }}
             />
-            {invitation.status}
+            {statusLabel}
           </span>
         </div>
 
