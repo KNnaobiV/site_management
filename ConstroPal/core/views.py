@@ -15,8 +15,18 @@ Architecture
 """
 from __future__ import annotations
 
+import io
+import os
+import datetime
+
 from django.core.exceptions import PermissionDenied, ValidationError
+from django.http import FileResponse
 from django.shortcuts import get_object_or_404
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.units import inch
+from reportlab.platypus import Image as PDFImage, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -624,6 +634,133 @@ class JobReportViewSet(PlotScopedMixin, viewsets.ModelViewSet):
             job_item__pk=self.kwargs["jobitem_pk"],
         ).select_related("reported_by", "job_item").order_by('-updated_at')
 
+    @action(detail=True, methods=["get"], url_path="export-reports")
+    def export_reports(self, request, **kwargs):
+        plot = self.get_plot()
+        if not plot:
+            return Response({"detail": "Plot not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        def parse_date(value):
+            try:
+                return datetime.datetime.strptime(value, "%Y-%m-%d").date()
+            except (ValueError, TypeError):
+                return None
+
+        start_date = parse_date(request.GET.get("start_date"))
+        end_date = parse_date(request.GET.get("end_date"))
+        if not start_date or not end_date:
+            today = datetime.date.today()
+            weekday = today.weekday()
+            start_date = today - datetime.timedelta(days=weekday)
+            end_date = start_date + datetime.timedelta(days=6)
+
+        if start_date > end_date:
+            return Response({"detail": "start_date cannot be after end_date."}, status=status.HTTP_400_BAD_REQUEST)
+
+        queryset = JobReport.objects.filter(job_item__work_item__construction_plot=plot)
+        if request.GET.get("job_item_id"):
+            queryset = queryset.filter(job_item__pk=request.GET["job_item_id"])
+        elif request.GET.get("work_item_id"):
+            queryset = queryset.filter(job_item__work_item__pk=request.GET["work_item_id"])
+
+        queryset = queryset.filter(report_date__gte=start_date, report_date__lte=end_date).select_related(
+            "reported_by", "job_item", "job_item__work_item"
+        ).prefetch_related("images").order_by('report_date')
+
+        buffer = io.BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=40, leftMargin=40, topMargin=40, bottomMargin=40)
+        styles = getSampleStyleSheet()
+        story = []
+
+        story.append(Paragraph(f"Plot Report Export: {plot.address}", styles["Title"]))
+        story.append(Spacer(1, 12))
+        story.append(Paragraph(f"Project: {plot.construction_project.project_name}", styles["Normal"]))
+        story.append(Paragraph(f"Date range: {start_date.isoformat()} — {end_date.isoformat()}", styles["Normal"]))
+        if request.GET.get("work_item_id"):
+            story.append(Paragraph(f"Filtered by work item ID: {request.GET['work_item_id']}", styles["Normal"]))
+        if request.GET.get("job_item_id"):
+            story.append(Paragraph(f"Filtered by job item ID: {request.GET['job_item_id']}", styles["Normal"]))
+        story.append(Spacer(1, 18))
+
+        if not queryset.exists():
+            story.append(Paragraph("No reports found for the selected scope and date range.", styles["BodyText"]))
+        else:
+            for report in queryset:
+                story.append(Paragraph(f"Report Date: {report.report_date}", styles["Heading2"]))
+                story.append(Paragraph(f"Job Item: {report.job_item.job_name}", styles["Heading3"]))
+                story.append(Paragraph(f"Work Item: {report.job_item.work_item.name}", styles["Normal"]))
+                story.append(Paragraph(f"Reported by: {report.reported_by.display_name or report.reported_by.username}", styles["Normal"]))
+                story.append(Paragraph(f"Priority: {report.priority}", styles["Normal"]))
+                story.append(Paragraph(f"Status: {report.report_status}", styles["Normal"]))
+                story.append(Paragraph(f"Completion: {report.percentage_job_progress}%", styles["Normal"]))
+                story.append(Paragraph(f"Expected completion: {report.expected_completion_date}", styles["Normal"]))
+                story.append(Spacer(1, 8))
+
+                report_table_data = [
+                    ["Field", "Value"],
+                    ["Notes", report.notes or "—"],
+                    ["External comments", report.external_comments or "—"],
+                    ["Internal comments", report.internal_comments or "—"],
+                    ["Days elapsed", report.days_elapsed if report.days_elapsed is not None else "—"],
+                ]
+                table = Table(report_table_data, colWidths=[130, 340])
+                table.setStyle(TableStyle([
+                    ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#f3f4f6")),
+                    ("TEXTCOLOR", (0, 0), (-1, 0), colors.black),
+                    ("FONTNAME", (0, 0), (-1, -1), "Helvetica"),
+                    ("FONTSIZE", (0, 0), (-1, -1), 9),
+                    ("BOTTOMPADDING", (0, 0), (-1, 0), 6),
+                    ("BACKGROUND", (0, 1), (-1, -1), colors.whitesmoke),
+                    ("GRID", (0, 0), (-1, -1), 0.25, colors.grey),
+                ]))
+                story.append(table)
+                story.append(Spacer(1, 12))
+
+                if report.images.exists():
+                    story.append(Paragraph("Photos:", styles["Heading4"]))
+                    for image in report.images.all():
+                        image_path = getattr(image.image, 'path', None)
+                        if image_path and os.path.exists(image_path):
+                            try:
+                                story.append(PDFImage(image_path, width=5 * inch, height=3 * inch))
+                                if image.caption:
+                                    story.append(Paragraph(image.caption, styles["Italic"]))
+                                story.append(Spacer(1, 8))
+                            except Exception:
+                                continue
+                story.append(Spacer(1, 20))
+
+        doc.build(story)
+        buffer.seek(0)
+        filename = f"plot_{plot.id}_reports_{start_date.isoformat()}_{end_date.isoformat()}.pdf"
+        return FileResponse(buffer, as_attachment=True, filename=filename)
+
+    def _notify_report_comment(self, report, comment):
+        project = report.job_item.work_item.construction_plot.construction_project
+        plot = report.job_item.work_item.construction_plot
+        members = set([project.created_by, project.client, project.project_manager])
+        members.update(project.consultants.all())
+        if plot.foreman:
+            members.add(plot.foreman)
+        if plot.storekeeper:
+            members.add(plot.storekeeper)
+        members.discard(comment.user)
+
+        notifications = [
+            Notification(
+                user=member,
+                project=project,
+                message=(
+                    f"New comment on report for {report.job_item.job_name} "
+                    f"in {report.job_item.work_item.name}"
+                ),
+                priority=Notification.Priority.NORMAL,
+                target_url=f"/job-items/{report.job_item.pk}?report={report.pk}"
+            )
+            for member in members if member
+        ]
+        Notification.objects.bulk_create(notifications)
+
     def perform_create(self, serializer):
         job_item = get_object_or_404(
             JobItem,
@@ -651,13 +788,26 @@ class JobReportViewSet(PlotScopedMixin, viewsets.ModelViewSet):
         ]
         Notification.objects.bulk_create(notifications)
 
+        if project.project_manager and project.project_manager != self.request.user:
+            Notification.objects.create(
+                user=project.project_manager,
+                project=project,
+                message=(
+                    f"Approval required: {job_item.job_name} report submitted "
+                    f"for {job_item.work_item.name}"
+                ),
+                priority=Notification.Priority.NORMAL,
+                target_url=(f"/job-items/{job_item.pk}?report={report.pk}")
+            )
+
     @action(detail=True, methods=["get", "post"])
     def comments(self, request, **kwargs):
         report = self.get_object()
         if request.method == "POST":
             serializer = JobReportCommentSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
-            serializer.save(report=report, user=request.user)
+            comment = serializer.save(report=report, user=request.user)
+            self._notify_report_comment(report, comment)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         
         comments = report.comments.all()

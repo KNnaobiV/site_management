@@ -7,9 +7,9 @@ const NotificationItem = ({ notification, onView }) => {
     const msg = notification.message?.toLowerCase() || '';
     if (msg.includes('invited')) return { icon: UserPlus, color: '#c14a1e', bg: '#fdf1ec' };
     if (msg.includes('approval') || msg.includes('approved')) return { icon: ClipboardCheck, color: '#8a6d3b', bg: '#fff8e1' };
+    if (msg.includes('comment')) return { icon: MessageSquare, color: '#1a1a1a', bg: '#f0f0f0' };
     if (msg.includes('report')) return { icon: FileText, color: '#1a1a1a', bg: '#f0f0f0' };
-    if (msg.includes('mentioned')) return { icon: MessageSquare, color: '#1a1a1a', bg: '#f0f0f0' };
-    if (msg.includes('urgent') || msg.includes('delayed') || msg.includes('alert')) return { icon: AlertTriangle, color: '#a32a2a', bg: '#fdeded' };
+    if (msg.includes('urgent') || msg.includes('delayed') || msg.includes('alert') || msg.includes('critical')) return { icon: AlertTriangle, color: '#a32a2a', bg: '#fdeded' };
     if (msg.includes('accepted') || msg.includes('declined')) return { icon: CheckCircle2, color: '#2d5a27', bg: '#edf5ed' };
     return { icon: Bell, color: '#8a8a8a', bg: '#f0f0f0' };
   };
@@ -18,9 +18,9 @@ const NotificationItem = ({ notification, onView }) => {
     const msg = notification.message?.toLowerCase() || '';
     if (msg.includes('invited')) return 'Invitations';
     if (msg.includes('approval') || msg.includes('approved')) return 'Approvals';
+    if (msg.includes('comment')) return 'Comments';
     if (msg.includes('report')) return 'Reports';
-    if (msg.includes('mentioned')) return 'Mentions';
-    if (msg.includes('urgent') || msg.includes('delayed') || msg.includes('alert')) return 'Alerts';
+    if (msg.includes('urgent') || msg.includes('delayed') || msg.includes('alert') || msg.includes('critical')) return 'Alerts';
     if (msg.includes('accepted') || msg.includes('declined')) return 'Invitations';
     return 'System';
   };

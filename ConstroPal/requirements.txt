@@ -6,5 +6,6 @@ djangorestframework
 drf-nested-routers
 pillow
 python-decouple
+reportlab
 sqlparse
 tzdata

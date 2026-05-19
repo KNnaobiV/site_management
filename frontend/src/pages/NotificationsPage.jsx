@@ -18,9 +18,9 @@ const NotificationsPage = () => {
     if (msg.includes('invited')) return 'Invitations';
     if (msg.includes('accepted') || msg.includes('declined')) return 'Invitations';
     if (msg.includes('approval') || msg.includes('approved')) return 'Approvals';
+    if (msg.includes('comment')) return 'Comments';
     if (msg.includes('report')) return 'Reports';
-    if (msg.includes('mentioned')) return 'Mentions';
-    if (msg.includes('urgent') || msg.includes('delayed') || msg.includes('alert')) return 'Alerts';
+    if (msg.includes('urgent') || msg.includes('delayed') || msg.includes('alert') || msg.includes('critical')) return 'Alerts';
     return 'System';
   };
 
@@ -32,7 +32,7 @@ const NotificationsPage = () => {
   const tabCounts = {
     All: notifications.length,
     Alerts: notifications.filter(n => getNotificationType(n.message) === 'Alerts').length,
-    Mentions: notifications.filter(n => getNotificationType(n.message) === 'Mentions').length,
+    Comments: notifications.filter(n => getNotificationType(n.message) === 'Comments').length,
     Approvals: notifications.filter(n => getNotificationType(n.message) === 'Approvals').length,
     Reports: notifications.filter(n => getNotificationType(n.message) === 'Reports').length,
     Invitations: notifications.filter(n => getNotificationType(n.message) === 'Invitations').length,
@@ -41,7 +41,7 @@ const NotificationsPage = () => {
   const tabs = [
     { label: 'All', count: tabCounts.All },
     { label: 'Alerts', count: tabCounts.Alerts },
-    { label: 'Mentions', count: tabCounts.Mentions },
+    { label: 'Comments', count: tabCounts.Comments },
     { label: 'Approvals', count: tabCounts.Approvals },
     { label: 'Reports', count: tabCounts.Reports },
     { label: 'Invitations', count: tabCounts.Invitations },
@@ -137,7 +137,7 @@ const NotificationsPage = () => {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '40px' }}>
         <div>
           <h1 style={{ fontSize: '48px', marginBottom: '8px' }}>Notifications</h1>
-          <p style={{ fontSize: '16px', color: 'var(--text-tertiary)' }}>Stay on top of approvals, alerts and mentions</p>
+          <p style={{ fontSize: '16px', color: 'var(--text-tertiary)' }}>Stay on top of approvals, alerts and comments</p>
         </div>
         <div style={{ display: 'flex', gap: '12px' }}>
           <button className="btn-ghost" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>

@@ -157,6 +157,12 @@ const PlotDetailPage = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [showNewWorkItem, setShowNewWorkItem] = useState(false);
   const [showInvite, setShowInvite] = useState(false);
+  const [exportScope, setExportScope] = useState('plot');
+  const [exportWorkItemId, setExportWorkItemId] = useState('');
+  const [exportJobItemId, setExportJobItemId] = useState('');
+  const [exportRange, setExportRange] = useState({ from: '', to: '' });
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState(null);
 
   useEffect(() => { fetchAll(); }, [projectId, id]);
 
@@ -203,7 +209,65 @@ const PlotDetailPage = () => {
     if (activeTab === 'reports') fetchReports();
   }, [activeTab, projectId]);
 
+  useEffect(() => {
+    const now = new Date();
+    const weekday = now.getDay();
+    const monday = new Date(now);
+    monday.setDate(now.getDate() - ((weekday + 6) % 7));
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    setExportRange({
+      from: monday.toISOString().slice(0, 10),
+      to: sunday.toISOString().slice(0, 10),
+    });
+  }, []);
+
+  const handleExportReports = async () => {
+    setExportError(null);
+    setExporting(true);
+
+    try {
+      if (!exportRange.from || !exportRange.to) {
+        throw new Error('Please set both a start and end date.');
+      }
+
+      const params = new URLSearchParams({
+        start_date: exportRange.from,
+        end_date: exportRange.to,
+      });
+
+      if (exportScope === 'workitem' && exportWorkItemId) {
+        params.append('work_item_id', exportWorkItemId);
+      }
+      if (exportScope === 'jobitem' && exportJobItemId) {
+        params.append('job_item_id', exportJobItemId);
+      }
+
+      const res = await apiFetch(`/plots/${id}/export-reports/?${params.toString()}`, { token });
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        throw new Error(data?.detail || 'Unable to export report.');
+      }
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = `plot_${id}_reports_${exportRange.from}_${exportRange.to}.pdf`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setExportError(err.message || 'Export failed.');
+    } finally {
+      setExporting(false);
+    }
+  };
+
   const completedItems = workItems.filter(w => w.work_status === 'Completed').length;
+  const reportJobItems = Array.from(new Map(reports.map(r => [r.job_item, { id: r.job_item, name: r.job_item_name }])).values());
+  const workItemOptions = workItems.map(wi => ({ id: wi.id, name: wi.name }));
   const progress = workItems.length ? Math.round((completedItems / workItems.length) * 100) : 0;
 
   const tabs = [
@@ -397,6 +461,86 @@ const PlotDetailPage = () => {
 
       {activeTab === 'reports' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '20px', padding: '22px' }}>
+            <div style={{ display: 'grid', gap: '18px', gridTemplateColumns: '1fr 1fr', alignItems: 'end' }}>
+              <div>
+                <label style={labelStyle}>Export scope</label>
+                <select
+                  value={exportScope}
+                  onChange={e => {
+                    setExportScope(e.target.value);
+                    setExportWorkItemId('');
+                    setExportJobItemId('');
+                  }}
+                  style={inputStyle}
+                >
+                  <option value="plot">Plot</option>
+                  <option value="workitem">Work Item</option>
+                  <option value="jobitem">Job Item</option>
+                </select>
+              </div>
+              {exportScope === 'workitem' && (
+                <div>
+                  <label style={labelStyle}>Work Item</label>
+                  <select
+                    value={exportWorkItemId}
+                    onChange={e => setExportWorkItemId(e.target.value)}
+                    style={inputStyle}
+                  >
+                    <option value="">All work items</option>
+                    {workItemOptions.map(wi => (
+                      <option key={wi.id} value={wi.id}>{wi.name}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+              {exportScope === 'jobitem' && (
+                <div>
+                  <label style={labelStyle}>Job Item</label>
+                  <select
+                    value={exportJobItemId}
+                    onChange={e => setExportJobItemId(e.target.value)}
+                    style={inputStyle}
+                  >
+                    <option value="">All job items</option>
+                    {reportJobItems.map(item => (
+                      <option key={item.id} value={item.id}>{item.name}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+              <div>
+                <label style={labelStyle}>From</label>
+                <input
+                  type="date"
+                  value={exportRange.from}
+                  onChange={e => setExportRange(range => ({ ...range, from: e.target.value }))}
+                  style={inputStyle}
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>To</label>
+                <input
+                  type="date"
+                  value={exportRange.to}
+                  onChange={e => setExportRange(range => ({ ...range, to: e.target.value }))}
+                  style={inputStyle}
+                />
+              </div>
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', justifyContent: 'space-between', marginTop: '18px' }}>
+              <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '14px' }}>
+                Export all report data for the selected plot, work item, or job item as a PDF.
+              </p>
+              <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                {exportError && <span style={{ color: '#dc2626', fontSize: '13px' }}>{exportError}</span>}
+                <button className="btn-primary" onClick={handleExportReports} disabled={exporting} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  {exporting ? 'Exporting...' : 'Export PDF'}
+                </button>
+              </div>
+            </div>
+          </div>
+
           {reports.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '60px', color: 'var(--text-tertiary)' }}>
               <FileText size={40} style={{ margin: '0 auto 16px', display: 'block', opacity: 0.3 }} />

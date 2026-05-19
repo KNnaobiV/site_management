@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 """
 
 
-# from decouple import config
+from decouple import config
 
 import configparser
 from datetime import timedelta
