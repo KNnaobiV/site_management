@@ -300,6 +300,7 @@ const PlotDetailPage = () => {
         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
           <button className="btn-ghost" style={{ display: 'flex', alignItems: 'center', gap: '8px' }} onClick={() => navigate(`/plots/${id}/edit`)}><Edit2 size={15} /> Edit</button>
           <button className="btn-ghost" onClick={() => navigate('/team/invite')} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><UserPlus size={15} /> Invite</button>
+          <button className="btn-ghost" onClick={() => setActiveTab('reports')} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><FileText size={15} /> Generate Report</button>
           <button className="btn-primary" onClick={() => navigate(`/plots/${id}/work-items/new`)} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Plus size={15} /> Add Work Item</button>
         </div>
       </div>
