@@ -1,4 +1,11 @@
-export let API_BASE = "http://127.0.0.1:8000/api";
+export const API_BASE = import.meta.env.VITE_API_BASE || "http://127.0.0.1:8000/api";
+
+function buildUrl(path) {
+    if (path.startsWith("http://") || path.startsWith("https://")) {
+        return path;
+    }
+    return `${API_BASE}${path.startsWith("/") ? path : `/${path}`}`;
+}
 
 export async function apiFetch(path, { token, ...options } = {}) {
     const headers = {
@@ -7,7 +14,7 @@ export async function apiFetch(path, { token, ...options } = {}) {
         ...options.headers,
     };
 
-    const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+    const res = await fetch(buildUrl(path), { ...options, headers });
     return res;
 }
 

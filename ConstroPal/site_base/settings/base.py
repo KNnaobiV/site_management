@@ -49,23 +49,29 @@ if 'CODESPACE_NAME' in os.environ:
 
 # Application definition
 
-INSTALLED_APPS = [
+DJANGO_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
-    
-    # Custom User Model
-    "accounts",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+]
+
+CUSTOM_USER_APPS  = [
+    "accounts",
+    "base",
+    "core",
+]
+
+THIRD_PARTY_APPS = [
     "corsheaders",
     "rest_framework",
     "rest_framework.authtoken",
     "django_browser_reload",
-    "base",
-    "core",
 ]
+
+INSTALLED_APPS = DJANGO_APPS + CUSTOM_USER_APPS + THIRD_PARTY_APPS
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -159,6 +165,18 @@ MEDIA_ROOT = BASE_DIR / "site_base" / "media"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTH_USER_MODEL = 'accounts.UserModel'
+
+EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='no-reply@constropal.local')
+EMAIL_HOST = config('EMAIL_HOST', default='')
+EMAIL_PORT = config('EMAIL_PORT', default=None, cast=int)
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=False, cast=bool)
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+
+GOOGLE_CLIENT_ID = config('GOOGLE_CLIENT_ID', default='')
+GOOGLE_CLIENT_SECRET = config('GOOGLE_CLIENT_SECRET', default='')
+APPLE_CLIENT_ID = config('APPLE_CLIENT_ID', default='')
 
 # Django REST Framework Configuration
 REST_FRAMEWORK = {

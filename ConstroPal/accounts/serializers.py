@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.contrib.auth import authenticate
-from django.utils import timezone
 
 User = get_user_model()
 
@@ -29,10 +28,9 @@ class RegisterSerializer(serializers.ModelSerializer):
             })
         return data
 
-    def create(self, validated_data):
+    def create(self, validated_data, **kwargs):
         validated_data.pop('password2')
-        user = User.objects.create_user(**validated_data)
-        return user
+        return User.objects.create_user(**validated_data, **kwargs)
 
 
 class LoginSerializer(serializers.Serializer):
@@ -47,6 +45,10 @@ class LoginSerializer(serializers.Serializer):
         if not user:
             raise serializers.ValidationError(
                 'Invalid username or password.'
+            )
+        if not user.is_active:
+            raise serializers.ValidationError(
+                'Account is not active. Please confirm your email before logging in.'
             )
         data['user'] = user
         return data
