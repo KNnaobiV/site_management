@@ -18,20 +18,25 @@ DATABASES = {
 
 ADMIN_URL = CFG.get("SITE", "DJANGO_ADMIN_URL")
 
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-EMAIL_BACKEND = CFG.get('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
-DEFAULT_FROM_EMAIL = CFG.get('DEFAULT_FROM_EMAIL', default='no-reply@constropal.local')
-EMAIL_HOST = CFG.get('EMAIL_HOST', default='')
-EMAIL_PORT = CFG.get('EMAIL_PORT', default=None, cast=int)
-EMAIL_USE_TLS = CFG.get('EMAIL_USE_TLS', default=False, cast=bool)
-EMAIL_HOST_USER = CFG.get('EMAIL_HOST_USER', default='')
-EMAIL_HOST_PASSWORD = CFG.get('EMAIL_HOST_PASSWORD', default='')
+EMAIL_BACKEND = CFG.get(
+    'EMAIL_BACKEND', 
+    fallback='django.core.mail.backends.console.EmailBackend'
+)
+DEFAULT_FROM_EMAIL = CFG.get(
+    'DEFAULT_FROM_EMAIL', 
+    fallback='no-reply@constropal.local'
+)
+EMAIL_HOST = CFG.get('EMAIL_HOST', fallback='')
+EMAIL_PORT = CFG.get('EMAIL_PORT', fallback=None, cast=int)
+EMAIL_USE_TLS = CFG.get('EMAIL_USE_TLS', fallback=False, cast=bool)
+EMAIL_HOST_USER = CFG.get('EMAIL_HOST_USER', fallback='')
+EMAIL_HOST_PASSWORD = CFG.get('EMAIL_HOST_PASSWORD', fallback='')
 
-GOOGLE_CLIENT_ID = CFG.get('GOOGLE_CLIENT_ID', default='')
-GOOGLE_CLIENT_SECRET = CFG.get('GOOGLE_CLIENT_SECRET', default='')
-APPLE_CLIENT_ID = CFG.get('APPLE_CLIENT_ID', default='')
+GOOGLE_CLIENT_ID = CFG.get('GOOGLE_CLIENT_ID', fallback='')
+GOOGLE_CLIENT_SECRET = CFG.get('GOOGLE_CLIENT_SECRET', fallback='')
+APPLE_CLIENT_ID = CFG.get('APPLE_CLIENT_ID', fallback='')
 
-ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1", "https://turbo-space-goldfish-4wv67xrww64c5r97-5173.app.github.dev/"]
+ALLOWED_HOSTS = CFG.get('ALLOWED_HOSTS')
 
 LOGGING = {
     "version": 1,
