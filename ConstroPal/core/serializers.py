@@ -307,8 +307,25 @@ class ConstructionPlotSerializer(RoleFilteredSerializer):
             "storekeeper_id",
             "role",
             "project_name",
+            "budget",
         ]
         read_only_fields = ["id"]
+
+    budget = serializers.SerializerMethodField()
+
+    def get_budget(self, obj):
+        from finance.models import PlotBudget
+        from decimal import Decimal
+        try:
+            b = obj.plot_budget
+            return {
+                "allocated_amount": str(b.allocated_amount),
+                "spent_amount": str(b.spent_amount),
+                "remaining_amount": str(b.remaining_amount),
+                "currency": b.currency,
+            }
+        except Exception:
+            return None
  
  
 # ===========================================================================
@@ -379,8 +396,24 @@ class WorkItemSerializer(RoleFilteredSerializer):
             "construction_plot_name",
             "construction_project",
             "images",
+            "budget",
         ]
         read_only_fields = ["id", "updated_at", "construction_plot"]
+
+    budget = serializers.SerializerMethodField()
+
+    def get_budget(self, obj):
+        from finance.models import WorkItemBudget
+        try:
+            b = obj.work_item_budget
+            return {
+                "allocated_amount": str(b.allocated_amount),
+                "spent_amount": str(b.spent_amount),
+                "remaining_amount": str(b.remaining_amount),
+                "currency": b.currency,
+            }
+        except Exception:
+            return None
  
  
 # ===========================================================================
@@ -458,8 +491,24 @@ class JobItemSerializer(RoleFilteredSerializer):
             "construction_plot",
             "construction_plot_name",
             "construction_project",
+            "budget",
         ]
         read_only_fields = ["id", "updated_at", "work_item"]
+
+    budget = serializers.SerializerMethodField()
+
+    def get_budget(self, obj):
+        from finance.models import JobItemBudget
+        try:
+            b = obj.job_item_budget
+            return {
+                "allocated_amount": str(b.allocated_amount),
+                "spent_amount": str(b.spent_amount),
+                "remaining_amount": str(b.remaining_amount),
+                "currency": b.currency,
+            }
+        except Exception:
+            return None
  
  
 # ===========================================================================

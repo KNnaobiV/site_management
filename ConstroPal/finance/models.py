@@ -3,7 +3,7 @@ from decimal import Decimal
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models import Sum
+from django.db.models import Sum, Q
 from django.utils import timezone
 
 
@@ -14,6 +14,7 @@ class Budget(models.Model):
         default=Decimal('0.00'),
         validators=[MinValueValidator(Decimal('0.00'))],
     )
+    currency = models.CharField(max_length=3, default='NGN')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -23,6 +24,10 @@ class Budget(models.Model):
     def save(self, *args, **kwargs):
         self.full_clean()
         super().save(*args, **kwargs)
+
+    @property
+    def remaining_amount(self):
+        return self.allocated_amount - self.spent_amount
 
 
 class CostCode(models.Model):
@@ -49,6 +54,8 @@ class Expense(models.Model):
         decimal_places=2,
         validators=[MinValueValidator(Decimal('0.01'))],
     )
+    currency = models.CharField(max_length=3, default='NGN')
+    incurred_at = models.DateField(default=timezone.now)
     description = models.TextField(blank=True, default='')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -119,9 +126,11 @@ class ProjectBudget(Budget):
 
     @property
     def spent_amount(self):
-        return self.project.project_expenses.aggregate(
-            total=Sum('amount')
-        )['total'] or Decimal('0.00')
+        direct = self.project.project_expenses.aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
+        plots = Expense.objects.filter(plot__construction_project=self.project).aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
+        work_items = Expense.objects.filter(work_item__construction_plot__construction_project=self.project).aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
+        job_items = Expense.objects.filter(job_item__work_item__construction_plot__construction_project=self.project).aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
+        return direct + plots + work_items + job_items
 
 
 class PlotBudget(Budget):
@@ -137,9 +146,10 @@ class PlotBudget(Budget):
 
     @property
     def spent_amount(self):
-        return self.plot.plot_expenses.aggregate(
-            total=Sum('amount')
-        )['total'] or Decimal('0.00')
+        direct = self.plot.plot_expenses.aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
+        work_items = Expense.objects.filter(work_item__construction_plot=self.plot).aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
+        job_items = Expense.objects.filter(job_item__work_item__construction_plot=self.plot).aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
+        return direct + work_items + job_items
 
 
 class WorkItemBudget(Budget):
@@ -155,9 +165,9 @@ class WorkItemBudget(Budget):
 
     @property
     def spent_amount(self):
-        return self.work_item.work_item_expenses.aggregate(
-            total=Sum('amount')
-        )['total'] or Decimal('0.00')
+        direct = self.work_item.work_item_expenses.aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
+        job_items = Expense.objects.filter(job_item__work_item=self.work_item).aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
+        return direct + job_items
 
 
 class JobItemBudget(Budget):

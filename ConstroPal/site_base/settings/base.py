@@ -62,6 +62,7 @@ CUSTOM_USER_APPS  = [
     "accounts",
     "base",
     "core",
+    "finance",
 ]
 
 THIRD_PARTY_APPS = [
@@ -169,7 +170,7 @@ AUTH_USER_MODEL = 'accounts.UserModel'
 EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='no-reply@constropal.local')
 EMAIL_HOST = config('EMAIL_HOST', default='')
-EMAIL_PORT = config('EMAIL_PORT', default=None, cast=int)
+EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
 EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=False, cast=bool)
 EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
