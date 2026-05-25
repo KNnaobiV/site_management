@@ -1,7 +1,16 @@
 import React from 'react';
 import StatusBadge from './StatusBadge';
 import Avatar from './Avatar';
-import { Calendar, User, Zap, CheckSquare } from 'lucide-react';
+import { Calendar, Zap, CheckSquare, DollarSign } from 'lucide-react';
+
+const formatCurrency = (amount, currency = 'NGN') => {
+  try {
+    const locale = currency === 'USD' ? 'en-US' : currency === 'GBP' ? 'en-GB' : 'en-NG';
+    return new Intl.NumberFormat(locale, { style: 'currency', currency, minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(Number(amount));
+  } catch {
+    return `${currency} ${Number(amount).toLocaleString()}`;
+  }
+};
 
 const ProgressRing = ({ progress, size = 60, strokeWidth = 5 }) => {
   const radius = (size - strokeWidth) / 2;
@@ -50,6 +59,16 @@ const ProgressRing = ({ progress, size = 60, strokeWidth = 5 }) => {
 };
 
 const JobItemCard = ({ job, onClick }) => {
+  const budget = job.budget || null;
+  const spent = parseFloat(budget?.spent_amount ?? job.spent_amount ?? 0);
+  const allocated = parseFloat(budget?.allocated_amount ?? 0);
+  const currency = budget?.currency || 'NGN';
+  const hasBudget = budget && allocated > 0;
+  const overBudget = hasBudget && spent > allocated;
+  const progress = hasBudget
+    ? Math.min(100, Math.round(allocated > 0 ? (spent / allocated) * 100 : 0))
+    : Math.max(0, Math.min(100, Number(job.progress ?? 0)));
+
   return (
     <div className="card" onClick={onClick} style={{ cursor: 'pointer' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
@@ -70,10 +89,17 @@ const JobItemCard = ({ job, onClick }) => {
               <Zap size={14} color="var(--brand-orange)" />
               <span>{job.job_artisan}</span>
             </div>
+
+            {(hasBudget || spent > 0) && (
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: overBudget ? 'rgba(220,38,38,0.1)' : 'rgba(34,197,94,0.1)', padding: '6px 12px', borderRadius: '999px', color: overBudget ? '#dc2626' : '#16a34a', fontWeight: 600, fontSize: '13px' }}>
+                <DollarSign size={14} />
+                <span>{hasBudget ? `${formatCurrency(spent, currency)} / ${formatCurrency(allocated, currency)}` : `Spent: ${formatCurrency(spent, currency)}`}</span>
+              </div>
+            )}
           </div>
         </div>
         
-        <ProgressRing progress={job.progress || 65} />
+        <ProgressRing progress={progress} />
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '12px', borderTop: '1px solid var(--border-default)', paddingTop: '16px' }}>
