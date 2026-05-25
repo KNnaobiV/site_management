@@ -317,7 +317,7 @@ const CreateJobItemPage = () => {
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '48px' }}>
           <button type="button" onClick={() => navigate(-1)} className="btn-ghost" style={{ padding: '12px 32px' }}>Cancel</button>
           <button type="submit" className="btn-primary" style={{ padding: '12px 48px' }} disabled={loading}>
-            {loading ? <Spinner size={20} /> : 'Create Job Item'}
+            {loading ? <Spinner size={20} /> : (typeof window !== 'undefined' && window.location.pathname.includes('/edit') ? 'Edit' : 'Create Job Item')}
           </button>
         </div>
       </form>

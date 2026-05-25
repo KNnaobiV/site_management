@@ -134,7 +134,7 @@ const NewJobItemForm = ({ projectId, plotId, workItemId, token, onSuccess, onClo
         <div style={{ display: 'flex', gap: '12px', paddingTop: '12px', borderTop: '1px solid var(--border-subtle)' }}>
           <button type="button" className="btn-ghost" onClick={onClose} style={{ flex: 1 }}>Cancel</button>
           <button type="submit" disabled={saving} className="btn-primary" style={{ flex: 2, justifyContent: 'center' }}>
-            {saving ? 'Creating...' : '+ Create Job Item'}
+            {saving ? (typeof window !== 'undefined' && window.location.pathname.includes('/edit') ? 'Editing...' : 'Creating...') : (typeof window !== 'undefined' && window.location.pathname.includes('/edit') ? 'Edit' : '+ Create Job Item')}
           </button>
         </div>
       </form>

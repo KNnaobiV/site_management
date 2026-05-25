@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { Breadcrumb, Spinner, SearchableSelect, ChecklistEditor } from '../components';
 import { Upload, X, ImageIcon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -329,7 +329,7 @@ const CreateWorkItemPage = () => {
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '48px' }}>
           <button type="button" onClick={() => navigate(-1)} className="btn-ghost" style={{ padding: '12px 32px' }}>Cancel</button>
           <button type="submit" className="btn-primary" style={{ padding: '12px 48px' }} disabled={loading}>
-            {loading ? <Spinner size={20} /> : 'Create Work Item'}
+            {loading ? <Spinner size={20} /> : (typeof window !== 'undefined' && window.location.pathname.includes('/edit') ? 'Edit' : 'Create Work Item')}
           </button>
         </div>
       </form>

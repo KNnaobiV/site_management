@@ -19,6 +19,7 @@ const CreatePlotPage = () => {
   const [error, setError] = useState(null);
   const [users, setUsers] = useState([]);
   const [projectsList, setProjectsList] = useState([]);
+  const [fieldsUpdated, setFieldsUpdated] = useState(false);
   
   const [formData, setFormData] = useState({
     plot_number: '',
@@ -65,6 +66,8 @@ const CreatePlotPage = () => {
           end_date: plotData.end_date || '',
           notes: plotData.notes || ''
         });
+        const hasValues = !!(plotData.plot_number || plotData.plot_name || plotData.address || plotData.construction_project);
+        setFieldsUpdated(hasValues);
       } else {
         setError('Failed to load plot for editing.');
       }
@@ -188,6 +191,7 @@ const CreatePlotPage = () => {
                   required
                   value={formData.plot_number}
                   onChange={e => setFormData({...formData, plot_number: e.target.value})}
+                  disabled={isEditing && fieldsUpdated}
                   style={inputStyle}
                 />
               </div>
@@ -198,6 +202,7 @@ const CreatePlotPage = () => {
                   placeholder="Enter plot name"
                   value={formData.plot_name}
                   onChange={e => setFormData({...formData, plot_name: e.target.value})}
+                  disabled={isEditing && fieldsUpdated}
                   style={inputStyle}
                 />
               </div>
@@ -218,6 +223,7 @@ const CreatePlotPage = () => {
                   value={formData.construction_project}
                   onChange={val => setFormData({...formData, construction_project: val})}
                   placeholder="Select project"
+                  disabled={isEditing && fieldsUpdated}
                 />
               )}
             </div>
@@ -228,6 +234,7 @@ const CreatePlotPage = () => {
                 placeholder="Enter site address"
                 value={formData.address}
                 onChange={e => setFormData({...formData, address: e.target.value})}
+                disabled={isEditing && fieldsUpdated}
                 style={{ ...inputStyle, minHeight: '100px', resize: 'vertical' }}
               />
             </div>
@@ -353,7 +360,7 @@ const CreatePlotPage = () => {
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '48px' }}>
           <button type="button" onClick={() => navigate(-1)} className="btn-ghost" style={{ padding: '12px 32px' }}>Cancel</button>
           <button type="submit" className="btn-primary" style={{ padding: '12px 48px' }} disabled={loading}>
-            {loading ? <Spinner size={20} /> : 'Create Plot'}
+            {loading ? <Spinner size={20} /> : (isEditing ? 'Edit Plot' : 'Create Plot')}
           </button>
         </div>
       </form>

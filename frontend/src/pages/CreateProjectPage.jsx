@@ -15,6 +15,7 @@ const CreateProjectPage = () => {
   const [fetching, setFetching] = useState(isEditing);
   const [error, setError] = useState(null);
   const [users, setUsers] = useState([]);
+  const [clientUpdated, setClientUpdated] = useState(false);
   
   const [formData, setFormData] = useState({
     project_name: '',
@@ -41,6 +42,7 @@ const CreateProjectPage = () => {
       const res = await apiFetch(`/projects/${projectId}/`, { token });
       if (res.ok) {
         const project = await res.json();
+        const hasClient = !!project.client;
         setFormData({
           project_name: project.project_name || '',
           client: project.client?.id || '',
@@ -53,6 +55,7 @@ const CreateProjectPage = () => {
           address: project.address || '',
           cover_image: null
         });
+        setClientUpdated(hasClient);
       } else {
         setError('Failed to load project for editing.');
       }
@@ -153,6 +156,7 @@ const CreateProjectPage = () => {
                 value={formData.client}
                 onChange={val => setFormData({...formData, client: val})}
                 placeholder="Select client"
+                disabled={isEditing && clientUpdated}
               />
             </div>
 
@@ -162,6 +166,7 @@ const CreateProjectPage = () => {
                 placeholder="Enter project address"
                 value={formData.address}
                 onChange={e => setFormData({...formData, address: e.target.value})}
+                disabled={isEditing && clientUpdated}
                 style={{ ...inputStyle, minHeight: '120px', resize: 'vertical' }}
               />
             </div>
@@ -173,6 +178,7 @@ const CreateProjectPage = () => {
                   type="date"
                   value={formData.proposed_start_date}
                   onChange={e => setFormData({...formData, proposed_start_date: e.target.value})}
+                  disabled={isEditing && clientUpdated}
                   style={inputStyle}
                 />
               </div>
@@ -258,7 +264,7 @@ const CreateProjectPage = () => {
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '48px' }}>
           <button type="button" onClick={() => navigate('/projects')} className="btn-ghost" style={{ padding: '12px 32px' }}>Cancel</button>
           <button type="submit" className="btn-primary" style={{ padding: '12px 48px' }} disabled={loading}>
-            {loading ? <Spinner size={20} /> : 'Create Project'}
+            {loading ? <Spinner size={20} /> : (isEditing ? 'Edit Project' : 'Create Project')}
           </button>
         </div>
       </form>
