@@ -52,9 +52,15 @@ LOGGING = {
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8000",
     "http://localhost:5173",
+    "https://maccaferra.vercel.app",
+    "htpps://*.vercel.app",
+    "https://vercel.app"
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:8000",
     "http://localhost:5173",
+    "https://maccaferra.vercel.app",
+    "https://*.verecel.app",
+    "https://vercel.app"
 ]

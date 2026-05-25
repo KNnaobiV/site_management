@@ -116,7 +116,7 @@ export default function LoginPage() {
                         </svg>
                     </div>
                     <span className="brand-name">
-                        <span className="panel-copy">Constro<em style={{ color: "var(--rust-light)", fontSize: "1.5em" }}>Pal</em></span>
+                        <span className="panel-copy">Iron<em style={{ color: "var(--rust-light)" }}>Work</em></span>
                     </span>
                 </div>
                 <div className="panel-copy">
