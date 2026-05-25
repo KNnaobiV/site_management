@@ -15,7 +15,6 @@ Architecture
 """
 from __future__ import annotations
 
-<<<<<<< HEAD
 import io
 import os
 import datetime
@@ -28,10 +27,6 @@ from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import inch
 from reportlab.platypus import Image as PDFImage, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
-=======
-from django.core.exceptions import PermissionDenied, ValidationError
-from django.shortcuts import get_object_or_404
->>>>>>> 452d9c2 (updated api with always data)
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
