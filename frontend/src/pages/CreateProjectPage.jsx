@@ -15,6 +15,7 @@ const CreateProjectPage = () => {
   const [fetching, setFetching] = useState(isEditing);
   const [error, setError] = useState(null);
   const [users, setUsers] = useState([]);
+  const [clientUpdated, setClientUpdated] = useState(false);
   
   const [formData, setFormData] = useState({
     project_name: '',
@@ -24,13 +25,11 @@ const CreateProjectPage = () => {
     proposed_start_date: new Date().toISOString().split('T')[0],
     proposed_end_date: '',
     project_manager: '',
-    foreman: '',
     address: '',
     cover_image: null
   });
 
   useEffect(() => {
-    fetchUsers();
     if (isEditing) {
       fetchProject();
     }
@@ -41,6 +40,7 @@ const CreateProjectPage = () => {
       const res = await apiFetch(`/projects/${projectId}/`, { token });
       if (res.ok) {
         const project = await res.json();
+        const hasClient = !!project.client;
         setFormData({
           project_name: project.project_name || '',
           client: project.client?.id || '',
@@ -49,10 +49,22 @@ const CreateProjectPage = () => {
           proposed_start_date: project.proposed_start_date || new Date().toISOString().split('T')[0],
           proposed_end_date: project.proposed_end_date || '',
           project_manager: project.project_manager?.id || '',
-          foreman: '',
           address: project.address || '',
           cover_image: null
         });
+        
+        // Ensure the selected users are prepopulated in the searchable options
+        const initialUsers = [];
+        if (project.client) {
+          initialUsers.push({ id: project.client.id, label: project.client.username, avatar: project.client.avatar_url || null });
+        }
+        if (project.project_manager) {
+          initialUsers.push({ id: project.project_manager.id, label: project.project_manager.username, avatar: project.project_manager.avatar_url || null });
+        }
+        if (initialUsers.length > 0) {
+          setUsers(initialUsers);
+        }
+        setClientUpdated(hasClient);
       } else {
         setError('Failed to load project for editing.');
       }
@@ -63,17 +75,15 @@ const CreateProjectPage = () => {
     }
   };
 
-  const fetchUsers = async () => {
+  const handleSearchUsers = async (query) => {
     try {
-      // For now fetching a broad list, or we could use the search endpoint
-      // Let's try to get some users for the selectors
-      const res = await apiFetch('/auth/users/search/?q= ', { token }); // empty space to get some users
+      const res = await apiFetch(`/auth/users/search/?q=${encodeURIComponent(query)}`, { token });
       if (res.ok) {
         const data = await res.json();
         setUsers(data.map(u => ({ id: u.id, label: u.username, avatar: u.avatar_url || null })));
       }
     } catch (err) {
-      console.error("Failed to fetch users", err);
+      console.error("Failed to search users", err);
     }
   };
 
@@ -89,7 +99,6 @@ const CreateProjectPage = () => {
       proposed_start_date: formData.proposed_start_date,
       proposed_end_date: formData.proposed_end_date || null,
       address: formData.address,
-      // The backend expects project_manager and client as IDs
       project_manager: formData.project_manager || null,
       client: formData.client || null,
     };
@@ -147,21 +156,12 @@ const CreateProjectPage = () => {
             </div>
 
             <div>
-              <label style={labelStyle}>Client</label>
-              <SearchableSelect 
-                options={users}
-                value={formData.client}
-                onChange={val => setFormData({...formData, client: val})}
-                placeholder="Select client"
-              />
-            </div>
-
-            <div>
               <label style={labelStyle}>Address</label>
               <textarea 
                 placeholder="Enter project address"
                 value={formData.address}
                 onChange={e => setFormData({...formData, address: e.target.value})}
+                disabled={isEditing && clientUpdated}
                 style={{ ...inputStyle, minHeight: '120px', resize: 'vertical' }}
               />
             </div>
@@ -173,6 +173,7 @@ const CreateProjectPage = () => {
                   type="date"
                   value={formData.proposed_start_date}
                   onChange={e => setFormData({...formData, proposed_start_date: e.target.value})}
+                  disabled={isEditing && clientUpdated}
                   style={inputStyle}
                 />
               </div>
@@ -208,26 +209,6 @@ const CreateProjectPage = () => {
           {/* Right Column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <div>
-              <label style={labelStyle}>Project Manager</label>
-              <SearchableSelect 
-                options={users}
-                value={formData.project_manager}
-                onChange={val => setFormData({...formData, project_manager: val})}
-                placeholder="Select project manager"
-              />
-            </div>
-
-            <div>
-              <label style={labelStyle}>Foreman</label>
-              <SearchableSelect 
-                options={users}
-                value={formData.foreman}
-                onChange={val => setFormData({...formData, foreman: val})}
-                placeholder="Select foreman"
-              />
-            </div>
-
-            <div>
               <label style={labelStyle}>Description</label>
               <textarea 
                 placeholder="Enter project description"
@@ -258,7 +239,7 @@ const CreateProjectPage = () => {
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '48px' }}>
           <button type="button" onClick={() => navigate('/projects')} className="btn-ghost" style={{ padding: '12px 32px' }}>Cancel</button>
           <button type="submit" className="btn-primary" style={{ padding: '12px 48px' }} disabled={loading}>
-            {loading ? <Spinner size={20} /> : 'Create Project'}
+            {loading ? <Spinner size={20} /> : (isEditing ? 'Update Project' : 'Create Project')}
           </button>
         </div>
       </form>

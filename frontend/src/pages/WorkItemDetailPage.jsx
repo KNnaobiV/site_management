@@ -134,7 +134,7 @@ const NewJobItemForm = ({ projectId, plotId, workItemId, token, onSuccess, onClo
         <div style={{ display: 'flex', gap: '12px', paddingTop: '12px', borderTop: '1px solid var(--border-subtle)' }}>
           <button type="button" className="btn-ghost" onClick={onClose} style={{ flex: 1 }}>Cancel</button>
           <button type="submit" disabled={saving} className="btn-primary" style={{ flex: 2, justifyContent: 'center' }}>
-            {saving ? 'Creating...' : '+ Create Job Item'}
+            {saving ? (typeof window !== 'undefined' && window.location.pathname.includes('/edit') ? 'Editing...' : 'Creating...') : (typeof window !== 'undefined' && window.location.pathname.includes('/edit') ? 'Edit' : '+ Create Job Item')}
           </button>
         </div>
       </form>
@@ -326,11 +326,6 @@ const WorkItemDetailPage = () => {
       {/* Job Items Tab */}
       {activeTab === 'jobitems' && (
         <div>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
-            <button className="btn-primary" onClick={() => setShowNewJobItem(true)} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Plus size={15} /> Add Job Item
-            </button>
-          </div>
           {jobItems.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '60px', color: 'var(--text-tertiary)' }}>
               <p style={{ fontWeight: 600 }}>No job items yet</p>

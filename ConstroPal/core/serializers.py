@@ -201,23 +201,6 @@ class ConstructionProjectSerializer(RoleFilteredSerializer):
         return project
  
     def validate(self, data):
-        status = data.get("project_status")
- 
-        client = data.get("client")
-        project_manager = data.get("project_manager")
- 
-        # If status is NOT planned → these fields are required
-        
-        if status.lower() != "planned":
-            if not client:
-                raise serializers.ValidationError({
-                    "client_id": "Client is required unless project is in planned state."
-                })
- 
-            if not project_manager:
-                raise serializers.ValidationError({
-                    "project_manager_id": "Project manager is required unless project is in planned state."
-                })
         return data
  
  

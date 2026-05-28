@@ -19,6 +19,7 @@ const CreatePlotPage = () => {
   const [error, setError] = useState(null);
   const [users, setUsers] = useState([]);
   const [projectsList, setProjectsList] = useState([]);
+  const [fieldsUpdated, setFieldsUpdated] = useState(false);
   
   const [formData, setFormData] = useState({
     plot_number: '',
@@ -29,6 +30,7 @@ const CreatePlotPage = () => {
     gps_longitude: '',
     status: 'Planned',
     foreman: '',
+    storekeeper: '',
     plot_opening_date: new Date().toISOString().split('T')[0],
     end_date: '',
     notes: ''
@@ -41,7 +43,6 @@ const CreatePlotPage = () => {
     } else {
       fetchProjects();
     }
-    fetchUsers();
     if (isEditing) {
       fetchPlot();
     }
@@ -61,10 +62,26 @@ const CreatePlotPage = () => {
           gps_longitude: plotData.gps_longitude || '',
           status: plotData.status || 'Planned',
           foreman: plotData.foreman?.id || '',
+          storekeeper: plotData.storekeeper?.id || '',
           plot_opening_date: plotData.plot_opening_date || new Date().toISOString().split('T')[0],
           end_date: plotData.end_date || '',
           notes: plotData.notes || ''
         });
+
+        // Prepopulate users select list with the existing foreman and storekeeper
+        const initialUsers = [];
+        if (plotData.foreman) {
+          initialUsers.push({ id: plotData.foreman.id, label: plotData.foreman.username, avatar: plotData.foreman.avatar_url || null });
+        }
+        if (plotData.storekeeper) {
+          initialUsers.push({ id: plotData.storekeeper.id, label: plotData.storekeeper.username, avatar: plotData.storekeeper.avatar_url || null });
+        }
+        if (initialUsers.length > 0) {
+          setUsers(initialUsers);
+        }
+
+        const hasValues = !!(plotData.plot_number || plotData.plot_name || plotData.address || plotData.construction_project);
+        setFieldsUpdated(hasValues);
       } else {
         setError('Failed to load plot for editing.');
       }
@@ -101,15 +118,15 @@ const CreatePlotPage = () => {
     }
   };
 
-  const fetchUsers = async () => {
+  const handleSearchUsers = async (query) => {
     try {
-      const res = await apiFetch('/auth/users/search/?q= ', { token });
+      const res = await apiFetch(`/auth/users/search/?q=${encodeURIComponent(query)}`, { token });
       if (res.ok) {
         const data = await res.json();
         setUsers(data.map(u => ({ id: u.id, label: u.username, avatar: u.avatar_url || null })));
       }
     } catch (err) {
-      console.error("Failed to fetch users", err);
+      console.error("Failed to search users", err);
     }
   };
 
@@ -127,6 +144,7 @@ const CreatePlotPage = () => {
       gps_longitude: formData.gps_longitude || null,
       notes: formData.notes,
       foreman: formData.foreman || null,
+      storekeeper: formData.storekeeper || null,
     };
 
     try {
@@ -188,6 +206,7 @@ const CreatePlotPage = () => {
                   required
                   value={formData.plot_number}
                   onChange={e => setFormData({...formData, plot_number: e.target.value})}
+                  disabled={isEditing && fieldsUpdated}
                   style={inputStyle}
                 />
               </div>
@@ -198,6 +217,7 @@ const CreatePlotPage = () => {
                   placeholder="Enter plot name"
                   value={formData.plot_name}
                   onChange={e => setFormData({...formData, plot_name: e.target.value})}
+                  disabled={isEditing && fieldsUpdated}
                   style={inputStyle}
                 />
               </div>
@@ -218,6 +238,7 @@ const CreatePlotPage = () => {
                   value={formData.construction_project}
                   onChange={val => setFormData({...formData, construction_project: val})}
                   placeholder="Select project"
+                  disabled={isEditing && fieldsUpdated}
                 />
               )}
             </div>
@@ -228,32 +249,22 @@ const CreatePlotPage = () => {
                 placeholder="Enter site address"
                 value={formData.address}
                 onChange={e => setFormData({...formData, address: e.target.value})}
+                disabled={isEditing && fieldsUpdated}
                 style={{ ...inputStyle, minHeight: '100px', resize: 'vertical' }}
               />
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-              <div>
-                <label style={labelStyle}>Status *</label>
-                <select 
-                  value={formData.status}
-                  onChange={e => setFormData({...formData, status: e.target.value})}
-                  style={inputStyle}
-                >
-                  <option value="Planned">Planned</option>
-                  <option value="In Progress">Active</option>
-                  <option value="Completed">Completed</option>
-                </select>
-              </div>
-              <div>
-                <label style={labelStyle}>Assigned Foreman</label>
-                <SearchableSelect 
-                  options={users}
-                  value={formData.foreman}
-                  onChange={val => setFormData({...formData, foreman: val})}
-                  placeholder="Select foreman"
-                />
-              </div>
+            <div>
+              <label style={labelStyle}>Status *</label>
+              <select 
+                value={formData.status}
+                onChange={e => setFormData({...formData, status: e.target.value})}
+                style={inputStyle}
+              >
+                <option value="Planned">Planned</option>
+                <option value="In Progress">Active</option>
+                <option value="Completed">Completed</option>
+              </select>
             </div>
           </div>
 
@@ -353,7 +364,7 @@ const CreatePlotPage = () => {
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '48px' }}>
           <button type="button" onClick={() => navigate(-1)} className="btn-ghost" style={{ padding: '12px 32px' }}>Cancel</button>
           <button type="submit" className="btn-primary" style={{ padding: '12px 48px' }} disabled={loading}>
-            {loading ? <Spinner size={20} /> : 'Create Plot'}
+            {loading ? <Spinner size={20} /> : (isEditing ? 'Update Plot' : 'Create Plot')}
           </button>
         </div>
       </form>

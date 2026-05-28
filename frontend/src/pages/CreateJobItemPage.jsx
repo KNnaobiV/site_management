@@ -11,6 +11,7 @@ const CreateJobItemPage = () => {
   const navigate = useNavigate();
   const { workItemId } = useParams();
   const [loading, setLoading] = useState(false);
+  const isEdit = false;
   const [fetchingWorkItem, setFetchingWorkItem] = useState(!!workItemId);
   const [workItem, setWorkItem] = useState(null);
   const [error, setError] = useState(null);
@@ -37,7 +38,6 @@ const CreateJobItemPage = () => {
     } else {
       fetchWorkItems();
     }
-    fetchUsers();
   }, [workItemId]);
 
   const fetchWorkItems = async () => {
@@ -84,15 +84,15 @@ const CreateJobItemPage = () => {
     }
   };
 
-  const fetchUsers = async () => {
+  const handleSearchUsers = async (query) => {
     try {
-      const res = await apiFetch('/auth/users/search/?q= ', { token });
+      const res = await apiFetch(`/auth/users/search/?q=${encodeURIComponent(query)}`, { token });
       if (res.ok) {
         const data = await res.json();
         setUsers(data.map(u => ({ id: u.id, label: u.username, avatar: u.avatar_url || null })));
       }
     } catch (err) {
-      console.error("Failed to fetch users", err);
+      console.error("Failed to search users", err);
     }
   };
 
@@ -291,8 +291,13 @@ const CreateJobItemPage = () => {
                 <input 
                   type="date"
                   value={formData.actual_start_date}
+                  disabled={isEdit && !!formData.actual_start_date}
                   onChange={e => setFormData({...formData, actual_start_date: e.target.value})}
-                  style={inputStyle}
+                  style={{
+                    ...inputStyle,
+                    background: isEdit && !!formData.actual_start_date ? 'var(--bg-canvas)' : inputStyle.background,
+                    cursor: isEdit && !!formData.actual_start_date ? 'not-allowed' : 'text'
+                  }}
                 />
               </div>
               <div>
@@ -317,7 +322,7 @@ const CreateJobItemPage = () => {
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '48px' }}>
           <button type="button" onClick={() => navigate(-1)} className="btn-ghost" style={{ padding: '12px 32px' }}>Cancel</button>
           <button type="submit" className="btn-primary" style={{ padding: '12px 48px' }} disabled={loading}>
-            {loading ? <Spinner size={20} /> : 'Create Job Item'}
+            {loading ? <Spinner size={20} /> : (typeof window !== 'undefined' && window.location.pathname.includes('/edit') ? 'Update Job Item' : 'Create Job Item')}
           </button>
         </div>
       </form>

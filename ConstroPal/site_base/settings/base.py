@@ -11,11 +11,7 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 """
 
 
-<<<<<<< HEAD
 # from decouple import config
-=======
-from decouple import config
->>>>>>> 452d9c2 (updated api with always data)
 
 import configparser
 from datetime import timedelta
@@ -42,11 +38,7 @@ else:
 SECRET_KEY = "bfquhufqhhfiqfhhqubefiwcn87824329yr928mc3q9&T%TDMG" #config("SECRET_KEY", default='')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-<<<<<<< HEAD
 DEBUG = True # config("DEBUG", default=True)
-=======
-DEBUG = config("DEBUG", default=True)
->>>>>>> 452d9c2 (updated api with always data)
 
 ALLOWED_HOSTS = ["*"]#config('ALLOWED_HOSTS', default='').split(',')
 
@@ -177,6 +169,3 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ],
 }
-
-
-

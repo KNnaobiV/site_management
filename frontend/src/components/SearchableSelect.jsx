@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Search, ChevronDown } from 'lucide-react';
 import Avatar from './Avatar';
 
-const SearchableSelect = ({ options, value, onChange, onSearch, placeholder, label, required }) => {
+const SearchableSelect = ({ options, value, onChange, onSearch, placeholder, label, required, disabled }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
   const containerRef = useRef(null);
@@ -27,18 +27,20 @@ const SearchableSelect = ({ options, value, onChange, onSearch, placeholder, lab
     <div ref={containerRef} style={{ position: 'relative', width: '100%' }}>
       {label && <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>{label} {required && "*"}</label>}
       <div
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => !disabled && setIsOpen(!isOpen)}
         style={{
           width: "100%",
           padding: "16px",
           borderRadius: "12px",
           border: "1px solid var(--border-default)",
-          background: "var(--bg-raised)",
+          background: disabled ? "var(--bg-raised)" : "var(--bg-raised)",
           color: value ? "var(--text-primary)" : "var(--text-tertiary)",
-          cursor: "pointer",
+          cursor: disabled ? "not-allowed" : "pointer",
           display: "flex",
           justifyContent: "space-between",
-          alignItems: "center"
+          alignItems: "center",
+          opacity: disabled ? 0.6 : 1,
+          transition: 'opacity 0.2s'
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, overflow: 'hidden' }}>
