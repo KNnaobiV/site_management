@@ -37,7 +37,6 @@ const CreateJobItemPage = () => {
     } else {
       fetchWorkItems();
     }
-    fetchUsers();
   }, [workItemId]);
 
   const fetchWorkItems = async () => {
@@ -84,15 +83,15 @@ const CreateJobItemPage = () => {
     }
   };
 
-  const fetchUsers = async () => {
+  const handleSearchUsers = async (query) => {
     try {
-      const res = await apiFetch('/auth/users/search/?q= ', { token });
+      const res = await apiFetch(`/auth/users/search/?q=${encodeURIComponent(query)}`, { token });
       if (res.ok) {
         const data = await res.json();
         setUsers(data.map(u => ({ id: u.id, label: u.username, avatar: u.avatar_url || null })));
       }
     } catch (err) {
-      console.error("Failed to fetch users", err);
+      console.error("Failed to search users", err);
     }
   };
 

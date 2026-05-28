@@ -45,15 +45,23 @@ const CreateWorkItemPage = () => {
               ...f,
               name: data.name || '',
               construction_phase: data.construction_phase || '',
-              foreman: data.foreman || '',
+              foreman: data.foreman?.id || '',
               description: data.description || '',
               proposed_start_date: data.proposed_start_date || f.proposed_start_date,
-              proposed_end_date: data.proposed_end_date || '',              start_date: data.start_date || '',
-              end_date: data.end_date || '',              priority: data.priority || 'Medium',
+              proposed_end_date: data.proposed_end_date || '',
+              start_date: data.start_date || '',
+              end_date: data.end_date || '',
+              priority: data.priority || 'Medium',
               initial_progress: data.initial_progress || 0,
               work_status: data.work_status || 'Planned',
               checklist: data.checklist || []
             }));
+
+            // Prepopulate options with existing foreman
+            if (data.foreman) {
+              setUsers([{ id: data.foreman.id, label: data.foreman.username, avatar: data.foreman.avatar_url || null }]);
+            }
+
             // fetch plot to show address
             const plid = data.construction_plot;
             if (plid) {
@@ -67,7 +75,6 @@ const CreateWorkItemPage = () => {
     } else {
       fetchPlots();
     }
-    fetchUsers();
   }, [plotId]);
 
   const fetchPlot = async () => {
@@ -96,15 +103,15 @@ const CreateWorkItemPage = () => {
     }
   };
 
-  const fetchUsers = async () => {
+  const handleSearchUsers = async (query) => {
     try {
-      const res = await apiFetch('/auth/users/search/?q= ', { token });
+      const res = await apiFetch(`/auth/users/search/?q=${encodeURIComponent(query)}`, { token });
       if (res.ok) {
         const data = await res.json();
         setUsers(data.map(u => ({ id: u.id, label: u.username, avatar: u.avatar_url || null })));
       }
     } catch (err) {
-      console.error("Failed to fetch users", err);
+      console.error("Failed to search users", err);
     }
   };
 
@@ -212,6 +219,7 @@ const CreateWorkItemPage = () => {
                   options={users}
                   value={formData.foreman}
                   onChange={val => setFormData({...formData, foreman: val})}
+                  onSearch={handleSearchUsers}
                   placeholder="Select foreman"
                 />
               </div>

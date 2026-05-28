@@ -30,6 +30,7 @@ const CreatePlotPage = () => {
     gps_longitude: '',
     status: 'Planned',
     foreman: '',
+    storekeeper: '',
     plot_opening_date: new Date().toISOString().split('T')[0],
     end_date: '',
     notes: ''
@@ -42,7 +43,6 @@ const CreatePlotPage = () => {
     } else {
       fetchProjects();
     }
-    fetchUsers();
     if (isEditing) {
       fetchPlot();
     }
@@ -62,10 +62,24 @@ const CreatePlotPage = () => {
           gps_longitude: plotData.gps_longitude || '',
           status: plotData.status || 'Planned',
           foreman: plotData.foreman?.id || '',
+          storekeeper: plotData.storekeeper?.id || '',
           plot_opening_date: plotData.plot_opening_date || new Date().toISOString().split('T')[0],
           end_date: plotData.end_date || '',
           notes: plotData.notes || ''
         });
+
+        // Prepopulate users select list with the existing foreman and storekeeper
+        const initialUsers = [];
+        if (plotData.foreman) {
+          initialUsers.push({ id: plotData.foreman.id, label: plotData.foreman.username, avatar: plotData.foreman.avatar_url || null });
+        }
+        if (plotData.storekeeper) {
+          initialUsers.push({ id: plotData.storekeeper.id, label: plotData.storekeeper.username, avatar: plotData.storekeeper.avatar_url || null });
+        }
+        if (initialUsers.length > 0) {
+          setUsers(initialUsers);
+        }
+
         const hasValues = !!(plotData.plot_number || plotData.plot_name || plotData.address || plotData.construction_project);
         setFieldsUpdated(hasValues);
       } else {
@@ -104,15 +118,15 @@ const CreatePlotPage = () => {
     }
   };
 
-  const fetchUsers = async () => {
+  const handleSearchUsers = async (query) => {
     try {
-      const res = await apiFetch('/auth/users/search/?q= ', { token });
+      const res = await apiFetch(`/auth/users/search/?q=${encodeURIComponent(query)}`, { token });
       if (res.ok) {
         const data = await res.json();
         setUsers(data.map(u => ({ id: u.id, label: u.username, avatar: u.avatar_url || null })));
       }
     } catch (err) {
-      console.error("Failed to fetch users", err);
+      console.error("Failed to search users", err);
     }
   };
 
@@ -130,6 +144,7 @@ const CreatePlotPage = () => {
       gps_longitude: formData.gps_longitude || null,
       notes: formData.notes,
       foreman: formData.foreman || null,
+      storekeeper: formData.storekeeper || null,
     };
 
     try {
@@ -258,9 +273,21 @@ const CreatePlotPage = () => {
                   options={users}
                   value={formData.foreman}
                   onChange={val => setFormData({...formData, foreman: val})}
+                  onSearch={handleSearchUsers}
                   placeholder="Select foreman"
                 />
               </div>
+            </div>
+
+            <div>
+              <label style={labelStyle}>Assigned Storekeeper</label>
+              <SearchableSelect 
+                options={users}
+                value={formData.storekeeper}
+                onChange={val => setFormData({...formData, storekeeper: val})}
+                onSearch={handleSearchUsers}
+                placeholder="Select storekeeper"
+              />
             </div>
           </div>
 

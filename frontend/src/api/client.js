@@ -1,4 +1,4 @@
-export let API_BASE = "https://constropal.alwaysdata.net/api";
+export let API_BASE = "http://127.0.0.1:8000/api";
 
 export async function apiFetch(path, { token, ...options } = {}) {
     const headers = {

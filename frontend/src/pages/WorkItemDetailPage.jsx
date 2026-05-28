@@ -326,11 +326,6 @@ const WorkItemDetailPage = () => {
       {/* Job Items Tab */}
       {activeTab === 'jobitems' && (
         <div>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
-            <button className="btn-primary" onClick={() => setShowNewJobItem(true)} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Plus size={15} /> Add Job Item
-            </button>
-          </div>
           {jobItems.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '60px', color: 'var(--text-tertiary)' }}>
               <p style={{ fontWeight: 600 }}>No job items yet</p>
