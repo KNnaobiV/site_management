@@ -360,7 +360,7 @@ const CreatePlotPage = () => {
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '48px' }}>
           <button type="button" onClick={() => navigate(-1)} className="btn-ghost" style={{ padding: '12px 32px' }}>Cancel</button>
           <button type="submit" className="btn-primary" style={{ padding: '12px 48px' }} disabled={loading}>
-            {loading ? <Spinner size={20} /> : (isEditing ? 'Edit Plot' : 'Create Plot')}
+            {loading ? <Spinner size={20} /> : (isEditing ? 'Update Plot' : 'Create Plot')}
           </button>
         </div>
       </form>

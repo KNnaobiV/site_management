@@ -9,7 +9,8 @@ import { showSuccessMessage } from '../utils/successMessage';
 const CreateWorkItemPage = () => {
   const { token } = useAuth();
   const navigate = useNavigate();
-  const { plotId } = useParams();
+  const { plotId, workItemId } = useParams();
+  const isEdit = Boolean(workItemId);
   const [loading, setLoading] = useState(false);
   const [fetchingPlot, setFetchingPlot] = useState(!!plotId);
   const [plot, setPlot] = useState(null);
@@ -24,6 +25,8 @@ const CreateWorkItemPage = () => {
     description: '',
     proposed_start_date: new Date().toISOString().split('T')[0],
     proposed_end_date: '',
+    start_date: '',
+    end_date: '',
     priority: 'Medium',
     initial_progress: 0,
     work_status: 'Planned',
@@ -31,8 +34,36 @@ const CreateWorkItemPage = () => {
   });
 
   useEffect(() => {
-    if (plotId) {
-      fetchPlot();
+    if (workItemId) {
+      // edit mode: load existing work item
+      (async () => {
+        try {
+          const res = await apiFetch(`/workitems/${workItemId}/`, { token });
+          if (res.ok) {
+            const data = await res.json();
+            setFormData(f => ({
+              ...f,
+              name: data.name || '',
+              construction_phase: data.construction_phase || '',
+              foreman: data.foreman || '',
+              description: data.description || '',
+              proposed_start_date: data.proposed_start_date || f.proposed_start_date,
+              proposed_end_date: data.proposed_end_date || '',              start_date: data.start_date || '',
+              end_date: data.end_date || '',              priority: data.priority || 'Medium',
+              initial_progress: data.initial_progress || 0,
+              work_status: data.work_status || 'Planned',
+              checklist: data.checklist || []
+            }));
+            // fetch plot to show address
+            const plid = data.construction_plot;
+            if (plid) {
+              const pRes = await apiFetch(`/plots/${plid}/`, { token });
+              if (pRes.ok) setPlot(await pRes.json());
+            }
+          }
+        } catch (err) { console.error('Failed to fetch workitem for editing', err); }
+        setFetchingPlot(false);
+      })();
     } else {
       fetchPlots();
     }
@@ -92,6 +123,8 @@ const CreateWorkItemPage = () => {
       // Priority and Progress are often handled via separate logic or combined into description if model doesn't have them
       // Based on model, we only have work_status, name, description, dates, checklist.
     };
+    if (formData.start_date) payload.start_date = formData.start_date;
+    if (formData.end_date) payload.end_date = formData.end_date;
 
     try {
       const targetPlotId = plotId || formData.construction_plot;
@@ -248,6 +281,32 @@ const CreateWorkItemPage = () => {
               </div>
             </div>
 
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div>
+                <label style={labelStyle}>Actual Start <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>(optional)</span></label>
+                <input
+                  type="date"
+                  value={formData.start_date}
+                  disabled={isEdit && !!formData.start_date}
+                  onChange={e => setFormData({...formData, start_date: e.target.value})}
+                  style={{
+                    ...inputStyle,
+                    background: isEdit && !!formData.start_date ? 'var(--bg-canvas)' : inputStyle.background,
+                    cursor: isEdit && !!formData.start_date ? 'not-allowed' : 'text'
+                  }}
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>Actual End <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>(optional)</span></label>
+                <input
+                  type="date"
+                  value={formData.end_date}
+                  onChange={e => setFormData({...formData, end_date: e.target.value})}
+                  style={inputStyle}
+                />
+              </div>
+            </div>
+
             <div>
               <label style={labelStyle}>Priority *</label>
               <div style={{ display: 'flex', gap: '10px' }}>
@@ -329,7 +388,7 @@ const CreateWorkItemPage = () => {
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '48px' }}>
           <button type="button" onClick={() => navigate(-1)} className="btn-ghost" style={{ padding: '12px 32px' }}>Cancel</button>
           <button type="submit" className="btn-primary" style={{ padding: '12px 48px' }} disabled={loading}>
-            {loading ? <Spinner size={20} /> : (typeof window !== 'undefined' && window.location.pathname.includes('/edit') ? 'Edit' : 'Create Work Item')}
+            {loading ? <Spinner size={20} /> : (typeof window !== 'undefined' && window.location.pathname.includes('/edit') ? 'Update Work Item' : 'Create Work Item')}
           </button>
         </div>
       </form>

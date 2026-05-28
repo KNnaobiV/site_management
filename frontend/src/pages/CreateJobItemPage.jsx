@@ -291,8 +291,13 @@ const CreateJobItemPage = () => {
                 <input 
                   type="date"
                   value={formData.actual_start_date}
+                  disabled={isEdit && !!formData.actual_start_date}
                   onChange={e => setFormData({...formData, actual_start_date: e.target.value})}
-                  style={inputStyle}
+                  style={{
+                    ...inputStyle,
+                    background: isEdit && !!formData.actual_start_date ? 'var(--bg-canvas)' : inputStyle.background,
+                    cursor: isEdit && !!formData.actual_start_date ? 'not-allowed' : 'text'
+                  }}
                 />
               </div>
               <div>
@@ -317,7 +322,7 @@ const CreateJobItemPage = () => {
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '48px' }}>
           <button type="button" onClick={() => navigate(-1)} className="btn-ghost" style={{ padding: '12px 32px' }}>Cancel</button>
           <button type="submit" className="btn-primary" style={{ padding: '12px 48px' }} disabled={loading}>
-            {loading ? <Spinner size={20} /> : (typeof window !== 'undefined' && window.location.pathname.includes('/edit') ? 'Edit' : 'Create Job Item')}
+            {loading ? <Spinner size={20} /> : (typeof window !== 'undefined' && window.location.pathname.includes('/edit') ? 'Update Job Item' : 'Create Job Item')}
           </button>
         </div>
       </form>

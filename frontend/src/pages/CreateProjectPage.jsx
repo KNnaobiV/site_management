@@ -264,7 +264,7 @@ const CreateProjectPage = () => {
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '48px' }}>
           <button type="button" onClick={() => navigate('/projects')} className="btn-ghost" style={{ padding: '12px 32px' }}>Cancel</button>
           <button type="submit" className="btn-primary" style={{ padding: '12px 48px' }} disabled={loading}>
-            {loading ? <Spinner size={20} /> : (isEditing ? 'Edit Project' : 'Create Project')}
+            {loading ? <Spinner size={20} /> : (isEditing ? 'Update Project' : 'Create Project')}
           </button>
         </div>
       </form>
