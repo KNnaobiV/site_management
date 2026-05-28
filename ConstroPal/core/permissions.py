@@ -21,6 +21,13 @@ from core.roles import (
     PLOT_MANAGE_ROLES,
     REPORT_WRITE_ROLES,
     REPORT_REVIEW_ROLES,
+    WORK_ITEM_CREATE_ROLES,
+    WORK_ITEM_UPDATE_ROLES,
+    WORK_ITEM_DELETE_ROLES,
+    WORK_ITEM_APPROVE_ROLES,
+    JOB_ITEM_CREATE_ROLES,
+    JOB_ITEM_UPDATE_ROLES,
+    JOB_ITEM_DELETE_ROLES,
 )
  
  
@@ -184,6 +191,150 @@ class CanManagePlot(BasePermission):
 # Backwards-compat aliases for anything that still imports the old names
 IsSiteMember = IsPlotMember
 CanManageSite = CanManagePlot
+
+
+# ---------------------------------------------------------------------------
+# Work item permissions
+# ---------------------------------------------------------------------------
+
+class CanCreateWorkItem(BasePermission):
+    """PM, owner, and foreman can create work items."""
+    message = "You do not have permission to create work items."
+
+    def has_permission(self, request, view):
+        if not request.user or not request.user.is_authenticated:
+            return False
+        plot = _get_plot(view)
+        if plot is None:
+            return True
+        return get_plot_role(request.user, plot) in WORK_ITEM_CREATE_ROLES
+
+    def has_object_permission(self, request, view, obj):
+        plot = getattr(obj, "construction_plot", None)
+        if plot is None:
+            return False
+        return get_plot_role(request.user, plot) in WORK_ITEM_CREATE_ROLES
+
+
+class CanUpdateWorkItem(BasePermission):
+    """PM, owner, and foreman can update work items (status, progress)."""
+    message = "You do not have permission to update work items."
+
+    def has_permission(self, request, view):
+        if not request.user or not request.user.is_authenticated:
+            return False
+        plot = _get_plot(view)
+        if plot is None:
+            return True
+        return get_plot_role(request.user, plot) in WORK_ITEM_UPDATE_ROLES
+
+    def has_object_permission(self, request, view, obj):
+        plot = getattr(obj, "construction_plot", None)
+        if plot is None:
+            return False
+        return get_plot_role(request.user, plot) in WORK_ITEM_UPDATE_ROLES
+
+
+class CanDeleteWorkItem(BasePermission):
+    """Only PM and owner can delete work items."""
+    message = "Only the project manager or owner can delete work items."
+
+    def has_permission(self, request, view):
+        if not request.user or not request.user.is_authenticated:
+            return False
+        plot = _get_plot(view)
+        if plot is None:
+            return True
+        return get_plot_role(request.user, plot) in WORK_ITEM_DELETE_ROLES
+
+    def has_object_permission(self, request, view, obj):
+        plot = getattr(obj, "construction_plot", None)
+        if plot is None:
+            return False
+        return get_plot_role(request.user, plot) in WORK_ITEM_DELETE_ROLES
+
+
+class CanApproveWorkItem(BasePermission):
+    """Only the project manager can approve or reject work items."""
+    message = "Only the project manager can approve work items."
+
+    def has_permission(self, request, view):
+        if not request.user or not request.user.is_authenticated:
+            return False
+        plot = _get_plot(view)
+        if plot is None:
+            return True
+        return get_plot_role(request.user, plot) in WORK_ITEM_APPROVE_ROLES
+
+    def has_object_permission(self, request, view, obj):
+        plot = getattr(obj, "construction_plot", None)
+        if plot is None:
+            return False
+        return get_plot_role(request.user, plot) in WORK_ITEM_APPROVE_ROLES
+
+
+# ---------------------------------------------------------------------------
+# Job item permissions
+# ---------------------------------------------------------------------------
+
+class CanCreateJobItem(BasePermission):
+    """PM, owner, and foreman can create job items."""
+    message = "You do not have permission to create job items."
+
+    def has_permission(self, request, view):
+        if not request.user or not request.user.is_authenticated:
+            return False
+        plot = _get_plot(view)
+        if plot is None:
+            return True
+        return get_plot_role(request.user, plot) in JOB_ITEM_CREATE_ROLES
+
+    def has_object_permission(self, request, view, obj):
+        plot = getattr(obj, "work_item", None)
+        plot = getattr(plot, "construction_plot", None) if plot else None
+        if plot is None:
+            return False
+        return get_plot_role(request.user, plot) in JOB_ITEM_CREATE_ROLES
+
+
+class CanUpdateJobItem(BasePermission):
+    """PM, owner, and foreman can update job item status/progress."""
+    message = "You do not have permission to update job items."
+
+    def has_permission(self, request, view):
+        if not request.user or not request.user.is_authenticated:
+            return False
+        plot = _get_plot(view)
+        if plot is None:
+            return True
+        return get_plot_role(request.user, plot) in JOB_ITEM_UPDATE_ROLES
+
+    def has_object_permission(self, request, view, obj):
+        plot = getattr(obj, "work_item", None)
+        plot = getattr(plot, "construction_plot", None) if plot else None
+        if plot is None:
+            return False
+        return get_plot_role(request.user, plot) in JOB_ITEM_UPDATE_ROLES
+
+
+class CanDeleteJobItem(BasePermission):
+    """Only PM and owner can delete job items."""
+    message = "Only the project manager or owner can delete job items."
+
+    def has_permission(self, request, view):
+        if not request.user or not request.user.is_authenticated:
+            return False
+        plot = _get_plot(view)
+        if plot is None:
+            return True
+        return get_plot_role(request.user, plot) in JOB_ITEM_DELETE_ROLES
+
+    def has_object_permission(self, request, view, obj):
+        plot = getattr(obj, "work_item", None)
+        plot = getattr(plot, "construction_plot", None) if plot else None
+        if plot is None:
+            return False
+        return get_plot_role(request.user, plot) in JOB_ITEM_DELETE_ROLES
 
 
 # ---------------------------------------------------------------------------

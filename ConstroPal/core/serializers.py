@@ -324,6 +324,7 @@ class WorkItemSerializer(RoleFilteredSerializer):
         "name",
         "description",
         "work_status",
+        "is_approved",
         "proposed_start_date",
         "proposed_end_date",
         "checklist",
@@ -363,7 +364,7 @@ class WorkItemSerializer(RoleFilteredSerializer):
             "construction_project",
             "images",
         ]
-        read_only_fields = ["id", "updated_at", "construction_plot"]
+        read_only_fields = ["id", "updated_at", "construction_plot", "is_approved"]
  
  
 # ===========================================================================
