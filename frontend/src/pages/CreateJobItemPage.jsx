@@ -11,6 +11,7 @@ const CreateJobItemPage = () => {
   const navigate = useNavigate();
   const { workItemId } = useParams();
   const [loading, setLoading] = useState(false);
+  const isEdit = false;
   const [fetchingWorkItem, setFetchingWorkItem] = useState(!!workItemId);
   const [workItem, setWorkItem] = useState(null);
   const [error, setError] = useState(null);

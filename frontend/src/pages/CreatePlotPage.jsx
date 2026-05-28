@@ -254,40 +254,17 @@ const CreatePlotPage = () => {
               />
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-              <div>
-                <label style={labelStyle}>Status *</label>
-                <select 
-                  value={formData.status}
-                  onChange={e => setFormData({...formData, status: e.target.value})}
-                  style={inputStyle}
-                >
-                  <option value="Planned">Planned</option>
-                  <option value="In Progress">Active</option>
-                  <option value="Completed">Completed</option>
-                </select>
-              </div>
-              <div>
-                <label style={labelStyle}>Assigned Foreman</label>
-                <SearchableSelect 
-                  options={users}
-                  value={formData.foreman}
-                  onChange={val => setFormData({...formData, foreman: val})}
-                  onSearch={handleSearchUsers}
-                  placeholder="Select foreman"
-                />
-              </div>
-            </div>
-
             <div>
-              <label style={labelStyle}>Assigned Storekeeper</label>
-              <SearchableSelect 
-                options={users}
-                value={formData.storekeeper}
-                onChange={val => setFormData({...formData, storekeeper: val})}
-                onSearch={handleSearchUsers}
-                placeholder="Select storekeeper"
-              />
+              <label style={labelStyle}>Status *</label>
+              <select 
+                value={formData.status}
+                onChange={e => setFormData({...formData, status: e.target.value})}
+                style={inputStyle}
+              >
+                <option value="Planned">Planned</option>
+                <option value="In Progress">Active</option>
+                <option value="Completed">Completed</option>
+              </select>
             </div>
           </div>
 

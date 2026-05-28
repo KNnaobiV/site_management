@@ -156,18 +156,6 @@ const CreateProjectPage = () => {
             </div>
 
             <div>
-              <label style={labelStyle}>Client</label>
-              <SearchableSelect 
-                options={users}
-                value={formData.client}
-                onChange={val => setFormData({...formData, client: val})}
-                onSearch={handleSearchUsers}
-                placeholder="Select client"
-                disabled={isEditing && clientUpdated}
-              />
-            </div>
-
-            <div>
               <label style={labelStyle}>Address</label>
               <textarea 
                 placeholder="Enter project address"
@@ -220,17 +208,6 @@ const CreateProjectPage = () => {
 
           {/* Right Column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            <div>
-              <label style={labelStyle}>Project Manager</label>
-              <SearchableSelect 
-                options={users}
-                value={formData.project_manager}
-                onChange={val => setFormData({...formData, project_manager: val})}
-                onSearch={handleSearchUsers}
-                placeholder="Select project manager"
-              />
-            </div>
-
             <div>
               <label style={labelStyle}>Description</label>
               <textarea 
