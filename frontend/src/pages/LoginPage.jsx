@@ -332,7 +332,7 @@ export default function LoginPage() {
                                     : "Create Account"}
                         </button>
 
-                        {tab === "login" && (googleReady || appleReady) && (
+                        {(googleReady || appleReady) && (
                             <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', gap: 12 }}>
                                 <div style={{ position: 'relative', textAlign: 'center', color: 'var(--text-tertiary)', fontSize: 12 }}>
                                     <span style={{ background: 'white', padding: '0 12px', position: 'relative', zIndex: 1 }}>
