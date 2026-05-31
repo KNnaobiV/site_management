@@ -286,14 +286,14 @@ const PlotDetailPage = () => {
       <Breadcrumb items={[
         { label: 'Projects', to: '/projects' },
         { label: project?.project_name || '...', to: `/projects/${projectId}` },
-        { label: plot.plot_number ? `Plot ${plot.plot_number}` : plot.address },
+        { label: plot.plot_name ? plot.plot_name : plot.address },
       ]} />
 
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px', marginBottom: '12px' }}>
         <div>
           <h1 style={{ fontSize: 'clamp(28px,4vw,48px)', marginBottom: '8px', lineHeight: 1.05 }}>
-            {plot.plot_number ? `Plot ${plot.plot_number}` : ''}{plot.plot_number && plot.address ? ' — ' : ''}{plot.address}
+            {plot.plot_name ? plot.plot_name : ''}{plot.plot_name && plot.address ? ' — ' : ''}{plot.address}
           </h1>
           {plot.notes && <p style={{ color: 'var(--text-secondary)', maxWidth: '600px', fontSize: '15px' }}>{plot.notes}</p>}
         </div>
@@ -301,7 +301,9 @@ const PlotDetailPage = () => {
           <button className="btn-ghost" style={{ display: 'flex', alignItems: 'center', gap: '8px' }} onClick={() => navigate(`/plots/${id}/edit`)}><Edit2 size={15} /> Edit</button>
           <button className="btn-ghost" onClick={() => navigate('/team/invite')} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><UserPlus size={15} /> Invite</button>
           <button className="btn-ghost" onClick={() => setActiveTab('reports')} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><FileText size={15} /> Generate Report</button>
-          <button className="btn-primary" onClick={() => navigate(`/plots/${id}/work-items/new`)} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Plus size={15} /> Add Work Item</button>
+          {plot.role === 'project_manager' && (
+            <button className="btn-primary" onClick={() => navigate(`/plots/${id}/work-items/new`)} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Plus size={15} /> Add Work Item</button>
+          )}
         </div>
       </div>
 
@@ -381,9 +383,11 @@ const PlotDetailPage = () => {
       {activeTab === 'workitems' && (
         <div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
-            <button className="btn-primary" onClick={() => setShowNewWorkItem(true)} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Plus size={15} /> Add Work Item
-            </button>
+            {plot.role === 'project_manager' && (
+              <button className="btn-primary" onClick={() => setShowNewWorkItem(true)} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Plus size={15} /> Add Work Item
+              </button>
+            )}
           </div>
           {workItems.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '60px', color: 'var(--text-tertiary)' }}>

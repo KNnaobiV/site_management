@@ -481,6 +481,12 @@ class JobItem(TimestampedModel):
         ALUMINIUM_WORKER = "Aluminium Worker"
         OTHER = "Other"
 
+    class PriorityChoices(models.TextChoices):
+        LOW = "Low"
+        MEDIUM = "Medium"
+        HIGH = "High"
+        URGENT = "Urgent"
+
     work_item = models.ForeignKey(
         WorkItem, on_delete=models.CASCADE, related_name="job_items"
     )
@@ -490,6 +496,10 @@ class JobItem(TimestampedModel):
     )
     job_artisan = models.CharField(max_length=20, choices=Artisans.choices)
     job_name = models.CharField(max_length=50, default="")
+    is_approved = models.BooleanField(default=False)
+    priority = models.CharField(
+        max_length=20, choices=PriorityChoices.choices, default=PriorityChoices.MEDIUM
+    )
     job_description = models.TextField(default="")
     projected_start_date = models.DateField()
     projected_end_date = models.DateField()

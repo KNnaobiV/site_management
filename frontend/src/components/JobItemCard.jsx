@@ -1,7 +1,7 @@
 import React from 'react';
 import StatusBadge from './StatusBadge';
 import Avatar from './Avatar';
-import { Calendar, User, Zap, CheckSquare } from 'lucide-react';
+import { Calendar, User, Zap, CheckSquare, CheckCircle2 } from 'lucide-react';
 
 const ProgressRing = ({ progress, size = 60, strokeWidth = 5 }) => {
   const radius = (size - strokeWidth) / 2;
@@ -54,6 +54,12 @@ const JobItemCard = ({ job, onClick }) => {
     <div className="card" onClick={onClick} style={{ cursor: 'pointer' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
         <StatusBadge status={job.job_status} />
+        {job.is_approved && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: '#edf5ed', color: '#2d5a27', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 600 }}>
+            <CheckCircle2 size={12} />
+            <span>Approved</span>
+          </div>
+        )}
       </div>
 
       <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>

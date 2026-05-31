@@ -57,8 +57,10 @@ export default function App() {
                 
                 <Route path="/work-items" element={<WorkItemsPage />} />
                 <Route path="/work-items/:workItemId" element={<WorkItemDetailPage />} />
+                <Route path="/work-items/:workItemId/edit" element={<CreateWorkItemPage />} />
                 <Route path="/work-items/:workItemId/job-items/new" element={<CreateJobItemPage />} />
                 <Route path="/job-items/new" element={<CreateJobItemPage />} />
+                <Route path="/job-items/:jobItemId/edit" element={<CreateJobItemPage />} />
                 
                 <Route path="/job-items" element={<JobItemsPage />} />
                 <Route path="/job-items/:jobItemId" element={<JobItemDetailPage />} />

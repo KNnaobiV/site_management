@@ -61,9 +61,9 @@ const Dashboard = () => {
         <StatCard label="On-site Teams" value="24" sub="Across 8 plots" />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '40px' }}>
+      <div className="mobile-stack" style={{ display: 'flex', gap: '40px' }}>
         {/* Recent Projects */}
-        <div>
+        <div style={{ flex: 2 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
             <h3 style={{ fontSize: '24px' }}>Recent Projects</h3>
             <button className="btn-ghost" style={{ fontSize: '14px' }}>View all</button>
@@ -80,7 +80,7 @@ const Dashboard = () => {
         </div>
 
         {/* Activity Feed */}
-        <div>
+        <div style={{ flex: 1 }}>
           <h3 style={{ fontSize: '24px', marginBottom: '24px' }}>Recent Activity</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {notifications.length > 0 ? (

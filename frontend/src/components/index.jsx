@@ -70,6 +70,8 @@ export function Tabs({ tabs, active, onChange, style }) {
         <div style={{
             display: "flex", gap: 2,
             borderBottom: "1px solid var(--border-subtle)",
+            overflowX: "auto",
+            whiteSpace: "nowrap",
             ...style,
         }}>
             {tabs.map(t => (

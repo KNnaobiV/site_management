@@ -332,6 +332,8 @@ class WorkItemSerializer(RoleFilteredSerializer):
         "images",
         "construction_plot_name",
         "construction_project",
+        "foreman",
+        "foreman_id",
     }
  
     ROLE_EXTRA = {
@@ -344,6 +346,10 @@ class WorkItemSerializer(RoleFilteredSerializer):
     construction_plot_name = serializers.ReadOnlyField(source="construction_plot.address")
     construction_project = serializers.ReadOnlyField(source="construction_plot.construction_project.id")
     images = WorkItemImageSerializer(many=True, read_only=True)
+    foreman = UserSummarySerializer(read_only=True)
+    foreman_id = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(), source="foreman", required=False, allow_null=True
+    )
  
     class Meta:
         model = WorkItem
@@ -363,6 +369,8 @@ class WorkItemSerializer(RoleFilteredSerializer):
             "construction_plot_name",
             "construction_project",
             "images",
+            "foreman",
+            "foreman_id",
         ]
         read_only_fields = ["id", "updated_at", "construction_plot", "is_approved"]
  
@@ -399,6 +407,8 @@ class JobItemSerializer(RoleFilteredSerializer):
         "job_description",
         "job_artisan",
         "job_status",
+        "is_approved",
+        "priority",
         "projected_start_date",
         "projected_end_date",
         "material_requirements",
@@ -431,6 +441,8 @@ class JobItemSerializer(RoleFilteredSerializer):
             "job_description",
             "job_artisan",
             "job_status",
+            "is_approved",
+            "priority",
             "projected_start_date",
             "projected_end_date",
             "actual_start_date",
@@ -443,7 +455,7 @@ class JobItemSerializer(RoleFilteredSerializer):
             "construction_plot_name",
             "construction_project",
         ]
-        read_only_fields = ["id", "updated_at", "work_item"]
+        read_only_fields = ["id", "updated_at", "work_item", "is_approved"]
  
  
 # ===========================================================================

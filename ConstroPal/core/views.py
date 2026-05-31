@@ -636,14 +636,14 @@ class WorkItemViewSet(PlotScopedMixin, viewsets.ModelViewSet):
         ).distinct()
 
         # Filter unapproved items unless user is PM/owner/foreman on that plot
-        # Simple heuristic: exclude unapproved unless user is foreman/PM on the plot
-        visible_unapproved = WorkItem.objects.filter(
+        can_see_unapproved = (
             models_Q(construction_plot__construction_project__created_by=user) |
             models_Q(construction_plot__construction_project__project_manager=user) |
             models_Q(construction_plot__foreman=user)
         )
-        approved = base_qs.filter(is_approved=True)
-        return (approved | visible_unapproved).distinct().order_by('-updated_at')
+        return base_qs.filter(
+            models_Q(is_approved=True) | can_see_unapproved
+        ).order_by('-updated_at')
 
     def perform_create(self, serializer):
         plot = self.get_plot()
@@ -773,6 +773,8 @@ class JobItemViewSet(PlotScopedMixin, viewsets.ModelViewSet):
             return [IsAuthenticated(), CanUpdateJobItem()]
         if self.action == "destroy":
             return [IsAuthenticated(), CanDeleteJobItem()]
+        if self.action in ("approve", "reject"):
+            return [IsAuthenticated(), CanApproveJobItem()]
         return [IsAuthenticated(), CanManagePlot()]
 
     def get_queryset(self):
@@ -786,9 +788,9 @@ class JobItemViewSet(PlotScopedMixin, viewsets.ModelViewSet):
                 work_item__construction_plot=plot,
                 work_item__pk=wi_pk,
             )
-            # Client / consultant / storekeeper only see job items whose parent work item is approved
+            # Client / consultant / storekeeper only see job items that are approved
             if role not in SEES_UNAPPROVED_ROLES:
-                qs = qs.filter(work_item__is_approved=True)
+                qs = qs.filter(is_approved=True)
             return qs.order_by('-updated_at')
 
         # Global access — restrict unapproved for limited roles
@@ -801,13 +803,14 @@ class JobItemViewSet(PlotScopedMixin, viewsets.ModelViewSet):
             models_Q(work_item__construction_plot__storekeeper=user)
         ).distinct()
 
-        visible_unapproved = JobItem.objects.filter(
+        can_see_unapproved = (
             models_Q(work_item__construction_plot__construction_project__created_by=user) |
             models_Q(work_item__construction_plot__construction_project__project_manager=user) |
             models_Q(work_item__construction_plot__foreman=user)
         )
-        approved = base_qs.filter(work_item__is_approved=True)
-        return (approved | visible_unapproved).distinct().order_by('-updated_at')
+        return base_qs.filter(
+            models_Q(is_approved=True) | can_see_unapproved
+        ).order_by('-updated_at')
 
     def perform_create(self, serializer):
         plot = self.get_plot()
@@ -817,7 +820,9 @@ class JobItemViewSet(PlotScopedMixin, viewsets.ModelViewSet):
             pk=self.kwargs["workitem_pk"],
             construction_plot=plot,
         )
-        job_item = serializer.save(work_item=work_item)
+        role = get_plot_role(user, plot)
+        is_approved = role in {"owner", "project_manager"}
+        job_item = serializer.save(work_item=work_item, is_approved=is_approved)
 
         project = work_item.construction_plot.construction_project
         role = get_plot_role(user, plot)
@@ -854,6 +859,52 @@ class JobItemViewSet(PlotScopedMixin, viewsets.ModelViewSet):
                 ) for m in members if m and m != user
             ]
             Notification.objects.bulk_create(notifications)
+
+    @action(detail=True, methods=["post"])
+    def approve(self, request, **kwargs):
+        """POST …/jobitems/{pk}/approve/ — only project_manager."""
+        job_item = self.get_object()
+        self.check_object_permissions(request, job_item)
+        job_item.is_approved = True
+        job_item.save()
+
+        # Notify the foreman whose item was approved
+        plot = job_item.work_item.construction_plot
+        project = plot.construction_project
+        if plot.foreman:
+            Notification.objects.create(
+                user=plot.foreman,
+                project=project,
+                message=f"Your job item '{job_item.job_name}' has been approved by the PM.",
+                priority=Notification.Priority.NORMAL,
+                target_url=f"/job-items/{job_item.pk}/"
+            )
+        return Response({"status": "approved"})
+
+    @action(detail=True, methods=["post"])
+    def reject(self, request, **kwargs):
+        """POST …/jobitems/{pk}/reject/ — only project_manager."""
+        job_item = self.get_object()
+        self.check_object_permissions(request, job_item)
+        job_item.is_approved = False
+        job_item.save()
+
+        # Notify the foreman whose item was rejected
+        plot = job_item.work_item.construction_plot
+        project = plot.construction_project
+        reason = request.data.get("reason", "")
+        message = f"Your job item '{job_item.job_name}' was rejected by the PM."
+        if reason:
+            message += f" Reason: {reason}"
+        if plot.foreman:
+            Notification.objects.create(
+                user=plot.foreman,
+                project=project,
+                message=message,
+                priority=Notification.Priority.HIGH,
+                target_url=f"/job-items/{job_item.pk}/"
+            )
+        return Response({"status": "rejected"})
 
 
 # ---------------------------------------------------------------------------

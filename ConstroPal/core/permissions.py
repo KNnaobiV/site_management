@@ -28,6 +28,7 @@ from core.roles import (
     JOB_ITEM_CREATE_ROLES,
     JOB_ITEM_UPDATE_ROLES,
     JOB_ITEM_DELETE_ROLES,
+    JOB_ITEM_APPROVE_ROLES,
 )
  
  
@@ -337,6 +338,26 @@ class CanDeleteJobItem(BasePermission):
         return get_plot_role(request.user, plot) in JOB_ITEM_DELETE_ROLES
 
 
+class CanApproveJobItem(BasePermission):
+    """Only the project manager can approve or reject job items."""
+    message = "Only the project manager can approve job items."
+
+    def has_permission(self, request, view):
+        if not request.user or not request.user.is_authenticated:
+            return False
+        plot = _get_plot(view)
+        if plot is None:
+            return True
+        return get_plot_role(request.user, plot) in JOB_ITEM_APPROVE_ROLES
+
+    def has_object_permission(self, request, view, obj):
+        plot = getattr(obj, "work_item", None)
+        plot = getattr(plot, "construction_plot", None) if plot else None
+        if plot is None:
+            return False
+        return get_plot_role(request.user, plot) in JOB_ITEM_APPROVE_ROLES
+
+
 # ---------------------------------------------------------------------------
 # Report permissions
 # ---------------------------------------------------------------------------
@@ -388,8 +409,8 @@ class CanSendProjectInvitation(BasePermission):
  
  
 class CanSendPlotInvitation(BasePermission):
-    """Owner, client, or project manager can invite to a plot."""
-    message = "Only the project owner, client, or project manager can send plot invitations."
+    """Owner or project manager can invite to a plot."""
+    message = "Only the project owner or project manager can send plot invitations."
  
     def has_permission(self, request, view):
         if not request.user or not request.user.is_authenticated:
