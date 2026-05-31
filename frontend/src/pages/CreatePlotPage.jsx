@@ -32,7 +32,9 @@ const CreatePlotPage = () => {
     storekeeper: '',
     plot_opening_date: new Date().toISOString().split('T')[0],
     end_date: '',
-    notes: ''
+    notes: '',
+    budget_amount: '',
+    budget_currency: 'NGN',
   });
 
   useEffect(() => {
@@ -154,6 +156,14 @@ const CreatePlotPage = () => {
       });
 
       if (res.ok) {
+        const savedPlot = await res.json();
+        if (formData.budget_amount && parseFloat(formData.budget_amount) > 0) {
+          await apiFetch(`/plots/${savedPlot.id}/budget/`, {
+            method: 'PATCH',
+            token,
+            body: JSON.stringify({ allocated_amount: parseFloat(formData.budget_amount), currency: formData.budget_currency }),
+          });
+        }
         showSuccessMessage(isEditing ? "Plot updated successfully!" : "Plot created successfully!");
         if (isEditing) {
           navigate(`/plots/${plotId}`);
@@ -345,6 +355,29 @@ const CreatePlotPage = () => {
                 onChange={e => setFormData({...formData, notes: e.target.value})}
                 style={{ ...inputStyle, minHeight: '100px', resize: 'vertical' }}
               />
+            </div>
+
+            {/* Budget */}
+            <div>
+              <label style={labelStyle}>Plot Budget <span style={{ fontWeight: 400, color: 'var(--text-tertiary)' }}>(Optional)</span></label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '10px' }}>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="e.g. 50000000"
+                  value={formData.budget_amount}
+                  onChange={e => setFormData({...formData, budget_amount: e.target.value})}
+                  style={inputStyle}
+                />
+                <select
+                  value={formData.budget_currency}
+                  onChange={e => setFormData({...formData, budget_currency: e.target.value})}
+                  style={{ ...inputStyle, width: '90px' }}
+                >
+                  {['NGN','USD','GBP','EUR'].map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
             </div>
 
             <div>

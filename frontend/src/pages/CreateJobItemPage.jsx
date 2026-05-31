@@ -30,7 +30,9 @@ const CreateJobItemPage = () => {
     actual_end_date: '',
     estimated_hours: '',
     material_requirements: [],
-    work_item: ''
+    work_item: '',
+    budget_amount: '',
+    budget_currency: 'NGN',
   });
 
   useEffect(() => {
@@ -134,12 +136,26 @@ const CreateJobItemPage = () => {
       });
 
       if (res.ok) {
+<<<<<<< HEAD
         showSuccessMessage(isEdit ? "Job item updated successfully!" : "Job item created successfully!");
         if (isEdit) {
           navigate(`/job-items/${jobItemId}`);
         } else {
           navigate(`/work-items/${targetWiId}`);
         }
+=======
+        const newJobItem = await res.json();
+        // Create budget if amount was set
+        if (formData.budget_amount && parseFloat(formData.budget_amount) > 0) {
+          await apiFetch(`/jobitems/${newJobItem.id}/budget/`, {
+            method: 'PATCH',
+            token,
+            body: JSON.stringify({ allocated_amount: parseFloat(formData.budget_amount), currency: formData.budget_currency }),
+          });
+        }
+        showSuccessMessage("Job item created successfully!");
+        navigate(`/work-items/${targetWiId}`);
+>>>>>>> 76f5b6f4 (connected finance be to fe)
       } else {
         const data = await res.json();
         setError(Object.entries(data).map(([k, v]) => `${k}: ${v}`).join(', '));
@@ -296,6 +312,29 @@ const CreateJobItemPage = () => {
                 onChange={e => setFormData({...formData, estimated_hours: e.target.value})}
                 style={inputStyle}
               />
+            </div>
+
+            {/* Budget */}
+            <div>
+              <label style={labelStyle}>Budget <span style={{ fontWeight: 400, color: 'var(--text-tertiary)' }}>(Optional)</span></label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '10px' }}>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="e.g. 500000"
+                  value={formData.budget_amount}
+                  onChange={e => setFormData({...formData, budget_amount: e.target.value})}
+                  style={inputStyle}
+                />
+                <select
+                  value={formData.budget_currency}
+                  onChange={e => setFormData({...formData, budget_currency: e.target.value})}
+                  style={{ ...inputStyle, width: '90px' }}
+                >
+                  {['NGN','USD','GBP','EUR'].map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>

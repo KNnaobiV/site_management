@@ -103,6 +103,52 @@ class BudgetModelsTest(TestCase):
         self.assertEqual(budget.spent_amount, Decimal('300.00'))
         self.assertEqual(budget.remaining_amount, Decimal('900.00'))
 
+    def test_hierarchical_payment_rollup(self):
+        # Create budgets at all levels
+        project_budget = ProjectBudget.objects.create(
+            project=self.project,
+            allocated_amount=Decimal('10000.00'),
+        )
+        plot_budget = PlotBudget.objects.create(
+            plot=self.plot,
+            allocated_amount=Decimal('5000.00'),
+        )
+        work_item_budget = WorkItemBudget.objects.create(
+            work_item=self.work_item,
+            allocated_amount=Decimal('2500.00'),
+        )
+        job_item_budget = JobItemBudget.objects.create(
+            job_item=self.job_item,
+            allocated_amount=Decimal('1000.00'),
+        )
+
+        # 1. Add an expense of 300 to the child job item
+        Expense.objects.create(
+            cost_code=self.cost_code,
+            amount=Decimal('300.00'),
+            job_item=self.job_item,
+        )
+
+        # Verify it propagates to all parent budgets
+        self.assertEqual(job_item_budget.spent_amount, Decimal('300.00'))
+        self.assertEqual(work_item_budget.spent_amount, Decimal('300.00'))
+        self.assertEqual(plot_budget.spent_amount, Decimal('300.00'))
+        self.assertEqual(project_budget.spent_amount, Decimal('300.00'))
+
+        # 2. Add a direct expense of 200 to the parent work item
+        Expense.objects.create(
+            cost_code=self.cost_code,
+            amount=Decimal('200.00'),
+            work_item=self.work_item,
+        )
+
+        # Verify job item is unchanged, but parents reflect both (300 + 200 = 500)
+        self.assertEqual(job_item_budget.spent_amount, Decimal('300.00'))
+        self.assertEqual(work_item_budget.spent_amount, Decimal('500.00'))
+        self.assertEqual(plot_budget.spent_amount, Decimal('500.00'))
+        self.assertEqual(project_budget.spent_amount, Decimal('500.00'))
+
+
     def test_expense_requires_exactly_one_target(self):
         expense = Expense(
             cost_code=self.cost_code,

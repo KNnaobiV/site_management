@@ -30,7 +30,9 @@ const CreateWorkItemPage = () => {
     priority: 'Medium',
     initial_progress: 0,
     work_status: 'Planned',
-    checklist: []
+    checklist: [],
+    budget_amount: '',
+    budget_currency: 'NGN',
   });
 
   useEffect(() => {
@@ -142,6 +144,14 @@ const CreateWorkItemPage = () => {
       });
 
       if (res.ok) {
+        const newWi = await res.json();
+        if (formData.budget_amount && parseFloat(formData.budget_amount) > 0) {
+          await apiFetch(`/workitems/${newWi.id}/budget/`, {
+            method: 'PATCH',
+            token,
+            body: JSON.stringify({ allocated_amount: parseFloat(formData.budget_amount), currency: formData.budget_currency }),
+          });
+        }
         showSuccessMessage("Work item created successfully!");
         navigate(`/plots/${targetPlotId}`);
       } else {
@@ -338,6 +348,7 @@ const CreateWorkItemPage = () => {
 
           </div>
 
+<<<<<<< HEAD
           <div>
             <label style={labelStyle}>Status *</label>
             <select
@@ -360,6 +371,41 @@ const CreateWorkItemPage = () => {
               <p style={{ margin: '4px 0', fontSize: '14px', color: 'var(--text-secondary)' }}>or</p>
               <button type="button" className="btn-ghost" style={{ padding: '8px 24px', fontSize: '14px' }}>Choose Files</button>
               <p style={{ fontSize: '11px', color: 'var(--text-tertiary)', marginTop: '12px' }}>JPG, PNG, PDF up to 25MB each</p>
+=======
+            {/* Budget */}
+            <div>
+              <label style={labelStyle}>Budget <span style={{ fontWeight: 400, color: 'var(--text-tertiary)' }}>(Optional)</span></label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '10px' }}>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="e.g. 2000000"
+                  value={formData.budget_amount}
+                  onChange={e => setFormData({...formData, budget_amount: e.target.value})}
+                  style={inputStyle}
+                />
+                <select
+                  value={formData.budget_currency}
+                  onChange={e => setFormData({...formData, budget_currency: e.target.value})}
+                  style={{ ...inputStyle, width: '90px' }}
+                >
+                  {['NGN','USD','GBP','EUR'].map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label style={labelStyle}>Reference Photos</label>
+              <p style={{ fontSize: '13px', color: 'var(--text-tertiary)', marginBottom: '12px' }}>Upload photos, drawings, or references.</p>
+              <div style={{ ...dropzoneStyle, height: '160px' }}>
+                <ImageIcon size={32} color="var(--border-strong)" style={{ marginBottom: '16px' }} />
+                <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-secondary)' }}>Drag and drop files here</p>
+                <p style={{ margin: '4px 0', fontSize: '14px', color: 'var(--text-secondary)' }}>or</p>
+                <button type="button" className="btn-ghost" style={{ padding: '8px 24px', fontSize: '14px' }}>Choose Files</button>
+                <p style={{ fontSize: '11px', color: 'var(--text-tertiary)', marginTop: '12px' }}>JPG, PNG, PDF up to 25MB each</p>
+              </div>
+>>>>>>> 76f5b6f4 (connected finance be to fe)
             </div>
           </div>
         </div>
