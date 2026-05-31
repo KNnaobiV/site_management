@@ -22,7 +22,6 @@ const CreatePlotPage = () => {
   const [fieldsUpdated, setFieldsUpdated] = useState(false);
   
   const [formData, setFormData] = useState({
-    plot_number: '',
     plot_name: '',
     construction_project: projectId || '',
     address: '',
@@ -54,7 +53,6 @@ const CreatePlotPage = () => {
       if (res.ok) {
         const plotData = await res.json();
         setFormData({
-          plot_number: plotData.plot_number || '',
           plot_name: plotData.plot_name || '',
           construction_project: plotData.construction_project?.id || '',
           address: plotData.address || '',
@@ -137,7 +135,6 @@ const CreatePlotPage = () => {
 
     const payload = {
       construction_project: formData.construction_project,
-      plot_number: formData.plot_number,
       address: formData.address,
       plot_opening_date: formData.plot_opening_date,
       gps_latitude: formData.gps_latitude || null,
@@ -241,6 +238,29 @@ const CreatePlotPage = () => {
                   disabled={isEditing && fieldsUpdated}
                 />
               )}
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div>
+                <label style={labelStyle}>Foreman</label>
+                <SearchableSelect 
+                  options={users}
+                  value={formData.foreman}
+                  onChange={val => setFormData({...formData, foreman: val})}
+                  onSearch={handleSearchUsers}
+                  placeholder="Select foreman"
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>Storekeeper</label>
+                <SearchableSelect 
+                  options={users}
+                  value={formData.storekeeper}
+                  onChange={val => setFormData({...formData, storekeeper: val})}
+                  onSearch={handleSearchUsers}
+                  placeholder="Select storekeeper"
+                />
+              </div>
             </div>
 
             <div>

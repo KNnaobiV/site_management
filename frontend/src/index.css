@@ -194,3 +194,48 @@ button {
     transform: rotate(360deg);
   }
 }
+
+/* --- Responsive Utilities --- */
+@media (max-width: 768px) {
+  /* Typography Scaling */
+  h1 {
+    font-size: 2.25rem;
+  }
+  h2 {
+    font-size: 1.75rem;
+  }
+  h3 {
+    font-size: 1.25rem;
+  }
+  
+  /* Layout Utilities */
+  .mobile-padding {
+    padding: 16px !important;
+  }
+  .mobile-stack {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  .mobile-stack-start {
+    align-items: flex-start !important;
+  }
+  
+  .hide-on-mobile {
+    display: none !important;
+  }
+
+  .mobile-w-full {
+    width: 100% !important;
+  }
+  
+  /* Inputs & Buttons */
+  button, .btn-primary, .btn-ghost {
+    padding: 12px 16px; /* Slightly larger touch targets */
+    justify-content: center;
+  }
+  
+  /* Override custom main layouts that rely on fixed margins */
+  .mobile-no-margin {
+    margin: 0 !important;
+  }
+}

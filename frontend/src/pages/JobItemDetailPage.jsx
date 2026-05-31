@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 // Optimized Job Item Detail View
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { Plus, Image as ImageIcon, ArrowLeft, CheckCircle2, Loader as SpinnerIcon, X } from 'lucide-react';
+import { Plus, Image as ImageIcon, ArrowLeft, CheckCircle2, Loader as SpinnerIcon, X, Edit2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { apiFetch, unwrapList } from '../api/client';
 import { Breadcrumb, Avatar, MaterialsEditor, Spinner, CommentsSection } from '../components';
@@ -117,6 +117,23 @@ const JobItemDetailPage = () => {
     } catch (err) { console.error(err); }
   };
 
+  const handleApprove = async () => {
+    try {
+      const res = await apiFetch(`/projects/${projectId}/plots/${plotId}/workitems/${workItemId}/jobitems/${id}/approve/`, {
+        method: 'POST',
+        token,
+      });
+      if (res.ok) {
+        showSuccessMessage("Job Item approved!");
+        fetchAll();
+      } else {
+        const data = await res.json();
+        console.error("Failed to approve job item:", data);
+        alert(data.detail || "Failed to approve job item");
+      }
+    } catch (err) { console.error(err); }
+  };
+
   if (loading) return <div style={{ padding: '60px', display: 'flex', justifyContent: 'center' }}><Spinner /></div>;
   if (!jobItem) return <div style={{ padding: '60px', textAlign: 'center', color: 'var(--text-tertiary)' }}>Job item not found.</div>;
 
@@ -139,9 +156,22 @@ const JobItemDetailPage = () => {
           <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
             <StatusPill status={jobItem.job_status} />
             <span style={{ fontSize: '14px', color: 'var(--text-tertiary)', padding: '5px 14px', borderRadius: '100px', background: 'var(--bg-raised)', fontWeight: 500 }}>{jobItem.job_artisan}</span>
+            {jobItem.is_approved && (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: '#edf5ed', color: '#2d5a27', padding: '5px 14px', borderRadius: '100px', fontSize: '13px', fontWeight: 600 }}>
+                <CheckCircle2 size={14} /> Approved
+              </span>
+            )}
           </div>
         </div>
         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          <button className="btn-ghost" onClick={() => navigate(`/job-items/${id}/edit`)} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Edit2 size={15} /> Edit Job
+          </button>
+          {!jobItem.is_approved && (
+            <button className="btn-ghost" onClick={handleApprove} style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#2d5a27', borderColor: '#2d5a27' }}>
+              <CheckCircle2 size={18} /> Approve Job
+            </button>
+          )}
           {jobItem.job_status !== 'Completed' && (
             <button className="btn-ghost" onClick={handleMarkComplete} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <CheckCircle2 size={18} /> Mark Complete

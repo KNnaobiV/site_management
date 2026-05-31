@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Plus, Check, Image as ImageIcon } from 'lucide-react';
+import { Plus, Check, CheckCircle2, Image as ImageIcon, Edit2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { apiFetch, unwrapList } from '../api/client';
 import { Breadcrumb, Tabs, Avatar, Spinner, ProgressDonut, ChecklistEditor, MaterialsEditor, ImageUploader } from '../components';
@@ -37,6 +37,7 @@ const ARTISANS = ['Mason','Plumber','Electrician','Carpenter','Painter','Roofer'
 const NewJobItemForm = ({ projectId, plotId, workItemId, token, onSuccess, onClose }) => {
   const [form, setForm] = useState({
     job_name: '', job_description: '', job_artisan: '', job_status: 'Planned',
+    priority: 'Medium',
     projected_start_date: new Date().toISOString().split('T')[0],
     projected_end_date: '', actual_start_date: '', actual_end_date: '',
     estimated_hours: '',
@@ -52,6 +53,7 @@ const NewJobItemForm = ({ projectId, plotId, workItemId, token, onSuccess, onClo
     const payload = {
       job_name: form.job_name, job_description: form.job_description,
       job_artisan: form.job_artisan, job_status: form.job_status,
+      priority: form.priority,
       projected_start_date: form.projected_start_date,
       projected_end_date: form.projected_end_date,
     };
@@ -97,6 +99,14 @@ const NewJobItemForm = ({ projectId, plotId, workItemId, token, onSuccess, onClo
               {['Planned','In Progress','Completed','On Hold','Delayed','Cancelled'].map(s => <option key={s} value={s}>{s}</option>)}
             </select>
           </div>
+          <div>
+            <label style={labelStyle}>Priority *</label>
+            <select required value={form.priority} onChange={e => set('priority', e.target.value)} style={inputStyle}>
+              {['Low','Medium','High','Urgent'].map(p => <option key={p} value={p}>{p}</option>)}
+            </select>
+          </div>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
           <div>
             <label style={labelStyle}>Estimated Hours <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>(optional)</span></label>
             <input type="number" step="0.5" min="0" value={form.estimated_hours} onChange={e => set('estimated_hours', e.target.value)} placeholder="e.g. 12.5" style={inputStyle} />
@@ -201,6 +211,23 @@ const WorkItemDetailPage = () => {
     } catch { /* silent */ } finally { setChecklistSaving(false); }
   };
 
+  const handleApprove = async () => {
+    try {
+      const res = await apiFetch(`/projects/${projectId}/plots/${plotId}/workitems/${id}/approve/`, {
+        method: 'POST',
+        token,
+      });
+      if (res.ok) {
+        showSuccessMessage("Work Item approved!");
+        fetchAll();
+      } else {
+        const data = await res.json();
+        console.error("Failed to approve work item:", data);
+        alert(data.detail || "Failed to approve work item");
+      }
+    } catch (err) { console.error(err); }
+  };
+
   const uploadImages = async (files) => {
     for (const file of files) {
       const fd = new FormData(); fd.append('image', file);
@@ -238,18 +265,35 @@ const WorkItemDetailPage = () => {
         <div style={{ display: 'flex', gap: '24px', alignItems: 'center', flexWrap: 'wrap' }}>
           <div>
             <h1 style={{ fontSize: 'clamp(26px,4vw,44px)', marginBottom: '10px', lineHeight: 1.05 }}>{workItem.name}</h1>
-            <StatusPill status={workItem.work_status} />
+            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
+              <StatusPill status={workItem.work_status} />
+              {workItem.is_approved && (
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: '#edf5ed', color: '#2d5a27', padding: '5px 14px', borderRadius: '100px', fontSize: '13px', fontWeight: 600 }}>
+                  <CheckCircle2 size={14} /> Approved
+                </span>
+              )}
+            </div>
           </div>
           <ProgressDonut percent={progress} size={100} strokeWidth={9} />
         </div>
         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          <button className="btn-ghost" onClick={() => navigate(`/work-items/${id}/edit`)} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Edit2 size={15} /> Edit Work
+          </button>
+          {!workItem.is_approved && (
+            <button className="btn-ghost" onClick={handleApprove} style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#2d5a27', borderColor: '#2d5a27' }}>
+              <CheckCircle2 size={18} /> Approve Work
+            </button>
+          )}
           <button className="btn-ghost" onClick={() => { const fi = document.getElementById('wi-img-upload'); fi && fi.click(); }} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <ImageIcon size={15} /> Attach Photos
           </button>
           <input id="wi-img-upload" type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={e => uploadImages(Array.from(e.target.files))} />
-          <button className="btn-primary" onClick={() => navigate(`/work-items/${id}/job-items/new`)} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Plus size={15} /> Add Job Item
-          </button>
+          {plot?.role === 'project_manager' && (
+            <button className="btn-primary" onClick={() => navigate(`/work-items/${id}/job-items/new`)} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Plus size={15} /> Add Job Item
+            </button>
+          )}
         </div>
       </div>
 
@@ -316,9 +360,11 @@ const WorkItemDetailPage = () => {
                 </div>
               </div>
             ))}
-            <button className="btn-ghost" onClick={() => setShowNewJobItem(true)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '13px' }}>
-              <Plus size={14} /> Add Job Item
-            </button>
+            {plot?.role === 'project_manager' && (
+              <button className="btn-ghost" onClick={() => setShowNewJobItem(true)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '13px' }}>
+                <Plus size={14} /> Add Job Item
+              </button>
+            )}
           </div>
         </div>
       )}

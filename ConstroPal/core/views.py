@@ -45,7 +45,7 @@ from core.models import (
     WorkItemImage,
     JobReportImage,
 )
-from core.roles import get_project_role, get_plot_role
+from core.roles import get_project_role, get_plot_role, SEES_UNAPPROVED_ROLES
 from core.services import (
     invite_to_project,
     invite_to_plot,
@@ -69,6 +69,13 @@ from .permissions import (
     CanSendPlotInvitation,
     IsInvitee,
     IsInviterOrProjectOwner,
+    CanCreateWorkItem,
+    CanUpdateWorkItem,
+    CanDeleteWorkItem,
+    CanApproveWorkItem,
+    CanCreateJobItem,
+    CanUpdateJobItem,
+    CanDeleteJobItem,
 )
 from .serializers import (
     ConstructionProjectSerializer,
@@ -596,57 +603,141 @@ class WorkItemViewSet(PlotScopedMixin, viewsets.ModelViewSet):
     def get_permissions(self):
         if self.action in ("list", "retrieve"):
             return [IsAuthenticated(), IsPlotMember()]
+        if self.action == "create":
+            return [IsAuthenticated(), CanCreateWorkItem()]
+        if self.action in ("update", "partial_update"):
+            return [IsAuthenticated(), CanUpdateWorkItem()]
+        if self.action == "destroy":
+            return [IsAuthenticated(), CanDeleteWorkItem()]
+        if self.action in ("approve", "reject"):
+            return [IsAuthenticated(), CanApproveWorkItem()]
         return [IsAuthenticated(), CanManagePlot()]
 
     def get_queryset(self):
         plot = self.get_plot()
         user = self.request.user
-        
+
         if plot:
-            return WorkItem.objects.filter(construction_plot=plot).order_by('-updated_at')
-        
-        # Global access: all work items user has plot-level access to
-        return WorkItem.objects.filter(
+            role = get_plot_role(user, plot)
+            qs = WorkItem.objects.filter(construction_plot=plot)
+            # Client / consultant / storekeeper only see PM-approved items
+            if role not in SEES_UNAPPROVED_ROLES:
+                qs = qs.filter(is_approved=True)
+            return qs.order_by('-updated_at')
+
+        # Global access — restrict unapproved items for limited roles
+        base_qs = WorkItem.objects.filter(
             models_Q(construction_plot__construction_project__created_by=user) |
             models_Q(construction_plot__construction_project__client=user) |
             models_Q(construction_plot__construction_project__project_manager=user) |
             models_Q(construction_plot__construction_project__consultants=user) |
             models_Q(construction_plot__foreman=user) |
             models_Q(construction_plot__storekeeper=user)
-        ).distinct().order_by('-updated_at')
+        ).distinct()
+
+        # Filter unapproved items unless user is PM/owner/foreman on that plot
+        can_see_unapproved = (
+            models_Q(construction_plot__construction_project__created_by=user) |
+            models_Q(construction_plot__construction_project__project_manager=user) |
+            models_Q(construction_plot__foreman=user)
+        )
+        return base_qs.filter(
+            models_Q(is_approved=True) | can_see_unapproved
+        ).order_by('-updated_at')
 
     def perform_create(self, serializer):
-        work_item = serializer.save(construction_plot=self.get_plot())
-        # Notify all project members
+        plot = self.get_plot()
+        user = self.request.user
+        role = get_plot_role(user, plot)
+
+        # Foreman-created items start unapproved; PM/owner items are auto-approved
+        is_approved = role in {"owner", "project_manager"}
+        work_item = serializer.save(construction_plot=plot, is_approved=is_approved)
+
         project = work_item.construction_plot.construction_project
-        members = set([project.created_by, project.client, project.project_manager])
-        members.update(project.consultants.all())
-        # Also include plot staff
-        for plot in project.constructionplot_set.all():
-            if plot.foreman: members.add(plot.foreman)
-            if plot.storekeeper: members.add(plot.storekeeper)
-        
-        notifications = [
-            Notification(
-                user=member, 
-                project=project, 
-                message=f"New work item '{work_item.name}' created in plot {work_item.construction_plot.address}",
-                priority=Notification.Priority.NORMAL
-            )
-            for member in members if member
-        ]
-        Notification.objects.bulk_create(notifications)
+
+        if not is_approved:
+            # Notify PM that a foreman submitted a work item for approval
+            recipients = [project.project_manager, project.created_by]
+            notifications = [
+                Notification(
+                    user=pm,
+                    project=project,
+                    message=(
+                        f"Approval required: Foreman submitted work item "
+                        f"'{work_item.name}' in plot {plot.address}"
+                    ),
+                    priority=Notification.Priority.HIGH,
+                    target_url=f"/plots/{plot.pk}/work-items/{work_item.pk}/"
+                )
+                for pm in recipients if pm
+            ]
+            Notification.objects.bulk_create(notifications)
+        else:
+            # Notify all project members of the new work item
+            members = set([project.created_by, project.client, project.project_manager])
+            members.update(project.consultants.all())
+            for p in project.constructionplot_set.all():
+                if p.foreman:
+                    members.add(p.foreman)
+                if p.storekeeper:
+                    members.add(p.storekeeper)
+            notifications = [
+                Notification(
+                    user=member,
+                    project=project,
+                    message=f"New work item '{work_item.name}' added to plot {plot.address}",
+                    priority=Notification.Priority.NORMAL
+                )
+                for member in members if member and member != user
+            ]
+            Notification.objects.bulk_create(notifications)
 
     @action(detail=True, methods=["post"])
     def approve(self, request, **kwargs):
+        """POST …/workitems/{pk}/approve/ — only project_manager."""
         work_item = self.get_object()
-        project = work_item.construction_plot.construction_project
-        if get_project_role(request.user, project) != "project_manager":
-            return Response({"detail": "Only Project Manager can approve work items."}, status=status.HTTP_403_FORBIDDEN)
-        
+        self.check_object_permissions(request, work_item)
         work_item.is_approved = True
         work_item.save()
+
+        # Notify the foreman whose item was approved
+        plot = work_item.construction_plot
+        project = plot.construction_project
+        if plot.foreman:
+            Notification.objects.create(
+                user=plot.foreman,
+                project=project,
+                message=f"Your work item '{work_item.name}' has been approved by the PM.",
+                priority=Notification.Priority.NORMAL,
+                target_url=f"/plots/{plot.pk}/work-items/{work_item.pk}/"
+            )
         return Response({"status": "approved"})
+
+    @action(detail=True, methods=["post"])
+    def reject(self, request, **kwargs):
+        """POST …/workitems/{pk}/reject/ — only project_manager."""
+        work_item = self.get_object()
+        self.check_object_permissions(request, work_item)
+        work_item.is_approved = False
+        work_item.save()
+
+        # Notify the foreman whose item was rejected
+        plot = work_item.construction_plot
+        project = plot.construction_project
+        reason = request.data.get("reason", "")
+        message = f"Your work item '{work_item.name}' was rejected by the PM."
+        if reason:
+            message += f" Reason: {reason}"
+        if plot.foreman:
+            Notification.objects.create(
+                user=plot.foreman,
+                project=project,
+                message=message,
+                priority=Notification.Priority.HIGH,
+                target_url=f"/plots/{plot.pk}/work-items/{work_item.pk}/"
+            )
+        return Response({"status": "rejected"})
 
     @action(detail=True, methods=["post", "get"], url_path="images")
     def images(self, request, **kwargs):
@@ -676,51 +767,144 @@ class JobItemViewSet(PlotScopedMixin, viewsets.ModelViewSet):
     def get_permissions(self):
         if self.action in ("list", "retrieve"):
             return [IsAuthenticated(), IsPlotMember()]
+        if self.action == "create":
+            return [IsAuthenticated(), CanCreateJobItem()]
+        if self.action in ("update", "partial_update"):
+            return [IsAuthenticated(), CanUpdateJobItem()]
+        if self.action == "destroy":
+            return [IsAuthenticated(), CanDeleteJobItem()]
+        if self.action in ("approve", "reject"):
+            return [IsAuthenticated(), CanApproveJobItem()]
         return [IsAuthenticated(), CanManagePlot()]
 
     def get_queryset(self):
         plot = self.get_plot()
         user = self.request.user
         wi_pk = self.kwargs.get("workitem_pk")
-        
+
         if plot and wi_pk:
-            return JobItem.objects.filter(
+            role = get_plot_role(user, plot)
+            qs = JobItem.objects.filter(
                 work_item__construction_plot=plot,
                 work_item__pk=wi_pk,
-            ).order_by('-updated_at')
-            
-        # Global access
-        return JobItem.objects.filter(
+            )
+            # Client / consultant / storekeeper only see job items that are approved
+            if role not in SEES_UNAPPROVED_ROLES:
+                qs = qs.filter(is_approved=True)
+            return qs.order_by('-updated_at')
+
+        # Global access — restrict unapproved for limited roles
+        base_qs = JobItem.objects.filter(
             models_Q(work_item__construction_plot__construction_project__created_by=user) |
             models_Q(work_item__construction_plot__construction_project__client=user) |
             models_Q(work_item__construction_plot__construction_project__project_manager=user) |
             models_Q(work_item__construction_plot__construction_project__consultants=user) |
             models_Q(work_item__construction_plot__foreman=user) |
             models_Q(work_item__construction_plot__storekeeper=user)
-        ).distinct().order_by('-updated_at')
+        ).distinct()
+
+        can_see_unapproved = (
+            models_Q(work_item__construction_plot__construction_project__created_by=user) |
+            models_Q(work_item__construction_plot__construction_project__project_manager=user) |
+            models_Q(work_item__construction_plot__foreman=user)
+        )
+        return base_qs.filter(
+            models_Q(is_approved=True) | can_see_unapproved
+        ).order_by('-updated_at')
 
     def perform_create(self, serializer):
+        plot = self.get_plot()
+        user = self.request.user
         work_item = get_object_or_404(
             WorkItem,
             pk=self.kwargs["workitem_pk"],
-            construction_plot=self.get_plot(),
+            construction_plot=plot,
         )
-        job_item = serializer.save(work_item=work_item)
-        
-        # Notify stakeholders
+        role = get_plot_role(user, plot)
+        is_approved = role in {"owner", "project_manager"}
+        job_item = serializer.save(work_item=work_item, is_approved=is_approved)
+
         project = work_item.construction_plot.construction_project
-        members = set([project.created_by, project.client, project.project_manager])
-        members.add(work_item.construction_plot.foreman)
-        
-        notifications = [
-            Notification(
-                user=m, 
-                project=project, 
-                message=f"New job item '{job_item.job_name}' assigned to {job_item.job_artisan}",
-                priority=Notification.Priority.NORMAL
-            ) for m in members if m
-        ]
-        Notification.objects.bulk_create(notifications)
+        role = get_plot_role(user, plot)
+
+        if role == "foreman":
+            # Notify PM that foreman added a job item
+            recipients = [project.project_manager, project.created_by]
+            notifications = [
+                Notification(
+                    user=pm,
+                    project=project,
+                    message=(
+                        f"Foreman added job item '{job_item.job_name}' "
+                        f"({job_item.job_artisan}) to work item '{work_item.name}'"
+                    ),
+                    priority=Notification.Priority.NORMAL,
+                    target_url=f"/job-items/{job_item.pk}/"
+                )
+                for pm in recipients if pm
+            ]
+            Notification.objects.bulk_create(notifications)
+        else:
+            # Notify plot foreman and stakeholders
+            members = set([project.created_by, project.client, project.project_manager])
+            if plot.foreman:
+                members.add(plot.foreman)
+            notifications = [
+                Notification(
+                    user=m,
+                    project=project,
+                    message=f"New job item '{job_item.job_name}' assigned to {job_item.job_artisan}",
+                    priority=Notification.Priority.NORMAL,
+                    target_url=f"/job-items/{job_item.pk}/"
+                ) for m in members if m and m != user
+            ]
+            Notification.objects.bulk_create(notifications)
+
+    @action(detail=True, methods=["post"])
+    def approve(self, request, **kwargs):
+        """POST …/jobitems/{pk}/approve/ — only project_manager."""
+        job_item = self.get_object()
+        self.check_object_permissions(request, job_item)
+        job_item.is_approved = True
+        job_item.save()
+
+        # Notify the foreman whose item was approved
+        plot = job_item.work_item.construction_plot
+        project = plot.construction_project
+        if plot.foreman:
+            Notification.objects.create(
+                user=plot.foreman,
+                project=project,
+                message=f"Your job item '{job_item.job_name}' has been approved by the PM.",
+                priority=Notification.Priority.NORMAL,
+                target_url=f"/job-items/{job_item.pk}/"
+            )
+        return Response({"status": "approved"})
+
+    @action(detail=True, methods=["post"])
+    def reject(self, request, **kwargs):
+        """POST …/jobitems/{pk}/reject/ — only project_manager."""
+        job_item = self.get_object()
+        self.check_object_permissions(request, job_item)
+        job_item.is_approved = False
+        job_item.save()
+
+        # Notify the foreman whose item was rejected
+        plot = job_item.work_item.construction_plot
+        project = plot.construction_project
+        reason = request.data.get("reason", "")
+        message = f"Your job item '{job_item.job_name}' was rejected by the PM."
+        if reason:
+            message += f" Reason: {reason}"
+        if plot.foreman:
+            Notification.objects.create(
+                user=plot.foreman,
+                project=project,
+                message=message,
+                priority=Notification.Priority.HIGH,
+                target_url=f"/job-items/{job_item.pk}/"
+            )
+        return Response({"status": "rejected"})
 
 
 # ---------------------------------------------------------------------------

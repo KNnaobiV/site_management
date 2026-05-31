@@ -9,7 +9,7 @@ import { showSuccessMessage } from '../utils/successMessage';
 const CreateJobItemPage = () => {
   const { token } = useAuth();
   const navigate = useNavigate();
-  const { workItemId } = useParams();
+  const { workItemId, jobItemId } = useParams();
   const [loading, setLoading] = useState(false);
   const isEdit = false;
   const [fetchingWorkItem, setFetchingWorkItem] = useState(!!workItemId);
@@ -23,6 +23,7 @@ const CreateJobItemPage = () => {
     job_artisan: '',
     job_description: '',
     job_status: 'Planned',
+    priority: 'Medium',
     projected_start_date: new Date().toISOString().split('T')[0],
     projected_end_date: '',
     actual_start_date: '',
@@ -33,7 +34,9 @@ const CreateJobItemPage = () => {
   });
 
   useEffect(() => {
-    if (workItemId) {
+    if (isEdit) {
+      fetchJobItem();
+    } else if (workItemId) {
       fetchWorkItem();
     } else {
       fetchWorkItems();
@@ -106,6 +109,7 @@ const CreateJobItemPage = () => {
       job_artisan: formData.job_artisan,
       job_description: formData.job_description,
       job_status: formData.job_status,
+      priority: formData.priority,
       projected_start_date: formData.projected_start_date,
       projected_end_date: formData.projected_end_date,
     };
@@ -120,16 +124,22 @@ const CreateJobItemPage = () => {
       const targetPlotId = selectedWi?.construction_plot || selectedWi?.plotId;
       const targetProjectId = selectedWi?.construction_project || selectedWi?.projectId;
 
-      // In our backend: /projects/{p}/plots/{pl}/workitems/{w}/jobitems/
-      const res = await apiFetch(`/projects/${targetProjectId}/plots/${targetPlotId}/workitems/${targetWiId}/jobitems/`, {
-        method: 'POST',
+      const url = isEdit ? `/jobitems/${jobItemId}/` : `/projects/${targetProjectId}/plots/${targetPlotId}/workitems/${targetWiId}/jobitems/`;
+      const method = isEdit ? 'PUT' : 'POST';
+
+      const res = await apiFetch(url, {
+        method,
         token,
         body: JSON.stringify(payload),
       });
 
       if (res.ok) {
-        showSuccessMessage("Job item created successfully!");
-        navigate(`/work-items/${targetWiId}`);
+        showSuccessMessage(isEdit ? "Job item updated successfully!" : "Job item created successfully!");
+        if (isEdit) {
+          navigate(`/job-items/${jobItemId}`);
+        } else {
+          navigate(`/work-items/${targetWiId}`);
+        }
       } else {
         const data = await res.json();
         setError(Object.entries(data).map(([k, v]) => `${k}: ${v}`).join(', '));
@@ -148,12 +158,12 @@ const CreateJobItemPage = () => {
       <div style={{ marginBottom: '32px' }}>
         <Breadcrumb items={[
           { label: 'Projects', path: '/projects' }, 
-          { label: workItem?.project_name || 'Project', path: `/projects/${workItem?.project_id}` },
-          { label: workItem?.plot_address || 'Plot', path: `/plots/${workItem?.plot_id}` },
-          { label: workItem?.name || 'Work Item', path: `/work-items/${workItemId}` },
-          { label: 'New Job Item' }
+          { label: workItem?.project_name || 'Project', path: `/projects/${workItem?.project_id || workItem?.construction_project}` },
+          { label: workItem?.plot_address || 'Plot', path: `/plots/${workItem?.plot_id || workItem?.construction_plot}` },
+          { label: workItem?.name || 'Work Item', path: `/work-items/${workItemId || workItem?.id}` },
+          { label: isEdit ? 'Edit Job Item' : 'New Job Item' }
         ]} />
-        <h1 style={{ fontSize: '64px', marginTop: '12px' }}>Create Job Item</h1>
+        <h1 style={{ fontSize: '64px', marginTop: '12px' }}>{isEdit ? 'Edit Job Item' : 'Create Job Item'}</h1>
       </div>
 
       <form onSubmit={handleSubmit} style={{ 
@@ -180,7 +190,7 @@ const CreateJobItemPage = () => {
               </div>
               <div>
                 <label style={labelStyle}>Parent Work Item *</label>
-                {workItemId ? (
+                {(workItemId || isEdit) ? (
                   <input 
                     type="text"
                     disabled
@@ -225,6 +235,32 @@ const CreateJobItemPage = () => {
                     <option key={s} value={s}>{s}</option>
                   ))}
                 </select>
+              </div>
+            </div>
+
+            <div>
+              <label style={labelStyle}>Priority *</label>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                {['Low', 'Medium', 'High', 'Urgent'].map(p => (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => setFormData({...formData, priority: p})}
+                    style={{
+                      flex: 1,
+                      padding: '12px 0',
+                      borderRadius: '10px',
+                      border: '1px solid var(--border-default)',
+                      background: formData.priority === p ? 'var(--brand-orange)' : 'var(--bg-raised)',
+                      color: formData.priority === p ? 'white' : 'var(--text-primary)',
+                      fontWeight: 600,
+                      fontSize: '14px',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    {p}
+                  </button>
+                ))}
               </div>
             </div>
 

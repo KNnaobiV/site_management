@@ -38,7 +38,7 @@ const labelStyle = { display: 'block', marginBottom: '10px', fontWeight: 600, fo
 
 // ─── New Plot Form ─────────────────────────────────────────────────────────────
 const NewPlotForm = ({ projectId, token, onSuccess, onClose }) => {
-  const [form, setForm] = useState({ address: '', plot_number: '', plot_opening_date: new Date().toISOString().split('T')[0], gps_latitude: '', gps_longitude: '', notes: '' });
+  const [form, setForm] = useState({ address: '', plot_name: '', plot_opening_date: new Date().toISOString().split('T')[0], gps_latitude: '', gps_longitude: '', notes: '' });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
@@ -47,7 +47,7 @@ const NewPlotForm = ({ projectId, token, onSuccess, onClose }) => {
     e.preventDefault();
     setSaving(true); setError(null);
     const payload = { address: form.address, plot_opening_date: form.plot_opening_date };
-    if (form.plot_number) payload.plot_number = form.plot_number;
+    if (form.plot_name) payload.plot_name = form.plot_name;
     if (form.gps_latitude) payload.gps_latitude = parseFloat(form.gps_latitude);
     if (form.gps_longitude) payload.gps_longitude = parseFloat(form.gps_longitude);
     if (form.notes) payload.notes = form.notes;
@@ -71,8 +71,8 @@ const NewPlotForm = ({ projectId, token, onSuccess, onClose }) => {
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
           <div>
-            <label style={labelStyle}>Plot Number <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>(optional)</span></label>
-            <input type="text" value={form.plot_number} onChange={e => set('plot_number', e.target.value)} placeholder="e.g. B-12" style={inputStyle} />
+            <label style={labelStyle}>Plot Name</label>
+            <input type="text" value={form.plot_name} onChange={e => set('plot_name', e.target.value)} placeholder="e.g. Block A" style={inputStyle} />
           </div>
           <div>
             <label style={labelStyle}>Opening Date *</label>
@@ -314,7 +314,7 @@ const ProjectDetailPage = () => {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                       <MapPin size={14} color="var(--brand-orange)" />
                       <p style={{ margin: 0, fontWeight: 700, fontSize: '14px', color: 'var(--text-primary)' }}>
-                        {plot.plot_number ? `Plot ${plot.plot_number}` : 'Plot'}
+                        {plot.plot_name ? plot.plot_name : 'Plot'}
                       </p>
                     </div>
                     <p style={{ margin: '0 0 10px', fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.4 }}>{plot.address}</p>
@@ -353,7 +353,7 @@ const ProjectDetailPage = () => {
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
                     <p style={{ margin: 0, fontWeight: 700, fontSize: '16px', color: 'var(--text-primary)' }}>
-                      {plot.plot_number ? `Plot ${plot.plot_number}` : 'Plot'}
+                      {plot.plot_name ? plot.plot_name : 'Plot'}
                     </p>
                   </div>
                   <p style={{ margin: '0 0 12px', fontSize: '14px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '6px' }}>

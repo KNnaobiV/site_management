@@ -40,7 +40,7 @@ const PlotsPage = () => {
   return (
     <div className="fade-up" style={{ height: "100vh", overflow: "auto", position: "relative" }}>
       <div style={{ paddingBottom: "100px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "40px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "40px", flexWrap: "wrap", gap: "20px" }}>
           <div>
             <h1 style={{ fontSize: "48px", margin: 0 }}>Plots</h1>
             <p style={{ fontSize: "16px", color: "var(--text-tertiary)" }}>
@@ -48,7 +48,7 @@ const PlotsPage = () => {
             </p>
           </div>
 
-          <div style={{ display: "flex", gap: "12px" }}>
+          <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
             <button className="btn-ghost" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
               <Filter size={18} />
               <span>Filter</span>
@@ -71,13 +71,13 @@ const PlotsPage = () => {
           </div>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "24px", marginBottom: "48px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "24px", marginBottom: "48px" }}>
           <StatCard label="Total Plots" value={plots.length} />
           <StatCard label="Active" value={plots.filter(p => p.plot_status !== 'Completed').length} color="var(--brand-orange)" />
           <StatCard label="Completed" value={plots.filter(p => p.plot_status === 'Completed').length} color="var(--status-completed)" />
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: "32px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "32px" }}>
           {plots.map(plot => (
             <PlotCard 
               key={plot.id} 

@@ -10,12 +10,13 @@ import {
   UserPlus,
   ChevronRight,
   HardHat,
-  LogOut
+  LogOut,
+  Menu
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import Avatar from './Avatar';
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen, toggleSidebar, isMobile }) => {
   const { user, logout } = useAuth();
 
   const navItems = [
@@ -29,37 +30,65 @@ const Sidebar = () => {
 
   return (
     <div style={{
-      width: '280px',
-      height: '100vh',
+      width: isMobile ? (isOpen ? '280px' : '0px') : (isOpen ? '280px' : '88px'),
+      height: '100dvh',
       background: 'var(--bg-sidebar)',
       color: '#fff',
       display: 'flex',
       flexDirection: 'column',
-      padding: '40px 24px',
+      padding: (isMobile && !isOpen) ? '0' : '40px 24px',
       position: 'fixed',
       left: 0,
       top: 0,
-      zIndex: 100
+      bottom: 0,
+      zIndex: 100,
+      transition: 'all 0.3s ease',
+      overflowX: 'hidden'
     }}>
-      {/* Brand */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '48px' }}>
+      {/* Brand & Hamburger */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '48px', overflow: 'hidden' }}>
+        {!isMobile && (
+          <button 
+            onClick={toggleSidebar} 
+            style={{ 
+              background: 'transparent', 
+              border: 'none', 
+              cursor: 'pointer', 
+              color: '#fff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              minWidth: '40px',
+              padding: 0
+            }}
+          >
+            <Menu size={24} />
+          </button>
+        )}
+        
         <div style={{
+          minWidth: '40px',
           width: '40px',
           height: '40px',
           background: 'var(--brand-orange)',
           borderRadius: '8px',
-          display: 'flex',
+          display: isOpen ? 'flex' : 'none',
           alignItems: 'center',
-          justifyContent: 'center'
+          justifyContent: 'center',
+          flexShrink: 0
         }}>
           <HardHat size={24} color="#fff" />
         </div>
-        <h2 style={{
-          fontFamily: 'var(--font-serif)',
-          fontSize: '28px',
-          margin: 0,
-          color: '#fff'
-        }}>Iron<em style={{ color: "var(--rust-light)" }}>Work</em></h2>
+        
+        {isOpen && (
+          <h2 style={{
+            fontFamily: 'var(--font-serif)',
+            fontSize: '28px',
+            margin: 0,
+            color: '#fff',
+            whiteSpace: 'nowrap'
+          }}>Iron<em style={{ color: "var(--rust-light)" }}>Work</em></h2>
+        )}
       </div>
 
       {/* Navigation */}
@@ -80,13 +109,15 @@ const Sidebar = () => {
                   textDecoration: 'none',
                   fontSize: '15px',
                   fontWeight: 500,
-                  transition: 'all 0.2s'
+                  transition: 'all 0.2s',
+                  justifyContent: isOpen ? 'flex-start' : 'center'
                 })}
+                title={!isOpen ? item.label : undefined}
               >
                 {({ isActive }) => (
                   <>
-                    <item.icon size={20} color={isActive ? 'var(--brand-orange)' : 'currentColor'} />
-                    <span>{item.label}</span>
+                    <item.icon size={20} color={isActive ? 'var(--brand-orange)' : 'currentColor'} style={{ flexShrink: 0 }} />
+                    {isOpen && <span style={{ whiteSpace: 'nowrap' }}>{item.label}</span>}
                   </>
                 )}
               </NavLink>
@@ -107,31 +138,40 @@ const Sidebar = () => {
             background: isActive ? 'rgba(193, 74, 30, 0.15)' : 'transparent',
             borderRadius: '12px',
             padding: '16px',
-            transition: 'all 0.2s'
+            transition: 'all 0.2s',
+            justifyContent: isOpen ? 'flex-start' : 'center'
           })}
+          title={!isOpen ? 'Profile' : undefined}
         >
-          <Avatar name={user?.display_name || user?.username} size={40} />
-          <div style={{ overflow: 'hidden' }}>
-            <p style={{
-              color: '#fff',
-              fontSize: '14px',
-              fontWeight: 600,
-              margin: 0,
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis'
-            }}>
-              {user?.display_name || user?.username}
-            </p>
-            <p style={{
-              color: 'var(--text-tertiary)',
-              fontSize: '12px',
-              margin: 0
-            }}>
-              {user?.role || 'Team Member'}
-            </p>
+          <div style={{ flexShrink: 0 }}>
+            <Avatar name={user?.display_name || user?.username} size={40} />
           </div>
-          <ChevronRight size={16} color="var(--text-tertiary)" style={{ marginLeft: 'auto' }} />
+          {isOpen && (
+            <>
+              <div style={{ overflow: 'hidden' }}>
+                <p style={{
+                  color: '#fff',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  margin: 0,
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis'
+                }}>
+                  {user?.display_name || user?.username}
+                </p>
+                <p style={{
+                  color: 'var(--text-tertiary)',
+                  fontSize: '12px',
+                  margin: 0,
+                  whiteSpace: 'nowrap'
+                }}>
+                  {user?.role || 'Team Member'}
+                </p>
+              </div>
+              <ChevronRight size={16} color="var(--text-tertiary)" style={{ marginLeft: 'auto', flexShrink: 0 }} />
+            </>
+          )}
         </NavLink>
 
         <button
@@ -150,13 +190,14 @@ const Sidebar = () => {
             fontWeight: 500,
             transition: 'all 0.2s',
             width: '100%',
-            textAlign: 'left'
+            justifyContent: isOpen ? 'flex-start' : 'center'
           }}
+          title={!isOpen ? 'Sign Out' : undefined}
           onMouseOver={(e) => { e.currentTarget.style.color = '#EB5757'; e.currentTarget.style.background = 'rgba(235, 87, 87, 0.1)'; }}
           onMouseOut={(e) => { e.currentTarget.style.color = 'var(--text-tertiary)'; e.currentTarget.style.background = 'transparent'; }}
         >
-          <LogOut size={20} />
-          <span>Sign Out</span>
+          <LogOut size={20} style={{ flexShrink: 0 }} />
+          {isOpen && <span style={{ whiteSpace: 'nowrap' }}>Sign Out</span>}
         </button>
       </div>
     </div>
