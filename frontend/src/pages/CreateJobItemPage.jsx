@@ -11,8 +11,8 @@ const CreateJobItemPage = () => {
   const navigate = useNavigate();
   const { workItemId, jobItemId } = useParams();
   const [loading, setLoading] = useState(false);
-  const isEdit = !!jobItemId;
-  const [fetchingWorkItem, setFetchingWorkItem] = useState(!!workItemId || isEdit);
+  const isEdit = false;
+  const [fetchingWorkItem, setFetchingWorkItem] = useState(!!workItemId);
   const [workItem, setWorkItem] = useState(null);
   const [error, setError] = useState(null);
   const [workItemsList, setWorkItemsList] = useState([]);
@@ -41,42 +41,7 @@ const CreateJobItemPage = () => {
     } else {
       fetchWorkItems();
     }
-  }, [workItemId, jobItemId]);
-
-  const fetchJobItem = async () => {
-    try {
-      const res = await apiFetch(`/jobitems/${jobItemId}/`, { token });
-      if (res.ok) {
-        const data = await res.json();
-        setFormData({
-          job_name: data.job_name || '',
-          job_artisan: data.job_artisan || '',
-          job_description: data.job_description || '',
-          job_status: data.job_status || 'Planned',
-          priority: data.priority || 'Medium',
-          projected_start_date: data.projected_start_date || new Date().toISOString().split('T')[0],
-          projected_end_date: data.projected_end_date || '',
-          actual_start_date: data.actual_start_date || '',
-          actual_end_date: data.actual_end_date || '',
-          estimated_hours: data.estimated_hours || '',
-          material_requirements: data.material_requirements || [],
-          work_item: data.work_item || ''
-        });
-
-        // Also fetch the parent work item for display purposes
-        if (data.work_item) {
-          const wRes = await apiFetch(`/workitems/${data.work_item}/`, { token });
-          if (wRes.ok) {
-            setWorkItem(await wRes.json());
-          }
-        }
-      }
-    } catch (err) {
-      console.error("Failed to fetch job item", err);
-    } finally {
-      setFetchingWorkItem(false);
-    }
-  };
+  }, [workItemId]);
 
   const fetchWorkItems = async () => {
     try {

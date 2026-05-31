@@ -27,6 +27,8 @@ const CreateWorkItemPage = () => {
     proposed_end_date: '',
     start_date: '',
     end_date: '',
+    priority: 'Medium',
+    initial_progress: 0,
     work_status: 'Planned',
     checklist: []
   });
@@ -49,6 +51,8 @@ const CreateWorkItemPage = () => {
               proposed_end_date: data.proposed_end_date || '',
               start_date: data.start_date || '',
               end_date: data.end_date || '',
+              priority: data.priority || 'Medium',
+              initial_progress: data.initial_progress || 0,
               work_status: data.work_status || 'Planned',
               checklist: data.checklist || []
             }));
@@ -193,7 +197,7 @@ const CreateWorkItemPage = () => {
                 <SearchableSelect
                   options={users}
                   value={formData.foreman}
-                  onChange={val => setFormData({ ...formData, foreman: val })}
+                  onChange={val => setFormData({...formData, foreman: val})}
                   onSearch={handleSearchUsers}
                   placeholder="Select foreman"
                 />
@@ -271,13 +275,55 @@ const CreateWorkItemPage = () => {
                   type="date"
                   value={formData.start_date}
                   disabled={isEdit && !!formData.start_date}
-                  onChange={e => setFormData({ ...formData, start_date: e.target.value })}
+                  onChange={e => setFormData({...formData, start_date: e.target.value})}
                   style={{
                     ...inputStyle,
                     background: isEdit && !!formData.start_date ? 'var(--bg-canvas)' : inputStyle.background,
                     cursor: isEdit && !!formData.start_date ? 'not-allowed' : 'text'
                   }}
                 />
+              </div>
+              <div>
+                <label style={labelStyle}>Actual End <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>(optional)</span></label>
+                <input
+                  type="date"
+                  value={formData.end_date}
+                  onChange={e => setFormData({...formData, end_date: e.target.value})}
+                  style={inputStyle}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label style={labelStyle}>Priority *</label>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                {['Low', 'Medium', 'High', 'Urgent'].map(p => (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => setFormData({...formData, priority: p})}
+                    style={{
+                      flex: 1,
+                      padding: '12px 0',
+                      borderRadius: '10px',
+                      border: '1px solid var(--border-default)',
+                      background: formData.priority === p ? 'var(--brand-orange)' : 'var(--bg-raised)',
+                      color: formData.priority === p ? 'white' : 'var(--text-primary)',
+                      fontWeight: 600,
+                      fontSize: '14px',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    {p}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                <label style={{ ...labelStyle, marginBottom: 0 }}>Initial Progress *</label>
+                <span style={{ fontWeight: 600 }}>{formData.initial_progress}%</span>
               </div>
               <div>
                 <label style={labelStyle}>Actual End <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>(optional)</span></label>
@@ -326,14 +372,14 @@ const CreateWorkItemPage = () => {
     )
   }
 
-  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '48px' }}>
-    <button type="button" onClick={() => navigate(-1)} className="btn-ghost" style={{ padding: '12px 32px' }}>Cancel</button>
-    <button type="submit" className="btn-primary" style={{ padding: '12px 48px' }} disabled={loading}>
-      {loading ? <Spinner size={20} /> : (typeof window !== 'undefined' && window.location.pathname.includes('/edit') ? 'Update Work Item' : 'Create Work Item')}
-    </button>
-  </div>
-      </form >
-    </div >
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '48px' }}>
+          <button type="button" onClick={() => navigate(-1)} className="btn-ghost" style={{ padding: '12px 32px' }}>Cancel</button>
+          <button type="submit" className="btn-primary" style={{ padding: '12px 48px' }} disabled={loading}>
+            {loading ? <Spinner size={20} /> : (typeof window !== 'undefined' && window.location.pathname.includes('/edit') ? 'Update Work Item' : 'Create Work Item')}
+          </button>
+        </div>
+      </form>
+    </div>
   );
 };
 

@@ -155,30 +155,6 @@ const CreateProjectPage = () => {
               />
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-              <div>
-                <label style={labelStyle}>Client</label>
-                <SearchableSelect 
-                  options={users}
-                  value={formData.client}
-                  onChange={val => setFormData({...formData, client: val})}
-                  onSearch={handleSearchUsers}
-                  placeholder="Select client"
-                  disabled={isEditing && clientUpdated}
-                />
-              </div>
-              <div>
-                <label style={labelStyle}>Project Manager</label>
-                <SearchableSelect 
-                  options={users}
-                  value={formData.project_manager}
-                  onChange={val => setFormData({...formData, project_manager: val})}
-                  onSearch={handleSearchUsers}
-                  placeholder="Select manager"
-                />
-              </div>
-            </div>
-
             <div>
               <label style={labelStyle}>Address</label>
               <textarea 

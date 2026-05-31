@@ -78,7 +78,7 @@ const CreatePlotPage = () => {
           setUsers(initialUsers);
         }
 
-        const hasValues = !!(plotData.plot_name || plotData.address || plotData.construction_project);
+        const hasValues = !!(plotData.plot_number || plotData.plot_name || plotData.address || plotData.construction_project);
         setFieldsUpdated(hasValues);
       } else {
         setError('Failed to load plot for editing.');
@@ -195,7 +195,19 @@ const CreatePlotPage = () => {
           {/* Left Column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-              <div style={{ gridColumn: '1 / -1' }}>
+              <div>
+                <label style={labelStyle}>Plot Number *</label>
+                <input 
+                  type="text" 
+                  placeholder="Enter plot number"
+                  required
+                  value={formData.plot_number}
+                  onChange={e => setFormData({...formData, plot_number: e.target.value})}
+                  disabled={isEditing && fieldsUpdated}
+                  style={inputStyle}
+                />
+              </div>
+              <div>
                 <label style={labelStyle}>Plot Name *</label>
                 <input 
                   type="text" 
