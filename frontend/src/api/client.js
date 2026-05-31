@@ -1,4 +1,4 @@
-export let API_BASE = "http://contropal.alwaydata.net/api";
+export let API_BASE = "http://constropal.alwaydata.net/api";
 
 export async function apiFetch(path, { token, ...options } = {}) {
     const headers = {
