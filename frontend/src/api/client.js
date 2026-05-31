@@ -7,7 +7,7 @@ export async function apiFetch(path, { token, ...options } = {}) {
         ...options.headers,
     };
 
-    const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+    const res = await fetch(buildUrl(path), { ...options, headers });
     return res;
 }
 
