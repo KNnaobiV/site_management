@@ -30,7 +30,7 @@ GOOGLE_CLIENT_ID = CFG.get('GOOGLE', 'GOOGLE_CLIENT_ID', fallback='')
 GOOGLE_CLIENT_SECRET = CFG.get('GOOGLE', 'GOOGLE_CLIENT_SECRET', fallback='')
 APPLE_CLIENT_ID = CFG.get('APPLE', 'APPLE_CLIENT_ID', fallback='')
 
-ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1"]
+ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1", "constropal.alwaysdata.net"]
 
 LOGGING = {
     "version": 1,

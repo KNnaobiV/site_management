@@ -1,4 +1,4 @@
-export let API_BASE = "http://127.0.0.1:8000/api";
+export let API_BASE = "https://constropal.alwaysdata..net/api";
 
 export const buildUrl = (path) => path.startsWith("http") ? path : `${API_BASE}${path}`;
 
