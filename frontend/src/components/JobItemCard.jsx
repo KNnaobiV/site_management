@@ -104,7 +104,6 @@ const JobItemCard = ({ job, onClick }) => {
             )}
           </div>
         </div>
-
         <ProgressRing progress={progress} />
       </div>
 

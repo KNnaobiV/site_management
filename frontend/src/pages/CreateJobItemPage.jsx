@@ -29,7 +29,9 @@ const CreateJobItemPage = () => {
     actual_end_date: '',
     estimated_hours: '',
     material_requirements: [],
-    work_item: ''
+    work_item: '',
+    budget_amount: '',
+    budget_currency: 'NGN',
   });
 
   useEffect(() => {
@@ -61,11 +63,11 @@ const CreateJobItemPage = () => {
           material_requirements: data.material_requirements || [],
           work_item: data.work_item || ''
         }));
-        
+
         // If it returns work_item ID, we can fetch it to show breadcrumb
         if (data.work_item) {
-           const wiRes = await apiFetch(`/workitems/${data.work_item}/`, { token });
-           if (wiRes.ok) setWorkItem(await wiRes.json());
+          const wiRes = await apiFetch(`/workitems/${data.work_item}/`, { token });
+          if (wiRes.ok) setWorkItem(await wiRes.json());
         }
       }
     } catch (err) {
@@ -167,9 +169,9 @@ const CreateJobItemPage = () => {
       if (res.ok) {
         showSuccessMessage(isEdit ? "Job item updated successfully!" : "Job item created successfully!");
         if (isEdit) {
-            navigate(`/job-items/${jobItemId}`);
+          navigate(`/job-items/${jobItemId}`);
         } else {
-            navigate(`/work-items/${targetWiId}`);
+          navigate(`/work-items/${targetWiId}`);
         }
       } else {
         const data = await res.json();

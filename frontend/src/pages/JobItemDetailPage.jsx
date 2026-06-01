@@ -433,142 +433,142 @@ const JobItemDetailPage = () => {
           {hasFinanceAccess && (
             <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '20px', padding: '24px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <div>
-                <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', color: 'var(--text-tertiary)', textTransform: 'uppercase', margin: '0 0 4px' }}>
-                  Expenses ({expenses.length})
-                </p>
-                {expenses.length > 0 && (
-                  <p style={{ margin: 0, fontSize: '22px', fontWeight: 700, color: isOverBudget ? '#dc2626' : 'var(--brand-orange)' }}>
-                    {formatCurrency(totalSpent, budgetCurrency)}
-                    {hasBudget && (
-                      <span style={{ fontSize: '13px', fontWeight: 400, color: 'var(--text-tertiary)', marginLeft: '6px' }}>
-                        / {formatCurrency(budget.allocated_amount, budgetCurrency)}
-                      </span>
-                    )}
+                <div>
+                  <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', color: 'var(--text-tertiary)', textTransform: 'uppercase', margin: '0 0 4px' }}>
+                    Expenses ({expenses.length})
                   </p>
-                )}
-              </div>
-              {jobItem.job_status !== 'Completed' && (
-                <button
-                  className="btn-ghost"
-                  onClick={() => { setEditingExpense(null); setShowExpenseModal(true); }}
-                  style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', padding: '8px 16px' }}
-                >
-                  <Plus size={14} /> Add Expense
-                </button>
-              )}
-            </div>
-
-            {/* Budget progress bar */}
-            {hasBudget && expenses.length > 0 && (
-              <div style={{ marginBottom: '20px' }}>
-                <div style={{ height: '6px', borderRadius: '6px', background: 'var(--bg-raised)', overflow: 'hidden' }}>
-                  <div style={{
-                    height: '100%',
-                    width: `${Math.min(100, (totalSpent / parseFloat(budget.allocated_amount)) * 100)}%`,
-                    background: isOverBudget ? '#dc2626' : 'var(--brand-orange)',
-                    borderRadius: '6px',
-                    transition: 'width 0.5s ease',
-                  }} />
+                  {expenses.length > 0 && (
+                    <p style={{ margin: 0, fontSize: '22px', fontWeight: 700, color: isOverBudget ? '#dc2626' : 'var(--brand-orange)' }}>
+                      {formatCurrency(totalSpent, budgetCurrency)}
+                      {hasBudget && (
+                        <span style={{ fontSize: '13px', fontWeight: 400, color: 'var(--text-tertiary)', marginLeft: '6px' }}>
+                          / {formatCurrency(budget.allocated_amount, budgetCurrency)}
+                        </span>
+                      )}
+                    </p>
+                  )}
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px', fontSize: '12px', color: 'var(--text-tertiary)' }}>
-                  <span>{Math.round((totalSpent / parseFloat(budget.allocated_amount)) * 100)}% used</span>
-                  <span style={{ color: isOverBudget ? '#dc2626' : 'var(--text-tertiary)' }}>
-                    {isOverBudget ? `Over by ${formatCurrency(totalSpent - parseFloat(budget.allocated_amount), budgetCurrency)}` : `${formatCurrency(budget.remaining_amount, budgetCurrency)} remaining`}
-                  </span>
-                </div>
-              </div>
-            )}
-
-            {expenses.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '32px', color: 'var(--text-tertiary)' }}>
-                <Receipt size={32} style={{ marginBottom: '12px', opacity: 0.4 }} />
-                <p style={{ fontWeight: 600, fontSize: '14px', margin: '0 0 6px' }}>No expenses yet</p>
-                <p style={{ fontSize: '13px', margin: '0 0 16px' }}>Track payments and costs for this job.</p>
                 {jobItem.job_status !== 'Completed' && (
                   <button
-                    className="btn-primary"
+                    className="btn-ghost"
                     onClick={() => { setEditingExpense(null); setShowExpenseModal(true); }}
-                    style={{ padding: '10px 24px' }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', padding: '8px 16px' }}
                   >
-                    Add First Expense
+                    <Plus size={14} /> Add Expense
                   </button>
                 )}
               </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {expenses.map(exp => (
-                  <div
-                    key={exp.id}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '14px',
-                      padding: '14px 16px',
-                      background: 'var(--bg-raised)',
-                      borderRadius: '14px',
-                      transition: 'all 0.15s',
-                    }}
-                  >
+
+              {/* Budget progress bar */}
+              {hasBudget && expenses.length > 0 && (
+                <div style={{ marginBottom: '20px' }}>
+                  <div style={{ height: '6px', borderRadius: '6px', background: 'var(--bg-raised)', overflow: 'hidden' }}>
                     <div style={{
-                      width: '36px',
-                      height: '36px',
-                      borderRadius: '10px',
-                      background: 'linear-gradient(135deg, rgba(249,115,22,0.15), rgba(234,88,12,0.1))',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0,
-                    }}>
-                      <Receipt size={16} color="var(--brand-orange)" />
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                        <span style={{ fontWeight: 700, fontSize: '15px', color: 'var(--text-primary)' }}>
-                          {formatCurrency(exp.amount, exp.currency)}
-                        </span>
-                        <span style={{
-                          fontSize: '11px',
-                          padding: '2px 8px',
-                          borderRadius: '100px',
-                          background: 'var(--bg-canvas)',
-                          color: 'var(--text-tertiary)',
-                          fontWeight: 600,
-                          letterSpacing: '0.04em',
-                        }}>
-                          {exp.cost_code_detail?.code || 'GENERAL'}
-                        </span>
-                      </div>
-                      {exp.description && (
-                        <p style={{ margin: '2px 0 0', fontSize: '13px', color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {exp.description}
-                        </p>
-                      )}
-                      <p style={{ margin: '2px 0 0', fontSize: '12px', color: 'var(--text-tertiary)' }}>{exp.incurred_at}</p>
-                    </div>
-                    {jobItem.job_status !== 'Completed' && (
-                      <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
-                        <button
-                          onClick={() => { setEditingExpense(exp); setShowExpenseModal(true); }}
-                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', padding: '6px', borderRadius: '8px', display: 'flex', alignItems: 'center' }}
-                          title="Edit"
-                        >
-                          <Edit2 size={15} />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteExpense(exp.id)}
-                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', padding: '6px', borderRadius: '8px', display: 'flex', alignItems: 'center' }}
-                          title="Delete"
-                        >
-                          <Trash2 size={15} />
-                        </button>
-                      </div>
-                    )}
+                      height: '100%',
+                      width: `${Math.min(100, (totalSpent / parseFloat(budget.allocated_amount)) * 100)}%`,
+                      background: isOverBudget ? '#dc2626' : 'var(--brand-orange)',
+                      borderRadius: '6px',
+                      transition: 'width 0.5s ease',
+                    }} />
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px', fontSize: '12px', color: 'var(--text-tertiary)' }}>
+                    <span>{Math.round((totalSpent / parseFloat(budget.allocated_amount)) * 100)}% used</span>
+                    <span style={{ color: isOverBudget ? '#dc2626' : 'var(--text-tertiary)' }}>
+                      {isOverBudget ? `Over by ${formatCurrency(totalSpent - parseFloat(budget.allocated_amount), budgetCurrency)}` : `${formatCurrency(budget.remaining_amount, budgetCurrency)} remaining`}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {expenses.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '32px', color: 'var(--text-tertiary)' }}>
+                  <Receipt size={32} style={{ marginBottom: '12px', opacity: 0.4 }} />
+                  <p style={{ fontWeight: 600, fontSize: '14px', margin: '0 0 6px' }}>No expenses yet</p>
+                  <p style={{ fontSize: '13px', margin: '0 0 16px' }}>Track payments and costs for this job.</p>
+                  {jobItem.job_status !== 'Completed' && (
+                    <button
+                      className="btn-primary"
+                      onClick={() => { setEditingExpense(null); setShowExpenseModal(true); }}
+                      style={{ padding: '10px 24px' }}
+                    >
+                      Add First Expense
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {expenses.map(exp => (
+                    <div
+                      key={exp.id}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '14px',
+                        padding: '14px 16px',
+                        background: 'var(--bg-raised)',
+                        borderRadius: '14px',
+                        transition: 'all 0.15s',
+                      }}
+                    >
+                      <div style={{
+                        width: '36px',
+                        height: '36px',
+                        borderRadius: '10px',
+                        background: 'linear-gradient(135deg, rgba(249,115,22,0.15), rgba(234,88,12,0.1))',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                      }}>
+                        <Receipt size={16} color="var(--brand-orange)" />
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                          <span style={{ fontWeight: 700, fontSize: '15px', color: 'var(--text-primary)' }}>
+                            {formatCurrency(exp.amount, exp.currency)}
+                          </span>
+                          <span style={{
+                            fontSize: '11px',
+                            padding: '2px 8px',
+                            borderRadius: '100px',
+                            background: 'var(--bg-canvas)',
+                            color: 'var(--text-tertiary)',
+                            fontWeight: 600,
+                            letterSpacing: '0.04em',
+                          }}>
+                            {exp.cost_code_detail?.code || 'GENERAL'}
+                          </span>
+                        </div>
+                        {exp.description && (
+                          <p style={{ margin: '2px 0 0', fontSize: '13px', color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {exp.description}
+                          </p>
+                        )}
+                        <p style={{ margin: '2px 0 0', fontSize: '12px', color: 'var(--text-tertiary)' }}>{exp.incurred_at}</p>
+                      </div>
+                      {jobItem.job_status !== 'Completed' && (
+                        <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
+                          <button
+                            onClick={() => { setEditingExpense(exp); setShowExpenseModal(true); }}
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', padding: '6px', borderRadius: '8px', display: 'flex', alignItems: 'center' }}
+                            title="Edit"
+                          >
+                            <Edit2 size={15} />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteExpense(exp.id)}
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', padding: '6px', borderRadius: '8px', display: 'flex', alignItems: 'center' }}
+                            title="Delete"
+                          >
+                            <Trash2 size={15} />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           )}
         </div>
 

@@ -30,7 +30,9 @@ const CreateWorkItemPage = () => {
     priority: 'Medium',
     initial_progress: 0,
     work_status: 'Planned',
-    checklist: []
+    checklist: [],
+    budget_amount: '',
+    budget_currency: 'NGN',
   });
 
   useEffect(() => {
@@ -149,9 +151,9 @@ const CreateWorkItemPage = () => {
       if (res.ok) {
         showSuccessMessage(isEdit ? "Work item updated successfully!" : "Work item created successfully!");
         if (isEdit) {
-            navigate(`/work-items/${workItemId}`);
+          navigate(`/work-items/${workItemId}`);
         } else {
-            navigate(`/plots/${targetPlotId}`);
+          navigate(`/plots/${targetPlotId}`);
         }
       } else {
         const data = await res.json();
@@ -378,6 +380,29 @@ const CreateWorkItemPage = () => {
                 <option value="In Progress">In Progress</option>
                 <option value="Completed">Completed</option>
               </select>
+            </div>
+
+            {/* Budget */}
+            <div>
+              <label style={labelStyle}>Budget <span style={{ fontWeight: 400, color: 'var(--text-tertiary)' }}>(Optional)</span></label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '10px' }}>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="e.g. 2000000"
+                  value={formData.budget_amount}
+                  onChange={e => setFormData({ ...formData, budget_amount: e.target.value })}
+                  style={inputStyle}
+                />
+                <select
+                  value={formData.budget_currency}
+                  onChange={e => setFormData({ ...formData, budget_currency: e.target.value })}
+                  style={{ ...inputStyle, width: '90px' }}
+                >
+                  {['NGN', 'USD', 'GBP', 'EUR'].map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
             </div>
 
             <div>
