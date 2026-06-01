@@ -1,5 +1,7 @@
 export let API_BASE = "https://constropal.alwaysdata.net/api";
 
+export const buildUrl = (path) => path.startsWith("http") ? path : `${API_BASE}${path}`;
+
 export async function apiFetch(path, { token, ...options } = {}) {
     const headers = {
         ...(options.body instanceof FormData ? {} : { "Content-Type": "application/json" }),
@@ -7,7 +9,7 @@ export async function apiFetch(path, { token, ...options } = {}) {
         ...options.headers,
     };
 
-    const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+    const res = await fetch(buildUrl(path), { ...options, headers });
     return res;
 }
 

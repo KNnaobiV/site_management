@@ -1,7 +1,16 @@
 import React from 'react';
 import StatusBadge from './StatusBadge';
 import Avatar from './Avatar';
-import { MapPin, User, Calendar } from 'lucide-react';
+import { MapPin, User, Calendar, DollarSign } from 'lucide-react';
+
+const formatCurrency = (amount, currency = 'NGN') => {
+  try {
+    const locale = currency === 'USD' ? 'en-US' : currency === 'GBP' ? 'en-GB' : 'en-NG';
+    return new Intl.NumberFormat(locale, { style: 'currency', currency, minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(Number(amount));
+  } catch {
+    return `${currency} ${Number(amount).toLocaleString()}`;
+  }
+};
 
 const PlotCard = ({ plot, onClick }) => {
   const getFullName = (userObj) => {
@@ -14,6 +23,12 @@ const PlotCard = ({ plot, onClick }) => {
 
   const foremanName = getFullName(plot.foreman);
   const storekeeperName = getFullName(plot.storekeeper);
+  const budget = plot.budget || null;
+  const allocated = parseFloat(budget?.allocated_amount ?? 0);
+  const spent = parseFloat(budget?.spent_amount ?? 0);
+  const currency = budget?.currency || 'NGN';
+  const hasBudget = budget && allocated > 0;
+  const overBudget = hasBudget && spent > allocated;
 
   return (
     <div className="card" onClick={onClick} style={{ cursor: 'pointer', padding: 0, overflow: 'hidden' }}>
@@ -56,6 +71,16 @@ const PlotCard = ({ plot, onClick }) => {
               </div>
             </div>
           </div>
+          {(hasBudget || spent > 0) && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '14px', padding: '12px', background: overBudget ? 'rgba(220,38,38,0.08)' : 'rgba(34,197,94,0.08)', borderRadius: '14px', color: overBudget ? '#dc2626' : '#16a34a', fontWeight: 600, fontSize: '13px' }}>
+              <DollarSign size={16} />
+              {hasBudget ? (
+                <span>{`${formatCurrency(spent, currency)} / ${formatCurrency(allocated, currency)}`}</span>
+              ) : (
+                <span>{`Spent: ${formatCurrency(spent, currency)}`}</span>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

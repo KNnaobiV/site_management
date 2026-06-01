@@ -58,6 +58,12 @@ from .views import (
     PlotInvitationViewSet,
     NotificationViewSet,
 )
+from finance.views import (
+    JobItemExpenseViewSet,
+    JobItemBudgetViewSet,
+    WorkItemBudgetViewSet,
+    PlotBudgetViewSet,
+)
  
 # ---------------------------------------------------------------------------
 # Root router
@@ -107,7 +113,7 @@ workitem_router = nested_routers.NestedDefaultRouter(
     plot_router, r"workitems", lookup="workitem"
 )
 workitem_router.register(r"jobitems", JobItemViewSet, basename="workitem-jobitems")
- 
+
 # ---------------------------------------------------------------------------
 # /projects/{project_pk}/plots/{plot_pk}/workitems/{workitem_pk}/jobitems/{jobitem_pk}/reports/
 # ---------------------------------------------------------------------------
@@ -115,6 +121,23 @@ jobitem_router = nested_routers.NestedDefaultRouter(
     workitem_router, r"jobitems", lookup="jobitem"
 )
 jobitem_router.register(r"reports", JobReportViewSet, basename="jobitem-reports")
+
+# ---------------------------------------------------------------------------
+# Finance: flat expense + budget endpoints
+# /jobitems/{jobitem_pk}/expenses/
+# /jobitems/{jobitem_pk}/budget/
+# /workitems/{workitem_pk}/budget/
+# /plots/{plot_pk}/budget/
+# ---------------------------------------------------------------------------
+flat_jobitem_router = nested_routers.NestedDefaultRouter(router, r"jobitems", lookup="jobitem")
+flat_jobitem_router.register(r"expenses", JobItemExpenseViewSet, basename="jobitem-expenses")
+flat_jobitem_router.register(r"budget", JobItemBudgetViewSet, basename="jobitem-budget")
+
+flat_workitem_router = nested_routers.NestedDefaultRouter(router, r"workitems", lookup="workitem")
+flat_workitem_router.register(r"budget", WorkItemBudgetViewSet, basename="workitem-budget")
+
+flat_plot_router = nested_routers.NestedDefaultRouter(router, r"plots", lookup="plot")
+flat_plot_router.register(r"budget", PlotBudgetViewSet, basename="plot-budget")
  
 # ---------------------------------------------------------------------------
 # Final urlpatterns
@@ -126,4 +149,7 @@ urlpatterns = [
     path("", include(plot_router.urls)),
     path("", include(workitem_router.urls)),
     path("", include(jobitem_router.urls)),
+    path("", include(flat_jobitem_router.urls)),
+    path("", include(flat_workitem_router.urls)),
+    path("", include(flat_plot_router.urls)),
 ]

@@ -18,9 +18,19 @@ DATABASES = {
 
 ADMIN_URL = CFG.get("SITE", "DJANGO_ADMIN_URL")
 
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+EMAIL_BACKEND = CFG.get('EMAIL', 'EMAIL_BACKEND', fallback='django.core.mail.backends.console.EmailBackend')
+DEFAULT_FROM_EMAIL = CFG.get('EMAIL', 'DEFAULT_FROM_EMAIL', fallback='no-reply@constropal.local')
+EMAIL_HOST = CFG.get('EMAIL', 'EMAIL_HOST', fallback='')
+EMAIL_PORT = CFG.getint('EMAIL', 'EMAIL_PORT', fallback=None)
+EMAIL_USE_TLS = CFG.getboolean('EMAIL', 'EMAIL_USE_TLS', fallback=False)
+EMAIL_HOST_USER = CFG.get('EMAIL', 'EMAIL_HOST_USER', fallback='')
+EMAIL_HOST_PASSWORD = CFG.get('EMAIL', 'EMAIL_HOST_PASSWORD', fallback='')
 
-ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1"]
+GOOGLE_CLIENT_ID = CFG.get('GOOGLE', 'GOOGLE_CLIENT_ID', fallback='')
+GOOGLE_CLIENT_SECRET = CFG.get('GOOGLE', 'GOOGLE_CLIENT_SECRET', fallback='')
+APPLE_CLIENT_ID = CFG.get('APPLE', 'APPLE_CLIENT_ID', fallback='')
+
+ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1", "constropal.alwaysdata.net"]
 
 LOGGING = {
     "version": 1,

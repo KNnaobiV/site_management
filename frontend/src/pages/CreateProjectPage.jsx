@@ -133,14 +133,14 @@ const CreateProjectPage = () => {
         <h1 style={{ fontSize: '64px', marginTop: '12px' }}>{isEditing ? 'Edit Project' : 'Create Project'}</h1>
       </div>
 
-      <form onSubmit={handleSubmit} style={{ 
+      <form onSubmit={handleSubmit} className="mobile-padding" style={{ 
         background: 'var(--bg-card)', 
         borderRadius: '24px', 
         border: '1px solid var(--border-default)',
         padding: '48px',
         maxWidth: '1200px'
       }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '48px' }}>
+        <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '48px' }}>
           {/* Left Column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <div>
@@ -166,7 +166,7 @@ const CreateProjectPage = () => {
               />
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div>
                 <label style={labelStyle}>Start Date</label>
                 <input 

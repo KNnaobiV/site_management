@@ -32,7 +32,9 @@ const CreatePlotPage = () => {
     storekeeper: '',
     plot_opening_date: new Date().toISOString().split('T')[0],
     end_date: '',
-    notes: ''
+    notes: '',
+    budget_amount: '',
+    budget_currency: 'NGN',
   });
 
   useEffect(() => {
@@ -154,6 +156,14 @@ const CreatePlotPage = () => {
       });
 
       if (res.ok) {
+        const savedPlot = await res.json();
+        if (formData.budget_amount && parseFloat(formData.budget_amount) > 0) {
+          await apiFetch(`/plots/${savedPlot.id}/budget/`, {
+            method: 'PATCH',
+            token,
+            body: JSON.stringify({ allocated_amount: parseFloat(formData.budget_amount), currency: formData.budget_currency }),
+          });
+        }
         showSuccessMessage(isEditing ? "Plot updated successfully!" : "Plot created successfully!");
         if (isEditing) {
           navigate(`/plots/${plotId}`);
@@ -184,17 +194,17 @@ const CreatePlotPage = () => {
         <h1 style={{ fontSize: '64px', marginTop: '12px' }}>{isEditing ? 'Edit Plot' : 'Create Plot'}</h1>
       </div>
 
-      <form onSubmit={handleSubmit} style={{ 
+      <form onSubmit={handleSubmit} className="mobile-padding" style={{ 
         background: 'var(--bg-card)', 
         borderRadius: '24px', 
         border: '1px solid var(--border-default)',
         padding: '48px',
         maxWidth: '1200px'
       }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '48px' }}>
+        <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '48px' }}>
           {/* Left Column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div>
                 <label style={labelStyle}>Plot Number *</label>
                 <input 
@@ -240,7 +250,7 @@ const CreatePlotPage = () => {
               )}
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div>
                 <label style={labelStyle}>Foreman</label>
                 <SearchableSelect 
@@ -316,7 +326,7 @@ const CreatePlotPage = () => {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div>
                 <label style={labelStyle}>Estimated Start Date</label>
                 <input 
@@ -345,6 +355,29 @@ const CreatePlotPage = () => {
                 onChange={e => setFormData({...formData, notes: e.target.value})}
                 style={{ ...inputStyle, minHeight: '100px', resize: 'vertical' }}
               />
+            </div>
+
+            {/* Budget */}
+            <div>
+              <label style={labelStyle}>Plot Budget <span style={{ fontWeight: 400, color: 'var(--text-tertiary)' }}>(Optional)</span></label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '10px' }}>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="e.g. 50000000"
+                  value={formData.budget_amount}
+                  onChange={e => setFormData({...formData, budget_amount: e.target.value})}
+                  style={inputStyle}
+                />
+                <select
+                  value={formData.budget_currency}
+                  onChange={e => setFormData({...formData, budget_currency: e.target.value})}
+                  style={{ ...inputStyle, width: '90px' }}
+                >
+                  {['NGN','USD','GBP','EUR'].map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
             </div>
 
             <div>

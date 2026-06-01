@@ -11,45 +11,79 @@ const CreateJobItemPage = () => {
   const navigate = useNavigate();
   const { workItemId, jobItemId } = useParams();
   const [loading, setLoading] = useState(false);
-  const isEdit = false;
-  const [fetchingWorkItem, setFetchingWorkItem] = useState(!!workItemId);
+  const isEdit = !!jobItemId;
+  const [fetchingWorkItem, setFetchingWorkItem] = useState(!!workItemId || !!jobItemId);
   const [workItem, setWorkItem] = useState(null);
   const [error, setError] = useState(null);
   const [workItemsList, setWorkItemsList] = useState([]);
   const [users, setUsers] = useState([]);
-  
+
   const [formData, setFormData] = useState({
     job_name: '',
     job_artisan: '',
     job_description: '',
     job_status: 'Planned',
-    priority: 'Medium',
     projected_start_date: new Date().toISOString().split('T')[0],
     projected_end_date: '',
     actual_start_date: '',
     actual_end_date: '',
     estimated_hours: '',
     material_requirements: [],
-    work_item: ''
+    work_item: '',
+    budget_amount: '',
+    budget_currency: 'NGN',
   });
 
   useEffect(() => {
-    if (isEdit) {
+    if (jobItemId) {
       fetchJobItem();
     } else if (workItemId) {
       fetchWorkItem();
     } else {
       fetchWorkItems();
     }
-  }, [workItemId]);
+  }, [workItemId, jobItemId]);
+
+  const fetchJobItem = async () => {
+    try {
+      const res = await apiFetch(`/jobitems/${jobItemId}/`, { token });
+      if (res.ok) {
+        const data = await res.json();
+        setFormData(f => ({
+          ...f,
+          job_name: data.job_name || '',
+          job_artisan: data.job_artisan || '',
+          job_description: data.job_description || '',
+          job_status: data.job_status || 'Planned',
+          projected_start_date: data.projected_start_date || f.projected_start_date,
+          projected_end_date: data.projected_end_date || '',
+          actual_start_date: data.actual_start_date || '',
+          actual_end_date: data.actual_end_date || '',
+          estimated_hours: data.estimated_hours || '',
+          material_requirements: data.material_requirements || [],
+          work_item: data.work_item || ''
+        }));
+
+        // If it returns work_item ID, we can fetch it to show breadcrumb
+        if (data.work_item) {
+          const wiRes = await apiFetch(`/workitems/${data.work_item}/`, { token });
+          if (wiRes.ok) setWorkItem(await wiRes.json());
+        }
+      }
+    } catch (err) {
+      console.error("Failed to fetch job item for editing", err);
+    } finally {
+      setFetchingWorkItem(false);
+    }
+  };
 
   const fetchWorkItems = async () => {
     try {
       const res = await apiFetch('/workitems/', { token });
       if (res.ok) {
         const data = await res.json();
-        setWorkItemsList(unwrapList(data).map(wi => ({ 
-          id: wi.id, 
+        setWorkItemsList(unwrapList(data).map(wi => ({
+          id: wi.id,
           label: wi.name,
           plotId: wi.construction_plot,
           projectId: wi.construction_project // Assuming these are available in the workitem object
@@ -69,12 +103,12 @@ const CreateJobItemPage = () => {
       // However, usually we can also have a non-nested retrieve. 
       // Let's check views again. WorkItemViewSet is PlotScopedMixin.
       // If we don't have project/plot IDs, we might need to fetch them first.
-      
+
       // Let's try a generic fetch if available, or just fetch all work items and find it.
       // Or we can assume the URL has them if we restructure App.jsx routes.
       // Current route: /work-items/:workItemId/job-items/new
       // I should probably have: /projects/:projectId/plots/:plotId/work-items/:workItemId/job-items/new
-      
+
       const res = await apiFetch(`/work-items/${workItemId}/`, { token }); // Assuming this exists or I'll fix App.jsx
       if (res.ok) {
         const data = await res.json();
@@ -109,7 +143,6 @@ const CreateJobItemPage = () => {
       job_artisan: formData.job_artisan,
       job_description: formData.job_description,
       job_status: formData.job_status,
-      priority: formData.priority,
       projected_start_date: formData.projected_start_date,
       projected_end_date: formData.projected_end_date,
     };
@@ -119,7 +152,7 @@ const CreateJobItemPage = () => {
     if (formData.material_requirements.length) payload.material_requirements = formData.material_requirements;
 
     try {
-      const targetWiId = workItemId || formData.work_item;
+      const targetWiId = workItemId || formData.work_item || workItem?.id;
       const selectedWi = workItem || workItemsList.find(wi => wi.id === formData.work_item);
       const targetPlotId = selectedWi?.construction_plot || selectedWi?.plotId;
       const targetProjectId = selectedWi?.construction_project || selectedWi?.projectId;
@@ -157,81 +190,81 @@ const CreateJobItemPage = () => {
     <div className="fade-up" style={{ padding: '0 0 80px' }}>
       <div style={{ marginBottom: '32px' }}>
         <Breadcrumb items={[
-          { label: 'Projects', path: '/projects' }, 
-          { label: workItem?.project_name || 'Project', path: `/projects/${workItem?.project_id || workItem?.construction_project}` },
-          { label: workItem?.plot_address || 'Plot', path: `/plots/${workItem?.plot_id || workItem?.construction_plot}` },
-          { label: workItem?.name || 'Work Item', path: `/work-items/${workItemId || workItem?.id}` },
+          { label: 'Projects', path: '/projects' },
+          { label: workItem?.project_name || 'Project', path: `/projects/${workItem?.project_id}` },
+          { label: workItem?.plot_address || 'Plot', path: `/plots/${workItem?.plot_id}` },
+          { label: workItem?.name || 'Work Item', path: `/work-items/${workItemId}` },
           { label: isEdit ? 'Edit Job Item' : 'New Job Item' }
         ]} />
         <h1 style={{ fontSize: '64px', marginTop: '12px' }}>{isEdit ? 'Edit Job Item' : 'Create Job Item'}</h1>
       </div>
 
-      <form onSubmit={handleSubmit} style={{ 
-        background: 'var(--bg-card)', 
-        borderRadius: '24px', 
+      <form onSubmit={handleSubmit} className="mobile-padding" style={{
+        background: 'var(--bg-card)',
+        borderRadius: '24px',
         border: '1px solid var(--border-default)',
         padding: '48px',
         maxWidth: '1200px'
       }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '48px' }}>
+        <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '48px' }}>
           {/* Left Column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div>
                 <label style={labelStyle}>Title</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   placeholder="Enter job item title"
                   required
                   value={formData.job_name}
-                  onChange={e => setFormData({...formData, job_name: e.target.value})}
+                  onChange={e => setFormData({ ...formData, job_name: e.target.value })}
                   style={inputStyle}
                 />
               </div>
               <div>
                 <label style={labelStyle}>Parent Work Item *</label>
-                {(workItemId || isEdit) ? (
-                  <input 
+                {workItemId ? (
+                  <input
                     type="text"
                     disabled
                     value={workItem?.name || 'Work Item Name'}
                     style={{ ...inputStyle, background: 'var(--bg-canvas)', cursor: 'not-allowed' }}
                   />
                 ) : (
-                  <SearchableSelect 
+                  <SearchableSelect
                     options={workItemsList}
                     value={formData.work_item}
-                    onChange={val => setFormData({...formData, work_item: val})}
+                    onChange={val => setFormData({ ...formData, work_item: val })}
                     placeholder="Select work item"
                   />
                 )}
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div>
                 <label style={labelStyle}>Artisan Type *</label>
-                <select 
+                <select
                   required
                   value={formData.job_artisan}
-                  onChange={e => setFormData({...formData, job_artisan: e.target.value})}
+                  onChange={e => setFormData({ ...formData, job_artisan: e.target.value })}
                   style={inputStyle}
                 >
                   <option value="">Select artisan...</option>
-                  {['Mason','Plumber','Electrician','Carpenter','Painter','Roofer','Iron Bender','Tiler','Glass Worker','Aluminium Worker','Other'].map(a => (
+                  {['Mason', 'Plumber', 'Electrician', 'Carpenter', 'Painter', 'Roofer', 'Iron Bender', 'Tiler', 'Glass Worker', 'Aluminium Worker', 'Other'].map(a => (
                     <option key={a} value={a}>{a}</option>
                   ))}
                 </select>
               </div>
               <div>
                 <label style={labelStyle}>Status *</label>
-                <select 
+                <select
                   required
                   value={formData.job_status}
-                  onChange={e => setFormData({...formData, job_status: e.target.value})}
+                  onChange={e => setFormData({ ...formData, job_status: e.target.value })}
                   style={inputStyle}
                 >
-                  {['Planned','In Progress','Completed','On Hold','Delayed','Cancelled'].map(s => (
+                  {['Planned', 'In Progress', 'Completed', 'On Hold', 'Delayed', 'Cancelled'].map(s => (
                     <option key={s} value={s}>{s}</option>
                   ))}
                 </select>
@@ -239,46 +272,20 @@ const CreateJobItemPage = () => {
             </div>
 
             <div>
-              <label style={labelStyle}>Priority *</label>
-              <div style={{ display: 'flex', gap: '10px' }}>
-                {['Low', 'Medium', 'High', 'Urgent'].map(p => (
-                  <button
-                    key={p}
-                    type="button"
-                    onClick={() => setFormData({...formData, priority: p})}
-                    style={{
-                      flex: 1,
-                      padding: '12px 0',
-                      borderRadius: '10px',
-                      border: '1px solid var(--border-default)',
-                      background: formData.priority === p ? 'var(--brand-orange)' : 'var(--bg-raised)',
-                      color: formData.priority === p ? 'white' : 'var(--text-primary)',
-                      fontWeight: 600,
-                      fontSize: '14px',
-                      transition: 'all 0.2s'
-                    }}
-                  >
-                    {p}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
               <label style={labelStyle}>Description</label>
-              <textarea 
+              <textarea
                 placeholder="Describe the scope of work..."
                 value={formData.job_description}
-                onChange={e => setFormData({...formData, job_description: e.target.value})}
+                onChange={e => setFormData({ ...formData, job_description: e.target.value })}
                 style={{ ...inputStyle, minHeight: '120px', resize: 'vertical' }}
               />
             </div>
 
             <div>
               <label style={labelStyle}>Material Requirements <span style={{ fontWeight: 400, color: 'var(--text-tertiary)' }}>(Optional)</span></label>
-              <MaterialsEditor 
+              <MaterialsEditor
                 items={formData.material_requirements}
-                onChange={items => setFormData({...formData, material_requirements: items})}
+                onChange={items => setFormData({ ...formData, material_requirements: items })}
               />
             </div>
           </div>
@@ -287,48 +294,48 @@ const CreateJobItemPage = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <div>
               <label style={labelStyle}>Estimated Hours <span style={{ fontWeight: 400, color: 'var(--text-tertiary)' }}>(Optional)</span></label>
-              <input 
+              <input
                 type="number"
                 step="0.5"
                 min="0"
                 placeholder="e.g. 12.5"
                 value={formData.estimated_hours}
-                onChange={e => setFormData({...formData, estimated_hours: e.target.value})}
+                onChange={e => setFormData({ ...formData, estimated_hours: e.target.value })}
                 style={inputStyle}
               />
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div>
                 <label style={labelStyle}>Projected Start *</label>
-                <input 
+                <input
                   type="date"
                   required
                   value={formData.projected_start_date}
-                  onChange={e => setFormData({...formData, projected_start_date: e.target.value})}
+                  onChange={e => setFormData({ ...formData, projected_start_date: e.target.value })}
                   style={inputStyle}
                 />
               </div>
               <div>
                 <label style={labelStyle}>Projected End *</label>
-                <input 
+                <input
                   type="date"
                   required
                   value={formData.projected_end_date}
-                  onChange={e => setFormData({...formData, projected_end_date: e.target.value})}
+                  onChange={e => setFormData({ ...formData, projected_end_date: e.target.value })}
                   style={inputStyle}
                 />
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div>
                 <label style={labelStyle}>Actual Start <span style={{ fontWeight: 400, color: 'var(--text-tertiary)' }}>(Optional)</span></label>
-                <input 
+                <input
                   type="date"
                   value={formData.actual_start_date}
                   disabled={isEdit && !!formData.actual_start_date}
-                  onChange={e => setFormData({...formData, actual_start_date: e.target.value})}
+                  onChange={e => setFormData({ ...formData, actual_start_date: e.target.value })}
                   style={{
                     ...inputStyle,
                     background: isEdit && !!formData.actual_start_date ? 'var(--bg-canvas)' : inputStyle.background,
@@ -338,10 +345,10 @@ const CreateJobItemPage = () => {
               </div>
               <div>
                 <label style={labelStyle}>Actual End <span style={{ fontWeight: 400, color: 'var(--text-tertiary)' }}>(Optional)</span></label>
-                <input 
+                <input
                   type="date"
                   value={formData.actual_end_date}
-                  onChange={e => setFormData({...formData, actual_end_date: e.target.value})}
+                  onChange={e => setFormData({ ...formData, actual_end_date: e.target.value })}
                   style={inputStyle}
                 />
               </div>

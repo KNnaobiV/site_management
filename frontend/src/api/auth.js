@@ -32,6 +32,19 @@ export async function registerUser(fields) {
     return data;
 }
 
+export async function socialLogin(provider, payload) {
+    const res = await apiFetch(`/auth/social/${provider}/`, {
+        method: "POST",
+        body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+        const errorMsg = data.detail || Object.values(data).flat().join(" ") || "Social login failed.";
+        throw new Error(errorMsg);
+    }
+    return data;
+}
+
 export async function fetchMe(token) {
     const res = await apiFetch("/auth/user/", { token });
     if (!res.ok) throw new Error("Session expired");

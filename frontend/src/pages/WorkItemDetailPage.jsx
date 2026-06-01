@@ -75,7 +75,7 @@ const NewJobItemForm = ({ projectId, plotId, workItemId, token, onSuccess, onClo
       <p style={{ color: 'var(--text-tertiary)', marginBottom: '32px' }}>Define a specific task for this work item.</p>
       {error && <div style={{ background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.2)', color: '#dc2626', padding: '12px 16px', borderRadius: '12px', marginBottom: '20px', fontSize: '14px' }}>{error}</div>}
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+        <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
           <div>
             <label style={labelStyle}>Job Name *</label>
             <input type="text" required value={form.job_name} onChange={e => set('job_name', e.target.value)} placeholder="e.g. Install Conduit" style={inputStyle} />
@@ -92,7 +92,7 @@ const NewJobItemForm = ({ projectId, plotId, workItemId, token, onSuccess, onClo
           <label style={labelStyle}>Description</label>
           <textarea value={form.job_description} onChange={e => set('job_description', e.target.value)} placeholder="Describe scope of work..." style={{ ...inputStyle, minHeight: '90px', resize: 'vertical' }} />
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+        <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
           <div>
             <label style={labelStyle}>Status *</label>
             <select required value={form.job_status} onChange={e => set('job_status', e.target.value)} style={inputStyle}>
@@ -106,13 +106,13 @@ const NewJobItemForm = ({ projectId, plotId, workItemId, token, onSuccess, onClo
             </select>
           </div>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+        <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
           <div>
             <label style={labelStyle}>Estimated Hours <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>(optional)</span></label>
             <input type="number" step="0.5" min="0" value={form.estimated_hours} onChange={e => set('estimated_hours', e.target.value)} placeholder="e.g. 12.5" style={inputStyle} />
           </div>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+        <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
           <div>
             <label style={labelStyle}>Projected Start *</label>
             <input type="date" required value={form.projected_start_date} onChange={e => set('projected_start_date', e.target.value)} style={inputStyle} />
@@ -122,7 +122,7 @@ const NewJobItemForm = ({ projectId, plotId, workItemId, token, onSuccess, onClo
             <input type="date" required value={form.projected_end_date} onChange={e => set('projected_end_date', e.target.value)} style={inputStyle} />
           </div>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+        <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
           <div>
             <label style={labelStyle}>Actual Start <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>(optional)</span></label>
             <input type="date" value={form.actual_start_date} onChange={e => set('actual_start_date', e.target.value)} style={inputStyle} />
@@ -289,7 +289,7 @@ const WorkItemDetailPage = () => {
             <ImageIcon size={15} /> Attach Photos
           </button>
           <input id="wi-img-upload" type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={e => uploadImages(Array.from(e.target.files))} />
-          {plot?.role === 'project_manager' && (
+          {plot?.role === 'project_manager' && workItem.work_status !== 'Completed' && (
             <button className="btn-primary" onClick={() => navigate(`/work-items/${id}/job-items/new`)} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Plus size={15} /> Add Job Item
             </button>
@@ -301,7 +301,7 @@ const WorkItemDetailPage = () => {
 
       {/* Overview Tab */}
       {activeTab === 'overview' && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '24px' }}>
+        <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '24px' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             {/* Description */}
             {workItem.description && (
@@ -312,7 +312,7 @@ const WorkItemDetailPage = () => {
             )}
 
             {/* Dates */}
-            <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '20px', padding: '24px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+            <div className="mobile-grid-1" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '20px', padding: '24px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
               <div>
                 <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', color: 'var(--text-tertiary)', textTransform: 'uppercase', margin: '0 0 6px' }}>Start Date</p>
                 <p style={{ margin: 0, fontWeight: 600, fontSize: '15px', color: 'var(--text-primary)' }}>{workItem.proposed_start_date}</p>
@@ -360,7 +360,7 @@ const WorkItemDetailPage = () => {
                 </div>
               </div>
             ))}
-            {plot?.role === 'project_manager' && (
+            {plot?.role === 'project_manager' && workItem.work_status !== 'Completed' && (
               <button className="btn-ghost" onClick={() => setShowNewJobItem(true)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '13px' }}>
                 <Plus size={14} /> Add Job Item
               </button>

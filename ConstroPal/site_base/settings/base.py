@@ -49,23 +49,30 @@ if 'CODESPACE_NAME' in os.environ:
 
 # Application definition
 
-INSTALLED_APPS = [
+DJANGO_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
-    
-    # Custom User Model
-    "accounts",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+]
+
+CUSTOM_USER_APPS  = [
+    "accounts",
+    "base",
+    "core",
+    "finance",
+]
+
+THIRD_PARTY_APPS = [
     "corsheaders",
     "rest_framework",
     "rest_framework.authtoken",
     "django_browser_reload",
-    "base",
-    "core",
 ]
+
+INSTALLED_APPS = DJANGO_APPS + CUSTOM_USER_APPS + THIRD_PARTY_APPS
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
