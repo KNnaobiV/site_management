@@ -445,3 +445,74 @@ class IsInviterOrProjectOwner(BasePermission):
         if project is None:
             project = obj.plot.construction_project
         return get_project_role(user, project) in {"owner"}
+
+
+# ---------------------------------------------------------------------------
+# Finance permissions
+# ---------------------------------------------------------------------------
+
+class CanManageFinance(BasePermission):
+    """Only project manager (and owner) can view and update overall finance/budgets."""
+    message = "You do not have permission to view or manage budgets."
+
+    def has_permission(self, request, view):
+        if not request.user or not request.user.is_authenticated:
+            return False
+        plot = _get_plot(view)
+        if plot is None:
+            return True
+        return get_plot_role(request.user, plot) in {"owner", "project_manager"}
+
+    def has_object_permission(self, request, view, obj):
+        if hasattr(obj, "plot"):
+            plot = obj.plot
+        elif hasattr(obj, "work_item"):
+            plot = obj.work_item.construction_plot
+        else:
+            return False
+        return get_plot_role(request.user, plot) in {"owner", "project_manager"}
+
+
+class CanManageJobFinance(BasePermission):
+    """
+    Project Manager and Foreman can view job budgets.
+    Only Project Manager can update job budgets.
+    """
+    message = "You do not have permission to view or manage job budgets."
+
+    def has_permission(self, request, view):
+        if not request.user or not request.user.is_authenticated:
+            return False
+        plot = _get_plot(view)
+        if plot is None:
+            return True
+        role = get_plot_role(request.user, plot)
+        if request.method in ["GET", "HEAD", "OPTIONS"]:
+            return role in {"owner", "project_manager", "foreman"}
+        return role in {"owner", "project_manager"}
+
+    def has_object_permission(self, request, view, obj):
+        # obj is JobItemBudget
+        plot = obj.job_item.work_item.construction_plot
+        role = get_plot_role(request.user, plot)
+        if request.method in ["GET", "HEAD", "OPTIONS"]:
+            return role in {"owner", "project_manager", "foreman"}
+        return role in {"owner", "project_manager"}
+
+
+class CanManageExpenses(BasePermission):
+    """Project Manager and Foreman can view, create, and update expenses."""
+    message = "You do not have permission to manage expenses."
+
+    def has_permission(self, request, view):
+        if not request.user or not request.user.is_authenticated:
+            return False
+        plot = _get_plot(view)
+        if plot is None:
+            return True
+        return get_plot_role(request.user, plot) in {"owner", "project_manager", "foreman"}
+
+    def has_object_permission(self, request, view, obj):
+        # obj is Expense
+        plot = obj.job_item.work_item.construction_plot
+        return get_plot_role(request.user, plot) in {"owner", "project_manager", "foreman"}

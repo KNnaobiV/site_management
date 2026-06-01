@@ -228,6 +228,10 @@ button {
     width: 100% !important;
   }
   
+  .mobile-grid-1 {
+    grid-template-columns: 1fr !important;
+  }
+  
   /* Inputs & Buttons */
   button, .btn-primary, .btn-ghost {
     padding: 12px 16px; /* Slightly larger touch targets */

@@ -117,7 +117,7 @@ const CreateDailyReportPage = () => {
 
       {error && <div style={{ background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.2)', color: '#dc2626', padding: '16px', borderRadius: '12px', marginBottom: '24px', maxWidth: '800px' }}>{error}</div>}
 
-      <form onSubmit={handleSubmit} style={{ 
+      <form onSubmit={handleSubmit} className="mobile-padding" style={{ 
         background: 'var(--bg-card)', 
         borderRadius: '24px', 
         border: '1px solid var(--border-default)',
@@ -133,7 +133,7 @@ const CreateDailyReportPage = () => {
             <Calendar size={20} color="var(--brand-orange)" />
             Schedule & Priority
           </h3>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+          <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
             <div>
               <label style={labelStyle}>Report Date *</label>
               <input 
@@ -165,7 +165,7 @@ const CreateDailyReportPage = () => {
             <AlertCircle size={20} color="var(--brand-orange)" />
             Work Completion
           </h3>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+          <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
             <div>
               <label style={labelStyle}>Job Progress (%) *</label>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '8px 0' }}>
@@ -222,7 +222,7 @@ const CreateDailyReportPage = () => {
 
         {/* Comments Section */}
         <section>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+          <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
             <div>
               <label style={labelStyle}>External Comments <span style={{ fontWeight: 400, color: 'var(--text-tertiary)' }}>(for Client)</span></label>
               <textarea 

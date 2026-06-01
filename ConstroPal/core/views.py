@@ -647,6 +647,9 @@ class WorkItemViewSet(PlotScopedMixin, viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         plot = self.get_plot()
+        if plot.status == 'Completed':
+            raise ValidationError("Cannot add work items to a completed plot.")
+
         user = self.request.user
         role = get_plot_role(user, plot)
 
@@ -820,6 +823,9 @@ class JobItemViewSet(PlotScopedMixin, viewsets.ModelViewSet):
             pk=self.kwargs["workitem_pk"],
             construction_plot=plot,
         )
+        if work_item.work_status == 'Completed':
+            raise ValidationError("Cannot add job items to a completed work item.")
+
         role = get_plot_role(user, plot)
         is_approved = role in {"owner", "project_manager"}
         job_item = serializer.save(work_item=work_item, is_approved=is_approved)

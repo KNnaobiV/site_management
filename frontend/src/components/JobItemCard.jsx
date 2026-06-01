@@ -1,7 +1,7 @@
 import React from 'react';
 import StatusBadge from './StatusBadge';
 import Avatar from './Avatar';
-import { Calendar, Zap, CheckSquare, DollarSign } from 'lucide-react';
+import { Calendar, Zap, CheckSquare, DollarSign, CheckCircle2 } from 'lucide-react';
 
 const formatCurrency = (amount, currency = 'NGN') => {
   try {

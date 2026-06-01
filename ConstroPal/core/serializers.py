@@ -251,6 +251,7 @@ class ConstructionPlotSerializer(RoleFilteredSerializer):
         "construction_project",
         "address",
         "plot_number",
+        "status",
         "plot_opening_date",
         "gps_latitude",
         "gps_longitude",
@@ -263,6 +264,7 @@ class ConstructionPlotSerializer(RoleFilteredSerializer):
         "project_manager": {
             "foreman", "foreman_id",
             "storekeeper", "storekeeper_id",
+            "budget",
         },
         "foreman": {
             "foreman", "foreman_id",
@@ -280,6 +282,7 @@ class ConstructionPlotSerializer(RoleFilteredSerializer):
             "construction_project",
             "address",
             "plot_number",
+            "status",
             "plot_opening_date",
             "gps_latitude",
             "gps_longitude",
@@ -354,7 +357,7 @@ class WorkItemSerializer(RoleFilteredSerializer):
     }
  
     ROLE_EXTRA = {
-        "project_manager": {"start_date", "end_date"},
+        "project_manager": {"start_date", "end_date", "budget"},
         "foreman":         {"start_date", "end_date"},
         "storekeeper":     {"start_date", "end_date"},
         "consultant":      set(),
@@ -386,12 +389,8 @@ class WorkItemSerializer(RoleFilteredSerializer):
             "construction_plot_name",
             "construction_project",
             "images",
-<<<<<<< HEAD
             "foreman",
             "foreman_id",
-        ]
-        read_only_fields = ["id", "updated_at", "construction_plot", "is_approved"]
-=======
             "budget",
         ]
         read_only_fields = ["id", "updated_at", "construction_plot"]
@@ -410,7 +409,6 @@ class WorkItemSerializer(RoleFilteredSerializer):
             }
         except Exception:
             return None
->>>>>>> 76f5b6f4 (connected finance be to fe)
  
  
 # ===========================================================================
@@ -459,8 +457,8 @@ class JobItemSerializer(RoleFilteredSerializer):
     }
  
     ROLE_EXTRA = {
-        "project_manager": {"actual_start_date", "actual_end_date"},
-        "foreman":         {"actual_start_date", "actual_end_date"},
+        "project_manager": {"actual_start_date", "actual_end_date", "budget"},
+        "foreman":         {"actual_start_date", "actual_end_date", "budget"},
         "storekeeper":     {"actual_start_date", "actual_end_date"},
         "consultant":      set(),
     }
@@ -492,11 +490,8 @@ class JobItemSerializer(RoleFilteredSerializer):
             "construction_plot",
             "construction_plot_name",
             "construction_project",
-            "budget",
+            "budget"
         ]
-<<<<<<< HEAD
-        read_only_fields = ["id", "updated_at", "work_item", "is_approved"]
-=======
         read_only_fields = ["id", "updated_at", "work_item"]
 
     budget = serializers.SerializerMethodField()
@@ -513,7 +508,6 @@ class JobItemSerializer(RoleFilteredSerializer):
             }
         except Exception:
             return None
->>>>>>> 76f5b6f4 (connected finance be to fe)
  
  
 # ===========================================================================

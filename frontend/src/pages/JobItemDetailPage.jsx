@@ -1,11 +1,7 @@
 import React, { useState, useEffect } from 'react';
 // Optimized Job Item Detail View
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-<<<<<<< HEAD
-import { Plus, Image as ImageIcon, ArrowLeft, CheckCircle2, Loader as SpinnerIcon, X, Edit2 } from 'lucide-react';
-=======
 import { Plus, Image as ImageIcon, ArrowLeft, CheckCircle2, Loader as SpinnerIcon, X, DollarSign, Edit2, Trash2, Receipt } from 'lucide-react';
->>>>>>> 76f5b6f4 (connected finance be to fe)
 import { useAuth } from '../context/AuthContext';
 import { apiFetch, unwrapList } from '../api/client';
 import { Breadcrumb, Avatar, MaterialsEditor, Spinner, CommentsSection } from '../components';
@@ -103,7 +99,7 @@ const ExpenseModal = ({ onClose, onSave, existing, jobItemId, token }) => {
         </div>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+          <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
             <div>
               <label style={labelStyle}>Amount *</label>
               <input
@@ -129,7 +125,7 @@ const ExpenseModal = ({ onClose, onSave, existing, jobItemId, token }) => {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+          <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
             <div>
               <label style={labelStyle}>Date *</label>
               <input
@@ -316,6 +312,8 @@ const JobItemDetailPage = () => {
   const budgetCurrency = budget?.currency || 'NGN';
   const isOverBudget = hasBudget && totalSpent > parseFloat(budget.allocated_amount);
 
+  const hasFinanceAccess = plot?.role === 'owner' || plot?.role === 'project_manager' || plot?.role === 'foreman';
+
   return (
     <div className="fade-up" style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 0 60px' }}>
       <Breadcrumb items={[
@@ -333,13 +331,8 @@ const JobItemDetailPage = () => {
           <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
             <StatusPill status={jobItem.job_status} />
             <span style={{ fontSize: '14px', color: 'var(--text-tertiary)', padding: '5px 14px', borderRadius: '100px', background: 'var(--bg-raised)', fontWeight: 500 }}>{jobItem.job_artisan}</span>
-<<<<<<< HEAD
-            {jobItem.is_approved && (
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: '#edf5ed', color: '#2d5a27', padding: '5px 14px', borderRadius: '100px', fontSize: '13px', fontWeight: 600 }}>
-                <CheckCircle2 size={14} /> Approved
-=======
             {/* Spend badge */}
-            {expenses.length > 0 && (
+            {hasFinanceAccess && expenses.length > 0 && (
               <span style={{
                 fontSize: '13px',
                 padding: '5px 14px',
@@ -356,11 +349,10 @@ const JobItemDetailPage = () => {
                   ? `${formatCurrency(totalSpent, budgetCurrency)} / ${formatCurrency(budget.allocated_amount, budgetCurrency)}`
                   : `Spent: ${formatCurrency(totalSpent, budgetCurrency)}`
                 }
->>>>>>> 76f5b6f4 (connected finance be to fe)
               </span>
             )}
           </div>
-        </div>
+        </div >
         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
           <button className="btn-ghost" onClick={() => navigate(`/job-items/${id}/edit`)} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Edit2 size={15} /> Edit Job
@@ -375,20 +367,22 @@ const JobItemDetailPage = () => {
               <CheckCircle2 size={18} /> Mark Complete
             </button>
           )}
-          <button
-            className="btn-ghost"
-            onClick={() => { setEditingExpense(null); setShowExpenseModal(true); }}
-            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
-          >
-            <Plus size={15} /> Add Expense
-          </button>
+          {hasFinanceAccess && jobItem.job_status !== 'Completed' && (
+            <button
+              className="btn-ghost"
+              onClick={() => { setEditingExpense(null); setShowExpenseModal(true); }}
+              style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+            >
+              <Plus size={15} /> Add Expense
+            </button>
+          )}
           <button className="btn-primary" onClick={() => navigate(`/job-items/${id}/reports/new`)} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Plus size={15} /> Write Report
           </button>
         </div>
-      </div>
+      </div >
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: '24px', alignItems: 'start' }}>
+      <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: '24px', alignItems: 'start' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           {/* Description */}
           {jobItem.job_description && (
@@ -399,7 +393,7 @@ const JobItemDetailPage = () => {
           )}
 
           {/* Dates & Hours */}
-          <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '20px', padding: '24px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(130px,1fr))', gap: '16px' }}>
+          <div className="mobile-grid-1" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '20px', padding: '24px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(130px,1fr))', gap: '16px' }}>
             <div>
               <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', color: 'var(--text-tertiary)', textTransform: 'uppercase', margin: '0 0 6px' }}>Projected Start</p>
               <p style={{ margin: 0, fontWeight: 600, fontSize: '15px', color: 'var(--text-primary)' }}>{jobItem.projected_start_date}</p>
@@ -417,7 +411,7 @@ const JobItemDetailPage = () => {
               <p style={{ margin: 0, fontWeight: 700, fontSize: '20px', color: 'var(--brand-orange)' }}>{jobItem.estimated_hours}<span style={{ fontSize: '13px', fontWeight: 400, color: 'var(--text-tertiary)' }}>h</span></p>
             </div>}
             {/* Budget stat */}
-            {hasBudget && (
+            {hasFinanceAccess && hasBudget && (
               <div>
                 <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', color: 'var(--text-tertiary)', textTransform: 'uppercase', margin: '0 0 6px' }}>Budget</p>
                 <p style={{ margin: 0, fontWeight: 700, fontSize: '15px', color: isOverBudget ? '#dc2626' : 'var(--brand-orange)' }}>
@@ -436,8 +430,9 @@ const JobItemDetailPage = () => {
           )}
 
           {/* ── Expenses Panel ── */}
-          <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '20px', padding: '24px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          {hasFinanceAccess && (
+            <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '20px', padding: '24px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
               <div>
                 <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', color: 'var(--text-tertiary)', textTransform: 'uppercase', margin: '0 0 4px' }}>
                   Expenses ({expenses.length})
@@ -453,13 +448,15 @@ const JobItemDetailPage = () => {
                   </p>
                 )}
               </div>
-              <button
-                className="btn-ghost"
-                onClick={() => { setEditingExpense(null); setShowExpenseModal(true); }}
-                style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', padding: '8px 16px' }}
-              >
-                <Plus size={14} /> Add Expense
-              </button>
+              {jobItem.job_status !== 'Completed' && (
+                <button
+                  className="btn-ghost"
+                  onClick={() => { setEditingExpense(null); setShowExpenseModal(true); }}
+                  style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', padding: '8px 16px' }}
+                >
+                  <Plus size={14} /> Add Expense
+                </button>
+              )}
             </div>
 
             {/* Budget progress bar */}
@@ -488,13 +485,15 @@ const JobItemDetailPage = () => {
                 <Receipt size={32} style={{ marginBottom: '12px', opacity: 0.4 }} />
                 <p style={{ fontWeight: 600, fontSize: '14px', margin: '0 0 6px' }}>No expenses yet</p>
                 <p style={{ fontSize: '13px', margin: '0 0 16px' }}>Track payments and costs for this job.</p>
-                <button
-                  className="btn-primary"
-                  onClick={() => { setEditingExpense(null); setShowExpenseModal(true); }}
-                  style={{ padding: '10px 24px' }}
-                >
-                  Add First Expense
-                </button>
+                {jobItem.job_status !== 'Completed' && (
+                  <button
+                    className="btn-primary"
+                    onClick={() => { setEditingExpense(null); setShowExpenseModal(true); }}
+                    style={{ padding: '10px 24px' }}
+                  >
+                    Add First Expense
+                  </button>
+                )}
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -547,27 +546,30 @@ const JobItemDetailPage = () => {
                       )}
                       <p style={{ margin: '2px 0 0', fontSize: '12px', color: 'var(--text-tertiary)' }}>{exp.incurred_at}</p>
                     </div>
-                    <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
-                      <button
-                        onClick={() => { setEditingExpense(exp); setShowExpenseModal(true); }}
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', padding: '6px', borderRadius: '8px', display: 'flex', alignItems: 'center' }}
-                        title="Edit"
-                      >
-                        <Edit2 size={15} />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteExpense(exp.id)}
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', padding: '6px', borderRadius: '8px', display: 'flex', alignItems: 'center' }}
-                        title="Delete"
-                      >
-                        <Trash2 size={15} />
-                      </button>
-                    </div>
+                    {jobItem.job_status !== 'Completed' && (
+                      <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
+                        <button
+                          onClick={() => { setEditingExpense(exp); setShowExpenseModal(true); }}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', padding: '6px', borderRadius: '8px', display: 'flex', alignItems: 'center' }}
+                          title="Edit"
+                        >
+                          <Edit2 size={15} />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteExpense(exp.id)}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', padding: '6px', borderRadius: '8px', display: 'flex', alignItems: 'center' }}
+                          title="Delete"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
             )}
           </div>
+          )}
         </div>
 
         {/* Daily Reports Timeline */}
@@ -627,151 +629,155 @@ const JobItemDetailPage = () => {
       </div>
 
       {/* Report Detail Modal */}
-      {selectedReport && (
-        <div
-          onClick={() => setSelectedReport(null)}
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0, 0, 0, 0.45)',
-            backdropFilter: 'blur(4px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 2000,
-            padding: '24px',
-          }}
-        >
+      {
+        selectedReport && (
           <div
-            onClick={(e) => e.stopPropagation()}
-            className="fade-in"
+            onClick={() => setSelectedReport(null)}
             style={{
-              background: 'var(--bg-card)',
-              borderRadius: '24px',
-              padding: '40px',
-              maxWidth: '700px',
-              width: '100%',
-              maxHeight: '90vh',
-              overflowY: 'auto',
-              boxShadow: '0 24px 60px rgba(0, 0, 0, 0.15)',
-              position: 'relative',
+              position: 'fixed',
+              inset: 0,
+              background: 'rgba(0, 0, 0, 0.45)',
+              backdropFilter: 'blur(4px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 2000,
+              padding: '24px',
             }}
           >
-            {/* Close Button */}
-            <button
-              onClick={() => setSelectedReport(null)}
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="fade-in"
               style={{
-                position: 'absolute',
-                top: '20px',
-                right: '20px',
-                background: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                padding: '8px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'var(--text-tertiary)',
-                transition: 'color 0.2s',
+                background: 'var(--bg-card)',
+                borderRadius: '24px',
+                padding: '40px',
+                maxWidth: '700px',
+                width: '100%',
+                maxHeight: '90vh',
+                overflowY: 'auto',
+                boxShadow: '0 24px 60px rgba(0, 0, 0, 0.15)',
+                position: 'relative',
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--text-primary)')}
-              onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-tertiary)')}
             >
-              <X size={24} />
-            </button>
+              {/* Close Button */}
+              <button
+                onClick={() => setSelectedReport(null)}
+                style={{
+                  position: 'absolute',
+                  top: '20px',
+                  right: '20px',
+                  background: 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'var(--text-tertiary)',
+                  transition: 'color 0.2s',
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--text-primary)')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-tertiary)')}
+              >
+                <X size={24} />
+              </button>
 
-            {/* Report Details */}
-            <h2 style={{ fontSize: '28px', marginBottom: '6px', marginTop: 0 }}>
-              Report Details
-            </h2>
-            <p style={{ color: 'var(--text-tertiary)', marginBottom: '24px' }}>
-              {selectedReport.report_date}
-            </p>
+              {/* Report Details */}
+              <h2 style={{ fontSize: '28px', marginBottom: '6px', marginTop: 0 }}>
+                Report Details
+              </h2>
+              <p style={{ color: 'var(--text-tertiary)', marginBottom: '24px' }}>
+                {selectedReport.report_date}
+              </p>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '28px' }}>
-              <div>
-                <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', color: 'var(--text-tertiary)', textTransform: 'uppercase', margin: '0 0 8px' }}>
-                  Progress
-                </p>
-                <p style={{ fontSize: '24px', fontWeight: 700, color: 'var(--brand-orange)', margin: 0 }}>
-                  {selectedReport.percentage_job_progress}%
-                </p>
-              </div>
-              <div>
-                <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', color: 'var(--text-tertiary)', textTransform: 'uppercase', margin: '0 0 8px' }}>
-                  Priority
-                </p>
-                <StatusPill status={selectedReport.priority} />
-              </div>
-            </div>
-
-            {selectedReport.notes && (
-              <div style={{ marginBottom: '24px' }}>
-                <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', color: 'var(--text-tertiary)', textTransform: 'uppercase', margin: '0 0 8px' }}>
-                  Notes
-                </p>
-                <p style={{ fontSize: '14px', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.6 }}>
-                  {selectedReport.notes}
-                </p>
-              </div>
-            )}
-
-            {selectedReport.issues_encountered && (
-              <div style={{ background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.2)', borderRadius: '12px', padding: '16px', marginBottom: '24px' }}>
-                <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', color: '#dc2626', textTransform: 'uppercase', margin: '0 0 8px' }}>
-                  ⚠ Issues Encountered
-                </p>
-                <p style={{ fontSize: '13px', color: '#7f1d1d', margin: 0, lineHeight: 1.6 }}>
-                  {selectedReport.issues_encountered}
-                </p>
-              </div>
-            )}
-
-            {selectedReport.images?.length > 0 && (
-              <div style={{ marginBottom: '24px' }}>
-                <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', color: 'var(--text-tertiary)', textTransform: 'uppercase', margin: '0 0 12px' }}>
-                  Report Photos
-                </p>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '12px' }}>
-                  {selectedReport.images.map(image => (
-                    <div key={image.id} style={{ cursor: 'pointer' }} onClick={() => window.open(image.image, '_blank')}>
-                      <img
-                        src={image.image}
-                        alt={image.caption || 'Report photo'}
-                        style={{ width: '100%', height: '130px', objectFit: 'cover', borderRadius: '16px', border: '1px solid var(--border-subtle)' }}
-                      />
-                      {image.caption && (
-                        <p style={{ margin: '8px 0 0', fontSize: '12px', color: 'var(--text-tertiary)' }}>{image.caption}</p>
-                      )}
-                    </div>
-                  ))}
+              <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '28px' }}>
+                <div>
+                  <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', color: 'var(--text-tertiary)', textTransform: 'uppercase', margin: '0 0 8px' }}>
+                    Progress
+                  </p>
+                  <p style={{ fontSize: '24px', fontWeight: 700, color: 'var(--brand-orange)', margin: 0 }}>
+                    {selectedReport.percentage_job_progress}%
+                  </p>
+                </div>
+                <div>
+                  <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', color: 'var(--text-tertiary)', textTransform: 'uppercase', margin: '0 0 8px' }}>
+                    Priority
+                  </p>
+                  <StatusPill status={selectedReport.priority} />
                 </div>
               </div>
-            )}
 
-            {/* Comments Section */}
-            <CommentsSection
-              reportId={selectedReport.id}
-              projectId={projectId}
-              plotId={plotId}
-              workitemId={workItemId}
-              jobitemId={id}
-            />
+              {selectedReport.notes && (
+                <div style={{ marginBottom: '24px' }}>
+                  <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', color: 'var(--text-tertiary)', textTransform: 'uppercase', margin: '0 0 8px' }}>
+                    Notes
+                  </p>
+                  <p style={{ fontSize: '14px', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.6 }}>
+                    {selectedReport.notes}
+                  </p>
+                </div>
+              )}
+
+              {selectedReport.issues_encountered && (
+                <div style={{ background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.2)', borderRadius: '12px', padding: '16px', marginBottom: '24px' }}>
+                  <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', color: '#dc2626', textTransform: 'uppercase', margin: '0 0 8px' }}>
+                    ⚠ Issues Encountered
+                  </p>
+                  <p style={{ fontSize: '13px', color: '#7f1d1d', margin: 0, lineHeight: 1.6 }}>
+                    {selectedReport.issues_encountered}
+                  </p>
+                </div>
+              )}
+
+              {selectedReport.images?.length > 0 && (
+                <div style={{ marginBottom: '24px' }}>
+                  <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', color: 'var(--text-tertiary)', textTransform: 'uppercase', margin: '0 0 12px' }}>
+                    Report Photos
+                  </p>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '12px' }}>
+                    {selectedReport.images.map(image => (
+                      <div key={image.id} style={{ cursor: 'pointer' }} onClick={() => window.open(image.image, '_blank')}>
+                        <img
+                          src={image.image}
+                          alt={image.caption || 'Report photo'}
+                          style={{ width: '100%', height: '130px', objectFit: 'cover', borderRadius: '16px', border: '1px solid var(--border-subtle)' }}
+                        />
+                        {image.caption && (
+                          <p style={{ margin: '8px 0 0', fontSize: '12px', color: 'var(--text-tertiary)' }}>{image.caption}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Comments Section */}
+              <CommentsSection
+                reportId={selectedReport.id}
+                projectId={projectId}
+                plotId={plotId}
+                workitemId={workItemId}
+                jobitemId={id}
+              />
+            </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
       {/* Expense Modal */}
-      {showExpenseModal && (
-        <ExpenseModal
-          token={token}
-          jobItemId={id}
-          existing={editingExpense}
-          onClose={() => { setShowExpenseModal(false); setEditingExpense(null); }}
-          onSave={() => { setShowExpenseModal(false); setEditingExpense(null); fetchExpenses(); }}
-        />
-      )}
-    </div>
+      {
+        showExpenseModal && (
+          <ExpenseModal
+            token={token}
+            jobItemId={id}
+            existing={editingExpense}
+            onClose={() => { setShowExpenseModal(false); setEditingExpense(null); }}
+            onSave={() => { setShowExpenseModal(false); setEditingExpense(null); fetchExpenses(); }}
+          />
+        )
+      }
+    </div >
   );
 };
 

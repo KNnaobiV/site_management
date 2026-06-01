@@ -19,6 +19,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from core.models import JobItem, WorkItem, ConstructionPlot
+from core.permissions import CanManageFinance, CanManageJobFinance, CanManageExpenses
 
 from .models import (
     Expense,
@@ -43,10 +44,11 @@ class JobItemExpenseViewSet(viewsets.ModelViewSet):
     CRUD for expenses attached to a specific job item.
 
     Nested under: /jobitems/{jobitem_pk}/expenses/
+    Nested under: /jobitems/{jobitem_pk}/expenses/
     Also available flat: /expenses/{pk}/ for retrieve/update/delete
     """
     serializer_class = ExpenseSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, CanManageExpenses]
 
     def get_job_item(self):
         jobitem_pk = self.kwargs.get("jobitem_pk")
@@ -69,8 +71,24 @@ class JobItemExpenseViewSet(viewsets.ModelViewSet):
         ).distinct().select_related("cost_code")
 
     def perform_create(self, serializer):
+        from django.core.exceptions import ValidationError
         job_item = self.get_job_item()
+        if job_item and job_item.job_status == 'Completed':
+            raise ValidationError("Cannot add expenses to a completed job item.")
         serializer.save(job_item=job_item)
+
+    def perform_update(self, serializer):
+        from django.core.exceptions import ValidationError
+        expense = self.get_object()
+        if expense.job_item.job_status == 'Completed':
+            raise ValidationError("Cannot update expenses of a completed job item.")
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        from django.core.exceptions import ValidationError
+        if instance.job_item.job_status == 'Completed':
+            raise ValidationError("Cannot delete expenses of a completed job item.")
+        instance.delete()
 
 
 # ---------------------------------------------------------------------------
@@ -82,7 +100,7 @@ class JobItemBudgetViewSet(viewsets.ViewSet):
     GET  /jobitems/{jobitem_pk}/budget/    → retrieve or create budget
     PATCH /jobitems/{jobitem_pk}/budget/   → update allocated_amount / currency
     """
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, CanManageJobFinance]
 
     def _get_job_item(self, jobitem_pk):
         return get_object_or_404(JobItem, pk=jobitem_pk)
@@ -96,7 +114,10 @@ class JobItemBudgetViewSet(viewsets.ViewSet):
         return Response(JobItemBudgetSerializer(budget).data)
 
     def partial_update(self, request, pk=None, jobitem_pk=None):
+        from django.core.exceptions import ValidationError
         job_item = self._get_job_item(jobitem_pk)
+        if job_item.job_status == 'Completed':
+            raise ValidationError("Cannot update budget of a completed job item.")
         budget, _ = JobItemBudget.objects.get_or_create(
             job_item=job_item,
             defaults={"allocated_amount": Decimal("0.00"), "currency": "NGN"},
@@ -112,7 +133,7 @@ class WorkItemBudgetViewSet(viewsets.ViewSet):
     GET  /workitems/{workitem_pk}/budget/
     PATCH /workitems/{workitem_pk}/budget/
     """
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, CanManageFinance]
 
     def _get_work_item(self, workitem_pk):
         return get_object_or_404(WorkItem, pk=workitem_pk)
@@ -126,7 +147,10 @@ class WorkItemBudgetViewSet(viewsets.ViewSet):
         return Response(WorkItemBudgetSerializer(budget).data)
 
     def partial_update(self, request, pk=None, workitem_pk=None):
+        from django.core.exceptions import ValidationError
         work_item = self._get_work_item(workitem_pk)
+        if work_item.work_status == 'Completed':
+            raise ValidationError("Cannot update budget of a completed work item.")
         budget, _ = WorkItemBudget.objects.get_or_create(
             work_item=work_item,
             defaults={"allocated_amount": Decimal("0.00"), "currency": "NGN"},
@@ -142,7 +166,7 @@ class PlotBudgetViewSet(viewsets.ViewSet):
     GET  /plots/{plot_pk}/budget/
     PATCH /plots/{plot_pk}/budget/
     """
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, CanManageFinance]
 
     def _get_plot(self, plot_pk):
         return get_object_or_404(ConstructionPlot, pk=plot_pk)
@@ -156,7 +180,10 @@ class PlotBudgetViewSet(viewsets.ViewSet):
         return Response(PlotBudgetSerializer(budget).data)
 
     def partial_update(self, request, pk=None, plot_pk=None):
+        from django.core.exceptions import ValidationError
         plot = self._get_plot(plot_pk)
+        if plot.status == 'Completed':
+            raise ValidationError("Cannot update budget of a completed plot.")
         budget, _ = PlotBudget.objects.get_or_create(
             plot=plot,
             defaults={"allocated_amount": Decimal("0.00"), "currency": "NGN"},

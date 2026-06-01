@@ -98,7 +98,7 @@ const NewWorkItemForm = ({ projectId, plotId, token, onSuccess, onClose }) => {
             {['Planned','In Progress','Completed','On Hold','Delayed','Cancelled'].map(s => <option key={s} value={s}>{s}</option>)}
           </select>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+        <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
           <div>
             <label style={labelStyle}>Proposed Start *</label>
             <input type="date" required value={form.proposed_start_date} onChange={e => set('proposed_start_date', e.target.value)} style={inputStyle} />
@@ -108,7 +108,7 @@ const NewWorkItemForm = ({ projectId, plotId, token, onSuccess, onClose }) => {
             <input type="date" required value={form.proposed_end_date} onChange={e => set('proposed_end_date', e.target.value)} style={inputStyle} />
           </div>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+        <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
           <div>
             <label style={labelStyle}>Actual Start <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>(optional)</span></label>
             <input type="date" value={form.start_date} onChange={e => set('start_date', e.target.value)} style={inputStyle} />
@@ -301,7 +301,7 @@ const PlotDetailPage = () => {
           <button className="btn-ghost" style={{ display: 'flex', alignItems: 'center', gap: '8px' }} onClick={() => navigate(`/plots/${id}/edit`)}><Edit2 size={15} /> Edit</button>
           <button className="btn-ghost" onClick={() => navigate('/team/invite')} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><UserPlus size={15} /> Invite</button>
           <button className="btn-ghost" onClick={() => setActiveTab('reports')} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><FileText size={15} /> Generate Report</button>
-          {plot.role === 'project_manager' && (
+          {plot.role === 'project_manager' && plot.status !== 'Completed' && (
             <button className="btn-primary" onClick={() => navigate(`/plots/${id}/work-items/new`)} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Plus size={15} /> Add Work Item</button>
           )}
         </div>
@@ -383,7 +383,7 @@ const PlotDetailPage = () => {
       {activeTab === 'workitems' && (
         <div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
-            {plot.role === 'project_manager' && (
+            {plot.role === 'project_manager' && plot.status !== 'Completed' && (
               <button className="btn-primary" onClick={() => setShowNewWorkItem(true)} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Plus size={15} /> Add Work Item
               </button>
@@ -467,7 +467,7 @@ const PlotDetailPage = () => {
       {activeTab === 'reports' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '20px', padding: '22px' }}>
-            <div style={{ display: 'grid', gap: '18px', gridTemplateColumns: '1fr 1fr', alignItems: 'end' }}>
+            <div className="mobile-grid-1" style={{ display: 'grid', gap: '18px', gridTemplateColumns: '1fr 1fr', alignItems: 'end' }}>
               <div>
                 <label style={labelStyle}>Export scope</label>
                 <select

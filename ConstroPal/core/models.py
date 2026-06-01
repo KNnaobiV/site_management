@@ -383,6 +383,10 @@ class ConstructionPlot(TimestampedModel):
     )
     address = models.CharField(max_length=255)
     plot_number = models.CharField(max_length=50, blank=True, default="")
+    status = models.CharField(
+        max_length=20, choices=StatusChoices.choices, 
+        default=StatusChoices.PLANNED
+    )
     plot_opening_date = models.DateField(default=timezone.now)
     gps_latitude = models.DecimalField(
         max_digits=9, decimal_places=6, null=True, blank=True
