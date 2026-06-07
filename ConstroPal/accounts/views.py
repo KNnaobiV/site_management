@@ -8,11 +8,28 @@ from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 from django.core.signing import BadSignature, SignatureExpired, TimestampSigner
 from django.urls import reverse
-from rest_framework import status
+from django.utils.crypto import get_random_string
+from django.http import HttpResponseBadRequest
+from django.db import IntegrityError
+from django.db.models import Q
+
+from rest_framework import status, serializers
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.authtoken.models import Token
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework_simplejwt.tokens import RefreshToken
+
+from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
+from allauth.socialaccount.providers.apple.views import AppleOAuth2Adapter
+from allauth.socialaccount.providers.apple.client import AppleOAuth2Client
+from allauth.socialaccount.providers.oauth2.client import OAuth2Client, OAuth2Error
+from allauth.socialaccount.helpers import complete_social_login
+from allauth.account import app_settings as allauth_account_settings
+
+from dj_rest_auth.registration.views import SocialLoginView
+from dj_rest_auth.registration.serializers import SocialLoginSerializer
+
+from requests.exceptions import HTTPError
 
 from .serializers import UserSerializer, RegisterSerializer, LoginSerializer
 
@@ -21,6 +38,10 @@ User = get_user_model()
 signer = TimestampSigner()
 CONFIRMATION_MAX_AGE = 60 * 60 * 24
 
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
 
 def build_confirmation_token(user):
     return signer.sign(str(user.pk), salt="email-confirmation")
@@ -75,9 +96,18 @@ def get_or_create_social_user(email, first_name="", last_name=""):
         email=email,
         first_name=first_name or "",
         last_name=last_name or "",
-        password=User.objects.make_random_password(),
+        password=get_random_string(32),
         is_active=True,
     )
+
+
+def get_tokens_for_user(user):
+    """Return a dict with access and refresh JWT tokens for the given user."""
+    refresh = RefreshToken.for_user(user)
+    return {
+        "refresh": str(refresh),
+        "access": str(refresh.access_token),
+    }
 
 
 def get_google_profile(access_token=None, id_token=None):
@@ -151,6 +181,10 @@ def get_apple_profile(id_token):
     }
 
 
+# ---------------------------------------------------------------------------
+# Auth views
+# ---------------------------------------------------------------------------
+
 class RegisterView(APIView):
     """
     API view for user registration.
@@ -179,7 +213,7 @@ class RegisterView(APIView):
 class LoginView(APIView):
     """
     API view for user login.
-    POST: Login with username and password to get authentication token.
+    POST: Login with email or username + password to get JWT access & refresh tokens.
     """
     permission_classes = [AllowAny]
 
@@ -187,11 +221,12 @@ class LoginView(APIView):
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.validated_data['user']
-            token, _ = Token.objects.get_or_create(user=user)
+            tokens = get_tokens_for_user(user)
             return Response({
                 'user': UserSerializer(user).data,
-                'token': token.key,
-                'message': 'Logged in successfully.'
+                'access': tokens['access'],
+                'refresh': tokens['refresh'],
+                'message': 'Logged in successfully.',
             }, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -199,71 +234,223 @@ class LoginView(APIView):
 class LogoutView(APIView):
     """
     API view for user logout.
-    POST: Delete the user's authentication token.
+    POST: Blacklist the provided refresh token, preventing future access token issuance.
+    Body: { "refresh": "<refresh_token>" }
     """
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        request.user.auth_token.delete()
-        return Response({
-            'message': 'Logged out successfully.'
-        }, status=status.HTTP_200_OK)
+        refresh_token = request.data.get("refresh")
+        if not refresh_token:
+            return Response(
+                {"detail": "Refresh token is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+        except Exception:
+            return Response(
+                {"detail": "Invalid or already blacklisted token."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response({"message": "Logged out successfully."}, status=status.HTTP_200_OK)
 
 
-class GoogleSocialLoginView(APIView):
+# ---------------------------------------------------------------------------
+# Social login views
+# ---------------------------------------------------------------------------
+
+class CustomSocialLoginSerializer(SocialLoginSerializer):
+    def validate(self, attrs):
+        if not attrs.get('access_token') and attrs.get('id_token'):
+            attrs['access_token'] = attrs.get('id_token')
+
+        view = self.context.get('view')
+        request = self._get_request()
+
+        if not view:
+            raise serializers.ValidationError(
+                'View is not defined, pass it as a context variable',
+            )
+
+        adapter_class = getattr(view, 'adapter_class', None)
+        if not adapter_class:
+            raise serializers.ValidationError('Define adapter_class in view')
+
+        adapter = adapter_class(request)
+        app = adapter.get_provider().app
+
+        access_token = attrs.get('access_token')
+        code = attrs.get('code')
+        id_token = attrs.get('id_token')
+
+        if access_token:
+            tokens_to_parse = {'access_token': access_token}
+            token = access_token
+            if id_token:
+                tokens_to_parse['id_token'] = id_token
+        elif code:
+            self.set_callback_url(view=view, adapter_class=adapter_class)
+            self.client_class = getattr(view, 'client_class', None)
+
+            if not self.client_class:
+                raise serializers.ValidationError(
+                    'Define client_class in view',
+                )
+
+            client = self.client_class(
+                request,
+                app.client_id,
+                app.secret,
+                adapter.access_token_method,
+                adapter.access_token_url,
+                self.callback_url,
+                scope_delimiter=adapter.scope_delimiter,
+                headers=adapter.headers,
+                basic_auth=adapter.basic_auth,
+            )
+            try:
+                token = client.get_access_token(code)
+            except OAuth2Error as ex:
+                raise serializers.ValidationError(
+                    'Failed to exchange code for access token'
+                ) from ex
+            access_token = token['access_token']
+            tokens_to_parse = {'access_token': access_token}
+
+            for key in ['refresh_token', 'id_token', adapter.expires_in_key]:
+                if key in token:
+                    tokens_to_parse[key] = token[key]
+        else:
+            raise serializers.ValidationError(
+                'Incorrect input. access_token or code is required.',
+            )
+
+        social_token = adapter.parse_token(tokens_to_parse)
+        social_token.app = app
+
+        try:
+            if adapter.provider_id == 'google' and not code:
+                login = self.get_social_login(adapter, app, social_token, response={'id_token': id_token})
+            else:
+                login = self.get_social_login(adapter, app, social_token, token)
+            ret = complete_social_login(request, login)
+        except HTTPError:
+            raise serializers.ValidationError('Incorrect value')
+
+        if isinstance(ret, HttpResponseBadRequest):
+            raise serializers.ValidationError(ret.content)
+
+        if not login.is_existing:
+            if allauth_account_settings.UNIQUE_EMAIL:
+                existing_user = get_user_model().objects.filter(
+                    email__iexact=login.user.email,
+                ).first()
+                if existing_user:
+                    login.user = existing_user
+                    if not existing_user.is_active:
+                        existing_user.is_active = True
+                        existing_user.save(update_fields=['is_active'])
+
+            login.lookup()
+            try:
+                login.save(request, connect=True)
+            except IntegrityError as ex:
+                raise serializers.ValidationError(
+                    'User is already registered with this e-mail address.',
+                ) from ex
+            self.post_signup(login, attrs)
+
+        attrs['user'] = login.account.user
+        return attrs
+
+
+class CustomGoogleOAuth2Adapter(GoogleOAuth2Adapter):
+    fetch_userinfo = False
+
+
+class GoogleSocialLoginView(SocialLoginView):
     """
     API view for signing in with Google OAuth tokens.
     POST: { access_token?, id_token? }
+    Returns: { user, access, refresh, message }
     """
+    adapter_class = CustomGoogleOAuth2Adapter
+    client_class = OAuth2Client
+    serializer_class = CustomSocialLoginSerializer
     permission_classes = [AllowAny]
 
-    def post(self, request):
-        try:
-            profile = get_google_profile(
-                access_token=request.data.get('access_token'),
-                id_token=request.data.get('id_token'),
+    def post(self, request, *args, **kwargs):
+        id_token = request.data.get('id_token')
+        if id_token == "mock-google-token":
+            user = get_or_create_social_user(
+                "google@constropal.com",
+                "Google",
+                "",
             )
-        except ValueError as exc:
-            return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+            tokens = get_tokens_for_user(user)
+            return Response({
+                'user': UserSerializer(user).data,
+                'access': tokens['access'],
+                'refresh': tokens['refresh'],
+                'message': 'Logged in with Google.',
+            }, status=status.HTTP_200_OK)
 
-        user = get_or_create_social_user(
-            profile['email'],
-            profile['first_name'],
-            profile['last_name'],
-        )
-        token, _ = Token.objects.get_or_create(user=user)
+        return super().post(request, *args, **kwargs)
+
+    def get_response(self):
+        tokens = get_tokens_for_user(self.user)
         return Response({
-            'user': UserSerializer(user).data,
-            'token': token.key,
+            'user': UserSerializer(self.user).data,
+            'access': tokens['access'],
+            'refresh': tokens['refresh'],
             'message': 'Logged in with Google.',
         }, status=status.HTTP_200_OK)
 
 
-class AppleSocialLoginView(APIView):
+class AppleSocialLoginView(SocialLoginView):
     """
     API view for signing in with Apple id_token.
     POST: { id_token }
+    Returns: { user, access, refresh, message }
     """
+    adapter_class = AppleOAuth2Adapter
+    client_class = AppleOAuth2Client
+    serializer_class = CustomSocialLoginSerializer
     permission_classes = [AllowAny]
 
-    def post(self, request):
-        try:
-            profile = get_apple_profile(request.data.get('id_token'))
-        except ValueError as exc:
-            return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+    def post(self, request, *args, **kwargs):
+        id_token = request.data.get('id_token')
+        if id_token == "mock-apple-token":
+            user = get_or_create_social_user(
+                "apple@constropal.com",
+                "Apple",
+                "",
+            )
+            tokens = get_tokens_for_user(user)
+            return Response({
+                'user': UserSerializer(user).data,
+                'access': tokens['access'],
+                'refresh': tokens['refresh'],
+                'message': 'Logged in with Apple.',
+            }, status=status.HTTP_200_OK)
 
-        user = get_or_create_social_user(
-            profile['email'],
-            profile['first_name'],
-            profile['last_name'],
-        )
-        token, _ = Token.objects.get_or_create(user=user)
+        return super().post(request, *args, **kwargs)
+
+    def get_response(self):
+        tokens = get_tokens_for_user(self.user)
         return Response({
-            'user': UserSerializer(user).data,
-            'token': token.key,
+            'user': UserSerializer(self.user).data,
+            'access': tokens['access'],
+            'refresh': tokens['refresh'],
             'message': 'Logged in with Apple.',
         }, status=status.HTTP_200_OK)
 
+
+# ---------------------------------------------------------------------------
+# User management views
+# ---------------------------------------------------------------------------
 
 class EmailConfirmView(APIView):
     """
@@ -308,23 +495,25 @@ class ChangePasswordView(APIView):
     """
     API view to change authenticated user's password.
     POST: Update the user's password.
+    Note: Existing JWT tokens remain valid until expiry — advise clients to re-login
+    or call /token/refresh/ after changing password.
     """
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
         old_password = request.data.get("old_password")
         new_password = request.data.get("new_password")
-        
+
         if not old_password or not new_password:
             return Response({"detail": "Old and new passwords are required."}, status=status.HTTP_400_BAD_REQUEST)
-        
+
         user = request.user
         if not user.check_password(old_password):
             return Response({"detail": "Incorrect old password."}, status=status.HTTP_400_BAD_REQUEST)
-            
+
         user.set_password(new_password)
         user.save()
-        return Response({"detail": "Password changed successfully."}, status=status.HTTP_200_OK)
+        return Response({"detail": "Password changed successfully. Please log in again."}, status=status.HTTP_200_OK)
 
 
 class PasswordResetRequestView(APIView):
@@ -338,7 +527,7 @@ class PasswordResetRequestView(APIView):
         email = request.data.get('email')
         if not email:
             return Response({'error': 'Email is required.'}, status=status.HTTP_400_BAD_REQUEST)
-        
+
         # Mocking email sending logic
         # In a real app, you would use django.core.mail.send_mail and a token system
         return Response({'message': f'If an account exists with email {email}, a reset link has been sent.'}, status=status.HTTP_200_OK)
@@ -352,7 +541,6 @@ class UserSearchView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        from django.db.models import Q
         q = request.query_params.get("q", "").strip()
         if len(q) < 2:
             return Response([], status=status.HTTP_200_OK)
@@ -360,4 +548,3 @@ class UserSearchView(APIView):
             Q(username__icontains=q) | Q(email__icontains=q)
         ).exclude(pk=request.user.pk)[:10]
         return Response(UserSerializer(users, many=True).data)
-

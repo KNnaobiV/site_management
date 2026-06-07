@@ -110,7 +110,7 @@ export default function LoginPage() {
             const data = await socialLogin("google", {
                 id_token: response.credential,
             });
-            login(data.user, data.token);
+            login(data.user, data.access, data.refresh);
         } catch (error) {
             showMessage(error.message || "Google login failed.");
         } finally {
@@ -134,13 +134,42 @@ export default function LoginPage() {
             const data = await socialLogin("apple", {
                 id_token: idToken,
             });
-            login(data.user, data.token);
+            login(data.user, data.access, data.refresh);
         } catch (error) {
             showMessage(error.message || "Apple login failed.");
         } finally {
             setSocialLoading(false);
         }
     };
+
+    const handleGoogleMockSignIn = async () => {
+        setSocialLoading(true);
+        try {
+            const data = await socialLogin("google", {
+                id_token: "mock-google-token",
+            });
+            login(data.user, data.access, data.refresh);
+        } catch (error) {
+            showMessage(error.message || "Mock Google login failed.");
+        } finally {
+            setSocialLoading(false);
+        }
+    };
+
+    const handleAppleMockSignIn = async () => {
+        setSocialLoading(true);
+        try {
+            const data = await socialLogin("apple", {
+                id_token: "mock-apple-token",
+            });
+            login(data.user, data.access, data.refresh);
+        } catch (error) {
+            showMessage(error.message || "Mock Apple login failed.");
+        } finally {
+            setSocialLoading(false);
+        }
+    };
+
 
     const validateRegister = () => {
         if (!form.first_name.trim() || !form.last_name.trim()) {
@@ -189,12 +218,12 @@ export default function LoginPage() {
 
         try {
             if (tab === "login") {
-                const { user, token } = await loginUser(
-                    form.username,
+                const { user, access, refresh } = await loginUser(
+                    form.username,   // accepted as email or username by backend
                     form.password
                 );
 
-                login(user, token);
+                login(user, access, refresh);
             } else {
                 // Map confirm_password to password2 for backend
                 const payload = {
@@ -297,7 +326,7 @@ export default function LoginPage() {
                         )}
 
                         <Field
-                            label="Username"
+                            label="Username or Email"
                             value={form.username}
                             onChange={updateField("username")}
                         />
@@ -340,20 +369,38 @@ export default function LoginPage() {
                                     </span>
                                     <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: 1, background: '#e5e7eb', zIndex: 0 }} />
                                 </div>
+                                <div className="social-buttons-grid">
+                                    {googleReady ? (
+                                        <div id="google-signin-button" style={{ width: '100%' }} />
+                                    ) : (
+                                        <button
+                                            type="button"
+                                            className="btn-social google"
+                                            onClick={handleGoogleMockSignIn}
+                                            disabled={loading || socialLoading}
+                                        >
+                                            <svg className="social-icon" viewBox="0 0 24 24">
+                                                <path fill="#EA4335" d="M12 5.04c1.66 0 3.2.57 4.38 1.69l3.27-3.27C17.68 1.54 14.98 1 12 1 7.24 1 3.21 3.73 1.25 7.68l3.87 3C6.07 7.75 8.83 5.04 12 5.04z" />
+                                                <path fill="#4285F4" d="M23.49 12.27c0-.81-.07-1.59-.2-2.34H12v4.47h6.46c-.28 1.47-1.11 2.71-2.36 3.55l3.66 2.84c2.14-1.97 3.39-4.87 3.39-8.52z" />
+                                                <path fill="#FBBC05" d="M5.12 10.68c-.25-.75-.39-1.56-.39-2.39s.14-1.64.39-2.39L1.25 2.9C.45 4.5.01 6.3.01 8.29s.44 3.79 1.24 5.39l3.87-3z" />
+                                                <path fill="#34A853" d="M12 23c3.24 0 5.97-1.07 7.96-2.91l-3.66-2.84c-1.01.68-2.31 1.09-3.9 1.09-3.17 0-5.93-2.71-6.88-5.64l-3.87 3C3.21 20.27 7.24 23 12 23z" />
+                                            </svg>
+                                            Google
+                                        </button>
+                                    )}
 
-                                {googleReady && <div id="google-signin-button" />}
-
-                                {appleReady && (
                                     <button
                                         type="button"
-                                        className="btn-primary"
-                                        onClick={handleAppleSignIn}
-                                        disabled={!appleReady || socialLoading}
-                                        style={{ background: '#111', borderColor: '#111' }}
+                                        className="btn-social apple"
+                                        onClick={appleReady ? handleAppleSignIn : handleAppleMockSignIn}
+                                        disabled={loading || socialLoading}
                                     >
-                                        {socialLoading ? "Please wait..." : "Continue with Apple"}
+                                        <svg className="social-icon" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 4.17c.66-.81 1.11-1.93.99-3.06-1 .04-2.21.67-2.93 1.49-.62.69-1.16 1.84-1.01 2.96 1.12.09 2.27-.58 2.95-1.39z" />
+                                        </svg>
+                                        Apple
                                     </button>
-                                )}
+                                </div>
                             </div>
                         )}
                     </form>

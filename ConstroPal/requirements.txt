@@ -3,6 +3,7 @@ Django
 django-browser-reload
 django-cors-headers
 djangorestframework
+djangorestframework-simplejwt
 drf-nested-routers
 pillow
 python-decouple
@@ -11,3 +12,6 @@ PyJWT
 reportlab
 sqlparse
 tzdata
+django-allauth
+dj-rest-auth
+cryptography

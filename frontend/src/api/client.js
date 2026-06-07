@@ -12,7 +12,7 @@ function buildUrl(path) {
 export async function apiFetch(path, { token, ...options } = {}) {
     const headers = {
         ...(options.body instanceof FormData ? {} : { "Content-Type": "application/json" }),
-        ...(token ? { Authorization: `Token ${token}` } : {}),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...options.headers,
     };
 

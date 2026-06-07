@@ -251,7 +251,6 @@ body {
         background-position: -200% 0
     }
 }
-
 .fade-in {
     animation: fadeIn 0.3s ease;
 }
@@ -267,3 +266,87 @@ body {
         transform: translateY(0);
     }
 }
+
+/* Social Login Styles */
+.social-login-section {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.social-divider {
+    position: relative;
+    text-align: center;
+    color: var(--ink-light);
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.social-divider span {
+    background: var(--white);
+    padding: 0 12px;
+    position: relative;
+    z-index: 1;
+}
+
+.social-divider::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--sand-dark);
+    z-index: 0;
+}
+
+.social-buttons-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.btn-social {
+    height: 46px;
+    border: 1.5px solid var(--sand-dark);
+    border-radius: var(--radius);
+    background: var(--white);
+    color: var(--ink);
+    font-size: 14px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-social:hover:not(:disabled) {
+    background: var(--sand);
+    border-color: var(--ink-light);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(26, 26, 24, 0.05);
+}
+
+.btn-social:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.btn-social.apple {
+    background: var(--ink);
+    color: var(--white);
+    border-color: var(--ink);
+}
+
+.btn-social.apple:hover:not(:disabled) {
+    background: var(--ink-mid);
+    border-color: var(--ink-mid);
+}
+
+.social-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}

@@ -1,9 +1,9 @@
 import { apiFetch } from "./client";
 
-export async function loginUser(username, password) {
+export async function loginUser(login, password) {
     const res = await apiFetch("/auth/login/", {
         method: "POST",
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ login, password }),
     });
     let data;
     try {
@@ -11,12 +11,12 @@ export async function loginUser(username, password) {
     } catch (e) {
         throw new Error(`Server returned an unexpected error (${res.status}).`);
     }
-    
+
     if (!res.ok) {
         const errorMsg = data.non_field_errors?.[0] || data.detail || Object.values(data).flat().join(" ") || "Invalid credentials";
         throw new Error(errorMsg);
     }
-    return data; // { user, token, message }
+    return data; // { user, access, refresh, message }
 }
 
 export async function registerUser(fields) {
