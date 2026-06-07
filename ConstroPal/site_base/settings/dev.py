@@ -17,6 +17,7 @@ DATABASES = {
 }
 
 ADMIN_URL = CFG.get("SITE", "DJANGO_ADMIN_URL")
+SECRET_KEY = CFG.get("SITE", "DJANGO_SECRET_KEY")
 
 EMAIL_BACKEND = CFG.get('EMAIL', 'EMAIL_BACKEND', fallback='django.core.mail.backends.console.EmailBackend')
 DEFAULT_FROM_EMAIL = CFG.get('EMAIL', 'DEFAULT_FROM_EMAIL', fallback='no-reply@constropal.local')

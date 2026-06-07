@@ -10,9 +10,6 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/topics/settings/
 """
 
-
-# from decouple import config
-
 import configparser
 from datetime import timedelta
 import os
@@ -39,13 +36,6 @@ SECRET_KEY = "bfquhufqhhfiqfhhqubefiwcn87824329yr928mc3q9&T%TDMG" #config("SECRE
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True # config("DEBUG", default=True)
-
-ALLOWED_HOSTS = ["*"]#config('ALLOWED_HOSTS', default='').split(',')
-
-if 'CODESPACE_NAME' in os.environ:
-    codespace_name = config("CODESPACE_NAME")
-    codespace_domain = config("GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN")
-    CSRF_TRUSTED_ORIGINS = [f'https://{codespace_name}-8000.{codespace_domain}']
 
 # Application definition
 
