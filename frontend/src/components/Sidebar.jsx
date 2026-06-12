@@ -48,12 +48,12 @@ const Sidebar = ({ isOpen, toggleSidebar, isMobile }) => {
       {/* Brand & Hamburger */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '48px', overflow: 'hidden' }}>
         {!isMobile && (
-          <button 
-            onClick={toggleSidebar} 
-            style={{ 
-              background: 'transparent', 
-              border: 'none', 
-              cursor: 'pointer', 
+          <button
+            onClick={toggleSidebar}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
               color: '#fff',
               display: 'flex',
               alignItems: 'center',
@@ -65,7 +65,7 @@ const Sidebar = ({ isOpen, toggleSidebar, isMobile }) => {
             <Menu size={24} />
           </button>
         )}
-        
+
         <div style={{
           minWidth: '40px',
           width: '40px',
@@ -79,7 +79,7 @@ const Sidebar = ({ isOpen, toggleSidebar, isMobile }) => {
         }}>
           <HardHat size={24} color="#fff" />
         </div>
-        
+
         {isOpen && (
           <h2 style={{
             fontFamily: 'var(--font-serif)',

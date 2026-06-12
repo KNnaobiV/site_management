@@ -1,11 +1,18 @@
-export let API_BASE = "https://constropal.alwaysdata.net/api";
+export const API_BASE = "http://127.0.0.1:8000/api";
 
-export const buildUrl = (path) => path.startsWith("http") ? path : `${API_BASE}${path}`;
+function buildUrl(path) {
+    if (path.startsWith("http://") || path.startsWith("https://")) {
+        return path;
+    }
+    return `${API_BASE}${path.startsWith("/") ? path : `/${path}`}`;
+}
+
+// export const buildUrl = (path) => path.startsWith("http") ? path : `${API_BASE}${path}`;
 
 export async function apiFetch(path, { token, ...options } = {}) {
     const headers = {
         ...(options.body instanceof FormData ? {} : { "Content-Type": "application/json" }),
-        ...(token ? { Authorization: `Token ${token}` } : {}),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...options.headers,
     };
 

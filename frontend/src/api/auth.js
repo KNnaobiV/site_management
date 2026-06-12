@@ -1,9 +1,9 @@
 import { apiFetch } from "./client";
 
-export async function loginUser(username, password) {
+export async function loginUser(login, password) {
     const res = await apiFetch("/auth/login/", {
         method: "POST",
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ login, password }),
     });
     let data;
     try {
@@ -11,12 +11,12 @@ export async function loginUser(username, password) {
     } catch (e) {
         throw new Error(`Server returned an unexpected error (${res.status}).`);
     }
-    
+
     if (!res.ok) {
         const errorMsg = data.non_field_errors?.[0] || data.detail || Object.values(data).flat().join(" ") || "Invalid credentials";
         throw new Error(errorMsg);
     }
-    return data; // { user, token, message }
+    return data; // { user, access, refresh, message }
 }
 
 export async function registerUser(fields) {
@@ -28,6 +28,18 @@ export async function registerUser(fields) {
     if (!res.ok) {
         const errorMsg = Object.values(data).flat().join(" ") || "We could not create your account right now.";
         throw new Error(errorMsg);
+    }
+    return data;
+}
+
+export async function confirmEmail(key) {
+    const res = await apiFetch("/auth/confirm-email/", {
+        method: "POST",
+        body: JSON.stringify({ key }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+        throw new Error(data.detail || "Invalid or expired confirmation link.");
     }
     return data;
 }
@@ -84,6 +96,19 @@ export async function changePassword(token, passwords) {
     const data = await res.json();
     if (!res.ok) {
         const errorMsg = data.detail || Object.values(data).flat().join(" ") || "Failed to change password";
+        throw new Error(errorMsg);
+    }
+    return data;
+}
+
+export async function confirmPasswordReset(uidb64, token, new_password) {
+    const res = await apiFetch("/auth/password-reset/confirm/", {
+        method: "POST",
+        body: JSON.stringify({ uidb64, token, new_password }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+        const errorMsg = data.detail || Object.values(data).flat().join(" ") || "Failed to reset password";
         throw new Error(errorMsg);
     }
     return data;

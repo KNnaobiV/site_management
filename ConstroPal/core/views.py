@@ -19,6 +19,7 @@ import io
 import os
 import datetime
 
+from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404
@@ -76,6 +77,7 @@ from .permissions import (
     CanCreateJobItem,
     CanUpdateJobItem,
     CanDeleteJobItem,
+    CanApproveJobItem,
 )
 from .serializers import (
     ConstructionProjectSerializer,
@@ -97,6 +99,8 @@ from django.db.models import Q as models_Q
 # ---------------------------------------------------------------------------
 # Mixins
 # ---------------------------------------------------------------------------
+
+User = get_user_model()
 
 class ProjectScopedMixin:
     """
