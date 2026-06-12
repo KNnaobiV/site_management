@@ -5,7 +5,7 @@ from . import views
 urlpatterns = [
     # Registration & email confirmation
     path('register/', views.RegisterView.as_view(), name='register'),
-    path('confirm-email/<str:key>/', views.EmailConfirmView.as_view(), name='confirm-email'),
+    path('confirm-email/', views.EmailConfirmView.as_view(), name='confirm-email'),
 
     # Login / Logout  (email or username accepted)
     path('login/', views.LoginView.as_view(), name='login'),
@@ -24,5 +24,6 @@ urlpatterns = [
 
     # Password management
     path('password-reset/', views.PasswordResetRequestView.as_view(), name='password-reset'),
+    path('password-reset/confirm/', views.PasswordResetConfirmView.as_view(), name='password-reset-confirm'),
     path('change-password/', views.ChangePasswordView.as_view(), name='change-password'),
 ]

@@ -32,6 +32,18 @@ export async function registerUser(fields) {
     return data;
 }
 
+export async function confirmEmail(key) {
+    const res = await apiFetch("/auth/confirm-email/", {
+        method: "POST",
+        body: JSON.stringify({ key }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+        throw new Error(data.detail || "Invalid or expired confirmation link.");
+    }
+    return data;
+}
+
 export async function socialLogin(provider, payload) {
     const res = await apiFetch(`/auth/social/${provider}/`, {
         method: "POST",
@@ -84,6 +96,19 @@ export async function changePassword(token, passwords) {
     const data = await res.json();
     if (!res.ok) {
         const errorMsg = data.detail || Object.values(data).flat().join(" ") || "Failed to change password";
+        throw new Error(errorMsg);
+    }
+    return data;
+}
+
+export async function confirmPasswordReset(uidb64, token, new_password) {
+    const res = await apiFetch("/auth/password-reset/confirm/", {
+        method: "POST",
+        body: JSON.stringify({ uidb64, token, new_password }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+        const errorMsg = data.detail || Object.values(data).flat().join(" ") || "Failed to reset password";
         throw new Error(errorMsg);
     }
     return data;

@@ -35,7 +35,7 @@ from .serializers import UserSerializer, RegisterSerializer, LoginSerializer
 
 User = get_user_model()
 
-signer = TimestampSigner()
+signer = TimestampSigner(salt="email-confirmation")
 CONFIRMATION_MAX_AGE = 60 * 60 * 24
 
 
@@ -44,12 +44,12 @@ CONFIRMATION_MAX_AGE = 60 * 60 * 24
 # ---------------------------------------------------------------------------
 
 def build_confirmation_token(user):
-    return signer.sign(str(user.pk), salt="email-confirmation")
+    return signer.sign(str(user.pk),)
 
 
 def confirm_user_from_token(key):
     try:
-        user_pk = signer.unsign(key, max_age=CONFIRMATION_MAX_AGE, salt="email-confirmation")
+        user_pk = signer.unsign(key, max_age=CONFIRMATION_MAX_AGE,)
     except (BadSignature, SignatureExpired):
         return None
 
@@ -61,7 +61,8 @@ def confirm_user_from_token(key):
 
 def send_confirmation_email(request, user):
     confirmation_key = build_confirmation_token(user)
-    confirm_url = request.build_absolute_uri(reverse("confirm-email", args=[confirmation_key]))
+    frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:5173')
+    confirm_url = f"{frontend_url}/login?confirm_key={confirmation_key}"
     subject = "Confirm your ConstroPal email"
     message = (
         f"Hello {user.first_name or user.username},\n\n"
@@ -69,7 +70,17 @@ def send_confirmation_email(request, user):
         f"{confirm_url}\n\n"
         "If you did not register for this account, please ignore this message.\n"
     )
-    send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email], fail_silently=False)
+    try:
+        send_mail(
+            subject,
+            message,
+            settings.DEFAULT_FROM_EMAIL,
+            [user.email],
+            fail_silently=False
+        )
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
 
 
 def normalize_username(value):
@@ -455,16 +466,21 @@ class AppleSocialLoginView(SocialLoginView):
 class EmailConfirmView(APIView):
     """
     API view for email confirmation links.
-    GET: Activate the user associated with the confirmation token.
+    POST: Receive `key` to activate user.
     """
     permission_classes = [AllowAny]
 
-    def get(self, request, key):
+    def post(self, request):
+        key = request.data.get('key')
+        if not key:
+             return Response({'detail': 'Confirmation key is required.'}, status=status.HTTP_400_BAD_REQUEST)
+             
         user = confirm_user_from_token(key)
+        
         if not user:
             return Response({'detail': 'Invalid or expired confirmation link.'}, status=status.HTTP_400_BAD_REQUEST)
         if user.is_active:
-            return Response({'detail': 'Email already confirmed.'}, status=status.HTTP_200_OK)
+            return Response({'detail': 'Email already confirmed. Please sign in.'}, status=status.HTTP_200_OK)
 
         user.is_active = True
         user.save(update_fields=['is_active'])
@@ -516,10 +532,14 @@ class ChangePasswordView(APIView):
         return Response({"detail": "Password changed successfully. Please log in again."}, status=status.HTTP_200_OK)
 
 
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+
 class PasswordResetRequestView(APIView):
     """
     API view to request a password reset.
-    POST: Send a password reset email (mocked).
+    POST: Send a password reset email.
     """
     permission_classes = [AllowAny]
 
@@ -528,9 +548,65 @@ class PasswordResetRequestView(APIView):
         if not email:
             return Response({'error': 'Email is required.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Mocking email sending logic
-        # In a real app, you would use django.core.mail.send_mail and a token system
+        user = User.objects.filter(email__iexact=email).first()
+        if user:
+            token = default_token_generator.make_token(user)
+            uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+            
+            frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:5173')
+            reset_url = f"{frontend_url}/reset-password/{uidb64}/{token}"
+            
+            subject = "Password Reset Request - ConstroPal"
+            message = (
+                f"Hello {user.first_name or user.username},\n\n"
+                "We received a request to reset your password. Please click the link below to set a new password:\n\n"
+                f"{reset_url}\n\n"
+                "If you did not request a password reset, please ignore this email.\n"
+            )
+            try:
+                send_mail(
+                    subject,
+                    message,
+                    settings.DEFAULT_FROM_EMAIL,
+                    [user.email],
+                    fail_silently=False
+                )
+            except Exception as e:
+                import traceback
+                traceback.print_exc()
+
         return Response({'message': f'If an account exists with email {email}, a reset link has been sent.'}, status=status.HTTP_200_OK)
+
+
+class PasswordResetConfirmView(APIView):
+    """
+    API view to confirm password reset.
+    POST: Receive uidb64, token, new_password to set a new password.
+    """
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        uidb64 = request.data.get("uidb64")
+        token = request.data.get("token")
+        new_password = request.data.get("new_password")
+
+        if not all([uidb64, token, new_password]):
+            return Response({"detail": "Missing required fields."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            uid = force_str(urlsafe_base64_decode(uidb64))
+            user = User.objects.get(pk=uid)
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+            user = None
+
+        if user is not None and default_token_generator.check_token(user, token):
+            if len(new_password) < 6:
+                return Response({"detail": "Password should be at least 6 characters long."}, status=status.HTTP_400_BAD_REQUEST)
+            user.set_password(new_password)
+            user.save()
+            return Response({"detail": "Password has been reset successfully."}, status=status.HTTP_200_OK)
+        else:
+            return Response({"detail": "Invalid or expired reset token."}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserSearchView(APIView):

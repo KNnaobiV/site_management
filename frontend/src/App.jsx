@@ -1,8 +1,9 @@
 import React from "react";
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from "./context/AuthContext";
 import LoginPage from "./pages/LoginPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 import Dashboard from "./pages/Dashboard";
 import ProjectsPage from "./pages/ProjectsPage";
 import ProjectDetailPage from "./pages/ProjectDetailPage";
@@ -27,15 +28,19 @@ import { DashboardShell, Spinner } from "./components";
 
 export default function App() {
     const { user, ready } = useAuth();
+    const location = useLocation();
 
     if (!ready) return <BootScreen />;
 
-    if (!user) {
+    const isResetPassword = location.pathname.startsWith('/reset-password');
+
+    if (!user || isResetPassword) {
         return (
             <Routes>
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-                <Route path="*" element={<Navigate to="/login" />} />
+                <Route path="/reset-password/:uid/:token" element={<ResetPasswordPage />} />
+                <Route path="*" element={<Navigate to={user ? "/" : "/login"} />} />
             </Routes>
         );
     }

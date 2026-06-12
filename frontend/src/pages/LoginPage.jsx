@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
-import { loginUser, registerUser, socialLogin } from "../api/auth";
+import { loginUser, registerUser, socialLogin, confirmEmail } from "../api/auth";
 import "../styles/login.css";
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
@@ -22,7 +23,11 @@ function loadScript(src, id) {
 
 export default function LoginPage() {
     const { login } = useAuth();
-    const [tab, setTab] = useState("login");
+    const [searchParams] = useSearchParams();
+    const confirmState = searchParams.get("confirm");
+    const confirmKey = searchParams.get("confirm_key");
+
+    const [tab, setTab] = useState(confirmState === "success" ? "success" : "login");
     const [loading, setLoading] = useState(false);
     const [socialLoading, setSocialLoading] = useState(false);
     const [googleReady, setGoogleReady] = useState(false);
@@ -49,6 +54,29 @@ export default function LoginPage() {
         setMessage(text);
         setMessageType(type);
     };
+
+    useEffect(() => {
+        if (confirmKey) {
+            setLoading(true);
+            confirmEmail(confirmKey)
+                .then(() => {
+                    setTab("success");
+                    showMessage("Your email has been confirmed successfully!", "success");
+                })
+                .catch((err) => {
+                    showMessage(err.message, "error");
+                })
+                .finally(() => {
+                    setLoading(false);
+                });
+        } else if (confirmState === "success") {
+            showMessage("Your email has been confirmed successfully!", "success");
+        } else if (confirmState === "already_confirmed") {
+            showMessage("Your email is already confirmed. Please sign in.", "success");
+        } else if (confirmState === "error") {
+            showMessage("The confirmation link is invalid or has expired.", "error");
+        }
+    }, [confirmState, confirmKey]);
 
     useEffect(() => {
         async function initSocialProviders() {
@@ -240,7 +268,17 @@ export default function LoginPage() {
                 setTab("login");
             }
         } catch (error) {
-            showMessage(error.message);
+            if (error.message && (error.message.includes("Account is not active") || error.message.includes("not active"))) {
+                showMessage(
+                    <>
+                        Account is not active. Please confirm your email before logging in.{" "}
+                        <Link to={`/resend-confirmation?email=${encodeURIComponent(form.username)}`} style={{textDecoration: 'underline'}}>Click here to resend confirmation link</Link>
+                    </>,
+                    "error"
+                );
+            } else {
+                showMessage(error.message);
+            }
         } finally {
             setLoading(false);
         }
@@ -283,24 +321,40 @@ export default function LoginPage() {
 
             <div className="auth-form-wrap">
                 <div className="auth-form-inner fade-in" id="login-form">
-                    <h2 style={{ color: "black" }}>{tab === "login" ? "Welcome back" : "Create account"}</h2>
-                    <p>
-                        {tab === "login"
-                            ? "Sign in to continue"
-                            : "Get started with your construction workspace"}
-                    </p>
-
-                    {message && (
-                        <div
-                            className={
-                                messageType === "success" ? "success-msg" : "error-msg"
-                            }
-                        >
-                            {message}
+                    {tab === "success" ? (
+                        <div style={{ textAlign: "center", padding: "2rem 0" }}>
+                            <div style={{ marginBottom: "1rem", color: "var(--success, #10b981)" }}>
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{margin: '0 auto'}}>
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                </svg>
+                            </div>
+                            <h2 style={{ color: "black", marginBottom: "1rem" }}>Email Confirmed</h2>
+                            <p style={{ marginBottom: "2rem", color: "var(--text-secondary)" }}>Your email address has been successfully verified. You can now access your workspace.</p>
+                            <button className="btn-primary" onClick={() => { setTab("login"); setMessage(""); }}>
+                                Click here to login
+                            </button>
                         </div>
-                    )}
+                    ) : (
+                        <>
+                            <h2 style={{ color: "black" }}>{tab === "login" ? "Welcome back" : "Create account"}</h2>
+                            <p>
+                                {tab === "login"
+                                    ? "Sign in to continue"
+                                    : "Get started with your construction workspace"}
+                            </p>
 
-                    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'inherit', width: '100%' }}>
+                            {message && (
+                                <div
+                                    className={
+                                        messageType === "success" ? "success-msg" : "error-msg"
+                                    }
+                                >
+                                    {message}
+                                </div>
+                            )}
+
+                            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'inherit', width: '100%' }}>
                         {tab === "register" && (
                             <div className="field-row">
                                 <Field
@@ -418,6 +472,8 @@ export default function LoginPage() {
                             </>
                         )}
                     </div>
+                        </>
+                    )}
                 </div>
             </div>
         </div>

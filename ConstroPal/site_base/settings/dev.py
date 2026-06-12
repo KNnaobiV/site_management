@@ -17,6 +17,8 @@ DATABASES = {
     # }
 }
 
+# FRONTEND_URL = CFG.get("SITE", "FRONTEND_URL", fallback="http://localhost:5173")
+SITE_NAME = CFG.get("SITE", "SITE_NAME", fallback="http://localhost:8000")
 ADMIN_URL = CFG.get("SITE", "DJANGO_ADMIN_URL")
 SECRET_KEY = CFG.get("SITE", "DJANGO_SECRET_KEY")
 
@@ -32,6 +34,7 @@ DEFAULT_FROM_EMAIL = CFG.get(
 )
 EMAIL_HOST = CFG.get('EMAIL', 'EMAIL_HOST', fallback='')
 EMAIL_PORT = CFG.getint('EMAIL', 'EMAIL_PORT', fallback=None)
+EMAIL_USE_SSL = CFG.getboolean('EMAIL', 'EMAIL_USE_SSL', fallback=True)
 EMAIL_USE_TLS = CFG.getboolean('EMAIL', 'EMAIL_USE_TLS', fallback=False)
 EMAIL_HOST_USER = CFG.get('EMAIL', 'EMAIL_HOST_USER', fallback='')
 EMAIL_HOST_PASSWORD = CFG.get('EMAIL', 'EMAIL_HOST_PASSWORD', fallback='')
