@@ -4,6 +4,7 @@ import { useAuth } from "./context/AuthContext";
 import LoginPage from "./pages/LoginPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
+import EmailConfirmedPage from "./pages/EmailConfirmedPage";
 import Dashboard from "./pages/Dashboard";
 import ProjectsPage from "./pages/ProjectsPage";
 import ProjectDetailPage from "./pages/ProjectDetailPage";
@@ -40,6 +41,7 @@ export default function App() {
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                 <Route path="/reset-password/:uid/:token" element={<ResetPasswordPage />} />
+                <Route path="/confirm-email" element={<EmailConfirmedPage />} />
                 <Route path="*" element={<Navigate to={user ? "/" : "/login"} />} />
             </Routes>
         );

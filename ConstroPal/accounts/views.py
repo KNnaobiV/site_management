@@ -4,7 +4,7 @@ import re
 import jwt
 import requests
 from django.conf import settings
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, authenticate
 from django.core.mail import send_mail
 from django.core.signing import BadSignature, SignatureExpired, TimestampSigner
 from django.urls import reverse
@@ -62,7 +62,7 @@ def confirm_user_from_token(key):
 def send_confirmation_email(request, user):
     confirmation_key = build_confirmation_token(user)
     frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:5173')
-    confirm_url = f"{frontend_url}/login?confirm_key={confirmation_key}"
+    confirm_url = f"{frontend_url}/confirm-email?confirm_key={confirmation_key}"
     subject = "Confirm your ConstroPal email"
     message = (
         f"Hello {user.first_name or user.username},\n\n"
@@ -376,6 +376,8 @@ class CustomSocialLoginSerializer(SocialLoginSerializer):
         attrs['user'] = login.account.user
         return attrs
 
+        view = self.context.get('view')
+        request = self._get_request()
 
 class CustomGoogleOAuth2Adapter(GoogleOAuth2Adapter):
     fetch_userinfo = False
@@ -487,6 +489,44 @@ class EmailConfirmView(APIView):
         return Response({'detail': 'Email confirmed. You can now log in.'}, status=status.HTTP_200_OK)
 
 
+class ResendEmailConfirmView(APIView):
+    """
+    API view to resend an email confirmation link.
+    POST: Receive `email` and `password` to verify and resend link.
+    """
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email = request.data.get('email')
+        password = request.data.get('password')
+
+        if not email or not password:
+            return Response({'detail': 'Email and password are required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Resolve username from either email or username field
+        user_qs = User.objects.filter(
+            Q(email__iexact=email) | Q(username__iexact=email)
+        )
+        user_obj = user_qs.first()
+
+        if not user_obj:
+            return Response({'detail': 'Invalid credentials.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = authenticate(username=user_obj.username, password=password)
+        
+        if not user:
+            return Response({'detail': 'Invalid credentials.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if user.is_active:
+            return Response({'detail': 'Account is already active. Please sign in.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            send_confirmation_email(request, user)
+            return Response({'detail': 'A new confirmation link has been sent to your email.'}, status=status.HTTP_200_OK)
+        except Exception:
+            return Response({'detail': 'Unable to send confirmation email. Please try again later.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 class UserDetailView(APIView):
     """
     API view to retrieve authenticated user details.
@@ -531,6 +571,9 @@ class ChangePasswordView(APIView):
         user.save()
         return Response({"detail": "Password changed successfully. Please log in again."}, status=status.HTTP_200_OK)
 
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
 
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode

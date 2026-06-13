@@ -44,6 +44,18 @@ export async function confirmEmail(key) {
     return data;
 }
 
+export async function resendConfirmation(email, password) {
+    const res = await apiFetch("/auth/resend-confirmation/", {
+        method: "POST",
+        body: JSON.stringify({ email, password }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+        throw new Error(data.detail || "Failed to resend confirmation.");
+    }
+    return data;
+}
+
 export async function socialLogin(provider, payload) {
     const res = await apiFetch(`/auth/social/${provider}/`, {
         method: "POST",
