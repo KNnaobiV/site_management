@@ -6,6 +6,7 @@ urlpatterns = [
     # Registration & email confirmation
     path('register/', views.RegisterView.as_view(), name='register'),
     path('confirm-email/', views.EmailConfirmView.as_view(), name='confirm-email'),
+    path('resend-confirmation/', views.ResendEmailConfirmView.as_view(), name='resend-confirmation'),
 
     # Login / Logout  (email or username accepted)
     path('login/', views.LoginView.as_view(), name='login'),

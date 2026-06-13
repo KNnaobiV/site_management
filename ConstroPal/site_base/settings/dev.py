@@ -17,7 +17,7 @@ DATABASES = {
     # }
 }
 
-# FRONTEND_URL = CFG.get("SITE", "FRONTEND_URL", fallback="http://localhost:5173")
+FRONTEND_URL = CFG.get("SITE", "FRONTEND_URL", fallback="http://localhost:5173")
 SITE_NAME = CFG.get("SITE", "SITE_NAME", fallback="http://localhost:8000")
 ADMIN_URL = CFG.get("SITE", "DJANGO_ADMIN_URL")
 SECRET_KEY = CFG.get("SITE", "DJANGO_SECRET_KEY")
@@ -46,7 +46,7 @@ APPLE_CLIENT_ID = CFG.get('APPLE', 'APPLE_CLIENT_ID', fallback='')
 ALLOWED_HOSTS = ast.literal_eval(CFG.get(
     'SITE',
     'ALLOWED_HOSTS',
-    fallback="['127.0.0.1','https://constropal.alwaysdata.net']"
+    fallback="['127.0.0.1:8000','https://constropal.alwaysdata.net']"
 ))
 
 LOGGING = {
@@ -85,5 +85,5 @@ CORS_ALLOWED_ORIGINS = ast.literal_eval(CFG.get(
 CSRF_TRUSTED_ORIGINS = ast.literal_eval(CFG.get(
     'SITE',
     'CSRF_TRUSTED_ORIGINS', 
-    fallback="['http://localhost:8000', 'http://localhost:5173', 'https://maccaferra.vercel.app']"  
+    fallback="['http://localhost:8000', 'http://localhost:5173', 'https://maccaferra.vercel.app']"
 ))
