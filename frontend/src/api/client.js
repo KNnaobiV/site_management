@@ -1,5 +1,4 @@
-export const API_BASE = import.meta.env.VITE_API_BASE || "http://127.0.0.1:8000/api";
-console.log(API_BASE)
+export const API_BASE = "http://127.0.0.1:8000/api";
 
 function buildUrl(path) {
     if (path.startsWith("http://") || path.startsWith("https://")) {
