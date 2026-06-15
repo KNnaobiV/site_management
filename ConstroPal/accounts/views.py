@@ -376,6 +376,8 @@ class CustomSocialLoginSerializer(SocialLoginSerializer):
         attrs['user'] = login.account.user
         return attrs
 
+        view = self.context.get('view')
+        request = self._get_request()
 
 class CustomGoogleOAuth2Adapter(GoogleOAuth2Adapter):
     fetch_userinfo = False
@@ -569,6 +571,13 @@ class ChangePasswordView(APIView):
         user.save()
         return Response({"detail": "Password changed successfully. Please log in again."}, status=status.HTTP_200_OK)
 
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
 
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
