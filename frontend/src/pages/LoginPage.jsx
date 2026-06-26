@@ -262,7 +262,7 @@ export default function LoginPage() {
 
                 await registerUser(payload);
                 showMessage(
-                    "Account created successfully. Please sign in.",
+                    "Account created successfully. Please confirm your email to sign in.",
                     "success"
                 );
                 setTab("login");
@@ -285,42 +285,22 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="auth-wrap">
-            <div className="auth-panel">
-                <div className="brand-mark">
-                    <div className="brand-icon">
-                        <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M2 16L10 4L18 16" stroke="#FEFCF8" strokeWidth="1.5" strokeLinejoin="round" />
-                            <path d="M5 16V11H15V16" stroke="#FEFCF8" strokeWidth="1.5" strokeLinejoin="round" />
-                            <path d="M8 16V13H12V16" stroke="#FEFCF8" strokeWidth="1.5" strokeLinejoin="round" />
-                        </svg>
-                    </div>
-                    <span className="brand-name">
-                        <span className="panel-copy">Iron<em style={{ color: "var(--rust-light)" }}>Work</em></span>
-                    </span>
+        <div className="auth-wrap" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+            <div className="brand-mark" style={{ marginBottom: '2rem' }}>
+                <div className="brand-icon">
+                    <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M2 16L10 4L18 16" stroke="#FEFCF8" strokeWidth="1.5" strokeLinejoin="round" />
+                        <path d="M5 16V11H15V16" stroke="#FEFCF8" strokeWidth="1.5" strokeLinejoin="round" />
+                        <path d="M8 16V13H12V16" stroke="#FEFCF8" strokeWidth="1.5" strokeLinejoin="round" />
+                    </svg>
                 </div>
-                <div className="panel-copy">
-                    <h1 style={{ color: "white" }}>Built for those who <em>build</em></h1>
-                    <p>Manage projects, sites, teams, and daily reports — all in one unified workspace designed for modern construction management.</p>
-                </div>
-                <div className="panel-stats">
-                    <div className="stat-item">
-                        <div className="stat-num">1.2k</div>
-                        <div className="stat-label">Projects</div>
-                    </div>
-                    <div className="stat-item">
-                        <div className="stat-num">94%</div>
-                        <div className="stat-label">On-time delivery</div>
-                    </div>
-                    <div className="stat-item">
-                        <div className="stat-num">48h</div>
-                        <div className="stat-label">Avg. report cycle</div>
-                    </div>
-                </div>
+                <span className="brand-name">
+                    <span style={{ color: "var(--ink)" }}>Iron<em style={{ color: "var(--rust)" }}>Work</em></span>
+                </span>
             </div>
 
-            <div className="auth-form-wrap">
-                <div className="auth-form-inner fade-in" id="login-form">
+            <div className="auth-form-wrap" style={{ padding: '0', background: 'transparent', width: '100%', maxWidth: '440px' }}>
+                <div className="auth-form-inner fade-in" id="login-form" style={{ background: 'white', padding: '3rem', borderRadius: '12px', boxShadow: '0 8px 30px rgba(0,0,0,0.08)' }}>
                     {tab === "success" ? (
                         <div style={{ textAlign: "center", padding: "2rem 0" }}>
                             <div style={{ marginBottom: "1rem", color: "var(--success, #10b981)" }}>

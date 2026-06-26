@@ -110,7 +110,7 @@ const JobItemCard = ({ job, onClick }) => {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '12px', borderTop: '1px solid var(--border-default)', paddingTop: '16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: 'var(--text-secondary)' }}>
           <Calendar size={14} />
-          <span>Proposed end: {job.projected_end_date || '22 Jul 2026'}</span>
+          <span>Target end: {job.target_end_date || '—'}</span>
         </div>
         <Avatar name={job.artisan_name} size={32} />
       </div>

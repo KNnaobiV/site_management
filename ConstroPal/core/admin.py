@@ -10,30 +10,30 @@ from .models import (
 
 @admin.register(ConstructionProject)
 class ConstructionProjectAdmin(admin.ModelAdmin):
-    list_display = ('id', 'client', 'project_manager', 'project_name', 'project_status', 'proposed_start_date', 'proposed_end_date')
+    list_display = ('id', 'client', 'project_manager', 'project_name', 'project_status', 'start_date', 'target_end_date')
     search_fields = ('client__username', 'project_manager__username', 'project_name')
-    list_filter = ('project_status', 'proposed_start_date', 'proposed_end_date')
+    list_filter = ('project_status', 'start_date', 'target_end_date')
 
 
 @admin.register(ConstructionPlot)
 class ConstructionPlotAdmin(admin.ModelAdmin):
-    list_display = ('id', 'construction_project', 'foreman', 'storekeeper', 'address', 'plot_opening_date')
+    list_display = ('id', 'construction_project', 'foreman', 'storekeeper', 'address', 'start_date', 'target_end_date')
     search_fields = ('address', 'foreman__username', 'storekeeper__username', 'construction_project__project_name')
-    list_filter = ('plot_opening_date', 'construction_project')
+    list_filter = ('start_date', 'target_end_date', 'construction_project')
 
 
 @admin.register(WorkItem)
 class WorkItemAdmin(admin.ModelAdmin):
-    list_display = ('id', 'construction_plot', 'name', 'work_status', 'proposed_start_date', 'start_date', 'proposed_end_date', 'end_date')
+    list_display = ('id', 'construction_plot', 'name', 'work_status', 'start_date', 'target_end_date')
     search_fields = ('name', 'construction_plot__address')
-    list_filter = ('work_status', 'proposed_start_date', 'proposed_end_date')
+    list_filter = ('work_status', 'start_date', 'target_end_date')
 
 
 @admin.register(JobItem)
 class JobItemAdmin(admin.ModelAdmin):
-    list_display = ('id', 'work_item', 'job_name', 'job_artisan', 'job_status', 'projected_start_date', 'projected_end_date')
+    list_display = ('id', 'work_item', 'job_name', 'job_artisan', 'job_status', 'start_date', 'target_end_date')
     search_fields = ('job_name', 'work_item__name')
-    list_filter = ('job_artisan', 'job_status', 'projected_start_date', 'projected_end_date')
+    list_filter = ('job_artisan', 'job_status', 'start_date', 'target_end_date')
 
 
 @admin.register(JobReport)

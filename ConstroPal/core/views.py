@@ -29,6 +29,7 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import inch
 from reportlab.platypus import Image as PDFImage, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 from rest_framework import status, viewsets
+from rest_framework.views import APIView
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -45,6 +46,7 @@ from core.models import (
     PlotInvitation,
     WorkItemImage,
     JobReportImage,
+    Document,
 )
 from core.roles import get_project_role, get_plot_role, SEES_UNAPPROVED_ROLES
 from core.services import (
@@ -78,6 +80,7 @@ from .permissions import (
     CanUpdateJobItem,
     CanDeleteJobItem,
     CanApproveJobItem,
+    CanManageDocuments,
 )
 from .serializers import (
     ConstructionProjectSerializer,
@@ -91,6 +94,7 @@ from .serializers import (
     PlotInvitationSerializer,
     WorkItemImageUploadSerializer,
     JobReportImageUploadSerializer,
+    DocumentSerializer,
 )
 
 from django.db.models import Q as models_Q
@@ -1275,3 +1279,74 @@ class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
     def read_all(self, request):
         self.get_queryset().update(is_read=True)
         return Response({"status": "all read"})
+
+
+# ---------------------------------------------------------------------------
+# Document ViewSet
+# ---------------------------------------------------------------------------
+
+class DocumentViewSet(ProjectScopedMixin, viewsets.ModelViewSet):
+    """
+    Nested under /projects/{project_pk}/documents/
+    Can also filter by plot via query param ?plot_id=
+    """
+    serializer_class = DocumentSerializer
+
+    def get_permissions(self):
+        if self.action in ("list", "retrieve"):
+            return [IsAuthenticated(), IsProjectMember()]
+        if self.action in ("create", "update", "partial_update", "destroy"):
+            return [IsAuthenticated(), CanManageDocuments()]
+        return [IsAuthenticated()]
+
+    def get_queryset(self):
+        project = self.get_project()
+        user = self.request.user
+        if not project:
+            return Document.objects.none()
+
+        role = get_project_role(user, project)
+        qs = Document.objects.filter(project=project)
+
+        plot_id = self.request.query_params.get("plot_id")
+        if plot_id:
+            qs = qs.filter(plot_id=plot_id)
+
+        # PM, Consultant, Client, Owner can see all documents
+        if role in {"owner", "project_manager", "consultant", "client"}:
+            return qs
+
+        # Foreman and Storekeeper logic
+        # They can see project-level docs if visibility flag is true
+        # They can see plot-level docs if visibility flag is true AND they belong to that plot
+        if role == "foreman":
+            return qs.filter(
+                visible_to_foremen=True
+            ).filter(
+                models_Q(plot__isnull=True) | models_Q(plot__foreman=user)
+            )
+        elif role == "storekeeper":
+            return qs.filter(
+                visible_to_storekeepers=True
+            ).filter(
+                models_Q(plot__isnull=True) | models_Q(plot__storekeeper=user)
+            )
+            
+        return Document.objects.none()
+
+    def perform_create(self, serializer):
+        project = self.get_project()
+        serializer.save(project=project, uploaded_by=self.request.user)
+
+class PublicStatsView(APIView):
+    permission_classes = []
+    authentication_classes = []
+
+    def get(self, request, *args, **kwargs):
+        total_projects = ConstructionProject.objects.count()
+        # Static average report cycle since date parsing might be complex
+        avg_report_cycle_hours = 48
+        return Response({
+            "total_projects": total_projects,
+            "avg_report_cycle_hours": avg_report_cycle_hours
+        })

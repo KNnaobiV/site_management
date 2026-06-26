@@ -7,7 +7,11 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
 from datetime import timedelta, date
-
+from django.core.files.uploadedfile import UploadedFile
+from django.core.files.base import ContentFile
+import sys
+from io import BytesIO
+from PIL import Image
 
 from base.models import Picture, Video
 from .groups import create_company_group, create_project_group
@@ -94,26 +98,18 @@ class ConstructionProject(TimestampedModel):
     is_deleted = models.BooleanField(default=False)
     project_name = models.CharField(max_length=100, default="")
     project_description = models.TextField(default="")
-    proposed_start_date = models.DateField(default=date.today)
-    proposed_end_date = models.DateField(blank=True, null=True)
-    actual_start_date = models.DateField(blank=True, null=True)
-    actual_end_date = models.DateField(blank=True, null=True)
+    start_date = models.DateField(default=date.today)
+    target_end_date = models.DateField(default=date.today)
     number_of_plots = models.PositiveSmallIntegerField(default=1)
-    # add project files
+    cover_image = models.ImageField(upload_to="projects/covers/", blank=True, null=True)
 
     class Meta:
         constraints = [
             models.CheckConstraint(
                 condition=models.Q(
-                    proposed_end_date__gte=models.F('proposed_start_date')
-                ) | models.Q(proposed_end_date__isnull=True),
-                name='proposed_end_date_after_proposed_start_date'
-            ),
-            models.CheckConstraint(
-                condition=models.Q(
-                    actual_end_date__gte=models.F('actual_start_date')
-                ) | models.Q(actual_end_date__isnull=True),
-                name='actual_end_date_after_actual_start_date'
+                    target_end_date__gte=models.F('start_date')
+                ),
+                name='project_target_end_date_after_start_date'
             ),
             models.UniqueConstraint(
                 fields=['created_by', 'project_name'], name='unique_project_name'
@@ -122,16 +118,30 @@ class ConstructionProject(TimestampedModel):
 
 
     def save(self, *args, **kwargs):
-        if self.proposed_end_date and self.proposed_start_date and \
-                self.proposed_end_date < self.proposed_start_date:
-            raise ValueError("Project end date cannot be before start date.")
-        if self.actual_end_date and self.actual_start_date and \
-                self.actual_end_date < self.actual_start_date:
-            raise ValueError("Project end date cannot be before start date.")
+        if self.target_end_date and self.start_date and \
+                self.target_end_date < self.start_date:
+            raise ValueError("Project target end date cannot be before start date.")
         if not self.project_name:
             client_name = self.client.username if self.client else "Unknown Client"
             pm_name = self.project_manager.username if self.project_manager else "Unknown PM"
             self.project_name = f"Project for {client_name} with {pm_name}"
+            
+        if self.cover_image and isinstance(self.cover_image.file, UploadedFile):
+            try:
+                img = Image.open(self.cover_image)
+                if img.mode != 'RGB':
+                    img = img.convert('RGB')
+                img.thumbnail((1200, 1200), Image.Resampling.LANCZOS)
+                
+                output = BytesIO()
+                img.save(output, format='JPEG', quality=75)
+                output.seek(0)
+                
+                self.cover_image.file = ContentFile(output.read())
+                self.cover_image.name = f"{self.cover_image.name.split('.')[0]}.jpg"
+            except Exception as e:
+                pass
+                
         super().save(*args, **kwargs)
 
     @receiver(post_save, sender='core.ConstructionProject')
@@ -387,7 +397,8 @@ class ConstructionPlot(TimestampedModel):
         max_length=20, choices=StatusChoices.choices, 
         default=StatusChoices.PLANNED
     )
-    plot_opening_date = models.DateField(default=timezone.now)
+    start_date = models.DateField(default=date.today)
+    target_end_date = models.DateField(default=date.today)
     gps_latitude = models.DecimalField(
         max_digits=9, decimal_places=6, null=True, blank=True
     )
@@ -399,6 +410,8 @@ class ConstructionPlot(TimestampedModel):
     def save(self, *args, **kwargs):
         if not self.address:
             raise ValueError("Construction plot must have an address.")
+        if self.target_end_date and self.start_date and self.target_end_date < self.start_date:
+            raise ValueError("Plot target end date cannot be before start date.")
         super().save(*args, **kwargs)
     
     @receiver(post_save, sender='core.ConstructionPlot')
@@ -437,10 +450,8 @@ class WorkItem(TimestampedModel):
     name = models.CharField(max_length=100, default="")
     is_approved = models.BooleanField(default=False)
     description = models.TextField(default="")
-    proposed_start_date = models.DateField()
-    start_date = models.DateField(null=True, blank=True)
-    proposed_end_date = models.DateField()
-    end_date = models.DateField(null=True, blank=True)
+    start_date = models.DateField(default=date.today)
+    target_end_date = models.DateField(default=date.today)
     # Checklist: [{"text": "Pour footings", "done": false}, ...]
     checklist = models.JSONField(default=list, blank=True)
 
@@ -449,18 +460,12 @@ class WorkItem(TimestampedModel):
 
     def save(self, *args, **kwargs):
         if (
-            self.proposed_end_date and 
-            self.proposed_end_date < self.proposed_start_date
+            self.target_end_date and self.start_date and 
+            self.target_end_date < self.start_date
         ):
             raise ValueError(
-                "Proposed end date cannot be before proposed start date."
+                "Target end date cannot be before start date."
             )
-        if (
-            self.end_date and 
-            self.start_date and 
-            self.end_date < self.start_date
-        ):
-            raise ValueError("End date cannot be before start date.")
         if not self.name:
             raise ValueError("Work item must have a name.")
         super().save(*args, **kwargs)
@@ -505,12 +510,8 @@ class JobItem(TimestampedModel):
         max_length=20, choices=PriorityChoices.choices, default=PriorityChoices.MEDIUM
     )
     job_description = models.TextField(default="")
-    projected_start_date = models.DateField()
-    projected_end_date = models.DateField()
-    actual_start_date = models.DateField(null=True, blank=True)
-    actual_end_date = models.DateField(null=True, blank=True)
-    # Material requirements: [{"name": "Cement", "quantity": 50, "unit": "bags"}, ...]
-    material_requirements = models.JSONField(default=list, blank=True)
+    start_date = models.DateField(default=date.today)
+    target_end_date = models.DateField(default=date.today)
     estimated_hours = models.DecimalField(
         max_digits=6, decimal_places=1, null=True, blank=True
     )
@@ -520,19 +521,12 @@ class JobItem(TimestampedModel):
 
     def save(self, *args, **kwargs):
         if (
-            self.projected_end_date and 
-            self.projected_end_date < self.projected_start_date
+            self.target_end_date and self.start_date and 
+            self.target_end_date < self.start_date
         ):
             raise ValueError(
-                "Projected end date cannot be before projected start date."
+                "Target end date cannot be before start date."
             )
-        if (
-            self.actual_end_date and 
-            self.actual_start_date and 
-            self.actual_end_date < self.actual_start_date
-        ):
-            raise ValueError(
-                "Actual end date cannot be before actual start date.")
         if not self.job_name:
             self.job_name = f"{self.job_artisan} work for {self.work_item.name}"
         if not self.job_description:
@@ -721,3 +715,26 @@ def create_plot_invitation_notification(sender, instance, created, **kwargs):
             target_url=instance.target_url,
             priority=Notification.Priority.HIGH
         )
+
+
+class Document(TimestampedModel):
+    """
+    Documents uploaded for a project or specific plot.
+    """
+    project = models.ForeignKey(
+        ConstructionProject, on_delete=models.CASCADE, related_name="documents",
+        null=True, blank=True
+    )
+    plot = models.ForeignKey(
+        ConstructionPlot, on_delete=models.CASCADE, related_name="documents",
+        null=True, blank=True
+    )
+    uploaded_by = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name="uploaded_documents")
+    name = models.CharField(max_length=255)
+    file = models.FileField(upload_to="documents/%Y/%m/%d/")
+    visible_to_storekeepers = models.BooleanField(default=False)
+    visible_to_foremen = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.name
+

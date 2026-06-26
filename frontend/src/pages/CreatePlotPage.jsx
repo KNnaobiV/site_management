@@ -30,8 +30,8 @@ const CreatePlotPage = () => {
     status: 'Planned',
     foreman: '',
     storekeeper: '',
-    plot_opening_date: new Date().toISOString().split('T')[0],
-    end_date: '',
+    start_date: new Date().toISOString().split('T')[0],
+    target_end_date: '',
     notes: '',
     budget_amount: '',
     budget_currency: 'NGN',
@@ -63,8 +63,8 @@ const CreatePlotPage = () => {
           status: plotData.status || 'Planned',
           foreman: plotData.foreman?.id || '',
           storekeeper: plotData.storekeeper?.id || '',
-          plot_opening_date: plotData.plot_opening_date || new Date().toISOString().split('T')[0],
-          end_date: plotData.end_date || '',
+          start_date: plotData.start_date || new Date().toISOString().split('T')[0],
+          target_end_date: plotData.target_end_date || '',
           notes: plotData.notes || ''
         });
 
@@ -120,7 +120,12 @@ const CreatePlotPage = () => {
 
   const handleSearchUsers = async (query) => {
     try {
-      const res = await apiFetch(`/auth/users/search/?q=${encodeURIComponent(query)}`, { token });
+      const targetProjectId = projectId || formData.construction_project;
+      let url = `/auth/users/search/?q=${encodeURIComponent(query)}`;
+      if (targetProjectId) {
+        url += `&project_id=${targetProjectId}`;
+      }
+      const res = await apiFetch(url, { token });
       if (res.ok) {
         const data = await res.json();
         setUsers(data.map(u => ({ id: u.id, label: u.username, avatar: u.avatar_url || null })));
@@ -138,7 +143,8 @@ const CreatePlotPage = () => {
     const payload = {
       construction_project: formData.construction_project,
       address: formData.address,
-      plot_opening_date: formData.plot_opening_date,
+      start_date: formData.start_date,
+      target_end_date: formData.target_end_date,
       gps_latitude: formData.gps_latitude || null,
       gps_longitude: formData.gps_longitude || null,
       notes: formData.notes,
@@ -328,20 +334,22 @@ const CreatePlotPage = () => {
 
             <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div>
-                <label style={labelStyle}>Estimated Start Date</label>
+                <label style={labelStyle}>Start Date *</label>
                 <input 
                   type="date"
-                  value={formData.plot_opening_date}
-                  onChange={e => setFormData({...formData, plot_opening_date: e.target.value})}
+                  required
+                  value={formData.start_date}
+                  onChange={e => setFormData({...formData, start_date: e.target.value})}
                   style={inputStyle}
                 />
               </div>
               <div>
-                <label style={labelStyle}>Estimated End Date</label>
+                <label style={labelStyle}>Target End Date *</label>
                 <input 
                   type="date"
-                  value={formData.end_date}
-                  onChange={e => setFormData({...formData, end_date: e.target.value})}
+                  required
+                  value={formData.target_end_date}
+                  onChange={e => setFormData({...formData, target_end_date: e.target.value})}
                   style={inputStyle}
                 />
               </div>
@@ -365,7 +373,7 @@ const CreatePlotPage = () => {
                   type="number"
                   min="0"
                   step="0.01"
-                  placeholder="e.g. 50000000"
+                  placeholder="e.g. 50,000,000"
                   value={formData.budget_amount}
                   onChange={e => setFormData({...formData, budget_amount: e.target.value})}
                   style={inputStyle}
@@ -380,20 +388,7 @@ const CreatePlotPage = () => {
               </div>
             </div>
 
-            <div>
-              <label style={labelStyle}>Site Photos</label>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '12px' }}>
-                <div style={{ ...dropzoneSmallStyle, borderStyle: 'dashed' }}>
-                  <Upload size={20} color="var(--brand-orange)" />
-                  <span style={{ fontSize: '11px', color: 'var(--text-tertiary)', textAlign: 'center', marginTop: '4px' }}>Upload Photos</span>
-                </div>
-                {[1,2,3,4].map(i => (
-                  <div key={i} style={dropzoneSmallStyle}>
-                    <span style={{ fontSize: '24px', color: 'var(--border-strong)' }}>+</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+
           </div>
         </div>
 
@@ -445,16 +440,6 @@ const inputStyle = {
   transition: 'border-color 0.2s'
 };
 
-const dropzoneSmallStyle = {
-  aspectRatio: '1',
-  borderRadius: '12px',
-  border: '2px solid var(--border-default)',
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  justifyContent: 'center',
-  background: 'var(--bg-raised)',
-  cursor: 'pointer'
-};
+
 
 export default CreatePlotPage;

@@ -3,7 +3,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Edit2, Plus, FileText, UserPlus, MoreHorizontal, MapPin, Calendar, Users } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { apiFetch, unwrapList } from '../api/client';
-import { Breadcrumb, Tabs, Avatar, Spinner, RoleBadge, InviteModal } from '../components';
+import { Breadcrumb, Tabs, Avatar, Spinner, RoleBadge, InviteModal, DocumentList } from '../components';
 import { showSuccessMessage } from '../utils/successMessage';
 
 // ─── Status pill ──────────────────────────────────────────────────────────────
@@ -172,6 +172,7 @@ const ProjectDetailPage = () => {
     { id: 'plots', label: `Plots (${plots.length})` },
     { id: 'team', label: 'Team' },
     { id: 'reports', label: `Reports (${reports.length})` },
+    { id: 'documents', label: 'Documents' },
   ];
 
   if (loading) return <div style={{ padding: '60px', display: 'flex', justifyContent: 'center' }}><Spinner /></div>;
@@ -255,19 +256,17 @@ const ProjectDetailPage = () => {
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
                 <Calendar size={18} color="var(--text-tertiary)" />
                 <div>
-                  <p style={{ margin: 0, fontSize: '15px', fontWeight: 600, color: 'var(--text-primary)' }}>{project.proposed_start_date || '—'}</p>
-                  <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-tertiary)' }}>Proposed Start</p>
+                  <p style={{ margin: 0, fontSize: '15px', fontWeight: 600, color: 'var(--text-primary)' }}>{project.start_date || '—'}</p>
+                  <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-tertiary)' }}>Start Date</p>
                 </div>
               </div>
-              {project.proposed_end_date && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <Calendar size={18} color="var(--text-tertiary)" />
-                  <div>
-                    <p style={{ margin: 0, fontSize: '15px', fontWeight: 600, color: 'var(--text-primary)' }}>{project.proposed_end_date}</p>
-                    <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-tertiary)' }}>Target Completion</p>
-                  </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <Calendar size={18} color="var(--text-tertiary)" />
+                <div>
+                  <p style={{ margin: 0, fontSize: '15px', fontWeight: 600, color: 'var(--text-primary)' }}>{project.target_end_date}</p>
+                  <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-tertiary)' }}>Target End Date</p>
                 </div>
-              )}
+              </div>
             </div>
             {/* Plots count */}
             <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '20px', padding: '24px' }}>
@@ -443,6 +442,11 @@ const ProjectDetailPage = () => {
             </div>
           )}
         </div>
+      )}
+
+      {/* Documents Tab */}
+      {activeTab === 'documents' && (
+        <DocumentList projectId={id} role={project.role} />
       )}
 
       {/* Modals */}

@@ -20,13 +20,10 @@ const CreateWorkItemPage = () => {
 
   const [formData, setFormData] = useState({
     name: '',
-    construction_phase: '',
     foreman: '',
     description: '',
-    proposed_start_date: new Date().toISOString().split('T')[0],
-    proposed_end_date: '',
-    start_date: '',
-    end_date: '',
+    start_date: new Date().toISOString().split('T')[0],
+    target_end_date: '',
     priority: 'Medium',
     initial_progress: 0,
     work_status: 'Planned',
@@ -46,13 +43,10 @@ const CreateWorkItemPage = () => {
             setFormData(f => ({
               ...f,
               name: data.name || '',
-              construction_phase: data.construction_phase || '',
               foreman: data.foreman?.id || '',
               description: data.description || '',
-              proposed_start_date: data.proposed_start_date || f.proposed_start_date,
-              proposed_end_date: data.proposed_end_date || '',
-              start_date: data.start_date || '',
-              end_date: data.end_date || '',
+              start_date: data.start_date || f.start_date,
+              target_end_date: data.target_end_date || '',
               priority: data.priority || 'Medium',
               initial_progress: data.initial_progress || 0,
               work_status: data.work_status || 'Planned',
@@ -107,7 +101,12 @@ const CreateWorkItemPage = () => {
 
   const handleSearchUsers = async (query) => {
     try {
-      const res = await apiFetch(`/auth/users/search/?q=${encodeURIComponent(query)}`, { token });
+      const targetProjectId = plot?.construction_project || plotsList.find(p => p.id === formData.construction_plot)?.projectId;
+      let url = `/auth/users/search/?q=${encodeURIComponent(query)}`;
+      if (targetProjectId) {
+        url += `&project_id=${targetProjectId}`;
+      }
+      const res = await apiFetch(url, { token });
       if (res.ok) {
         const data = await res.json();
         setUsers(data.map(u => ({ id: u.id, label: u.username, avatar: u.avatar_url || null })));
@@ -125,15 +124,11 @@ const CreateWorkItemPage = () => {
     const payload = {
       name: formData.name,
       description: formData.description,
-      proposed_start_date: formData.proposed_start_date,
-      proposed_end_date: formData.proposed_end_date,
+      start_date: formData.start_date,
+      target_end_date: formData.target_end_date,
       work_status: formData.work_status,
       checklist: formData.checklist,
-      // Priority and Progress are often handled via separate logic or combined into description if model doesn't have them
-      // Based on model, we only have work_status, name, description, dates, checklist.
     };
-    if (formData.start_date) payload.start_date = formData.start_date;
-    if (formData.end_date) payload.end_date = formData.end_date;
 
     try {
       const targetPlotId = plotId || formData.construction_plot;
@@ -202,26 +197,7 @@ const CreateWorkItemPage = () => {
               />
             </div>
 
-            <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-              <div>
-                <label style={labelStyle}>Construction Phase *</label>
-                <select
-                  required
-                  value={formData.construction_phase}
-                  onChange={e => setFormData({ ...formData, construction_phase: e.target.value })}
-                  style={inputStyle}
-                >
-                  <option value="">Select phase</option>
-                  <option value="Foundation">Foundation</option>
-                  <option value="Framing">Framing</option>
-                  <option value="Electrical">Electrical</option>
-                  <option value="Plumbing">Plumbing</option>
-                  <option value="Finishing">Finishing</option>
-                </select>
-                <p style={{ fontSize: '11px', color: 'var(--text-tertiary)', marginTop: '6px' }}>
-                  Foundation / Framing / Electrical / Plumbing / Finishing
-                </p>
-              </div>
+            <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px' }}>
               <div>
                 <label style={labelStyle}>Assigned Foreman *</label>
                 <SearchableSelect
@@ -281,8 +257,8 @@ const CreateWorkItemPage = () => {
                 <input
                   type="date"
                   required
-                  value={formData.proposed_start_date}
-                  onChange={e => setFormData({ ...formData, proposed_start_date: e.target.value })}
+                  value={formData.start_date}
+                  onChange={e => setFormData({ ...formData, start_date: e.target.value })}
                   style={inputStyle}
                 />
               </div>
@@ -291,34 +267,8 @@ const CreateWorkItemPage = () => {
                 <input
                   type="date"
                   required
-                  value={formData.proposed_end_date}
-                  onChange={e => setFormData({ ...formData, proposed_end_date: e.target.value })}
-                  style={inputStyle}
-                />
-              </div>
-            </div>
-
-            <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-              <div>
-                <label style={labelStyle}>Actual Start <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>(optional)</span></label>
-                <input
-                  type="date"
-                  value={formData.start_date}
-                  disabled={isEdit && !!formData.start_date}
-                  onChange={e => setFormData({ ...formData, start_date: e.target.value })}
-                  style={{
-                    ...inputStyle,
-                    background: isEdit && !!formData.start_date ? 'var(--bg-canvas)' : inputStyle.background,
-                    cursor: isEdit && !!formData.start_date ? 'not-allowed' : 'text'
-                  }}
-                />
-              </div>
-              <div>
-                <label style={labelStyle}>Actual End <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>(optional)</span></label>
-                <input
-                  type="date"
-                  value={formData.end_date}
-                  onChange={e => setFormData({ ...formData, end_date: e.target.value })}
+                  value={formData.target_end_date}
+                  onChange={e => setFormData({ ...formData, target_end_date: e.target.value })}
                   style={inputStyle}
                 />
               </div>
@@ -390,7 +340,7 @@ const CreateWorkItemPage = () => {
                   type="number"
                   min="0"
                   step="0.01"
-                  placeholder="e.g. 2000000"
+                  placeholder="e.g. 2,000,000"
                   value={formData.budget_amount}
                   onChange={e => setFormData({ ...formData, budget_amount: e.target.value })}
                   style={inputStyle}
@@ -405,17 +355,7 @@ const CreateWorkItemPage = () => {
               </div>
             </div>
 
-            <div>
-              <label style={labelStyle}>Reference Photos</label>
-              <p style={{ fontSize: '13px', color: 'var(--text-tertiary)', marginBottom: '12px' }}>Upload photos, drawings, or references.</p>
-              <div style={{ ...dropzoneStyle, height: '160px' }}>
-                <ImageIcon size={32} color="var(--border-strong)" style={{ marginBottom: '16px' }} />
-                <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-secondary)' }}>Drag and drop files here</p>
-                <p style={{ margin: '4px 0', fontSize: '14px', color: 'var(--text-secondary)' }}>or</p>
-                <button type="button" className="btn-ghost" style={{ padding: '8px 24px', fontSize: '14px' }}>Choose Files</button>
-                <p style={{ fontSize: '11px', color: 'var(--text-tertiary)', marginTop: '12px' }}>JPG, PNG, PDF up to 25MB each</p>
-              </div>
-            </div>
+
           </div>
         </div>
 
@@ -456,16 +396,6 @@ const inputStyle = {
   transition: 'border-color 0.2s'
 };
 
-const dropzoneStyle = {
-  width: '100%',
-  borderRadius: '16px',
-  border: '2px dashed var(--border-default)',
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  justifyContent: 'center',
-  background: 'var(--bg-raised)',
-  transition: 'all 0.2s'
-};
+
 
 export default CreateWorkItemPage;
