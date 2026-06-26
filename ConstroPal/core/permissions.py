@@ -516,3 +516,32 @@ class CanManageExpenses(BasePermission):
         # obj is Expense
         plot = obj.job_item.work_item.construction_plot
         return get_plot_role(request.user, plot) in {"owner", "project_manager", "foreman"}
+
+
+# ---------------------------------------------------------------------------
+# Document permissions
+# ---------------------------------------------------------------------------
+
+class CanManageDocuments(BasePermission):
+    """Only project manager and consultants can create/update documents."""
+    message = "Only the project manager or consultants can manage documents."
+
+    def has_permission(self, request, view):
+        if not request.user or not request.user.is_authenticated:
+            return False
+        project = _get_project(view)
+        if project is None:
+            # If not a project view, allow the object-level permission to decide
+            return True
+        return get_project_role(request.user, project) in {"owner", "project_manager", "consultant"}
+
+    def has_object_permission(self, request, view, obj):
+        if view.action == "destroy" and request.user != obj.uploaded_by:
+            return False
+            
+        project = getattr(obj, "project", None)
+        if project is None and getattr(obj, "plot", None):
+            project = obj.plot.construction_project
+        if project is None:
+            return False
+        return get_project_role(request.user, project) in {"owner", "project_manager", "consultant"}

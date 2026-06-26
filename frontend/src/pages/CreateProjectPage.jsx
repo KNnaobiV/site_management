@@ -21,9 +21,8 @@ const CreateProjectPage = () => {
     project_name: '',
     client: '',
     project_description: '',
-    project_status: 'Planned',
-    proposed_start_date: new Date().toISOString().split('T')[0],
-    proposed_end_date: '',
+    start_date: new Date().toISOString().split('T')[0],
+    target_end_date: '',
     project_manager: '',
     address: '',
     cover_image: null
@@ -46,8 +45,8 @@ const CreateProjectPage = () => {
           client: project.client?.id || '',
           project_description: project.project_description || '',
           project_status: project.project_status || 'Planned',
-          proposed_start_date: project.proposed_start_date || new Date().toISOString().split('T')[0],
-          proposed_end_date: project.proposed_end_date || '',
+          start_date: project.start_date || new Date().toISOString().split('T')[0],
+          target_end_date: project.target_end_date || '',
           project_manager: project.project_manager?.id || '',
           address: project.address || '',
           cover_image: null
@@ -96,18 +95,29 @@ const CreateProjectPage = () => {
       project_name: formData.project_name,
       project_description: formData.project_description,
       project_status: formData.project_status,
-      proposed_start_date: formData.proposed_start_date,
-      proposed_end_date: formData.proposed_end_date || null,
+      start_date: formData.start_date,
+      target_end_date: formData.target_end_date,
       address: formData.address,
       project_manager: formData.project_manager || null,
       client: formData.client || null,
     };
 
+    let bodyData;
+    if (formData.cover_image) {
+      bodyData = new FormData();
+      Object.keys(payload).forEach(key => {
+        if (payload[key] !== null) bodyData.append(key, payload[key]);
+      });
+      bodyData.append('cover_image', formData.cover_image);
+    } else {
+      bodyData = JSON.stringify(payload);
+    }
+
     try {
       const res = await apiFetch(isEditing ? `/projects/${projectId}/` : '/projects/', {
         method: isEditing ? 'PUT' : 'POST',
         token,
-        body: JSON.stringify(payload),
+        body: bodyData,
       });
 
       if (res.ok) {
@@ -168,21 +178,23 @@ const CreateProjectPage = () => {
 
             <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div>
-                <label style={labelStyle}>Start Date</label>
+                <label style={labelStyle}>Start Date *</label>
                 <input 
                   type="date"
-                  value={formData.proposed_start_date}
-                  onChange={e => setFormData({...formData, proposed_start_date: e.target.value})}
+                  required
+                  value={formData.start_date}
+                  onChange={e => setFormData({...formData, start_date: e.target.value})}
                   disabled={isEditing && clientUpdated}
                   style={inputStyle}
                 />
               </div>
               <div>
-                <label style={labelStyle}>End Date</label>
+                <label style={labelStyle}>Target End Date *</label>
                 <input 
                   type="date"
-                  value={formData.proposed_end_date}
-                  onChange={e => setFormData({...formData, proposed_end_date: e.target.value})}
+                  required
+                  value={formData.target_end_date}
+                  onChange={e => setFormData({...formData, target_end_date: e.target.value})}
                   style={inputStyle}
                 />
               </div>
@@ -220,12 +232,19 @@ const CreateProjectPage = () => {
 
             <div>
               <label style={labelStyle}>Cover Image</label>
-              <div style={dropzoneStyle}>
-                <Upload size={32} color="var(--brand-orange)" style={{ marginBottom: '16px' }} />
-                <p style={{ margin: 0, fontWeight: 500 }}>Drag and drop an image here</p>
-                <p style={{ margin: '4px 0 0', color: 'var(--brand-orange)', cursor: 'pointer' }}>or click to browse</p>
-                <p style={{ fontSize: '12px', color: 'var(--text-tertiary)', marginTop: '12px' }}>JPG, PNG or WEBP up to 10MB</p>
-              </div>
+              <input 
+                type="file" 
+                accept="image/*"
+                onChange={e => {
+                  if (e.target.files.length > 0) {
+                    setFormData({...formData, cover_image: e.target.files[0]});
+                  }
+                }}
+                style={inputStyle}
+              />
+              <p style={{ fontSize: '12px', color: 'var(--text-tertiary)', marginTop: '8px' }}>
+                Optional. JPG, PNG or WEBP up to 10MB
+              </p>
             </div>
           </div>
         </div>
@@ -267,17 +286,6 @@ const inputStyle = {
   transition: 'border-color 0.2s'
 };
 
-const dropzoneStyle = {
-  width: '100%',
-  height: '180px',
-  borderRadius: '16px',
-  border: '2px dashed var(--border-default)',
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  justifyContent: 'center',
-  background: 'var(--bg-raised)',
-  transition: 'all 0.2s'
-};
+
 
 export default CreateProjectPage;

@@ -9,9 +9,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { user, token } = useAuth();
   const [stats, setStats] = useState({
-    activeProjects: 0,
-    openIssues: 5,
-    pendingReports: 12
+    activeProjects: 0
   });
   const [recentProjects, setRecentProjects] = useState([]);
   const [notifications, setNotifications] = useState([]);
@@ -56,9 +54,6 @@ const Dashboard = () => {
       {/* Quick Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '24px', marginBottom: '48px' }}>
         <StatCard label="Active Projects" value={stats.activeProjects} sub="+1 since last week" />
-        <StatCard label="Open Issues" value={stats.openIssues} color="var(--status-delayed)" />
-        <StatCard label="Pending Reports" value={stats.pendingReports} color="var(--brand-orange)" />
-        <StatCard label="On-site Teams" value="24" sub="Across 8 plots" />
       </div>
 
       <div className="mobile-stack" style={{ display: 'flex', gap: '40px' }}>

@@ -35,6 +35,7 @@ from core.models import (
     PlotRole,
     WorkItemImage,
     JobReportImage,
+    Document,
 )
 from core.roles import get_project_role, get_plot_role
  
@@ -141,9 +142,8 @@ class ConstructionProjectSerializer(RoleFilteredSerializer):
         "project_name",
         "project_description",
         "project_status",
-        "proposed_start_date",
-        "proposed_end_date",
-        "actual_start_date",
+        "start_date",
+        "target_end_date",
         "number_of_plots",
         "role",
     }
@@ -172,9 +172,8 @@ class ConstructionProjectSerializer(RoleFilteredSerializer):
             "project_name",
             "project_description",
             "project_status",
-            "proposed_start_date",
-            "proposed_end_date",
-            "actual_start_date",
+            "start_date",
+            "target_end_date",
             "created_by",
             "client",
             "client_id",
@@ -185,11 +184,7 @@ class ConstructionProjectSerializer(RoleFilteredSerializer):
             "is_deleted",
             "role",
         ]
-        read_only_fields = ["id", "proposed_start_date", "created_by", "is_deleted"]
-        extra_kwargs = {
-            "proposed_end_date": {"required": False, "allow_null": True},
-            "actual_start_date": {"required": False},
-        }
+        read_only_fields = ["id", "start_date", "created_by", "is_deleted"]
  
     def create(self, validated_data):
         # number_of_plots is saved directly to the model now
@@ -252,7 +247,8 @@ class ConstructionPlotSerializer(RoleFilteredSerializer):
         "address",
         "plot_number",
         "status",
-        "plot_opening_date",
+        "start_date",
+        "target_end_date",
         "gps_latitude",
         "gps_longitude",
         "notes",
@@ -283,7 +279,8 @@ class ConstructionPlotSerializer(RoleFilteredSerializer):
             "address",
             "plot_number",
             "status",
-            "plot_opening_date",
+            "start_date",
+            "target_end_date",
             "gps_latitude",
             "gps_longitude",
             "notes",
@@ -334,7 +331,6 @@ class WorkItemSerializer(RoleFilteredSerializer):
     Field visibility by role
     ------------------------
     owner/client/pm     : all fields including both date pairs
-    consultant          : proposed dates + status (no actual dates)
     foreman/storekeeper : all fields (they execute the work)
     """
  
@@ -345,8 +341,8 @@ class WorkItemSerializer(RoleFilteredSerializer):
         "description",
         "work_status",
         "is_approved",
-        "proposed_start_date",
-        "proposed_end_date",
+        "start_date",
+        "target_end_date",
         "checklist",
         "updated_at",
         "images",
@@ -357,9 +353,9 @@ class WorkItemSerializer(RoleFilteredSerializer):
     }
  
     ROLE_EXTRA = {
-        "project_manager": {"start_date", "end_date", "budget"},
-        "foreman":         {"start_date", "end_date"},
-        "storekeeper":     {"start_date", "end_date"},
+        "project_manager": {"budget"},
+        "foreman":         set(),
+        "storekeeper":     set(),
         "consultant":      set(),
     }
  
@@ -379,10 +375,8 @@ class WorkItemSerializer(RoleFilteredSerializer):
             "name",
             "description",
             "work_status",
-            "proposed_start_date",
-            "proposed_end_date",
             "start_date",
-            "end_date",
+            "target_end_date",
             "is_approved",
             "checklist",
             "updated_at",
@@ -445,9 +439,8 @@ class JobItemSerializer(RoleFilteredSerializer):
         "job_status",
         "is_approved",
         "priority",
-        "projected_start_date",
-        "projected_end_date",
-        "material_requirements",
+        "start_date",
+        "target_end_date",
         "estimated_hours",
         "updated_at",
         "construction_plot",
@@ -457,9 +450,9 @@ class JobItemSerializer(RoleFilteredSerializer):
     }
  
     ROLE_EXTRA = {
-        "project_manager": {"actual_start_date", "actual_end_date", "budget"},
-        "foreman":         {"actual_start_date", "actual_end_date", "budget"},
-        "storekeeper":     {"actual_start_date", "actual_end_date"},
+        "project_manager": {"budget"},
+        "foreman":         {"budget"},
+        "storekeeper":     set(),
         "consultant":      set(),
     }
  
@@ -479,11 +472,8 @@ class JobItemSerializer(RoleFilteredSerializer):
             "job_status",
             "is_approved",
             "priority",
-            "projected_start_date",
-            "projected_end_date",
-            "actual_start_date",
-            "actual_end_date",
-            "material_requirements",
+            "start_date",
+            "target_end_date",
             "estimated_hours",
             "updated_at",
             "work_item_name",
@@ -732,3 +722,50 @@ class JobReportImageUploadSerializer(serializers.ModelSerializer):
         model = JobReportImage
         fields = ["id", "image", "caption", "uploaded_at"]
         read_only_fields = ["id", "uploaded_at"]
+
+
+# ===========================================================================
+# Document
+# ===========================================================================
+
+class DocumentSerializer(RoleFilteredSerializer):
+    """
+    Field visibility by role
+    ------------------------
+    pm/client/consultant : can see visibility flags
+    foreman/storekeeper  : only see document details
+    """
+    uploaded_by = UserSummarySerializer(read_only=True)
+
+    ALWAYS_VISIBLE = {
+        "id",
+        "project",
+        "plot",
+        "uploaded_by",
+        "name",
+        "file",
+        "created_at",
+    }
+
+    ROLE_EXTRA = {
+        "project_manager": {"visible_to_storekeepers", "visible_to_foremen"},
+        "client": {"visible_to_storekeepers", "visible_to_foremen"},
+        "consultant": {"visible_to_storekeepers", "visible_to_foremen"},
+        "foreman": set(),
+        "storekeeper": set(),
+    }
+
+    class Meta:
+        model = Document
+        fields = [
+            "id",
+            "project",
+            "plot",
+            "uploaded_by",
+            "name",
+            "file",
+            "visible_to_storekeepers",
+            "visible_to_foremen",
+            "created_at",
+        ]
+        read_only_fields = ["id", "uploaded_by", "created_at"]

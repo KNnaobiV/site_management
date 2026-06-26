@@ -117,12 +117,14 @@ body {
     font-size: 30px;
     margin-bottom: 0.35rem;
     color: #000;
+    text-align: center;
 }
 
 .auth-form-inner p {
     color: var(--ink-light);
     font-size: 14px;
     margin-bottom: 2rem;
+    text-align: center;
 }
 
 .field-group {
@@ -174,6 +176,13 @@ body {
     cursor: pointer;
     margin-top: 0.5rem;
     transition: var(--transition);
+}
+
+.auth-form-inner .btn-primary {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .btn-primary:hover {

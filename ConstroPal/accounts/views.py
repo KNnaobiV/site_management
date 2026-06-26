@@ -81,6 +81,7 @@ def send_confirmation_email(request, user):
     except Exception as e:
         import traceback
         traceback.print_exc()
+        raise e
 
 
 def normalize_username(value):
@@ -656,9 +657,25 @@ class UserSearchView(APIView):
 
     def get(self, request):
         q = request.query_params.get("q", "").strip()
+        project_id = request.query_params.get("project_id", "").strip()
         if len(q) < 2:
             return Response([], status=status.HTTP_200_OK)
+            
         users = User.objects.filter(
             Q(username__icontains=q) | Q(email__icontains=q)
-        ).exclude(pk=request.user.pk)[:10]
+        )
+        
+        if project_id:
+            users = users.filter(
+                Q(created_projects__id=project_id) |
+                Q(project_owner__id=project_id) |
+                Q(project_manager__id=project_id) |
+                Q(project_consultants__id=project_id) |
+                Q(plot_foreman__construction_project_id=project_id) |
+                Q(plot_storekeeper__construction_project_id=project_id)
+            ).distinct()
+        else:
+            users = users.exclude(pk=request.user.pk)
+            
+        users = users[:10]
         return Response(UserSerializer(users, many=True).data)

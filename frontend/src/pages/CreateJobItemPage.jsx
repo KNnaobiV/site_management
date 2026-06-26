@@ -23,12 +23,8 @@ const CreateJobItemPage = () => {
     job_artisan: '',
     job_description: '',
     job_status: 'Planned',
-    projected_start_date: new Date().toISOString().split('T')[0],
-    projected_end_date: '',
-    actual_start_date: '',
-    actual_end_date: '',
-    estimated_hours: '',
-    material_requirements: [],
+    start_date: new Date().toISOString().split('T')[0],
+    target_end_date: '',
     work_item: '',
     budget_amount: '',
     budget_currency: 'NGN',
@@ -55,12 +51,8 @@ const CreateJobItemPage = () => {
           job_artisan: data.job_artisan || '',
           job_description: data.job_description || '',
           job_status: data.job_status || 'Planned',
-          projected_start_date: data.projected_start_date || f.projected_start_date,
-          projected_end_date: data.projected_end_date || '',
-          actual_start_date: data.actual_start_date || '',
-          actual_end_date: data.actual_end_date || '',
-          estimated_hours: data.estimated_hours || '',
-          material_requirements: data.material_requirements || [],
+          start_date: data.start_date || f.start_date,
+          target_end_date: data.target_end_date || '',
           work_item: data.work_item || ''
         }));
 
@@ -143,13 +135,9 @@ const CreateJobItemPage = () => {
       job_artisan: formData.job_artisan,
       job_description: formData.job_description,
       job_status: formData.job_status,
-      projected_start_date: formData.projected_start_date,
-      projected_end_date: formData.projected_end_date,
+      start_date: formData.start_date,
+      target_end_date: formData.target_end_date,
     };
-    if (formData.actual_start_date) payload.actual_start_date = formData.actual_start_date;
-    if (formData.actual_end_date) payload.actual_end_date = formData.actual_end_date;
-    if (formData.estimated_hours) payload.estimated_hours = parseFloat(formData.estimated_hours);
-    if (formData.material_requirements.length) payload.material_requirements = formData.material_requirements;
 
     try {
       const targetWiId = workItemId || formData.work_item || workItem?.id;
@@ -281,13 +269,7 @@ const CreateJobItemPage = () => {
               />
             </div>
 
-            <div>
-              <label style={labelStyle}>Material Requirements <span style={{ fontWeight: 400, color: 'var(--text-tertiary)' }}>(Optional)</span></label>
-              <MaterialsEditor
-                items={formData.material_requirements}
-                onChange={items => setFormData({ ...formData, material_requirements: items })}
-              />
-            </div>
+
           </div>
 
           {/* Right Column */}
@@ -307,48 +289,22 @@ const CreateJobItemPage = () => {
 
             <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div>
-                <label style={labelStyle}>Projected Start *</label>
+                <label style={labelStyle}>Start Date *</label>
                 <input
                   type="date"
                   required
-                  value={formData.projected_start_date}
-                  onChange={e => setFormData({ ...formData, projected_start_date: e.target.value })}
+                  value={formData.start_date}
+                  onChange={e => setFormData({ ...formData, start_date: e.target.value })}
                   style={inputStyle}
                 />
               </div>
               <div>
-                <label style={labelStyle}>Projected End *</label>
+                <label style={labelStyle}>Target End Date *</label>
                 <input
                   type="date"
                   required
-                  value={formData.projected_end_date}
-                  onChange={e => setFormData({ ...formData, projected_end_date: e.target.value })}
-                  style={inputStyle}
-                />
-              </div>
-            </div>
-
-            <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-              <div>
-                <label style={labelStyle}>Actual Start <span style={{ fontWeight: 400, color: 'var(--text-tertiary)' }}>(Optional)</span></label>
-                <input
-                  type="date"
-                  value={formData.actual_start_date}
-                  disabled={isEdit && !!formData.actual_start_date}
-                  onChange={e => setFormData({ ...formData, actual_start_date: e.target.value })}
-                  style={{
-                    ...inputStyle,
-                    background: isEdit && !!formData.actual_start_date ? 'var(--bg-canvas)' : inputStyle.background,
-                    cursor: isEdit && !!formData.actual_start_date ? 'not-allowed' : 'text'
-                  }}
-                />
-              </div>
-              <div>
-                <label style={labelStyle}>Actual End <span style={{ fontWeight: 400, color: 'var(--text-tertiary)' }}>(Optional)</span></label>
-                <input
-                  type="date"
-                  value={formData.actual_end_date}
-                  onChange={e => setFormData({ ...formData, actual_end_date: e.target.value })}
+                  value={formData.target_end_date}
+                  onChange={e => setFormData({ ...formData, target_end_date: e.target.value })}
                   style={inputStyle}
                 />
               </div>

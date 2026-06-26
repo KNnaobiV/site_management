@@ -38,8 +38,8 @@ const NewJobItemForm = ({ projectId, plotId, workItemId, token, onSuccess, onClo
   const [form, setForm] = useState({
     job_name: '', job_description: '', job_artisan: '', job_status: 'Planned',
     priority: 'Medium',
-    projected_start_date: new Date().toISOString().split('T')[0],
-    projected_end_date: '', actual_start_date: '', actual_end_date: '',
+    start_date: new Date().toISOString().split('T')[0],
+    target_end_date: '',
     estimated_hours: '',
   });
   const [materials, setMaterials] = useState([]);
@@ -54,8 +54,8 @@ const NewJobItemForm = ({ projectId, plotId, workItemId, token, onSuccess, onClo
       job_name: form.job_name, job_description: form.job_description,
       job_artisan: form.job_artisan, job_status: form.job_status,
       priority: form.priority,
-      projected_start_date: form.projected_start_date,
-      projected_end_date: form.projected_end_date,
+      start_date: form.start_date,
+      target_end_date: form.target_end_date,
     };
     if (form.actual_start_date) payload.actual_start_date = form.actual_start_date;
     if (form.actual_end_date) payload.actual_end_date = form.actual_end_date;
@@ -114,12 +114,12 @@ const NewJobItemForm = ({ projectId, plotId, workItemId, token, onSuccess, onClo
         </div>
         <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
           <div>
-            <label style={labelStyle}>Projected Start *</label>
-            <input type="date" required value={form.projected_start_date} onChange={e => set('projected_start_date', e.target.value)} style={inputStyle} />
+            <label style={labelStyle}>Start Date *</label>
+            <input type="date" required value={form.start_date} onChange={e => set('start_date', e.target.value)} style={inputStyle} />
           </div>
           <div>
-            <label style={labelStyle}>Projected End *</label>
-            <input type="date" required value={form.projected_end_date} onChange={e => set('projected_end_date', e.target.value)} style={inputStyle} />
+            <label style={labelStyle}>Target End Date *</label>
+            <input type="date" required value={form.target_end_date} onChange={e => set('target_end_date', e.target.value)} style={inputStyle} />
           </div>
         </div>
         <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
@@ -314,12 +314,12 @@ const WorkItemDetailPage = () => {
             {/* Dates */}
             <div className="mobile-grid-1" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '20px', padding: '24px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
               <div>
-                <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', color: 'var(--text-tertiary)', textTransform: 'uppercase', margin: '0 0 6px' }}>Start Date</p>
-                <p style={{ margin: 0, fontWeight: 600, fontSize: '15px', color: 'var(--text-primary)' }}>{workItem.proposed_start_date}</p>
+                <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-tertiary)', marginBottom: '4px' }}>Start Date</p>
+                <p style={{ margin: 0, fontWeight: 600, fontSize: '15px', color: 'var(--text-primary)' }}>{workItem.start_date}</p>
               </div>
               <div>
-                <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', color: 'var(--text-tertiary)', textTransform: 'uppercase', margin: '0 0 6px' }}>Target End</p>
-                <p style={{ margin: 0, fontWeight: 600, fontSize: '15px', color: 'var(--text-primary)' }}>{workItem.proposed_end_date}</p>
+                <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-tertiary)', marginBottom: '4px' }}>Target End Date</p>
+                <p style={{ margin: 0, fontWeight: 600, fontSize: '15px', color: 'var(--text-primary)' }}>{workItem.target_end_date}</p>
               </div>
             </div>
 
@@ -388,7 +388,7 @@ const WorkItemDetailPage = () => {
                 >
                   <div style={{ flex: 1 }}>
                     <p style={{ margin: '0 0 3px', fontWeight: 700, fontSize: '15px', color: 'var(--text-primary)' }}>{ji.job_name}</p>
-                    <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-tertiary)' }}>{ji.job_artisan} · {ji.projected_start_date} → {ji.projected_end_date}</p>
+                    <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-secondary)' }}>{ji.start_date} → {ji.target_end_date}</p>
                   </div>
                   {ji.estimated_hours && <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 600 }}>{ji.estimated_hours}h</span>}
                   <StatusPill status={ji.job_status} />

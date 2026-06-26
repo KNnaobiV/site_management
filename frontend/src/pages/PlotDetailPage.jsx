@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Edit2, Plus, FileText, UserPlus, MapPin, Clock } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { apiFetch, unwrapList } from '../api/client';
-import { Breadcrumb, Tabs, Avatar, Spinner, ProgressDonut, InviteModal, ChecklistEditor, ImageUploader } from '../components';
+import { Breadcrumb, Tabs, Avatar, Spinner, ProgressDonut, InviteModal, ChecklistEditor, ImageUploader, DocumentList } from '../components';
 import { showSuccessMessage } from '../utils/successMessage';
 
 const statusColors = {
@@ -38,8 +38,8 @@ const labelStyle = { display: 'block', marginBottom: '10px', fontWeight: 600, fo
 const NewWorkItemForm = ({ projectId, plotId, token, onSuccess, onClose }) => {
   const [form, setForm] = useState({
     name: '', description: '', work_status: 'Planned',
-    proposed_start_date: new Date().toISOString().split('T')[0],
-    proposed_end_date: '', start_date: '', end_date: '',
+    start_date: new Date().toISOString().split('T')[0],
+    target_end_date: '', start_date: '', end_date: '',
   });
   const [checklist, setChecklist] = useState([]);
   const [images, setImages] = useState([]);
@@ -54,8 +54,8 @@ const NewWorkItemForm = ({ projectId, plotId, token, onSuccess, onClose }) => {
       name: form.name,
       description: form.description,
       work_status: form.work_status,
-      proposed_start_date: form.proposed_start_date,
-      proposed_end_date: form.proposed_end_date,
+      start_date: form.start_date,
+      target_end_date: form.target_end_date,
     };
     if (form.start_date) payload.start_date = form.start_date;
     if (form.end_date) payload.end_date = form.end_date;
@@ -100,24 +100,15 @@ const NewWorkItemForm = ({ projectId, plotId, token, onSuccess, onClose }) => {
         </div>
         <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
           <div>
-            <label style={labelStyle}>Proposed Start *</label>
-            <input type="date" required value={form.proposed_start_date} onChange={e => set('proposed_start_date', e.target.value)} style={inputStyle} />
+            <label style={labelStyle}>Start Date</label>
+            <input type="date" required value={form.start_date} onChange={e => set('start_date', e.target.value)} style={inputStyle} />
           </div>
           <div>
-            <label style={labelStyle}>Proposed End *</label>
-            <input type="date" required value={form.proposed_end_date} onChange={e => set('proposed_end_date', e.target.value)} style={inputStyle} />
+            <label style={labelStyle}>Target End Date</label>
+            <input type="date" required value={form.target_end_date} onChange={e => set('target_end_date', e.target.value)} style={inputStyle} />
           </div>
         </div>
-        <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-          <div>
-            <label style={labelStyle}>Actual Start <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>(optional)</span></label>
-            <input type="date" value={form.start_date} onChange={e => set('start_date', e.target.value)} style={inputStyle} />
-          </div>
-          <div>
-            <label style={labelStyle}>Actual End <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>(optional)</span></label>
-            <input type="date" value={form.end_date} onChange={e => set('end_date', e.target.value)} style={inputStyle} />
-          </div>
-        </div>
+
 
         {/* Checklist */}
         <div>
@@ -276,6 +267,7 @@ const PlotDetailPage = () => {
     { id: 'team', label: 'Team' },
     { id: 'reports', label: `Reports (${reports.length})` },
     { id: 'media', label: 'Media' },
+    { id: 'documents', label: 'Documents' },
   ];
 
   if (loading) return <div style={{ padding: '60px', display: 'flex', justifyContent: 'center' }}><Spinner /></div>;
@@ -406,7 +398,7 @@ const PlotDetailPage = () => {
                 >
                   <div style={{ flex: 1 }}>
                     <p style={{ margin: '0 0 4px', fontWeight: 700, fontSize: '16px', color: 'var(--text-primary)' }}>{wi.name}</p>
-                    <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-secondary)' }}>{wi.proposed_start_date} → {wi.proposed_end_date}</p>
+                    <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-secondary)' }}>{wi.start_date} → {wi.target_end_date}</p>
                   </div>
                   <StatusPill status={wi.work_status} />
                 </div>
@@ -588,6 +580,11 @@ const PlotDetailPage = () => {
         <div style={{ textAlign: 'center', padding: '60px', color: 'var(--text-tertiary)' }}>
           <p style={{ fontWeight: 600 }}>No media uploaded yet.</p>
         </div>
+      )}
+
+      {/* Documents Tab */}
+      {activeTab === 'documents' && (
+        <DocumentList projectId={projectId} plotId={id} role={plot.role} />
       )}
 
       {/* Modals */}
