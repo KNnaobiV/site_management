@@ -17,7 +17,7 @@ DATABASES = {
     # }
 }
 
-FRONTEND_URL = CFG.get("SITE", "FRONTEND_URL", fallback="http://localhost:5173")
+FRONTEND_URL = CFG.get("SITE", "FRONTEND_URL", fallback="https://maccaferra.vercel.app")
 SITE_NAME = CFG.get("SITE", "SITE_NAME", fallback="http://localhost:8000")
 ADMIN_URL = CFG.get("SITE", "DJANGO_ADMIN_URL")
 SECRET_KEY = CFG.get("SITE", "DJANGO_SECRET_KEY")

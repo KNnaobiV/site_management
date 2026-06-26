@@ -1349,4 +1349,4 @@ class PublicStatsView(APIView):
         return Response({
             "total_projects": total_projects,
             "avg_report_cycle_hours": avg_report_cycle_hours
-        })
+        })
