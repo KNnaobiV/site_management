@@ -146,6 +146,7 @@ class ConstructionProjectSerializer(RoleFilteredSerializer):
         "target_end_date",
         "number_of_plots",
         "role",
+        "cover_image",
     }
  
     ROLE_EXTRA = {
@@ -183,6 +184,7 @@ class ConstructionProjectSerializer(RoleFilteredSerializer):
             "number_of_plots",
             "is_deleted",
             "role",
+            "cover_image",
         ]
         read_only_fields = ["id", "start_date", "created_by", "is_deleted"]
  

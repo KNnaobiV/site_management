@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.core.validators import FileExtensionValidator
 from django.db import models
+from cloudinary_storage.storage import VideoMediaCloudinaryStorage
 
 
 # User = get_user_model()
@@ -24,6 +25,7 @@ class Picture(Multimedia):
 class Video(Multimedia):
     video_file = models.FileField(
         upload_to='videos/%Y/%m/%d/',
+        storage=VideoMediaCloudinaryStorage(),
         validators=[FileExtensionValidator(
         allowed_extensions=['mp4', 'webm', 'ogg']
         )]

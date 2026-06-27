@@ -12,6 +12,7 @@ from django.core.files.base import ContentFile
 import sys
 from io import BytesIO
 from PIL import Image
+from cloudinary_storage.storage import RawMediaCloudinaryStorage
 
 from base.models import Picture, Video
 from .groups import create_company_group, create_project_group
@@ -606,14 +607,14 @@ class JobReport(TimestampedModel):
     @property
     def days_elapsed(self):
         """Calculate days elapsed since the job item started"""
-        if self.job_item.actual_start_date:
-            return (self.report_date - self.job_item.actual_start_date).days
+        if self.job_item.start_date:
+            return (self.report_date - self.job_item.start_date).days
     
     def save(self, *args, **kwargs):
         """Calculate days elapsed when saving"""
         if (
-            self.job_item.actual_start_date and \
-            self.report_date < self.job_item.actual_start_date
+            self.job_item.start_date and \
+            self.report_date < self.job_item.start_date
             ):
             raise ValueError(
                 "Report date cannot be before job item actual start date."
@@ -731,7 +732,7 @@ class Document(TimestampedModel):
     )
     uploaded_by = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name="uploaded_documents")
     name = models.CharField(max_length=255)
-    file = models.FileField(upload_to="documents/%Y/%m/%d/")
+    file = models.FileField(upload_to="documents/%Y/%m/%d/", storage=RawMediaCloudinaryStorage())
     visible_to_storekeepers = models.BooleanField(default=False)
     visible_to_foremen = models.BooleanField(default=False)
 
