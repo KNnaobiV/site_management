@@ -1,25 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Breadcrumb, Spinner, Avatar, SearchableSelect } from '../components';
-import { Briefcase, HardHat, Hammer, Eye, X } from 'lucide-react';
+import { Briefcase, Hammer, Eye, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { apiFetch, unwrapList } from '../api/client';
 import { showSuccessMessage } from '../utils/successMessage';
 
 const InviteTeamMemberPage = () => {
-  const { token } = useAuth();
+  const { user, token } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const initialProjectId = searchParams.get('project');
   const [loading, setLoading] = useState(false);
   const [fetchingData, setFetchingData] = useState(true);
   const [projects, setProjects] = useState([]);
   const [pendingInvites, setPendingInvites] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
   const [error, setError] = useState(null);
-  
+
   const [formData, setFormData] = useState({
     invitee_id: '',
-    role: 'foreman',
-    assigned_projects: [],
+    role: 'project_manager',
+    assigned_projects: initialProjectId ? [parseInt(initialProjectId)] : [],
     message: ''
   });
 
@@ -33,8 +35,12 @@ const InviteTeamMemberPage = () => {
         apiFetch('/projects/', { token }),
         apiFetch('/invitations/projects/', { token })
       ]);
-      
-      if (projRes.ok) setProjects(unwrapList(await projRes.json()));
+
+      if (projRes.ok) {
+        const allProjs = unwrapList(await projRes.json());
+        const filtered = allProjs.filter(p => p.created_by?.id === user?.id || p.project_manager?.id === user?.id);
+        setProjects(filtered);
+      }
       if (invRes.ok) setPendingInvites(unwrapList(await invRes.json()));
     } catch (err) {
       console.error("Failed to fetch data", err);
@@ -61,7 +67,7 @@ const InviteTeamMemberPage = () => {
 
     setLoading(true);
     setError(null);
-    
+
     try {
       let successCount = 0;
       for (const pId of formData.assigned_projects) {
@@ -103,10 +109,9 @@ const InviteTeamMemberPage = () => {
   };
 
   const roles = [
-    { id: 'project_manager', label: 'Project Manager', sub: 'Oversees projects and manages teams.', icon: <Briefcase size={24} /> },
-    { id: 'foreman', label: 'Foreman', sub: 'Manages field work and crew.', icon: <HardHat size={24} /> },
+    { id: 'project_manager', label: 'Project Manager', sub: 'Oversees the project and manages teams.', icon: <Briefcase size={24} /> },
+    { id: 'client', label: 'Client', sub: 'Project owner with full visibility.', icon: <Eye size={24} /> },
     { id: 'consultant', label: 'Consultant', sub: 'Technical expert or specialist.', icon: <Hammer size={24} /> },
-    { id: 'viewer', label: 'Viewer', sub: 'View-only access to project info.', icon: <Eye size={24} /> },
   ];
 
   if (fetchingData) return <div style={{ display: 'flex', justifyContent: 'center', padding: '100px' }}><Spinner /></div>;
@@ -121,31 +126,31 @@ const InviteTeamMemberPage = () => {
 
       {error && <div style={{ background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.2)', color: '#dc2626', padding: '16px', borderRadius: '12px', marginBottom: '24px' }}>{error}</div>}
 
-      <form onSubmit={handleSubmit} style={{ 
-        background: 'var(--bg-card)', 
-        borderRadius: '24px', 
+      <form onSubmit={handleSubmit} style={{
+        background: 'var(--bg-card)',
+        borderRadius: '24px',
         border: '1px solid var(--border-default)',
         padding: '48px',
         maxWidth: '1200px'
       }}>
         <div style={{ marginBottom: '32px' }}>
           <label style={labelStyle}>Search User (Name or Email)</label>
-          <SearchableSelect 
+          <SearchableSelect
             placeholder="Search for an existing user..."
             options={searchResults}
             value={formData.invitee_id}
-            onChange={val => setFormData({...formData, invitee_id: val})}
+            onChange={val => setFormData({ ...formData, invitee_id: val })}
             onSearch={handleUserSearch}
           />
         </div>
 
         <div style={{ marginBottom: '32px' }}>
           <label style={labelStyle}>Role</label>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
             {roles.map(r => (
-              <div 
+              <div
                 key={r.id}
-                onClick={() => setFormData({...formData, role: r.id})}
+                onClick={() => setFormData({ ...formData, role: r.id })}
                 style={{
                   padding: '24px',
                   borderRadius: '16px',
@@ -159,7 +164,7 @@ const InviteTeamMemberPage = () => {
                   position: 'relative'
                 }}
               >
-                <div style={{ 
+                <div style={{
                   width: '20px', height: '20px', borderRadius: '50%', border: '2px solid var(--border-strong)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   background: formData.role === r.id ? 'var(--brand-orange)' : 'transparent',
@@ -184,25 +189,29 @@ const InviteTeamMemberPage = () => {
               const p = projects.find(proj => proj.id === pId);
               return (
                 <div key={pId} style={{ background: 'var(--bg-canvas)', border: '1px solid var(--border-default)', borderRadius: '8px', padding: '4px 8px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }}>
-                  {p?.project_name}
-                  <X size={14} style={{ cursor: 'pointer' }} onClick={() => setFormData({...formData, assigned_projects: formData.assigned_projects.filter(id => id !== pId)})} />
+                  {p?.project_name || `Project ${pId}`}
+                  {!initialProjectId && (
+                    <X size={14} style={{ cursor: 'pointer' }} onClick={() => setFormData({ ...formData, assigned_projects: formData.assigned_projects.filter(id => id !== pId) })} />
+                  )}
                 </div>
               );
             })}
-            <select 
-              style={{ background: 'transparent', border: 'none', outline: 'none', flex: 1, fontSize: '14px' }}
-              onChange={e => {
-                if (e.target.value && !formData.assigned_projects.includes(parseInt(e.target.value))) {
-                  setFormData({...formData, assigned_projects: [...formData.assigned_projects, parseInt(e.target.value)]});
-                }
-                e.target.value = '';
-              }}
-            >
-              <option value="">Add project...</option>
-              {projects.filter(p => !formData.assigned_projects.includes(p.id)).map(p => (
-                <option key={p.id} value={p.id}>{p.project_name}</option>
-              ))}
-            </select>
+            {!initialProjectId && (
+              <select
+                style={{ background: 'transparent', border: 'none', outline: 'none', flex: 1, fontSize: '14px' }}
+                onChange={e => {
+                  if (e.target.value && !formData.assigned_projects.includes(parseInt(e.target.value))) {
+                    setFormData({ ...formData, assigned_projects: [...formData.assigned_projects, parseInt(e.target.value)] });
+                  }
+                  e.target.value = '';
+                }}
+              >
+                <option value="">Add project...</option>
+                {projects.filter(p => !formData.assigned_projects.includes(p.id)).map(p => (
+                  <option key={p.id} value={p.id}>{p.project_name}</option>
+                ))}
+              </select>
+            )}
           </div>
         </div>
 
@@ -211,11 +220,11 @@ const InviteTeamMemberPage = () => {
             <label style={{ ...labelStyle, marginBottom: 0 }}>Personal Message <span style={{ fontWeight: 400, color: 'var(--text-tertiary)' }}>(optional)</span></label>
             <span style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>{formData.message.length}/500</span>
           </div>
-          <textarea 
+          <textarea
             placeholder="Add a personal message to your invitation..."
             maxLength={500}
             value={formData.message}
-            onChange={e => setFormData({...formData, message: e.target.value})}
+            onChange={e => setFormData({ ...formData, message: e.target.value })}
             style={{ ...inputStyle, minHeight: '120px', resize: 'vertical' }}
           />
         </div>
@@ -231,9 +240,9 @@ const InviteTeamMemberPage = () => {
       {/* Pending Invitations Table */}
       <div style={{ marginTop: '64px' }}>
         <h3 style={{ marginBottom: '24px' }}>Pending Invitations ({pendingInvites.length})</h3>
-        <div style={{ 
-          background: 'var(--bg-card)', 
-          borderRadius: '16px', 
+        <div style={{
+          background: 'var(--bg-card)',
+          borderRadius: '16px',
           border: '1px solid var(--border-default)',
           overflow: 'hidden'
         }}>

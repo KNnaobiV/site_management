@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
   Briefcase,
@@ -18,6 +18,10 @@ import Avatar from './Avatar';
 
 const Sidebar = ({ isOpen, toggleSidebar, isMobile }) => {
   const { user, logout } = useAuth();
+  const location = useLocation();
+
+  const projectMatch = location.pathname.match(/^\/projects\/(\d+)/);
+  const invitePath = projectMatch ? `/team/invite?project=${projectMatch[1]}` : '/team/invite';
 
   const navItems = [
     { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
@@ -26,6 +30,7 @@ const Sidebar = ({ isOpen, toggleSidebar, isMobile }) => {
     { to: '/work-items', icon: CheckSquare, label: 'Work Items' },
     { to: '/job-items', icon: ClipboardList, label: 'Job Items' },
     { to: '/notifications', icon: Bell, label: 'Notifications' },
+    { to: invitePath, icon: UserPlus, label: 'Invite Team' },
   ];
 
   return (

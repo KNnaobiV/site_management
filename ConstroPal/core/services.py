@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.core.exceptions import PermissionDenied, ValidationError
+from django.db import IntegrityError
 from django.utils import timezone
 
 from core.models import (
@@ -58,16 +59,29 @@ def invite_to_project(
             f"Choose from: {ProjectRole.values}"
         )
  
-    # Guard: invitee already holds this role
+    # Guard: invitee already holds this role on the project
     _check_not_already_assigned_project(project, invitee, role)
- 
-    invitation = ProjectInvitation.objects.create(
-        project=project,
-        invited_by=actor,
-        invitee=invitee,
-        role=role,
-        message=message,
-    )
+
+    # Guard: a pending invitation already exists for this combination
+    if ProjectInvitation.objects.filter(
+        project=project, invitee=invitee, role=role, status="pending"
+    ).exists():
+        raise ValidationError(
+            f"{invitee.username} already has a pending {role} invitation for this project."
+        )
+
+    try:
+        invitation = ProjectInvitation.objects.create(
+            project=project,
+            invited_by=actor,
+            invitee=invitee,
+            role=role,
+            message=message,
+        )
+    except IntegrityError:
+        raise ValidationError(
+            f"An invitation for {invitee.username} as {role} on this project already exists."
+        )
  
     return invitation
  
@@ -92,14 +106,27 @@ def invite_to_plot(
         )
  
     _check_not_already_assigned_plot(plot, invitee, role)
- 
-    invitation = PlotInvitation.objects.create(
-        plot=plot,
-        invited_by=actor,
-        invitee=invitee,
-        role=role,
-        message=message,
-    )
+
+    # Guard: a pending invitation already exists for this combination
+    if PlotInvitation.objects.filter(
+        plot=plot, invitee=invitee, role=role, status="pending"
+    ).exists():
+        raise ValidationError(
+            f"{invitee.username} already has a pending {role} invitation for this plot."
+        )
+
+    try:
+        invitation = PlotInvitation.objects.create(
+            plot=plot,
+            invited_by=actor,
+            invitee=invitee,
+            role=role,
+            message=message,
+        )
+    except IntegrityError:
+        raise ValidationError(
+            f"An invitation for {invitee.username} as {role} on this plot already exists."
+        )
  
     return invitation
 

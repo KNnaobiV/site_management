@@ -137,9 +137,20 @@ class ConstructionProject(TimestampedModel):
                 output = BytesIO()
                 img.save(output, format='JPEG', quality=75)
                 output.seek(0)
-                
-                self.cover_image.file = ContentFile(output.read())
-                self.cover_image.name = f"{self.cover_image.name.split('.')[0]}.jpg"
+
+                # Re-assign the field with an InMemoryUploadedFile so the
+                # storage backend (Cloudinary) uploads the resized bytes.
+                from django.core.files.uploadedfile import InMemoryUploadedFile
+                original_name = self.cover_image.name.rsplit('.', 1)[0]
+                new_name = f"{original_name}.jpg"
+                self.cover_image = InMemoryUploadedFile(
+                    output,
+                    field_name='cover_image',
+                    name=new_name,
+                    content_type='image/jpeg',
+                    size=output.getbuffer().nbytes,
+                    charset=None,
+                )
             except Exception as e:
                 pass
                 
@@ -147,13 +158,19 @@ class ConstructionProject(TimestampedModel):
 
     @receiver(post_save, sender='core.ConstructionProject')
     def create_project_group(sender, instance, created, **kwargs):
-        """Create project-specific groups when a new project is created"""
+        """Create project-specific groups when a new project is created,
+        and add the project manager (which defaults to the creator) to their group."""
         group_suffixes = [
             "Client", "Consultant", "Project Manager",
         ]
         if created:
             for suffix in group_suffixes:
                 create_project_group(instance.project_name, group_suffix=suffix)
+            # Add the project manager to the Project Manager group
+            if instance.project_manager:
+                pm_group_name = f"{instance.project_name} Project Manager"
+                pm_group, _ = Group.objects.get_or_create(name=pm_group_name)
+                pm_group.user_set.add(instance.project_manager)
 
 
 class ProjectInvitation(TimestampedModel):
@@ -553,12 +570,6 @@ class JobReport(TimestampedModel):
     job_item = models.ForeignKey(
         JobItem, on_delete=models.CASCADE, related_name="daily_reports"
     )
-    job_image = models.ForeignKey(
-        Picture, 
-        on_delete=models.CASCADE, 
-        related_name="job_report_pictures",
-        blank=True, null=True
-    )
     job_video = models.ForeignKey(
         Video, 
         on_delete=models.CASCADE, 
@@ -669,27 +680,21 @@ SiteRole = PlotRole
 SiteInvitation = PlotInvitation
 
 
-class WorkItemImage(models.Model):
+class WorkItemImage(Picture):
     """Photo attached to a WorkItem."""
     work_item = models.ForeignKey(
         WorkItem, on_delete=models.CASCADE, related_name="images"
     )
-    image = models.ImageField(upload_to="work_items/%Y/%m/%d/")
-    caption = models.CharField(max_length=255, blank=True)
-    uploaded_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"Image for {self.work_item.name}"
 
 
-class JobReportImage(models.Model):
+class JobReportImage(Picture):
     """Photo attached to a JobReport (daily report)."""
     report = models.ForeignKey(
         JobReport, on_delete=models.CASCADE, related_name="images"
     )
-    image = models.ImageField(upload_to="reports/%Y/%m/%d/")
-    caption = models.CharField(max_length=255, blank=True)
-    uploaded_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"Image for report {self.report.id} ({self.report.report_date})"
@@ -718,24 +723,4 @@ def create_plot_invitation_notification(sender, instance, created, **kwargs):
         )
 
 
-class Document(TimestampedModel):
-    """
-    Documents uploaded for a project or specific plot.
-    """
-    project = models.ForeignKey(
-        ConstructionProject, on_delete=models.CASCADE, related_name="documents",
-        null=True, blank=True
-    )
-    plot = models.ForeignKey(
-        ConstructionPlot, on_delete=models.CASCADE, related_name="documents",
-        null=True, blank=True
-    )
-    uploaded_by = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name="uploaded_documents")
-    name = models.CharField(max_length=255)
-    file = models.FileField(upload_to="documents/%Y/%m/%d/", storage=RawMediaCloudinaryStorage())
-    visible_to_storekeepers = models.BooleanField(default=False)
-    visible_to_foremen = models.BooleanField(default=False)
-
-    def __str__(self):
-        return self.name
 

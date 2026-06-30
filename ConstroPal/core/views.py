@@ -18,6 +18,8 @@ from __future__ import annotations
 import io
 import os
 import datetime
+import urllib.request as urllib_request
+import tempfile
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied, ValidationError
@@ -46,7 +48,6 @@ from core.models import (
     PlotInvitation,
     WorkItemImage,
     JobReportImage,
-    Document,
 )
 from core.roles import get_project_role, get_plot_role, SEES_UNAPPROVED_ROLES
 from core.services import (
@@ -80,7 +81,6 @@ from .permissions import (
     CanUpdateJobItem,
     CanDeleteJobItem,
     CanApproveJobItem,
-    CanManageDocuments,
 )
 from .serializers import (
     ConstructionProjectSerializer,
@@ -94,7 +94,6 @@ from .serializers import (
     PlotInvitationSerializer,
     WorkItemImageUploadSerializer,
     JobReportImageUploadSerializer,
-    DocumentSerializer,
 )
 
 from django.db.models import Q as models_Q
@@ -583,15 +582,19 @@ class ConstructionPlotViewSet(ProjectScopedMixin, viewsets.ModelViewSet):
                     if report.images.exists():
                         story.append(Paragraph(f"Photos for {report.report_date}:", styles["Heading4"]))
                         for image in report.images.all():
-                            image_path = getattr(image.image, 'path', None)
-                            if image_path and os.path.exists(image_path):
-                                try:
-                                    story.append(PDFImage(image_path, width=5 * inch, height=3 * inch))
-                                    if image.caption:
-                                        story.append(Paragraph(image.caption, styles["Italic"]))
-                                    story.append(Spacer(1, 8))
-                                except Exception:
+                            try:
+                                image_url = image.img.url if image.img else None
+                                if not image_url:
                                     continue
+                                # Download from Cloudinary into a temp file for ReportLab
+                                with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as tmp:
+                                    urllib_request.urlretrieve(image_url, tmp.name)
+                                    story.append(PDFImage(tmp.name, width=5 * inch, height=3 * inch))
+                                    if image.description:
+                                        story.append(Paragraph(image.description, styles["Italic"]))
+                                    story.append(Spacer(1, 8))
+                            except Exception:
+                                continue
                 story.append(Spacer(1, 20))
 
         doc.build(story)
@@ -759,7 +762,7 @@ class WorkItemViewSet(PlotScopedMixin, viewsets.ModelViewSet):
             qs = WorkItemImage.objects.filter(work_item=work_item)
             return Response(WorkItemImageSerializer(qs, many=True, context=self.get_serializer_context()).data)
         # POST
-        serializer = WorkItemImageUploadSerializer(data=request.data)
+        serializer = WorkItemImageUploadSerializer(data=request.data, context=self.get_serializer_context())
         serializer.is_valid(raise_exception=True)
         serializer.save(work_item=work_item)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -1041,15 +1044,19 @@ class JobReportViewSet(PlotScopedMixin, viewsets.ModelViewSet):
                 if report.images.exists():
                     story.append(Paragraph("Photos:", styles["Heading4"]))
                     for image in report.images.all():
-                        image_path = getattr(image.image, 'path', None)
-                        if image_path and os.path.exists(image_path):
-                            try:
-                                story.append(PDFImage(image_path, width=5 * inch, height=3 * inch))
-                                if image.caption:
-                                    story.append(Paragraph(image.caption, styles["Italic"]))
-                                story.append(Spacer(1, 8))
-                            except Exception:
+                        try:
+                            image_url = image.img.url if image.img else None
+                            if not image_url:
                                 continue
+                            # Download from Cloudinary into a temp file for ReportLab
+                            with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as tmp:
+                                urllib_request.urlretrieve(image_url, tmp.name)
+                                story.append(PDFImage(tmp.name, width=5 * inch, height=3 * inch))
+                                if image.description:
+                                    story.append(Paragraph(image.description, styles["Italic"]))
+                                story.append(Spacer(1, 8))
+                        except Exception:
+                            continue
                 story.append(Spacer(1, 20))
 
         doc.build(story)
@@ -1145,7 +1152,7 @@ class JobReportViewSet(PlotScopedMixin, viewsets.ModelViewSet):
             qs = JobReportImage.objects.filter(report=report)
             return Response(JobReportImageSerializer(qs, many=True, context=self.get_serializer_context()).data)
         # POST
-        serializer = JobReportImageUploadSerializer(data=request.data)
+        serializer = JobReportImageUploadSerializer(data=request.data, context=self.get_serializer_context())
         serializer.is_valid(raise_exception=True)
         serializer.save(report=report)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -1281,62 +1288,6 @@ class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
         return Response({"status": "all read"})
 
 
-# ---------------------------------------------------------------------------
-# Document ViewSet
-# ---------------------------------------------------------------------------
-
-class DocumentViewSet(ProjectScopedMixin, viewsets.ModelViewSet):
-    """
-    Nested under /projects/{project_pk}/documents/
-    Can also filter by plot via query param ?plot_id=
-    """
-    serializer_class = DocumentSerializer
-
-    def get_permissions(self):
-        if self.action in ("list", "retrieve"):
-            return [IsAuthenticated(), IsProjectMember()]
-        if self.action in ("create", "update", "partial_update", "destroy"):
-            return [IsAuthenticated(), CanManageDocuments()]
-        return [IsAuthenticated()]
-
-    def get_queryset(self):
-        project = self.get_project()
-        user = self.request.user
-        if not project:
-            return Document.objects.none()
-
-        role = get_project_role(user, project)
-        qs = Document.objects.filter(project=project)
-
-        plot_id = self.request.query_params.get("plot_id")
-        if plot_id:
-            qs = qs.filter(plot_id=plot_id)
-
-        # PM, Consultant, Client, Owner can see all documents
-        if role in {"owner", "project_manager", "consultant", "client"}:
-            return qs
-
-        # Foreman and Storekeeper logic
-        # They can see project-level docs if visibility flag is true
-        # They can see plot-level docs if visibility flag is true AND they belong to that plot
-        if role == "foreman":
-            return qs.filter(
-                visible_to_foremen=True
-            ).filter(
-                models_Q(plot__isnull=True) | models_Q(plot__foreman=user)
-            )
-        elif role == "storekeeper":
-            return qs.filter(
-                visible_to_storekeepers=True
-            ).filter(
-                models_Q(plot__isnull=True) | models_Q(plot__storekeeper=user)
-            )
-            
-        return Document.objects.none()
-
-    def perform_create(self, serializer):
-        project = self.get_project()
-        serializer.save(project=project, uploaded_by=self.request.user)
 
 class PublicStatsView(APIView):
     permission_classes = []

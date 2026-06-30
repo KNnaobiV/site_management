@@ -1,21 +1,22 @@
 from django.contrib.auth import get_user_model
 from django.core.validators import FileExtensionValidator
 from django.db import models
-from cloudinary_storage.storage import VideoMediaCloudinaryStorage
+from cloudinary_storage.storage import VideoMediaCloudinaryStorage, MediaCloudinaryStorage
 
 
-# User = get_user_model()
+User = get_user_model()
 
 
 class Multimedia(models.Model):
-    # uploaded_by = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    uploaded_by = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     description = models.CharField(max_length=255, null=True, blank=True)
     created_at = models.DateTimeField(auto_now=True)
     
 
 class Picture(Multimedia):
     img = models.ImageField(
-        upload_to='videos/%Y/%m/%d/',
+        upload_to='images/%Y/%m/%d/',
+        storage=MediaCloudinaryStorage(),
         validators=[FileExtensionValidator(
         allowed_extensions=['jpeg', 'jpg', 'png']
         )]

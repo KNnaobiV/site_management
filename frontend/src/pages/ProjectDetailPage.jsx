@@ -3,17 +3,17 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Edit2, Plus, FileText, UserPlus, MoreHorizontal, MapPin, Calendar, Users } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { apiFetch, unwrapList } from '../api/client';
-import { Breadcrumb, Tabs, Avatar, Spinner, RoleBadge, InviteModal, DocumentList } from '../components';
+import { Breadcrumb, Tabs, Avatar, Spinner, RoleBadge, InviteModal } from '../components';
 import { showSuccessMessage } from '../utils/successMessage';
 
 // ─── Status pill ──────────────────────────────────────────────────────────────
 const statusColors = {
-  'Planned':    { bg: '#e8e8e8', text: '#555' },
-  'In Progress':{ bg: '#fef3ec', text: '#c14a1e' },
-  'Completed':  { bg: '#e8f5e9', text: '#2d5a27' },
-  'On Hold':    { bg: '#fff3e0', text: '#e65100' },
-  'Delayed':    { bg: '#fce4ec', text: '#a32a2a' },
-  'Cancelled':  { bg: '#f5f5f5', text: '#9e9e9e' },
+  'Planned': { bg: '#e8e8e8', text: '#555' },
+  'In Progress': { bg: '#fef3ec', text: '#c14a1e' },
+  'Completed': { bg: '#e8f5e9', text: '#2d5a27' },
+  'On Hold': { bg: '#fff3e0', text: '#e65100' },
+  'Delayed': { bg: '#fce4ec', text: '#a32a2a' },
+  'Cancelled': { bg: '#f5f5f5', text: '#9e9e9e' },
 };
 const StatusPill = ({ status }) => {
   const c = statusColors[status] || statusColors['Planned'];
@@ -55,7 +55,7 @@ const NewPlotForm = ({ projectId, token, onSuccess, onClose }) => {
     try {
       const res = await apiFetch(`/projects/${projectId}/plots/`, { method: 'POST', token, body: JSON.stringify(payload) });
       if (res.ok) { showSuccessMessage('Plot created ✅'); onSuccess(); onClose(); }
-      else { const d = await res.json(); setError(Object.entries(d).map(([k,v]) => `${k}: ${Array.isArray(v)?v.join(', '):v}`).join(' | ')); }
+      else { const d = await res.json(); setError(Object.entries(d).map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(', ') : v}`).join(' | ')); }
     } catch { setError('Connection error.'); } finally { setSaving(false); }
   };
 
@@ -119,7 +119,6 @@ const ProjectDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
   const [showNewPlot, setShowNewPlot] = useState(false);
-  const [showInvite, setShowInvite] = useState(false);
 
   useEffect(() => { fetchAll(); }, [id]);
 
@@ -145,8 +144,8 @@ const ProjectDetailPage = () => {
       }
       if (plotsRes.ok) setPlots(unwrapList(await plotsRes.json()));
       if (reportsRes.ok) setReports(unwrapList(await reportsRes.json()));
-    } catch (e) { 
-      console.error("Fetch error in ProjectDetailPage:", e); 
+    } catch (e) {
+      console.error("Fetch error in ProjectDetailPage:", e);
     } finally { setLoading(false); }
   };
 
@@ -172,7 +171,6 @@ const ProjectDetailPage = () => {
     { id: 'plots', label: `Plots (${plots.length})` },
     { id: 'team', label: 'Team' },
     { id: 'reports', label: `Reports (${reports.length})` },
-    { id: 'documents', label: 'Documents' },
   ];
 
   if (loading) return <div style={{ padding: '60px', display: 'flex', justifyContent: 'center' }}><Spinner /></div>;
@@ -185,7 +183,11 @@ const ProjectDetailPage = () => {
   const pm = project.project_manager;
   const client = project.client;
   const consultants = project.consultants || [];
-  const teamMembers = [pm, client, ...consultants].filter(Boolean);
+
+  const teamMembers = [];
+  if (pm) teamMembers.push({ ...pm, display_role: 'project_manager' });
+  if (client) teamMembers.push({ ...client, display_role: 'client' });
+  consultants.forEach(c => teamMembers.push({ ...c, display_role: 'consultant' }));
 
   return (
     <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 0 60px' }}>
@@ -202,15 +204,16 @@ const ProjectDetailPage = () => {
         </div>
         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
           <StatusPill status={project.project_status} />
-          <button className="btn-ghost" style={{ display: 'flex', alignItems: 'center', gap: '8px' }} onClick={() => navigate(`/projects/${id}/edit`)}>
-            <Edit2 size={15} /> Edit
-          </button>
-          <button className="btn-ghost" onClick={() => navigate('/team/invite')} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <UserPlus size={15} /> Invite
-          </button>
-          <button className="btn-primary" onClick={() => navigate(`/projects/${id}/plots/new`)} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Plus size={15} /> Add Plot
-          </button>
+          {(project.role === 'owner' || project.role === 'project_manager') && (
+            <>
+              <button className="btn-ghost" style={{ display: 'flex', alignItems: 'center', gap: '8px' }} onClick={() => navigate(`/projects/${id}/edit`)}>
+                <Edit2 size={15} /> Edit
+              </button>
+              <button className="btn-primary" onClick={() => navigate(`/projects/${id}/plots/new`)} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Plus size={15} /> Add Plot
+              </button>
+            </>
+          )}
         </div>
       </div>
 
@@ -280,9 +283,6 @@ const ProjectDetailPage = () => {
           <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '20px', padding: '24px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
               <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', color: 'var(--text-tertiary)', textTransform: 'uppercase', margin: 0 }}>Team</p>
-              <button className="btn-ghost" onClick={() => setShowInvite(true)} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', padding: '6px 14px' }}>
-                <Plus size={14} /> Add Member
-              </button>
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', alignItems: 'center' }}>
               {teamMembers.map((m, i) => (
@@ -330,9 +330,11 @@ const ProjectDetailPage = () => {
       {activeTab === 'plots' && (
         <div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
-            <button className="btn-primary" onClick={() => setShowNewPlot(true)} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Plus size={15} /> Add Plot
-            </button>
+            {(project.role === 'owner' || project.role === 'project_manager') && (
+              <button className="btn-primary" onClick={() => setShowNewPlot(true)} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Plus size={15} /> Add Plot
+              </button>
+            )}
           </div>
           {plots.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '60px', color: 'var(--text-tertiary)' }}>
@@ -377,11 +379,6 @@ const ProjectDetailPage = () => {
       {/* Team Tab */}
       {activeTab === 'team' && (
         <div>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
-            <button className="btn-primary" onClick={() => setShowInvite(true)} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <UserPlus size={15} /> Invite Member
-            </button>
-          </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {teamMembers.map((m, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '18px 24px', background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '16px' }}>
@@ -390,7 +387,7 @@ const ProjectDetailPage = () => {
                   <p style={{ margin: 0, fontWeight: 700, color: 'var(--text-primary)', fontSize: '15px' }}>{m.display_name || m.username}</p>
                   <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-tertiary)' }}>{m.email}</p>
                 </div>
-                <RoleBadge role={i === 0 ? 'project_manager' : i === 1 ? 'client' : 'consultant'} />
+                <RoleBadge role={m.display_role} />
               </div>
             ))}
             {teamMembers.length === 0 && (
@@ -442,13 +439,8 @@ const ProjectDetailPage = () => {
             </div>
           )}
         </div>
-      )}
 
-      {/* Documents Tab */}
-      {activeTab === 'documents' && (
-        <DocumentList projectId={id} role={project.role} />
       )}
-
       {/* Modals */}
       {showNewPlot && (
         <FormOverlay onClose={() => setShowNewPlot(false)}>
@@ -456,13 +448,6 @@ const ProjectDetailPage = () => {
         </FormOverlay>
       )}
 
-      <InviteModal
-        isOpen={showInvite}
-        onClose={() => setShowInvite(false)}
-        type="project"
-        entityId={id}
-        title="Invite to Project"
-      />
     </div>
   );
 };

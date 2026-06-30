@@ -25,6 +25,7 @@ const CreateProjectPage = () => {
     target_end_date: '',
     project_manager: '',
     address: '',
+    project_status: 'Planned',
     cover_image: null
   });
 
@@ -207,14 +208,10 @@ const CreateProjectPage = () => {
                 onChange={e => setFormData({...formData, project_status: e.target.value})}
                 style={inputStyle}
               >
-                <option value="Planned">Planning</option>
-                <option value="In Progress">Active</option>
-                <option value="On Hold">On Hold</option>
-                <option value="Completed">Completed</option>
+                {['Planned', 'In Progress', 'Completed', 'On Hold', 'Delayed', 'Cancelled'].map(s => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
               </select>
-              <p style={{ fontSize: '12px', color: 'var(--text-tertiary)', marginTop: '8px' }}>
-                Planning / Active / On Hold / Completed
-              </p>
             </div>
           </div>
 

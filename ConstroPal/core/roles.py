@@ -107,8 +107,8 @@ REPORT_REVIEW_ROLES = {"owner", "client", "project_manager", "consultant"}
 # Work item permissions
 # ---------------------------------------------------------------------------
 
-#: Roles that may create work items (only PM)
-WORK_ITEM_CREATE_ROLES = {"project_manager"}
+#: Roles that may create work items (PM and owner)
+WORK_ITEM_CREATE_ROLES = {"owner", "project_manager"}
 
 #: Roles that may update work item status/progress
 WORK_ITEM_UPDATE_ROLES = {"owner", "project_manager", "foreman", "consultant"}
@@ -116,15 +116,15 @@ WORK_ITEM_UPDATE_ROLES = {"owner", "project_manager", "foreman", "consultant"}
 #: Roles that may delete work items
 WORK_ITEM_DELETE_ROLES = {"owner", "project_manager"}
 
-#: Only PM can approve or reject work items submitted by the foreman
-WORK_ITEM_APPROVE_ROLES = {"project_manager"}
+#: Only PM (and owner) can approve or reject work items submitted by the foreman
+WORK_ITEM_APPROVE_ROLES = {"owner", "project_manager"}
 
 # ---------------------------------------------------------------------------
 # Job item permissions
 # ---------------------------------------------------------------------------
 
-#: Roles that may create job items (only PM)
-JOB_ITEM_CREATE_ROLES = {"project_manager"}
+#: Roles that may create job items (PM and owner)
+JOB_ITEM_CREATE_ROLES = {"owner", "project_manager"}
 
 #: Roles that may update job item status/progress
 JOB_ITEM_UPDATE_ROLES = {"owner", "project_manager", "foreman", "consultant"}
@@ -132,8 +132,8 @@ JOB_ITEM_UPDATE_ROLES = {"owner", "project_manager", "foreman", "consultant"}
 #: Roles that may delete job items
 JOB_ITEM_DELETE_ROLES = {"owner", "project_manager"}
 
-#: Only PM can approve or reject job items submitted by the foreman
-JOB_ITEM_APPROVE_ROLES = {"project_manager"}
+#: Only PM (and owner) can approve or reject job items submitted by the foreman
+JOB_ITEM_APPROVE_ROLES = {"owner", "project_manager"}
 
 # ---------------------------------------------------------------------------
 # Visibility — which roles see unapproved items

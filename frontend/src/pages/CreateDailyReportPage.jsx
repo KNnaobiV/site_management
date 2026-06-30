@@ -250,7 +250,7 @@ const CreateDailyReportPage = () => {
             <Camera size={20} color="var(--brand-orange)" />
             Progress Photos
           </h3>
-          <ImageUploader files={reportImages} onChange={setReportImages} label="Upload site photos" max={12} />
+          <ImageUploader files={reportImages} onChange={setReportImages} label="Upload site photos" max={4} />
         </section>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--border-default)', paddingTop: '40px', marginTop: '12px' }}>

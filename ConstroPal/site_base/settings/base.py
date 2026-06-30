@@ -170,6 +170,15 @@ CLOUDINARY_STORAGE = {
     'API_SECRET': CFG.get('CLOUDINARY', 'CLOUDINARY_API_SECRET', fallback=''),
 }
 
+# Explicitly configure the Cloudinary SDK so URL generation and uploads work
+# without relying solely on cloudinary_storage's lazy initialization.
+cloudinary.config(
+    cloud_name=CLOUDINARY_STORAGE['CLOUD_NAME'],
+    api_key=CLOUDINARY_STORAGE['API_KEY'],
+    api_secret=CLOUDINARY_STORAGE['API_SECRET'],
+    secure=True,  # Always use https:// URLs
+)
+
 STORAGES = {
     "default": {
         "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
