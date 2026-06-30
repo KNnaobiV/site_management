@@ -57,6 +57,7 @@ from .views import (
     ProjectInvitationViewSet,
     PlotInvitationViewSet,
     NotificationViewSet,
+    DocumentViewSet,
 )
 from finance.views import (
     JobItemExpenseViewSet,
@@ -98,6 +99,7 @@ project_router = nested_routers.NestedDefaultRouter(
     router, r"projects", lookup="project"
 )
 project_router.register(r"plots", ConstructionPlotViewSet, basename="project-plots")
+project_router.register(r"documents", DocumentViewSet, basename="project-documents")
  
 # ---------------------------------------------------------------------------
 # /projects/{project_pk}/plots/{plot_pk}/workitems/

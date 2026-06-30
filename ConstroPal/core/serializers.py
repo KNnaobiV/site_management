@@ -35,6 +35,7 @@ from core.models import (
     PlotRole,
     WorkItemImage,
     JobReportImage,
+    Document,
 )
 from core.roles import get_project_role, get_plot_role
  

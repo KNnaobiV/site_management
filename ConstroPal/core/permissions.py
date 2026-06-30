@@ -515,4 +515,4 @@ class CanManageExpenses(BasePermission):
     def has_object_permission(self, request, view, obj):
         # obj is Expense
         plot = obj.job_item.work_item.construction_plot
-        return get_plot_role(request.user, plot) in {"owner", "project_manager", "foreman"}
+        return get_plot_role(request.user, plot) in {"owner", "project_manager", "foreman"}
