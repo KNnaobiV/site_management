@@ -25,8 +25,7 @@ const CreateProjectPage = () => {
     target_end_date: '',
     project_manager: '',
     address: '',
-    project_status: 'Planned',
-    cover_image: null
+    project_status: 'Planned'
   });
 
   useEffect(() => {
@@ -49,8 +48,7 @@ const CreateProjectPage = () => {
           start_date: project.start_date || new Date().toISOString().split('T')[0],
           target_end_date: project.target_end_date || '',
           project_manager: project.project_manager?.id || '',
-          address: project.address || '',
-          cover_image: null
+          address: project.address || ''
         });
         
         // Ensure the selected users are prepopulated in the searchable options
@@ -103,16 +101,7 @@ const CreateProjectPage = () => {
       client: formData.client || null,
     };
 
-    let bodyData;
-    if (formData.cover_image) {
-      bodyData = new FormData();
-      Object.keys(payload).forEach(key => {
-        if (payload[key] !== null) bodyData.append(key, payload[key]);
-      });
-      bodyData.append('cover_image', formData.cover_image);
-    } else {
-      bodyData = JSON.stringify(payload);
-    }
+    const bodyData = JSON.stringify(payload);
 
     try {
       const res = await apiFetch(isEditing ? `/projects/${projectId}/` : '/projects/', {
@@ -227,22 +216,7 @@ const CreateProjectPage = () => {
               />
             </div>
 
-            <div>
-              <label style={labelStyle}>Cover Image</label>
-              <input 
-                type="file" 
-                accept="image/*"
-                onChange={e => {
-                  if (e.target.files.length > 0) {
-                    setFormData({...formData, cover_image: e.target.files[0]});
-                  }
-                }}
-                style={inputStyle}
-              />
-              <p style={{ fontSize: '12px', color: 'var(--text-tertiary)', marginTop: '8px' }}>
-                Optional. JPG, PNG or WEBP up to 10MB
-              </p>
-            </div>
+
           </div>
         </div>
 

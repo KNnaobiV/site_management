@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { Edit2, Plus, FileText, UserPlus, MoreHorizontal, MapPin, Calendar, Users } from 'lucide-react';
+import { Edit2, Plus, FileText, UserPlus, MoreHorizontal, MapPin, Calendar, Users, Search, Loader, X, HardHat, Package, Briefcase } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { apiFetch, unwrapList } from '../api/client';
 import { Breadcrumb, Tabs, Avatar, Spinner, RoleBadge, InviteModal } from '../components';
@@ -104,13 +104,21 @@ const NewPlotForm = ({ projectId, token, onSuccess, onClose }) => {
   );
 };
 
+
+// ─── Status badge for invitation ──────────────────────────────────────────────
+const inviteStatusStyle = {
+  pending:  { bg: '#fef3ec', text: '#c14a1e' },
+  accepted: { bg: '#e8f5e9', text: '#2d5a27' },
+  declined: { bg: '#fce4ec', text: '#a32a2a' },
+  revoked:  { bg: '#f5f5f5', text: '#9e9e9e' },
+};
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 const ProjectDetailPage = () => {
   const { projectId } = useParams();
-  const id = projectId; // Alias for backward compatibility if needed
-  const { token } = useAuth();
+  const id = projectId;
+  const { token, user: currentUser } = useAuth();
   const location = useLocation();
-  console.log("ProjectDetailPage ID:", id);
   const navigate = useNavigate();
 
   const [project, setProject] = useState(null);
@@ -119,6 +127,11 @@ const ProjectDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
   const [showNewPlot, setShowNewPlot] = useState(false);
+  const [showProjectInvite, setShowProjectInvite] = useState(false);
+
+  // Team tab state
+  const [pendingInvites, setPendingInvites] = useState([]);
+  const [loadingInvites, setLoadingInvites] = useState(false);
 
   useEffect(() => { fetchAll(); }, [id]);
 
@@ -126,6 +139,11 @@ const ProjectDetailPage = () => {
     const tab = new URLSearchParams(location.search).get('tab');
     if (tab) setActiveTab(tab);
   }, [location.search]);
+
+  useEffect(() => {
+    if (activeTab === 'team') fetchInvitations();
+    if (activeTab === 'reports') fetchReports();
+  }, [activeTab]);
 
   const fetchAll = async () => {
     setLoading(true);
@@ -135,36 +153,65 @@ const ProjectDetailPage = () => {
         apiFetch(`/projects/${id}/plots/`, { token }),
         apiFetch(`/projects/${id}/reports/`, { token }),
       ]);
-      if (projRes.ok) {
-        const data = await projRes.json();
-        console.log("Project fetch success:", data);
-        setProject(data);
-      } else {
-        console.error("Project fetch failed:", projRes.status, id);
-      }
+      if (projRes.ok) setProject(await projRes.json());
       if (plotsRes.ok) setPlots(unwrapList(await plotsRes.json()));
       if (reportsRes.ok) setReports(unwrapList(await reportsRes.json()));
     } catch (e) {
-      console.error("Fetch error in ProjectDetailPage:", e);
+      console.error('Fetch error in ProjectDetailPage:', e);
     } finally { setLoading(false); }
   };
 
   const fetchReports = async () => {
     try {
       const res = await apiFetch(`/projects/${id}/reports/`, { token });
-      if (res.ok) {
-        const data = await res.json();
-        console.log('Project reports fetch:', data);
-        setReports(unwrapList(data));
-      } else {
-        console.warn('Failed fetching project reports', res.status);
-      }
+      if (res.ok) setReports(unwrapList(await res.json()));
     } catch (e) { console.error('Error fetching project reports', e); }
   };
 
-  useEffect(() => {
-    if (activeTab === 'reports') fetchReports();
-  }, [activeTab]);
+  // Fetch all project + plot invitations and merge, filtered to this project
+  const fetchInvitations = async () => {
+    setLoadingInvites(true);
+    try {
+      const [projInvRes, plotInvRes] = await Promise.all([
+        apiFetch('/invitations/projects/', { token }),
+        apiFetch('/invitations/plots/', { token }),
+      ]);
+
+      const projectInvites = projInvRes.ok
+        ? unwrapList(await projInvRes.json())
+            .filter(inv => inv.project === parseInt(id) || inv.project?.id === parseInt(id))
+            .map(inv => ({ ...inv, _type: 'project', _scopeLabel: 'Project' }))
+        : [];
+
+      const plotInvites = plotInvRes.ok
+        ? unwrapList(await plotInvRes.json())
+            .filter(inv => {
+              // Filter only invitations belonging to plots in this project
+              return inv.project_name === project?.project_name ||
+                     (inv.plot && plots.some(p => p.id === inv.plot));
+            })
+            .map(inv => ({ ...inv, _type: 'plot', _scopeLabel: inv.plot_address || 'Plot' }))
+        : [];
+
+      // Merge and sort newest first
+      const merged = [...projectInvites, ...plotInvites]
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      setPendingInvites(merged);
+    } catch (e) {
+      console.error('Error fetching invitations', e);
+    } finally { setLoadingInvites(false); }
+  };
+
+  const handleRevoke = async (inv) => {
+    if (!window.confirm('Revoke this invitation?')) return;
+    const url = inv._type === 'plot'
+      ? `/invitations/plots/${inv.id}/revoke/`
+      : `/invitations/projects/${inv.id}/revoke/`;
+    try {
+      const res = await apiFetch(url, { method: 'POST', token });
+      if (res.ok) { showSuccessMessage('Invitation revoked'); fetchInvitations(); }
+    } catch (e) { console.error(e); }
+  };
 
   const tabs = [
     { id: 'overview', label: 'Overview' },
@@ -189,6 +236,8 @@ const ProjectDetailPage = () => {
   if (client) teamMembers.push({ ...client, display_role: 'client' });
   consultants.forEach(c => teamMembers.push({ ...c, display_role: 'consultant' }));
 
+  const canManage = project.role === 'owner' || project.role === 'project_manager';
+
   return (
     <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 0 60px' }}>
       {/* Breadcrumb */}
@@ -204,12 +253,15 @@ const ProjectDetailPage = () => {
         </div>
         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
           <StatusPill status={project.project_status} />
-          {(project.role === 'owner' || project.role === 'project_manager') && (
+          {canManage && (
             <>
               <button className="btn-ghost" style={{ display: 'flex', alignItems: 'center', gap: '8px' }} onClick={() => navigate(`/projects/${id}/edit`)}>
                 <Edit2 size={15} /> Edit
               </button>
-              <button className="btn-primary" onClick={() => navigate(`/projects/${id}/plots/new`)} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <button className="btn-primary" onClick={() => setShowProjectInvite(true)} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <UserPlus size={15} /> Invite
+              </button>
+              <button className="btn-primary" onClick={() => setShowNewPlot(true)} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Plus size={15} /> Add Plot
               </button>
             </>
@@ -225,7 +277,6 @@ const ProjectDetailPage = () => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
           {/* Info cards row */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
-            {/* Project Manager */}
             {pm && (
               <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '20px', padding: '24px' }}>
                 <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: '14px' }}>Project Manager</p>
@@ -239,7 +290,6 @@ const ProjectDetailPage = () => {
                 {pm.email && <p style={{ margin: '0 0 4px', fontSize: '13px', color: 'var(--text-secondary)' }}>✉ {pm.email}</p>}
               </div>
             )}
-            {/* Client */}
             {client && (
               <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '20px', padding: '24px' }}>
                 <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: '14px' }}>Client</p>
@@ -253,7 +303,6 @@ const ProjectDetailPage = () => {
                 {client.email && <p style={{ margin: '0 0 4px', fontSize: '13px', color: 'var(--text-secondary)' }}>✉ {client.email}</p>}
               </div>
             )}
-            {/* Dates */}
             <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '20px', padding: '24px' }}>
               <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: '14px' }}>Dates</p>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
@@ -271,7 +320,6 @@ const ProjectDetailPage = () => {
                 </div>
               </div>
             </div>
-            {/* Plots count */}
             <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '20px', padding: '24px' }}>
               <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: '14px' }}>Plots</p>
               <p style={{ fontSize: '48px', fontFamily: 'var(--font-serif)', margin: '0 0 4px', color: 'var(--text-primary)', lineHeight: 1 }}>{plots.length}</p>
@@ -283,6 +331,11 @@ const ProjectDetailPage = () => {
           <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '20px', padding: '24px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
               <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', color: 'var(--text-tertiary)', textTransform: 'uppercase', margin: 0 }}>Team</p>
+              {canManage && (
+                <button className="btn-ghost" onClick={() => setShowProjectInvite(true)} style={{ fontSize: '13px', color: 'var(--brand-orange)', borderColor: 'transparent', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <UserPlus size={14} /> Invite →
+                </button>
+              )}
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', alignItems: 'center' }}>
               {teamMembers.map((m, i) => (
@@ -291,6 +344,9 @@ const ProjectDetailPage = () => {
                   <p style={{ margin: 0, fontSize: '12px', fontWeight: 600, color: 'var(--text-primary)', textAlign: 'center', maxWidth: '80px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.display_name || m.username}</p>
                 </div>
               ))}
+              {teamMembers.length === 0 && (
+                <p style={{ color: 'var(--text-tertiary)', fontSize: '14px', margin: 0 }}>No team members yet. <button className="btn-ghost" onClick={() => setActiveTab('team')} style={{ fontSize: '14px', color: 'var(--brand-orange)', borderColor: 'transparent', padding: '0' }}>Invite someone →</button></p>
+              )}
             </div>
           </div>
 
@@ -330,7 +386,7 @@ const ProjectDetailPage = () => {
       {activeTab === 'plots' && (
         <div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
-            {(project.role === 'owner' || project.role === 'project_manager') && (
+            {canManage && (
               <button className="btn-primary" onClick={() => setShowNewPlot(true)} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Plus size={15} /> Add Plot
               </button>
@@ -378,24 +434,115 @@ const ProjectDetailPage = () => {
 
       {/* Team Tab */}
       {activeTab === 'team' && (
-        <div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {teamMembers.map((m, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '18px 24px', background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '16px' }}>
-                <Avatar name={m.display_name || m.username} size={48} />
-                <div style={{ flex: 1 }}>
-                  <p style={{ margin: 0, fontWeight: 700, color: 'var(--text-primary)', fontSize: '15px' }}>{m.display_name || m.username}</p>
-                  <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-tertiary)' }}>{m.email}</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+
+          {/* Current Members */}
+          <div>
+            <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', color: 'var(--text-tertiary)', textTransform: 'uppercase', margin: '0 0 16px' }}>Current Members</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {teamMembers.map((m, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '18px 24px', background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '16px' }}>
+                  <Avatar name={m.display_name || m.username} size={48} />
+                  <div style={{ flex: 1 }}>
+                    <p style={{ margin: 0, fontWeight: 700, color: 'var(--text-primary)', fontSize: '15px' }}>{m.display_name || m.username}</p>
+                    <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-tertiary)' }}>{m.email}</p>
+                  </div>
+                  <RoleBadge role={m.display_role} />
                 </div>
-                <RoleBadge role={m.display_role} />
-              </div>
-            ))}
-            {teamMembers.length === 0 && (
-              <div style={{ textAlign: 'center', padding: '60px', color: 'var(--text-tertiary)' }}>
-                <Users size={40} style={{ margin: '0 auto 16px', display: 'block', opacity: 0.3 }} />
-                <p style={{ fontWeight: 600 }}>No team members yet</p>
-              </div>
-            )}
+              ))}
+              {teamMembers.length === 0 && (
+                <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-tertiary)' }}>
+                  <Users size={36} style={{ margin: '0 auto 12px', display: 'block', opacity: 0.3 }} />
+                  <p style={{ fontWeight: 600, margin: '0 0 4px' }}>No team members yet</p>
+                  <p style={{ fontSize: '14px', margin: 0 }}>Use the form below to invite your first member.</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+
+          {/* Pending Invitations Table */}
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', color: 'var(--text-tertiary)', textTransform: 'uppercase', margin: 0 }}>
+                Pending Invitations ({pendingInvites.length})
+              </p>
+              {loadingInvites && <Spinner />}
+            </div>
+            <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '16px', overflow: 'hidden' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid var(--border-default)', background: 'var(--bg-raised)' }}>
+                    <th style={thStyle}>INVITEE</th>
+                    <th style={thStyle}>ROLE</th>
+                    <th style={thStyle}>SCOPE</th>
+                    <th style={thStyle}>STATUS</th>
+                    <th style={thStyle}>SENT</th>
+                    <th style={thStyle}>ACTIONS</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pendingInvites.map((inv, i) => {
+                    const s = inviteStatusStyle[inv.status] || inviteStatusStyle.pending;
+                    const isLast = i === pendingInvites.length - 1;
+                    return (
+                      <tr key={`${inv._type}-${inv.id}`} style={{ borderBottom: isLast ? 'none' : '1px solid var(--border-subtle)' }}>
+                        <td style={tdStyle}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <Avatar name={inv.invitee?.display_name || inv.invitee?.username || '?'} size={32} />
+                            <div>
+                              <p style={{ margin: 0, fontWeight: 600, fontSize: '13px' }}>{inv.invitee?.display_name || inv.invitee?.username}</p>
+                              <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-tertiary)' }}>{inv.invitee?.email}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td style={tdStyle}>
+                          <span style={{ fontWeight: 600, fontSize: '13px', textTransform: 'capitalize' }}>{inv.role?.replace('_', ' ')}</span>
+                        </td>
+                        <td style={tdStyle}>
+                          <span style={{
+                            display: 'inline-flex', alignItems: 'center', gap: '5px',
+                            padding: '3px 10px', borderRadius: '100px', fontSize: '12px', fontWeight: 600,
+                            background: inv._type === 'project' ? 'rgba(249,115,22,0.1)' : 'rgba(99,102,241,0.1)',
+                            color: inv._type === 'project' ? 'var(--brand-orange)' : '#6366f1',
+                          }}>
+                            {inv._type === 'project' ? <Briefcase size={11} /> : <MapPin size={11} />}
+                            {inv._type === 'project' ? 'Project' : inv._scopeLabel}
+                          </span>
+                        </td>
+                        <td style={tdStyle}>
+                          <span style={{ display: 'inline-block', padding: '3px 12px', borderRadius: '100px', fontSize: '12px', fontWeight: 600, background: s.bg, color: s.text }}>
+                            {inv.status}
+                          </span>
+                        </td>
+                        <td style={tdStyle}>
+                          <span style={{ fontSize: '13px', color: 'var(--text-tertiary)' }}>
+                            {inv.created_at ? new Date(inv.created_at).toLocaleDateString() : '—'}
+                          </span>
+                        </td>
+                        <td style={tdStyle}>
+                          {inv.status === 'pending' && (
+                            <button
+                              onClick={() => handleRevoke(inv)}
+                              style={{ background: 'none', border: 'none', color: '#dc2626', fontWeight: 600, fontSize: '13px', cursor: 'pointer', padding: 0 }}
+                            >
+                              Revoke
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                  {pendingInvites.length === 0 && !loadingInvites && (
+                    <tr>
+                      <td colSpan="6" style={{ padding: '40px', textAlign: 'center', color: 'var(--text-tertiary)', fontSize: '14px' }}>
+                        No invitations yet
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}
@@ -439,17 +586,29 @@ const ProjectDetailPage = () => {
             </div>
           )}
         </div>
-
       )}
+
       {/* Modals */}
+      {showProjectInvite && (
+        <InviteModal
+          isOpen={showProjectInvite}
+          onClose={() => setShowProjectInvite(false)}
+          onSuccess={fetchInvitations}
+          type="project"
+          entityId={id}
+          title="Invite to Project"
+        />
+      )}
       {showNewPlot && (
         <FormOverlay onClose={() => setShowNewPlot(false)}>
           <NewPlotForm projectId={id} token={token} onSuccess={fetchAll} onClose={() => setShowNewPlot(false)} />
         </FormOverlay>
       )}
-
     </div>
   );
 };
+
+const thStyle = { padding: '14px 20px', fontSize: '11px', fontWeight: 700, color: 'var(--text-tertiary)', letterSpacing: '0.06em' };
+const tdStyle = { padding: '16px 20px', fontSize: '14px', color: 'var(--text-primary)' };
 
 export default ProjectDetailPage;

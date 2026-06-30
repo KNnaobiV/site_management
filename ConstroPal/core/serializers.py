@@ -114,7 +114,7 @@ class ConstructionProjectSerializer(RoleFilteredSerializer):
     number_of_plots = serializers.IntegerField(required=False, default=1)
     
     role = serializers.SerializerMethodField()
-    cover_image = serializers.SerializerMethodField()
+    cover_image = serializers.ImageField(required=False)
     
     def get_role(self, obj):
         user = self.context.get("request").user
@@ -122,18 +122,18 @@ class ConstructionProjectSerializer(RoleFilteredSerializer):
             return "none"
         from core.roles import get_project_role
         return get_project_role(user, obj)
-
-    def get_cover_image(self, obj):
-        if not obj.cover_image:
-            return None
-        url = obj.cover_image.url
-        # If Cloudinary is configured correctly, .url is already a full https:// URL.
-        # As a safety net, make it absolute using the request context.
-        if url and not url.startswith('http'):
-            request = self.context.get('request')
-            if request:
-                url = request.build_absolute_uri(url)
-        return url
+    
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        if instance.cover_image and 'cover_image' in ret:
+            url = instance.cover_image.url
+            # Safety net for non-absolute local media URLs
+            if url and not url.startswith('http'):
+                request = self.context.get('request')
+                if request:
+                    url = request.build_absolute_uri(url)
+            ret['cover_image'] = url
+        return ret
  
     # Write-only FK inputs
     client_id = serializers.PrimaryKeyRelatedField(
