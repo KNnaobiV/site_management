@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Edit2, Plus, FileText, UserPlus, MapPin, Clock } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { apiFetch, unwrapList } from '../api/client';
-import { Breadcrumb, Tabs, Avatar, Spinner, ProgressDonut, InviteModal, ChecklistEditor, ImageUploader, DocumentList } from '../components';
+import { Breadcrumb, Tabs, Avatar, Spinner, ProgressDonut, InviteModal, ChecklistEditor, ImageUploader } from '../components';
 import { showSuccessMessage } from '../utils/successMessage';
 
 const statusColors = {
