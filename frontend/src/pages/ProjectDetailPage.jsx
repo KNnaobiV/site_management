@@ -3,7 +3,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Edit2, Plus, FileText, UserPlus, MoreHorizontal, MapPin, Calendar, Users, Search, Loader, X, HardHat, Package, Briefcase } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { apiFetch, unwrapList } from '../api/client';
-import { Breadcrumb, Tabs, Avatar, Spinner, RoleBadge, InviteModal, DocumentList } from '../components';
+import { Breadcrumb, Tabs, Avatar, Spinner, RoleBadge, InviteModal } from '../components';
 import { showSuccessMessage } from '../utils/successMessage';
 
 // ─── Status pill ──────────────────────────────────────────────────────────────
@@ -589,10 +589,10 @@ const ProjectDetailPage = () => {
         </div>
       )}
 
-      {/* Documents Tab */}
+      /* {/* Documents Tab */}
       {activeTab === 'documents' && (
         <DocumentList projectId={id} role={project.role} />
-      )}
+      )} */
 
       {/* Modals */}
       {showProjectInvite && (
