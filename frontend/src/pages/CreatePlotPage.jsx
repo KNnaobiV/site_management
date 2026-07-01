@@ -20,7 +20,7 @@ const CreatePlotPage = () => {
   const [users, setUsers] = useState([]);
   const [projectsList, setProjectsList] = useState([]);
   const [fieldsUpdated, setFieldsUpdated] = useState(false);
-  
+
   const [formData, setFormData] = useState({
     plot_name: '',
     construction_project: projectId || '',
@@ -193,16 +193,16 @@ const CreatePlotPage = () => {
     <div className="fade-up" style={{ padding: '0 0 80px' }}>
       <div style={{ marginBottom: '32px' }}>
         <Breadcrumb items={[
-          { label: 'Projects', path: '/projects' }, 
+          { label: 'Projects', path: '/projects' },
           { label: project?.project_name || 'Project', path: `/projects/${projectId}` },
           { label: isEditing ? 'Edit Plot' : 'New Plot' }
         ]} />
         <h1 style={{ fontSize: '64px', marginTop: '12px' }}>{isEditing ? 'Edit Plot' : 'Create Plot'}</h1>
       </div>
 
-      <form onSubmit={handleSubmit} className="mobile-padding" style={{ 
-        background: 'var(--bg-card)', 
-        borderRadius: '24px', 
+      <form onSubmit={handleSubmit} className="mobile-padding" style={{
+        background: 'var(--bg-card)',
+        borderRadius: '24px',
         border: '1px solid var(--border-default)',
         padding: '48px',
         maxWidth: '1200px'
@@ -213,23 +213,23 @@ const CreatePlotPage = () => {
             <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div>
                 <label style={labelStyle}>Plot Number *</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   placeholder="Enter plot number"
                   required
                   value={formData.plot_number}
-                  onChange={e => setFormData({...formData, plot_number: e.target.value})}
+                  onChange={e => setFormData({ ...formData, plot_number: e.target.value })}
                   disabled={isEditing && fieldsUpdated}
                   style={inputStyle}
                 />
               </div>
               <div>
                 <label style={labelStyle}>Plot Name *</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   placeholder="Enter plot name"
                   value={formData.plot_name}
-                  onChange={e => setFormData({...formData, plot_name: e.target.value})}
+                  onChange={e => setFormData({ ...formData, plot_name: e.target.value })}
                   disabled={isEditing && fieldsUpdated}
                   style={inputStyle}
                 />
@@ -239,17 +239,17 @@ const CreatePlotPage = () => {
             <div>
               <label style={labelStyle}>Parent Project *</label>
               {projectId ? (
-                <input 
+                <input
                   type="text"
                   disabled
                   value={project?.project_name || 'Project Name'}
                   style={{ ...inputStyle, background: 'var(--bg-canvas)', cursor: 'not-allowed' }}
                 />
               ) : (
-                <SearchableSelect 
+                <SearchableSelect
                   options={projectsList}
                   value={formData.construction_project}
-                  onChange={val => setFormData({...formData, construction_project: val})}
+                  onChange={val => setFormData({ ...formData, construction_project: val })}
                   placeholder="Select project"
                   disabled={isEditing && fieldsUpdated}
                 />
@@ -259,20 +259,20 @@ const CreatePlotPage = () => {
             <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div>
                 <label style={labelStyle}>Foreman</label>
-                <SearchableSelect 
+                <SearchableSelect
                   options={users}
                   value={formData.foreman}
-                  onChange={val => setFormData({...formData, foreman: val})}
+                  onChange={val => setFormData({ ...formData, foreman: val })}
                   onSearch={handleSearchUsers}
                   placeholder="Select foreman"
                 />
               </div>
               <div>
                 <label style={labelStyle}>Storekeeper</label>
-                <SearchableSelect 
+                <SearchableSelect
                   options={users}
                   value={formData.storekeeper}
-                  onChange={val => setFormData({...formData, storekeeper: val})}
+                  onChange={val => setFormData({ ...formData, storekeeper: val })}
                   onSearch={handleSearchUsers}
                   placeholder="Select storekeeper"
                 />
@@ -281,10 +281,10 @@ const CreatePlotPage = () => {
 
             <div>
               <label style={labelStyle}>Address</label>
-              <textarea 
+              <textarea
                 placeholder="Enter site address"
                 value={formData.address}
-                onChange={e => setFormData({...formData, address: e.target.value})}
+                onChange={e => setFormData({ ...formData, address: e.target.value })}
                 disabled={isEditing && fieldsUpdated}
                 style={{ ...inputStyle, minHeight: '100px', resize: 'vertical' }}
               />
@@ -292,14 +292,15 @@ const CreatePlotPage = () => {
 
             <div>
               <label style={labelStyle}>Status *</label>
-              <select 
+              <select
+                required
                 value={formData.status}
-                onChange={e => setFormData({...formData, status: e.target.value})}
+                onChange={e => setFormData({ ...formData, status: e.target.value })}
                 style={inputStyle}
               >
-                <option value="Planned">Planned</option>
-                <option value="In Progress">Active</option>
-                <option value="Completed">Completed</option>
+                {['Planned', 'In Progress', 'Completed', 'On Hold', 'Delayed', 'Cancelled'].map(s => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
               </select>
             </div>
           </div>
@@ -307,25 +308,25 @@ const CreatePlotPage = () => {
           {/* Right Column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <div>
-              <label style={labelStyle}>GPS Coordinates *</label>
+              <label style={labelStyle}>GPS Coordinates</label>
               <div style={{ display: 'flex', gap: '12px' }}>
                 <div style={{ position: 'relative', flex: 1 }}>
                   <MapPin size={16} color="var(--text-tertiary)" style={{ position: 'absolute', left: '16px', top: '18px' }} />
-                  <input 
+                  <input
                     type="text"
                     placeholder="Latitude (e.g. 40.7128)"
                     value={formData.gps_latitude}
-                    onChange={e => setFormData({...formData, gps_latitude: e.target.value})}
+                    onChange={e => setFormData({ ...formData, gps_latitude: e.target.value })}
                     style={{ ...inputStyle, paddingLeft: '44px' }}
                   />
                 </div>
                 <div style={{ position: 'relative', flex: 1 }}>
                   <MapPin size={16} color="var(--text-tertiary)" style={{ position: 'absolute', left: '16px', top: '18px' }} />
-                  <input 
+                  <input
                     type="text"
                     placeholder="Longitude (e.g. -74.0060)"
                     value={formData.gps_longitude}
-                    onChange={e => setFormData({...formData, gps_longitude: e.target.value})}
+                    onChange={e => setFormData({ ...formData, gps_longitude: e.target.value })}
                     style={{ ...inputStyle, paddingLeft: '44px' }}
                   />
                 </div>
@@ -335,21 +336,21 @@ const CreatePlotPage = () => {
             <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div>
                 <label style={labelStyle}>Start Date *</label>
-                <input 
+                <input
                   type="date"
                   required
                   value={formData.start_date}
-                  onChange={e => setFormData({...formData, start_date: e.target.value})}
+                  onChange={e => setFormData({ ...formData, start_date: e.target.value })}
                   style={inputStyle}
                 />
               </div>
               <div>
                 <label style={labelStyle}>Target End Date *</label>
-                <input 
+                <input
                   type="date"
                   required
                   value={formData.target_end_date}
-                  onChange={e => setFormData({...formData, target_end_date: e.target.value})}
+                  onChange={e => setFormData({ ...formData, target_end_date: e.target.value })}
                   style={inputStyle}
                 />
               </div>
@@ -357,10 +358,10 @@ const CreatePlotPage = () => {
 
             <div>
               <label style={labelStyle}>Notes</label>
-              <textarea 
+              <textarea
                 placeholder="Add any additional notes about this plot"
                 value={formData.notes}
-                onChange={e => setFormData({...formData, notes: e.target.value})}
+                onChange={e => setFormData({ ...formData, notes: e.target.value })}
                 style={{ ...inputStyle, minHeight: '100px', resize: 'vertical' }}
               />
             </div>
@@ -375,15 +376,15 @@ const CreatePlotPage = () => {
                   step="0.01"
                   placeholder="e.g. 50,000,000"
                   value={formData.budget_amount}
-                  onChange={e => setFormData({...formData, budget_amount: e.target.value})}
+                  onChange={e => setFormData({ ...formData, budget_amount: e.target.value })}
                   style={inputStyle}
                 />
                 <select
                   value={formData.budget_currency}
-                  onChange={e => setFormData({...formData, budget_currency: e.target.value})}
+                  onChange={e => setFormData({ ...formData, budget_currency: e.target.value })}
                   style={{ ...inputStyle, width: '90px' }}
                 >
-                  {['NGN','USD','GBP','EUR'].map(c => <option key={c} value={c}>{c}</option>)}
+                  {['NGN', 'USD', 'GBP', 'EUR'].map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
             </div>
@@ -393,12 +394,12 @@ const CreatePlotPage = () => {
         </div>
 
         {error && (
-          <div style={{ 
-            marginTop: '24px', 
-            background: 'rgba(239, 68, 68, 0.1)', 
-            border: '1px solid var(--status-delayed)', 
-            color: 'var(--status-delayed)', 
-            padding: '20px', 
+          <div style={{
+            marginTop: '24px',
+            background: 'rgba(239, 68, 68, 0.1)',
+            border: '1px solid var(--status-delayed)',
+            color: 'var(--status-delayed)',
+            padding: '20px',
             borderRadius: '12px',
             fontSize: '14px'
           }}>

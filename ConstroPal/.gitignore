@@ -5,5 +5,6 @@ staticfiles/
 /envs
 venv/
 *.log
-*/migrations/*
+*/migrations/*.py
+!*/migrations/__init__.py
 /media/*

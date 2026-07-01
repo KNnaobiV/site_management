@@ -15,6 +15,9 @@ from datetime import timedelta
 import os
 from pathlib import Path
 
+import cloudinary
+import cloudinary.uploader
+
 # Build paths inside the project like this: BASE_DIR / "subdir".
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
@@ -45,6 +48,7 @@ DJANGO_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
+    "cloudinary_storage",
     "django.contrib.staticfiles",
     "django.contrib.sites",
 ]
@@ -69,6 +73,7 @@ THIRD_PARTY_APPS = [
     "allauth.socialaccount.providers.apple",
     "dj_rest_auth",
     "dj_rest_auth.registration",
+    "cloudinary",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + CUSTOM_USER_APPS + THIRD_PARTY_APPS
@@ -159,8 +164,32 @@ STATIC_ROOT = BASE_DIR / "site_base" / "staticfiles"
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "site_base" / "media"
 
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': CFG.get('CLOUDINARY', 'CLOUDINARY_CLOUD_NAME', fallback=''),
+    'API_KEY': CFG.get('CLOUDINARY', 'CLOUDINARY_API_KEY', fallback=''),
+    'API_SECRET': CFG.get('CLOUDINARY', 'CLOUDINARY_API_SECRET', fallback=''),
+}
 
-# Default primary key field type
+# Explicitly configure the Cloudinary SDK so URL generation and uploads work
+# without relying solely on cloudinary_storage's lazy initialization.
+cloudinary.config(
+    cloud_name=CLOUDINARY_STORAGE['CLOUD_NAME'],
+    api_key=CLOUDINARY_STORAGE['API_KEY'],
+    api_secret=CLOUDINARY_STORAGE['API_SECRET'],
+    secure=True,  # Always use https:// URLs
+)
+
+STORAGES = {
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "cloudinary_storage.storage.StaticHashedCloudinaryStorage",
+    },
+}
+
+
+# Default primary key field  
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

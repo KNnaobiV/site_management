@@ -303,6 +303,22 @@ const JobItemDetailPage = () => {
     } catch (err) { console.error(err); }
   };
 
+  const handleDeleteReport = async (reportId) => {
+    if (!window.confirm("Delete this daily report?")) return;
+    try {
+      const url = `/projects/${projectId}/plots/${plotId}/workitems/${workItemId}/jobitems/${id}/reports/${reportId}/`;
+      const res = await apiFetch(url, { method: 'DELETE', token });
+      if (res.ok) {
+        showSuccessMessage("Daily report deleted.");
+        setSelectedReport(null);
+        fetchAll();
+      } else {
+        const d = await res.json();
+        alert(d.detail || "Failed to delete report.");
+      }
+    } catch (e) { console.error(e); }
+  };
+
   if (loading) return <div style={{ padding: '60px', display: 'flex', justifyContent: 'center' }}><Spinner /></div>;
   if (!jobItem) return <div style={{ padding: '60px', textAlign: 'center', color: 'var(--text-tertiary)' }}>Job item not found.</div>;
 
@@ -354,9 +370,11 @@ const JobItemDetailPage = () => {
           </div>
         </div >
         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-          <button className="btn-ghost" onClick={() => navigate(`/job-items/${id}/edit`)} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Edit2 size={15} /> Edit Job
-          </button>
+          {hasFinanceAccess && (
+            <button className="btn-ghost" onClick={() => navigate(`/job-items/${id}/edit`)} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Edit2 size={15} /> Edit Job
+            </button>
+          )}
           {!jobItem.is_approved && (
             <button className="btn-ghost" onClick={handleApprove} style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#2d5a27', borderColor: '#2d5a27' }}>
               <CheckCircle2 size={18} /> Approve Job
@@ -376,9 +394,11 @@ const JobItemDetailPage = () => {
               <Plus size={15} /> Add Expense
             </button>
           )}
-          <button className="btn-primary" onClick={() => navigate(`/job-items/${id}/reports/new`)} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Plus size={15} /> Write Report
-          </button>
+          {hasFinanceAccess && (
+            <button className="btn-primary" onClick={() => navigate(`/job-items/${id}/reports/new`)} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Plus size={15} /> Write Report
+            </button>
+          )}
         </div>
       </div >
 
@@ -576,9 +596,11 @@ const JobItemDetailPage = () => {
         <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '20px', padding: '24px', position: 'sticky', top: '20px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
             <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', color: 'var(--text-tertiary)', textTransform: 'uppercase', margin: 0 }}>Daily Reports ({reports.length})</p>
-            <button className="btn-ghost" onClick={() => navigate(`/job-items/${id}/reports/new`)} style={{ fontSize: '12px', padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-              <Plus size={12} /> New
-            </button>
+            {hasFinanceAccess && (
+              <button className="btn-ghost" onClick={() => navigate(`/job-items/${id}/reports/new`)} style={{ fontSize: '12px', padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <Plus size={12} /> New
+              </button>
+            )}
           </div>
 
           {reports.length === 0 ? (
@@ -684,12 +706,25 @@ const JobItemDetailPage = () => {
               </button>
 
               {/* Report Details */}
-              <h2 style={{ fontSize: '28px', marginBottom: '6px', marginTop: 0 }}>
-                Report Details
-              </h2>
-              <p style={{ color: 'var(--text-tertiary)', marginBottom: '24px' }}>
-                {selectedReport.report_date}
-              </p>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  <h2 style={{ fontSize: '28px', marginBottom: '6px', marginTop: 0 }}>
+                    Report Details
+                  </h2>
+                  <p style={{ color: 'var(--text-tertiary)', marginBottom: '24px' }}>
+                    {selectedReport.report_date}
+                  </p>
+                </div>
+                {plot?.role === 'project_manager' && (
+                  <button 
+                    onClick={() => handleDeleteReport(selectedReport.id)}
+                    className="btn-ghost" 
+                    style={{ color: '#dc2626', borderColor: 'transparent', padding: '8px 12px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', marginTop: '4px', marginRight: '32px' }}
+                  >
+                    <Trash2 size={16} /> Delete
+                  </button>
+                )}
+              </div>
 
               <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '28px' }}>
                 <div>

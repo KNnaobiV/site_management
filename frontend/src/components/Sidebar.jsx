@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
   Briefcase,
@@ -7,7 +7,6 @@ import {
   CheckSquare,
   ClipboardList,
   Bell,
-  UserPlus,
   ChevronRight,
   HardHat,
   LogOut,
@@ -18,6 +17,9 @@ import Avatar from './Avatar';
 
 const Sidebar = ({ isOpen, toggleSidebar, isMobile }) => {
   const { user, logout } = useAuth();
+  const location = useLocation();
+
+  const projectMatch = location.pathname.match(/^\/projects\/(\d+)/);
 
   const navItems = [
     { to: '/', icon: LayoutDashboard, label: 'Dashboard' },

@@ -115,6 +115,7 @@ class ConstructionProjectSerializer(RoleFilteredSerializer):
     number_of_plots = serializers.IntegerField(required=False, default=1)
     
     role = serializers.SerializerMethodField()
+    cover_image = serializers.ImageField(required=False)
     
     def get_role(self, obj):
         user = self.context.get("request").user
@@ -122,6 +123,18 @@ class ConstructionProjectSerializer(RoleFilteredSerializer):
             return "none"
         from core.roles import get_project_role
         return get_project_role(user, obj)
+    
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        if instance.cover_image and 'cover_image' in ret:
+            url = instance.cover_image.url
+            # Safety net for non-absolute local media URLs
+            if url and not url.startswith('http'):
+                request = self.context.get('request')
+                if request:
+                    url = request.build_absolute_uri(url)
+            ret['cover_image'] = url
+        return ret
  
     # Write-only FK inputs
     client_id = serializers.PrimaryKeyRelatedField(
@@ -146,6 +159,7 @@ class ConstructionProjectSerializer(RoleFilteredSerializer):
         "target_end_date",
         "number_of_plots",
         "role",
+        "cover_image",
     }
  
     ROLE_EXTRA = {
@@ -183,6 +197,7 @@ class ConstructionProjectSerializer(RoleFilteredSerializer):
             "number_of_plots",
             "is_deleted",
             "role",
+            "cover_image",
         ]
         read_only_fields = ["id", "start_date", "created_by", "is_deleted"]
  
@@ -316,6 +331,22 @@ class ConstructionPlotSerializer(RoleFilteredSerializer):
 # ===========================================================================
 
 class WorkItemImageSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+    caption = serializers.CharField(source='description', required=False, allow_blank=True)
+    uploaded_at = serializers.DateTimeField(source='created_at', read_only=True)
+
+    def get_image(self, obj):
+        if not obj.img:
+            return None
+        url = obj.img.url
+        # If Cloudinary is configured correctly, .url is already a full https:// URL.
+        # As a safety net, make it absolute using the request context.
+        if url and not url.startswith('http'):
+            request = self.context.get('request')
+            if request:
+                url = request.build_absolute_uri(url)
+        return url
+
     class Meta:
         model = WorkItemImage
         fields = ["id", "work_item", "image", "caption", "uploaded_at"]
@@ -410,6 +441,22 @@ class WorkItemSerializer(RoleFilteredSerializer):
 # ===========================================================================
 
 class JobReportImageSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+    caption = serializers.CharField(source='description', required=False, allow_blank=True)
+    uploaded_at = serializers.DateTimeField(source='created_at', read_only=True)
+
+    def get_image(self, obj):
+        if not obj.img:
+            return None
+        url = obj.img.url
+        # If Cloudinary is configured correctly, .url is already a full https:// URL.
+        # As a safety net, make it absolute using the request context.
+        if url and not url.startswith('http'):
+            request = self.context.get('request')
+            if request:
+                url = request.build_absolute_uri(url)
+        return url
+
     class Meta:
         model = JobReportImage
         fields = ["id", "report", "image", "caption", "uploaded_at"]
@@ -542,9 +589,9 @@ class JobReportSerializer(RoleFilteredSerializer):
     }
  
     ROLE_EXTRA = {
-        "project_manager": {"internal_comments", "job_image", "job_video"},
-        "foreman":         {"job_image", "job_video"},
-        "storekeeper":     {"job_image", "job_video"},
+        "project_manager": {"internal_comments", "job_video"},
+        "foreman":         {"job_video"},
+        "storekeeper":     {"job_video"},
         "consultant":      set(),
     }
  
@@ -567,7 +614,6 @@ class JobReportSerializer(RoleFilteredSerializer):
             "external_comments",
             "internal_comments",
             "days_elapsed",
-            "job_image",
             "job_video",
             "images",
             "updated_at",
@@ -710,62 +756,41 @@ SiteInvitationSerializer = PlotInvitationSerializer
 
 class WorkItemImageUploadSerializer(serializers.ModelSerializer):
     """Used for POST /workitems/{pk}/images/ — expects multipart form data."""
+    image = serializers.ImageField(source='img')
+    caption = serializers.CharField(source='description', required=False, allow_blank=True)
+    uploaded_at = serializers.DateTimeField(source='created_at', read_only=True)
+
     class Meta:
         model = WorkItemImage
         fields = ["id", "image", "caption", "uploaded_at"]
         read_only_fields = ["id", "uploaded_at"]
 
+    def create(self, validated_data):
+        validated_data['uploaded_by'] = self.context['request'].user
+        return super().create(validated_data)
+
 
 class JobReportImageUploadSerializer(serializers.ModelSerializer):
     """Used for POST /reports/{pk}/images/ — expects multipart form data."""
+    image = serializers.ImageField(source='img')
+    caption = serializers.CharField(source='description', required=False, allow_blank=True)
+    uploaded_at = serializers.DateTimeField(source='created_at', read_only=True)
+
     class Meta:
         model = JobReportImage
         fields = ["id", "image", "caption", "uploaded_at"]
         read_only_fields = ["id", "uploaded_at"]
 
+    def validate(self, attrs):
+        report_id = self.context.get('view').kwargs.get('pk')
+        if report_id:
+            from core.models import JobReportImage
+            if JobReportImage.objects.filter(report_id=report_id).count() >= 4:
+                raise serializers.ValidationError("A maximum of 4 images can be attached to a job report.")
+        return attrs
 
-# ===========================================================================
-# Document
-# ===========================================================================
+    def create(self, validated_data):
+        validated_data['uploaded_by'] = self.context['request'].user
+        return super().create(validated_data)
 
-class DocumentSerializer(RoleFilteredSerializer):
-    """
-    Field visibility by role
-    ------------------------
-    pm/client/consultant : can see visibility flags
-    foreman/storekeeper  : only see document details
-    """
-    uploaded_by = UserSummarySerializer(read_only=True)
 
-    ALWAYS_VISIBLE = {
-        "id",
-        "project",
-        "plot",
-        "uploaded_by",
-        "name",
-        "file",
-        "created_at",
-    }
-
-    ROLE_EXTRA = {
-        "project_manager": {"visible_to_storekeepers", "visible_to_foremen"},
-        "client": {"visible_to_storekeepers", "visible_to_foremen"},
-        "consultant": {"visible_to_storekeepers", "visible_to_foremen"},
-        "foreman": set(),
-        "storekeeper": set(),
-    }
-
-    class Meta:
-        model = Document
-        fields = [
-            "id",
-            "project",
-            "plot",
-            "uploaded_by",
-            "name",
-            "file",
-            "visible_to_storekeepers",
-            "visible_to_foremen",
-            "created_at",
-        ]
-        read_only_fields = ["id", "uploaded_by", "created_at"]

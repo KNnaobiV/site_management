@@ -22,7 +22,6 @@ import JobItemDetailPage from "./pages/JobItemDetailPage";
 import CreateDailyReportPage from "./pages/CreateDailyReportPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import InvitationsPage from "./pages/InvitationsPage";
-import InviteTeamMemberPage from "./pages/InviteTeamMemberPage";
 import EditProfilePage from "./pages/EditProfilePage";
 import UpdatePasswordPage from "./pages/UpdatePasswordPage";
 import ProfilePage from "./pages/ProfilePage";
@@ -78,7 +77,6 @@ export default function App() {
                 <Route path="/job-items/:jobItemId/reports/new" element={<CreateDailyReportPage />} />
                 <Route path="/notifications" element={<NotificationsPage />} />
                 <Route path="/invitations" element={<InvitationsPage />} />
-                <Route path="/team/invite" element={<InviteTeamMemberPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/profile/edit" element={<EditProfilePage />} />
                 <Route path="/profile/update-password" element={<UpdatePasswordPage />} />

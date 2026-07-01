@@ -7,12 +7,12 @@ import { Breadcrumb, Tabs, Avatar, Spinner, ProgressDonut, InviteModal, Checklis
 import { showSuccessMessage } from '../utils/successMessage';
 
 const statusColors = {
-  'Planned':    { bg: '#e8e8e8', text: '#555' },
-  'In Progress':{ bg: '#fef3ec', text: '#c14a1e' },
-  'Completed':  { bg: '#e8f5e9', text: '#2d5a27' },
-  'On Hold':    { bg: '#fff3e0', text: '#e65100' },
-  'Delayed':    { bg: '#fce4ec', text: '#a32a2a' },
-  'Cancelled':  { bg: '#f5f5f5', text: '#9e9e9e' },
+  'Planned': { bg: '#e8e8e8', text: '#555' },
+  'In Progress': { bg: '#fef3ec', text: '#c14a1e' },
+  'Completed': { bg: '#e8f5e9', text: '#2d5a27' },
+  'On Hold': { bg: '#fff3e0', text: '#e65100' },
+  'Delayed': { bg: '#fce4ec', text: '#a32a2a' },
+  'Cancelled': { bg: '#f5f5f5', text: '#9e9e9e' },
 };
 const StatusPill = ({ status }) => {
   const c = statusColors[status] || statusColors['Planned'];
@@ -73,7 +73,7 @@ const NewWorkItemForm = ({ projectId, plotId, token, onSuccess, onClose }) => {
         showSuccessMessage('Work item created ✅');
         onSuccess(); onClose();
       } else {
-        const d = await res.json(); setError(Object.entries(d).map(([k,v]) => `${k}: ${Array.isArray(v)?v.join(', '):v}`).join(' | '));
+        const d = await res.json(); setError(Object.entries(d).map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(', ') : v}`).join(' | '));
       }
     } catch { setError('Connection error.'); } finally { setSaving(false); }
   };
@@ -95,7 +95,7 @@ const NewWorkItemForm = ({ projectId, plotId, token, onSuccess, onClose }) => {
         <div>
           <label style={labelStyle}>Status *</label>
           <select required value={form.work_status} onChange={e => set('work_status', e.target.value)} style={inputStyle}>
-            {['Planned','In Progress','Completed','On Hold','Delayed','Cancelled'].map(s => <option key={s} value={s}>{s}</option>)}
+            {['Planned', 'In Progress', 'Completed', 'On Hold', 'Delayed', 'Cancelled'].map(s => <option key={s} value={s}>{s}</option>)}
           </select>
         </div>
         <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
@@ -148,6 +148,7 @@ const PlotDetailPage = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [showNewWorkItem, setShowNewWorkItem] = useState(false);
   const [showInvite, setShowInvite] = useState(false);
+  const [inviteRole, setInviteRole] = useState('foreman');
   const [exportScope, setExportScope] = useState('plot');
   const [exportWorkItemId, setExportWorkItemId] = useState('');
   const [exportJobItemId, setExportJobItemId] = useState('');
@@ -178,8 +179,8 @@ const PlotDetailPage = () => {
         if (wiRes.ok) setWorkItems(unwrapList(await wiRes.json()));
         if (reportsRes.ok) setReports(unwrapList(await reportsRes.json()));
       }
-    } catch (e) { 
-      console.error("PlotDetailPage fetch error:", e); 
+    } catch (e) {
+      console.error("PlotDetailPage fetch error:", e);
     } finally { setLoading(false); }
   };
 
@@ -266,9 +267,7 @@ const PlotDetailPage = () => {
     { id: 'workitems', label: `Work Items (${workItems.length})` },
     { id: 'team', label: 'Team' },
     { id: 'reports', label: `Reports (${reports.length})` },
-    { id: 'media', label: 'Media' },
-    { id: 'documents', label: 'Documents' },
-  ];
+  ]
 
   if (loading) return <div style={{ padding: '60px', display: 'flex', justifyContent: 'center' }}><Spinner /></div>;
   if (!plot) return <div style={{ padding: '60px', textAlign: 'center', color: 'var(--text-tertiary)' }}>Plot not found.</div>;
@@ -290,10 +289,12 @@ const PlotDetailPage = () => {
           {plot.notes && <p style={{ color: 'var(--text-secondary)', maxWidth: '600px', fontSize: '15px' }}>{plot.notes}</p>}
         </div>
         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
-          <button className="btn-ghost" style={{ display: 'flex', alignItems: 'center', gap: '8px' }} onClick={() => navigate(`/plots/${id}/edit`)}><Edit2 size={15} /> Edit</button>
-          <button className="btn-ghost" onClick={() => navigate('/team/invite')} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><UserPlus size={15} /> Invite</button>
+          {(plot.role === 'owner' || plot.role === 'project_manager') && (
+            <button className="btn-ghost" style={{ display: 'flex', alignItems: 'center', gap: '8px' }} onClick={() => navigate(`/plots/${id}/edit`)}><Edit2 size={15} /> Edit</button>
+          )}
+          <button className="btn-ghost" onClick={() => { setInviteRole('foreman'); setShowInvite(true); }} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><UserPlus size={15} /> Invite</button>
           <button className="btn-ghost" onClick={() => setActiveTab('reports')} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><FileText size={15} /> Generate Report</button>
-          {plot.role === 'project_manager' && plot.status !== 'Completed' && (
+          {(plot.role === 'owner' || plot.role === 'project_manager') && plot.status !== 'Completed' && (
             <button className="btn-primary" onClick={() => navigate(`/plots/${id}/work-items/new`)} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Plus size={15} /> Add Work Item</button>
           )}
         </div>
@@ -375,7 +376,7 @@ const PlotDetailPage = () => {
       {activeTab === 'workitems' && (
         <div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
-            {plot.role === 'project_manager' && plot.status !== 'Completed' && (
+            {(plot.role === 'owner' || plot.role === 'project_manager') && plot.status !== 'Completed' && (
               <button className="btn-primary" onClick={() => setShowNewWorkItem(true)} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Plus size={15} /> Add Work Item
               </button>
@@ -408,48 +409,73 @@ const PlotDetailPage = () => {
         </div>
       )}
 
-      {/* Team Tab */}
+        {/* Team Tab */}
       {activeTab === 'team' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h2 style={{ fontSize: '24px', margin: 0 }}>Team Members</h2>
-            <button className="btn-primary" onClick={() => setShowInvite(true)} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <UserPlus size={15} /> Invite
-            </button>
+            <h2 style={{ fontSize: '24px', margin: 0 }}>Plot Team</h2>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              {!plot.foreman && (
+                <button className="btn-ghost" onClick={() => { setInviteRole('foreman'); setShowInvite(true); }} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <UserPlus size={15} /> Invite Foreman
+                </button>
+              )}
+              {!plot.storekeeper && (
+                <button className="btn-primary" onClick={() => { setInviteRole('storekeeper'); setShowInvite(true); }} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <UserPlus size={15} /> Invite Storekeeper
+                </button>
+              )}
+            </div>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
-            {/* Foreman */}
-            {plot.foreman && (
+            {/* Foreman slot */}
+            {plot.foreman ? (
               <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '20px', padding: '24px' }}>
+                <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', color: 'var(--text-tertiary)', textTransform: 'uppercase', margin: '0 0 16px' }}>Foreman</p>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                   <Avatar name={plot.foreman.display_name || plot.foreman.username} size={48} />
                   <div style={{ flex: 1 }}>
                     <p style={{ margin: '0 0 4px', fontWeight: 700, fontSize: '16px', color: 'var(--text-primary)' }}>{plot.foreman.display_name || plot.foreman.username}</p>
-                    <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-secondary)' }}>Foreman</p>
+                    <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-secondary)' }}>{plot.foreman.email}</p>
                   </div>
                 </div>
               </div>
+            ) : (
+              <div
+                onClick={() => { setInviteRole('foreman'); setShowInvite(true); }}
+                style={{ background: 'var(--bg-raised)', border: '2px dashed var(--border-default)', borderRadius: '20px', padding: '28px 24px', cursor: 'pointer', textAlign: 'center', transition: 'border-color 0.2s' }}
+                onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--brand-orange)'}
+                onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border-default)'}
+              >
+                <UserPlus size={28} color="var(--text-tertiary)" style={{ margin: '0 auto 10px', display: 'block' }} />
+                <p style={{ margin: '0 0 4px', fontWeight: 600, fontSize: '15px', color: 'var(--text-primary)' }}>No Foreman Assigned</p>
+                <p style={{ margin: 0, fontSize: '13px', color: 'var(--brand-orange)' }}>Tap to invite a foreman →</p>
+              </div>
             )}
 
-            {/* Storekeeper */}
-            {plot.storekeeper && (
+            {/* Storekeeper slot */}
+            {plot.storekeeper ? (
               <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '20px', padding: '24px' }}>
+                <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', color: 'var(--text-tertiary)', textTransform: 'uppercase', margin: '0 0 16px' }}>Storekeeper</p>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                   <Avatar name={plot.storekeeper.display_name || plot.storekeeper.username} size={48} />
                   <div style={{ flex: 1 }}>
                     <p style={{ margin: '0 0 4px', fontWeight: 700, fontSize: '16px', color: 'var(--text-primary)' }}>{plot.storekeeper.display_name || plot.storekeeper.username}</p>
-                    <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-secondary)' }}>Storekeeper</p>
+                    <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-secondary)' }}>{plot.storekeeper.email}</p>
                   </div>
                 </div>
               </div>
-            )}
-
-            {/* If no team members */}
-            {!plot.foreman && !plot.storekeeper && (
-              <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px', color: 'var(--text-tertiary)' }}>
-                <p style={{ fontWeight: 600 }}>No team members assigned</p>
-                <p style={{ fontSize: '14px' }}>Invite team members to get started.</p>
+            ) : (
+              <div
+                onClick={() => { setInviteRole('storekeeper'); setShowInvite(true); }}
+                style={{ background: 'var(--bg-raised)', border: '2px dashed var(--border-default)', borderRadius: '20px', padding: '28px 24px', cursor: 'pointer', textAlign: 'center', transition: 'border-color 0.2s' }}
+                onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--brand-orange)'}
+                onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border-default)'}
+              >
+                <UserPlus size={28} color="var(--text-tertiary)" style={{ margin: '0 auto 10px', display: 'block' }} />
+                <p style={{ margin: '0 0 4px', fontWeight: 600, fontSize: '15px', color: 'var(--text-primary)' }}>No Storekeeper Assigned</p>
+                <p style={{ margin: 0, fontSize: '13px', color: 'var(--brand-orange)' }}>Tap to invite a storekeeper →</p>
               </div>
             )}
           </div>
@@ -582,10 +608,7 @@ const PlotDetailPage = () => {
         </div>
       )}
 
-      {/* Documents Tab */}
-      {activeTab === 'documents' && (
-        <DocumentList projectId={projectId} plotId={id} role={plot.role} />
-      )}
+
 
       {/* Modals */}
       {showNewWorkItem && (
@@ -597,10 +620,12 @@ const PlotDetailPage = () => {
       <InviteModal
         isOpen={showInvite}
         onClose={() => setShowInvite(false)}
+        onSuccess={fetchAll}
         type="plot"
         entityId={id}
         projectId={projectId}
-        title="Invite to Plot"
+        defaultRole={inviteRole}
+        title={`Invite ${inviteRole === 'foreman' ? 'Foreman' : 'Storekeeper'}`}
       />
     </div>
   );
