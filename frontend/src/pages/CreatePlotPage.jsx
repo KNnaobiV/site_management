@@ -20,7 +20,6 @@ const CreatePlotPage = () => {
   const [users, setUsers] = useState([]);
   const [projectsList, setProjectsList] = useState([]);
   const [fieldsUpdated, setFieldsUpdated] = useState(false);
-
   const [formData, setFormData] = useState({
     plot_name: '',
     construction_project: projectId || '',

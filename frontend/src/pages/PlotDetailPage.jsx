@@ -409,7 +409,7 @@ const PlotDetailPage = () => {
         </div>
       )}
 
-        {/* Team Tab */}
+      {/* Team Tab */}
       {activeTab === 'team' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -607,7 +607,6 @@ const PlotDetailPage = () => {
           <p style={{ fontWeight: 600 }}>No media uploaded yet.</p>
         </div>
       )}
-
 
 
       {/* Modals */}

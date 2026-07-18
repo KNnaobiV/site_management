@@ -59,19 +59,19 @@ export default function App() {
                 <Route path="/projects/:projectId/plots/new" element={<CreatePlotPage />} />
                 <Route path="/plots/new" element={<CreatePlotPage />} />
                 <Route path="/plots/:plotId/edit" element={<CreatePlotPage />} />
-                
+
                 <Route path="/plots" element={<PlotsPage />} />
                 <Route path="/plots/:plotId" element={<PlotDetailPage />} />
                 <Route path="/plots/:plotId/work-items/new" element={<CreateWorkItemPage />} />
                 <Route path="/work-items/new" element={<CreateWorkItemPage />} />
-                
+
                 <Route path="/work-items" element={<WorkItemsPage />} />
                 <Route path="/work-items/:workItemId" element={<WorkItemDetailPage />} />
                 <Route path="/work-items/:workItemId/edit" element={<CreateWorkItemPage />} />
                 <Route path="/work-items/:workItemId/job-items/new" element={<CreateJobItemPage />} />
                 <Route path="/job-items/new" element={<CreateJobItemPage />} />
                 <Route path="/job-items/:jobItemId/edit" element={<CreateJobItemPage />} />
-                
+
                 <Route path="/job-items" element={<JobItemsPage />} />
                 <Route path="/job-items/:jobItemId" element={<JobItemDetailPage />} />
                 <Route path="/job-items/:jobItemId/reports/new" element={<CreateDailyReportPage />} />

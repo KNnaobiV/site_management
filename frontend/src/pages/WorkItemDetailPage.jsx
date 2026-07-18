@@ -7,12 +7,12 @@ import { Breadcrumb, Tabs, Avatar, Spinner, ProgressDonut, MaterialsEditor, Imag
 import { showSuccessMessage } from '../utils/successMessage';
 
 const statusColors = {
-  'Planned':    { bg: '#e8e8e8', text: '#555' },
-  'In Progress':{ bg: '#fef3ec', text: '#c14a1e' },
-  'Completed':  { bg: '#e8f5e9', text: '#2d5a27' },
-  'On Hold':    { bg: '#fff3e0', text: '#e65100' },
-  'Delayed':    { bg: '#fce4ec', text: '#a32a2a' },
-  'Cancelled':  { bg: '#f5f5f5', text: '#9e9e9e' },
+  'Planned': { bg: '#e8e8e8', text: '#555' },
+  'In Progress': { bg: '#fef3ec', text: '#c14a1e' },
+  'Completed': { bg: '#e8f5e9', text: '#2d5a27' },
+  'On Hold': { bg: '#fff3e0', text: '#e65100' },
+  'Delayed': { bg: '#fce4ec', text: '#a32a2a' },
+  'Cancelled': { bg: '#f5f5f5', text: '#9e9e9e' },
 };
 const StatusPill = ({ status }) => {
   const c = statusColors[status] || statusColors['Planned'];
@@ -31,7 +31,7 @@ const FormOverlay = ({ children, onClose }) => (
 const inputStyle = { width: '100%', padding: '16px', borderRadius: '14px', border: '1px solid var(--border-default)', background: 'var(--bg-raised)', color: 'var(--text-primary)', fontSize: '15px', fontFamily: 'var(--font-sans)' };
 const labelStyle = { display: 'block', marginBottom: '10px', fontWeight: 600, fontSize: '14px', color: 'var(--text-secondary)', letterSpacing: '0.04em' };
 
-const ARTISANS = ['Mason','Plumber','Electrician','Carpenter','Painter','Roofer','Iron Bender','Tiler','Glass Worker','Aluminium Worker','Other'];
+const ARTISANS = ['Mason', 'Plumber', 'Electrician', 'Carpenter', 'Painter', 'Roofer', 'Iron Bender', 'Tiler', 'Glass Worker', 'Aluminium Worker', 'Other'];
 
 // ─── New Job Item Form ─────────────────────────────────────────────────────────
 const NewJobItemForm = ({ projectId, plotId, workItemId, token, onSuccess, onClose }) => {
@@ -65,7 +65,7 @@ const NewJobItemForm = ({ projectId, plotId, workItemId, token, onSuccess, onClo
     try {
       const res = await apiFetch(`/projects/${projectId}/plots/${plotId}/workitems/${workItemId}/jobitems/`, { method: 'POST', token, body: JSON.stringify(payload) });
       if (res.ok) { showSuccessMessage('Job item created ✅'); onSuccess(); onClose(); }
-      else { const d = await res.json(); setError(Object.entries(d).map(([k,v]) => `${k}: ${Array.isArray(v)?v.join(', '):v}`).join(' | ')); }
+      else { const d = await res.json(); setError(Object.entries(d).map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(', ') : v}`).join(' | ')); }
     } catch { setError('Connection error.'); } finally { setSaving(false); }
   };
 
@@ -96,13 +96,13 @@ const NewJobItemForm = ({ projectId, plotId, workItemId, token, onSuccess, onClo
           <div>
             <label style={labelStyle}>Status *</label>
             <select required value={form.job_status} onChange={e => set('job_status', e.target.value)} style={inputStyle}>
-              {['Planned','In Progress','Completed','On Hold','Delayed','Cancelled'].map(s => <option key={s} value={s}>{s}</option>)}
+              {['Planned', 'In Progress', 'Completed', 'On Hold', 'Delayed', 'Cancelled'].map(s => <option key={s} value={s}>{s}</option>)}
             </select>
           </div>
           <div>
             <label style={labelStyle}>Priority *</label>
             <select required value={form.priority} onChange={e => set('priority', e.target.value)} style={inputStyle}>
-              {['Low','Medium','High','Urgent'].map(p => <option key={p} value={p}>{p}</option>)}
+              {['Low', 'Medium', 'High', 'Urgent'].map(p => <option key={p} value={p}>{p}</option>)}
             </select>
           </div>
         </div>
@@ -179,7 +179,7 @@ const WorkItemDetailPage = () => {
       if (wiRes.ok) {
         const wiData = await wiRes.json();
         setWorkItem(wiData);
-        
+
         const pid = pidFromUrl || wiData.construction_project;
         const plid = plidFromUrl || wiData.construction_plot;
         setProjectId(pid);
@@ -194,8 +194,8 @@ const WorkItemDetailPage = () => {
         if (plotRes.ok) setPlot(await plotRes.json());
         if (jiRes.ok) setJobItems(unwrapList(await jiRes.json()));
       }
-    } catch (e) { 
-      console.error("WorkItemDetailPage fetch error:", e); 
+    } catch (e) {
+      console.error("WorkItemDetailPage fetch error:", e);
     } finally { setLoading(false); }
   };
 

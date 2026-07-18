@@ -107,10 +107,10 @@ const NewPlotForm = ({ projectId, token, onSuccess, onClose }) => {
 
 // ─── Status badge for invitation ──────────────────────────────────────────────
 const inviteStatusStyle = {
-  pending:  { bg: '#fef3ec', text: '#c14a1e' },
+  pending: { bg: '#fef3ec', text: '#c14a1e' },
   accepted: { bg: '#e8f5e9', text: '#2d5a27' },
   declined: { bg: '#fce4ec', text: '#a32a2a' },
-  revoked:  { bg: '#f5f5f5', text: '#9e9e9e' },
+  revoked: { bg: '#f5f5f5', text: '#9e9e9e' },
 };
 
 // ─── Main Component ───────────────────────────────────────────────────────────
@@ -179,18 +179,18 @@ const ProjectDetailPage = () => {
 
       const projectInvites = projInvRes.ok
         ? unwrapList(await projInvRes.json())
-            .filter(inv => inv.project === parseInt(id) || inv.project?.id === parseInt(id))
-            .map(inv => ({ ...inv, _type: 'project', _scopeLabel: 'Project' }))
+          .filter(inv => inv.project === parseInt(id) || inv.project?.id === parseInt(id))
+          .map(inv => ({ ...inv, _type: 'project', _scopeLabel: 'Project' }))
         : [];
 
       const plotInvites = plotInvRes.ok
         ? unwrapList(await plotInvRes.json())
-            .filter(inv => {
-              // Filter only invitations belonging to plots in this project
-              return inv.project_name === project?.project_name ||
-                     (inv.plot && plots.some(p => p.id === inv.plot));
-            })
-            .map(inv => ({ ...inv, _type: 'plot', _scopeLabel: inv.plot_address || 'Plot' }))
+          .filter(inv => {
+            // Filter only invitations belonging to plots in this project
+            return inv.project_name === project?.project_name ||
+              (inv.plot && plots.some(p => p.id === inv.plot));
+          })
+          .map(inv => ({ ...inv, _type: 'plot', _scopeLabel: inv.plot_address || 'Plot' }))
         : [];
 
       // Merge and sort newest first

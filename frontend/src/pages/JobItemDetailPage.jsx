@@ -716,9 +716,9 @@ const JobItemDetailPage = () => {
                   </p>
                 </div>
                 {plot?.role === 'project_manager' && (
-                  <button 
+                  <button
                     onClick={() => handleDeleteReport(selectedReport.id)}
-                    className="btn-ghost" 
+                    className="btn-ghost"
                     style={{ color: '#dc2626', borderColor: 'transparent', padding: '8px 12px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', marginTop: '4px', marginRight: '32px' }}
                   >
                     <Trash2 size={16} /> Delete

@@ -1,0 +1,20 @@
+netdata:
+  image: netdata/netdata
+  restart: unless-stopped
+  hostname: "${DOCKER_HOST_IP:-[IP_ADDRESS]}"
+  ports:
+    - "19999:19999"
+  cap_add:
+    - SYS_PTRACE
+  security_opt:
+    - apparmor:unconfined
+  volumes:
+    - /etc/netdata:/etc/netdata
+    - /var/run/docker.sock:/var/run/docker.sock
+    - netdata-storage:/var/lib/netdata
+
+healthcheck:
+  test: ["CMD", "curl", "http://localhost:8000/api/health/"]
+  interval: 30s
+  timeout: 10s
+  retries: 3

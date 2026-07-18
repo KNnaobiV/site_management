@@ -16,7 +16,7 @@ const CreateProjectPage = () => {
   const [error, setError] = useState(null);
   const [users, setUsers] = useState([]);
   const [clientUpdated, setClientUpdated] = useState(false);
-  
+
   const [formData, setFormData] = useState({
     project_name: '',
     client: '',
@@ -50,7 +50,7 @@ const CreateProjectPage = () => {
           project_manager: project.project_manager?.id || '',
           address: project.address || ''
         });
-        
+
         // Ensure the selected users are prepopulated in the searchable options
         const initialUsers = [];
         if (project.client) {
@@ -133,9 +133,9 @@ const CreateProjectPage = () => {
         <h1 style={{ fontSize: '64px', marginTop: '12px' }}>{isEditing ? 'Edit Project' : 'Create Project'}</h1>
       </div>
 
-      <form onSubmit={handleSubmit} className="mobile-padding" style={{ 
-        background: 'var(--bg-card)', 
-        borderRadius: '24px', 
+      <form onSubmit={handleSubmit} className="mobile-padding" style={{
+        background: 'var(--bg-card)',
+        borderRadius: '24px',
         border: '1px solid var(--border-default)',
         padding: '48px',
         maxWidth: '1200px'
@@ -145,22 +145,22 @@ const CreateProjectPage = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <div>
               <label style={labelStyle}>Project Name</label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 placeholder="Enter project name"
                 required
                 value={formData.project_name}
-                onChange={e => setFormData({...formData, project_name: e.target.value})}
+                onChange={e => setFormData({ ...formData, project_name: e.target.value })}
                 style={inputStyle}
               />
             </div>
 
             <div>
               <label style={labelStyle}>Address</label>
-              <textarea 
+              <textarea
                 placeholder="Enter project address"
                 value={formData.address}
-                onChange={e => setFormData({...formData, address: e.target.value})}
+                onChange={e => setFormData({ ...formData, address: e.target.value })}
                 disabled={isEditing && clientUpdated}
                 style={{ ...inputStyle, minHeight: '120px', resize: 'vertical' }}
               />
@@ -169,22 +169,22 @@ const CreateProjectPage = () => {
             <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div>
                 <label style={labelStyle}>Start Date *</label>
-                <input 
+                <input
                   type="date"
                   required
                   value={formData.start_date}
-                  onChange={e => setFormData({...formData, start_date: e.target.value})}
+                  onChange={e => setFormData({ ...formData, start_date: e.target.value })}
                   disabled={isEditing && clientUpdated}
                   style={inputStyle}
                 />
               </div>
               <div>
                 <label style={labelStyle}>Target End Date *</label>
-                <input 
+                <input
                   type="date"
                   required
                   value={formData.target_end_date}
-                  onChange={e => setFormData({...formData, target_end_date: e.target.value})}
+                  onChange={e => setFormData({ ...formData, target_end_date: e.target.value })}
                   style={inputStyle}
                 />
               </div>
@@ -192,9 +192,9 @@ const CreateProjectPage = () => {
 
             <div>
               <label style={labelStyle}>Status</label>
-              <select 
+              <select
                 value={formData.project_status}
-                onChange={e => setFormData({...formData, project_status: e.target.value})}
+                onChange={e => setFormData({ ...formData, project_status: e.target.value })}
                 style={inputStyle}
               >
                 {['Planned', 'In Progress', 'Completed', 'On Hold', 'Delayed', 'Cancelled'].map(s => (
@@ -208,14 +208,13 @@ const CreateProjectPage = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <div>
               <label style={labelStyle}>Description</label>
-              <textarea 
+              <textarea
                 placeholder="Enter project description"
                 value={formData.project_description}
-                onChange={e => setFormData({...formData, project_description: e.target.value})}
+                onChange={e => setFormData({ ...formData, project_description: e.target.value })}
                 style={{ ...inputStyle, minHeight: '120px', resize: 'vertical' }}
               />
             </div>
-
 
           </div>
         </div>
