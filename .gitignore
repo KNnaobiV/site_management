@@ -1,0 +1,4 @@
+constropal/.env
+constropal/logs/
+constropal/media/
+constropal/staticfiles/
