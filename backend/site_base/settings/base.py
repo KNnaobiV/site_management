@@ -24,20 +24,22 @@ APP_DIR = os.path.join(BASE_DIR, "apps")
 
 CFG = configparser.ConfigParser()
 
-if os.path.exists(os.path.join(BASE_DIR, "envs", "prod.env")):
-    CFG.read(os.path.join(BASE_DIR, "envs", "prod.env"))
-else:
+if os.path.exists(os.path.join(BASE_DIR, "envs", "dev.env")):
     CFG.read(os.path.join(BASE_DIR, "envs", "dev.env"))
+    DEBUG = True
+else:
+    CFG.read(os.path.join(BASE_DIR, "env", "prod.env"))
+    DEBUG = False
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "bfquhufqhhfiqfhhqubefiwcn87824329yr928mc3q9&T%TDMG" #config("SECRET_KEY", default='')
+# SECRET_KEY = "bfquhufqhhfiqfhhqubefiwcn87824329yr928mc3q9&T%TDMG" #config("SECRET_KEY", default='')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True # config("DEBUG", default=True)
+# DEBUG = True # config("DEBUG", default=True)
 
 # Application definition
 
@@ -216,7 +218,7 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
     'USER_ID_FIELD': 'id',
     'USER_ID_CLAIM': 'user_id',
-    'SIGNING_KEY': CFG.get("SITE", "DJANGO_SECRET_KEY", fallback=SECRET_KEY)
+    'SIGNING_KEY': CFG.get("SITE", "DJANGO_SECRET_KEY",)
 }
 
 # dj-rest-auth JWT configuration
@@ -243,29 +245,4 @@ ACCOUNT_LOGIN_METHODS = {'email', 'username'}
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*', 'password1*', 'password2*']
 ACCOUNT_EMAIL_VERIFICATION = 'none'   # Custom email confirmation handled in RegisterView
 SOCIALACCOUNT_QUERY_EMAIL = True
-
-GOOGLE_CLIENT_ID = CFG.get('GOOGLE', 'GOOGLE_CLIENT_ID', fallback='')
-GOOGLE_CLIENT_SECRET = CFG.get('GOOGLE', 'GOOGLE_CLIENT_SECRET', fallback='')
-APPLE_CLIENT_ID = CFG.get('APPLE', 'APPLE_CLIENT_ID', fallback='')
-
-SOCIALACCOUNT_PROVIDERS = {
-    'google': {
-        'APP': {
-            'client_id': GOOGLE_CLIENT_ID,
-            'secret': GOOGLE_CLIENT_SECRET,
-            'key': ''
-        }
-    },
-    'apple': {
-        'APP': {
-            'client_id': APPLE_CLIENT_ID,
-            'secret': '',
-            'key': ''
-        }
-    }
-}
-
-
-
-
 
