@@ -260,6 +260,7 @@ body {
         background-position: -200% 0
     }
 }
+
 .fade-in {
     animation: fadeIn 0.3s ease;
 }

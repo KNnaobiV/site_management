@@ -23,6 +23,7 @@ import ChecklistEditor from "./ChecklistEditor";
 import MaterialsEditor from "./MaterialsEditor";
 // import { DocumentList } from "./DocumentList";
 
+
 // ---------------------------------------------------------------------------
 // RoleBadge
 // ---------------------------------------------------------------------------
@@ -116,5 +117,4 @@ export {
     ImageUploader,
     ChecklistEditor,
     MaterialsEditor,
-    // DocumentList,
 };

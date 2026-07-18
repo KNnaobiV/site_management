@@ -3,16 +3,16 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Plus, Check, CheckCircle2, Image as ImageIcon, Edit2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { apiFetch, unwrapList } from '../api/client';
-import { Breadcrumb, Tabs, Avatar, Spinner, ProgressDonut, ChecklistEditor, MaterialsEditor, ImageUploader } from '../components';
+import { Breadcrumb, Tabs, Avatar, Spinner, ProgressDonut, MaterialsEditor, ImageUploader } from '../components';
 import { showSuccessMessage } from '../utils/successMessage';
 
 const statusColors = {
-  'Planned':    { bg: '#e8e8e8', text: '#555' },
-  'In Progress':{ bg: '#fef3ec', text: '#c14a1e' },
-  'Completed':  { bg: '#e8f5e9', text: '#2d5a27' },
-  'On Hold':    { bg: '#fff3e0', text: '#e65100' },
-  'Delayed':    { bg: '#fce4ec', text: '#a32a2a' },
-  'Cancelled':  { bg: '#f5f5f5', text: '#9e9e9e' },
+  'Planned': { bg: '#e8e8e8', text: '#555' },
+  'In Progress': { bg: '#fef3ec', text: '#c14a1e' },
+  'Completed': { bg: '#e8f5e9', text: '#2d5a27' },
+  'On Hold': { bg: '#fff3e0', text: '#e65100' },
+  'Delayed': { bg: '#fce4ec', text: '#a32a2a' },
+  'Cancelled': { bg: '#f5f5f5', text: '#9e9e9e' },
 };
 const StatusPill = ({ status }) => {
   const c = statusColors[status] || statusColors['Planned'];
@@ -31,7 +31,7 @@ const FormOverlay = ({ children, onClose }) => (
 const inputStyle = { width: '100%', padding: '16px', borderRadius: '14px', border: '1px solid var(--border-default)', background: 'var(--bg-raised)', color: 'var(--text-primary)', fontSize: '15px', fontFamily: 'var(--font-sans)' };
 const labelStyle = { display: 'block', marginBottom: '10px', fontWeight: 600, fontSize: '14px', color: 'var(--text-secondary)', letterSpacing: '0.04em' };
 
-const ARTISANS = ['Mason','Plumber','Electrician','Carpenter','Painter','Roofer','Iron Bender','Tiler','Glass Worker','Aluminium Worker','Other'];
+const ARTISANS = ['Mason', 'Plumber', 'Electrician', 'Carpenter', 'Painter', 'Roofer', 'Iron Bender', 'Tiler', 'Glass Worker', 'Aluminium Worker', 'Other'];
 
 // ─── New Job Item Form ─────────────────────────────────────────────────────────
 const NewJobItemForm = ({ projectId, plotId, workItemId, token, onSuccess, onClose }) => {
@@ -65,7 +65,7 @@ const NewJobItemForm = ({ projectId, plotId, workItemId, token, onSuccess, onClo
     try {
       const res = await apiFetch(`/projects/${projectId}/plots/${plotId}/workitems/${workItemId}/jobitems/`, { method: 'POST', token, body: JSON.stringify(payload) });
       if (res.ok) { showSuccessMessage('Job item created ✅'); onSuccess(); onClose(); }
-      else { const d = await res.json(); setError(Object.entries(d).map(([k,v]) => `${k}: ${Array.isArray(v)?v.join(', '):v}`).join(' | ')); }
+      else { const d = await res.json(); setError(Object.entries(d).map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(', ') : v}`).join(' | ')); }
     } catch { setError('Connection error.'); } finally { setSaving(false); }
   };
 
@@ -96,13 +96,13 @@ const NewJobItemForm = ({ projectId, plotId, workItemId, token, onSuccess, onClo
           <div>
             <label style={labelStyle}>Status *</label>
             <select required value={form.job_status} onChange={e => set('job_status', e.target.value)} style={inputStyle}>
-              {['Planned','In Progress','Completed','On Hold','Delayed','Cancelled'].map(s => <option key={s} value={s}>{s}</option>)}
+              {['Planned', 'In Progress', 'Completed', 'On Hold', 'Delayed', 'Cancelled'].map(s => <option key={s} value={s}>{s}</option>)}
             </select>
           </div>
           <div>
             <label style={labelStyle}>Priority *</label>
             <select required value={form.priority} onChange={e => set('priority', e.target.value)} style={inputStyle}>
-              {['Low','Medium','High','Urgent'].map(p => <option key={p} value={p}>{p}</option>)}
+              {['Low', 'Medium', 'High', 'Urgent'].map(p => <option key={p} value={p}>{p}</option>)}
             </select>
           </div>
         </div>
@@ -169,7 +169,6 @@ const WorkItemDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [showNewJobItem, setShowNewJobItem] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
-  const [checklistSaving, setChecklistSaving] = useState(false);
 
   useEffect(() => { fetchAll(); }, [projectId, plotId, id]);
 
@@ -180,7 +179,7 @@ const WorkItemDetailPage = () => {
       if (wiRes.ok) {
         const wiData = await wiRes.json();
         setWorkItem(wiData);
-        
+
         const pid = pidFromUrl || wiData.construction_project;
         const plid = plidFromUrl || wiData.construction_plot;
         setProjectId(pid);
@@ -195,20 +194,9 @@ const WorkItemDetailPage = () => {
         if (plotRes.ok) setPlot(await plotRes.json());
         if (jiRes.ok) setJobItems(unwrapList(await jiRes.json()));
       }
-    } catch (e) { 
-      console.error("WorkItemDetailPage fetch error:", e); 
+    } catch (e) {
+      console.error("WorkItemDetailPage fetch error:", e);
     } finally { setLoading(false); }
-  };
-
-  const saveChecklist = async (newChecklist) => {
-    setWorkItem(w => ({ ...w, checklist: newChecklist }));
-    setChecklistSaving(true);
-    try {
-      await apiFetch(`/projects/${projectId}/plots/${plotId}/workitems/${id}/`, {
-        method: 'PATCH', token,
-        body: JSON.stringify({ checklist: newChecklist })
-      });
-    } catch { /* silent */ } finally { setChecklistSaving(false); }
   };
 
   const handleApprove = async () => {
@@ -248,9 +236,6 @@ const WorkItemDetailPage = () => {
   if (loading) return <div style={{ padding: '60px', display: 'flex', justifyContent: 'center' }}><Spinner /></div>;
   if (!workItem) return <div style={{ padding: '60px', textAlign: 'center', color: 'var(--text-tertiary)' }}>Work item not found.</div>;
 
-  const checklist = workItem.checklist || [];
-  const doneCount = checklist.filter(c => c.done).length;
-
   return (
     <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 0 60px' }}>
       <Breadcrumb items={[
@@ -277,9 +262,11 @@ const WorkItemDetailPage = () => {
           <ProgressDonut percent={progress} size={100} strokeWidth={9} />
         </div>
         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-          <button className="btn-ghost" onClick={() => navigate(`/work-items/${id}/edit`)} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Edit2 size={15} /> Edit Work
-          </button>
+          {(plot?.role === 'owner' || plot?.role === 'project_manager' || plot?.role === 'foreman') && (
+            <button className="btn-ghost" onClick={() => navigate(`/work-items/${id}/edit`)} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Edit2 size={15} /> Edit Work
+            </button>
+          )}
           {!workItem.is_approved && (
             <button className="btn-ghost" onClick={handleApprove} style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#2d5a27', borderColor: '#2d5a27' }}>
               <CheckCircle2 size={18} /> Approve Work
@@ -289,7 +276,7 @@ const WorkItemDetailPage = () => {
             <ImageIcon size={15} /> Attach Photos
           </button>
           <input id="wi-img-upload" type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={e => uploadImages(Array.from(e.target.files))} />
-          {plot?.role === 'project_manager' && workItem.work_status !== 'Completed' && (
+          {(plot?.role === 'owner' || plot?.role === 'project_manager' || plot?.role === 'foreman') && workItem.work_status !== 'Completed' && (
             <button className="btn-primary" onClick={() => navigate(`/work-items/${id}/job-items/new`)} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Plus size={15} /> Add Job Item
             </button>
@@ -322,21 +309,6 @@ const WorkItemDetailPage = () => {
                 <p style={{ margin: 0, fontWeight: 600, fontSize: '15px', color: 'var(--text-primary)' }}>{workItem.target_end_date}</p>
               </div>
             </div>
-
-            {/* Checklist */}
-            {checklist.length > 0 && (
-              <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '20px', padding: '24px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                  <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', color: 'var(--text-tertiary)', textTransform: 'uppercase', margin: 0 }}>
-                    Checklist {checklistSaving ? '(saving…)' : `${doneCount}/${checklist.length}`}
-                  </p>
-                  <div style={{ height: '4px', flex: 1, maxWidth: '100px', background: 'var(--bg-raised)', borderRadius: '4px', marginLeft: '12px', overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${checklist.length ? (doneCount/checklist.length)*100 : 0}%`, background: 'var(--brand-orange)', borderRadius: '4px', transition: 'width 0.3s' }} />
-                  </div>
-                </div>
-                <ChecklistEditor items={checklist} onChange={saveChecklist} />
-              </div>
-            )}
           </div>
 
           {/* Job Items sidebar preview */}
@@ -360,7 +332,7 @@ const WorkItemDetailPage = () => {
                 </div>
               </div>
             ))}
-            {plot?.role === 'project_manager' && workItem.work_status !== 'Completed' && (
+            {(plot?.role === 'owner' || plot?.role === 'project_manager' || plot?.role === 'foreman') && workItem.work_status !== 'Completed' && (
               <button className="btn-ghost" onClick={() => setShowNewJobItem(true)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '13px' }}>
                 <Plus size={14} /> Add Job Item
               </button>

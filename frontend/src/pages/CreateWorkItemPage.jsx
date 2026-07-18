@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { Breadcrumb, Spinner, SearchableSelect, ChecklistEditor } from '../components';
+import { Breadcrumb, Spinner, SearchableSelect } from '../components';
 import { Upload, X, ImageIcon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { apiFetch, unwrapList } from '../api/client';
@@ -27,7 +27,6 @@ const CreateWorkItemPage = () => {
     priority: 'Medium',
     initial_progress: 0,
     work_status: 'Planned',
-    checklist: [],
     budget_amount: '',
     budget_currency: 'NGN',
   });
@@ -49,8 +48,7 @@ const CreateWorkItemPage = () => {
               target_end_date: data.target_end_date || '',
               priority: data.priority || 'Medium',
               initial_progress: data.initial_progress || 0,
-              work_status: data.work_status || 'Planned',
-              checklist: data.checklist || []
+              work_status: data.work_status || 'Planned'
             }));
 
             // Prepopulate options with existing foreman
@@ -127,7 +125,6 @@ const CreateWorkItemPage = () => {
       start_date: formData.start_date,
       target_end_date: formData.target_end_date,
       work_status: formData.work_status,
-      checklist: formData.checklist,
     };
 
     try {
@@ -217,15 +214,6 @@ const CreateWorkItemPage = () => {
                 value={formData.description}
                 onChange={e => setFormData({ ...formData, description: e.target.value })}
                 style={{ ...inputStyle, minHeight: '180px', resize: 'vertical' }}
-              />
-            </div>
-
-            <div>
-              <label style={labelStyle}>Checklist</label>
-              <p style={{ fontSize: '13px', color: 'var(--text-tertiary)', marginBottom: '12px' }}>Build a checklist to track work completion.</p>
-              <ChecklistEditor
-                items={formData.checklist}
-                onChange={items => setFormData({ ...formData, checklist: items })}
               />
             </div>
           </div>
@@ -322,13 +310,14 @@ const CreateWorkItemPage = () => {
             <div>
               <label style={labelStyle}>Status *</label>
               <select
+                required
                 value={formData.work_status}
                 onChange={e => setFormData({ ...formData, work_status: e.target.value })}
                 style={inputStyle}
               >
-                <option value="Planned">Not Started</option>
-                <option value="In Progress">In Progress</option>
-                <option value="Completed">Completed</option>
+                {['Planned', 'In Progress', 'Completed', 'On Hold', 'Delayed', 'Cancelled'].map(s => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
               </select>
             </div>
 

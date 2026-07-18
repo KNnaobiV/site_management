@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Search, UserPlus, Loader } from 'lucide-react';
+import { X, Search, UserPlus, Loader, HardHat, Package } from 'lucide-react';
 import { apiFetch } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 
@@ -7,17 +7,19 @@ import { useAuth } from '../context/AuthContext';
  * InviteModal — searchable user invite form for Projects and Plots.
  * @param {boolean} isOpen
  * @param {function} onClose
+ * @param {function} onSuccess - optional callback after a successful invite
  * @param {string} type - 'project' | 'plot'
  * @param {string} entityId - project or plot ID
  * @param {string} projectId - parent project ID (required for plot invites)
  * @param {string} title - modal title
+ * @param {string} defaultRole - if set, pre-selects and locks the role so the user doesn't need to choose
  */
-const InviteModal = ({ isOpen, onClose, type = 'project', entityId, projectId, title }) => {
+const InviteModal = ({ isOpen, onClose, onSuccess, type = 'project', entityId, projectId, title, defaultRole }) => {
   const { token } = useAuth();
   const [query, setQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
-  const [role, setRole] = useState('');
+  const [role, setRole] = useState(defaultRole || '');
   const [message, setMessage] = useState('');
   const [searching, setSearching] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -38,6 +40,19 @@ const InviteModal = ({ isOpen, onClose, type = 'project', entityId, projectId, t
 
   const roles = type === 'plot' ? plotRoles : projectRoles;
 
+  const roleIcons = {
+    foreman: <HardHat size={16} />,
+    storekeeper: <Package size={16} />,
+  };
+
+  const roleLabels = {
+    foreman: 'Foreman',
+    storekeeper: 'Storekeeper',
+    project_manager: 'Project Manager',
+    client: 'Client',
+    consultant: 'Consultant',
+  };
+
   useEffect(() => {
     if (!query || query.length < 2) { setSearchResults([]); return; }
     clearTimeout(debounceRef.current);
@@ -52,8 +67,17 @@ const InviteModal = ({ isOpen, onClose, type = 'project', entityId, projectId, t
   }, [query]);
 
   useEffect(() => {
-    if (!isOpen) { setQuery(''); setSelectedUser(null); setRole(''); setMessage(''); setError(null); setSuccess(false); setSearchResults([]); }
-  }, [isOpen]);
+    if (!isOpen) {
+      setQuery(''); setSelectedUser(null);
+      setRole(defaultRole || '');
+      setMessage(''); setError(null); setSuccess(false); setSearchResults([]);
+    }
+  }, [isOpen, defaultRole]);
+
+  // Keep role in sync if defaultRole prop changes while open
+  useEffect(() => {
+    if (defaultRole) setRole(defaultRole);
+  }, [defaultRole]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -72,6 +96,7 @@ const InviteModal = ({ isOpen, onClose, type = 'project', entityId, projectId, t
       });
       if (res.ok) {
         setSuccess(true);
+        if (onSuccess) onSuccess();
         setTimeout(onClose, 1500);
       } else {
         const data = await res.json();
@@ -142,7 +167,10 @@ const InviteModal = ({ isOpen, onClose, type = 'project', entityId, projectId, t
               ) : (
                 <div style={{ position: 'relative' }}>
                   <div style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
-                    {searching ? <Loader size={16} color="var(--text-tertiary)" style={{ animation: 'spin 1s linear infinite' }} /> : <Search size={16} color="var(--text-tertiary)" />}
+                    {searching
+                      ? <Loader size={16} color="var(--text-tertiary)" style={{ animation: 'spin 1s linear infinite' }} />
+                      : <Search size={16} color="var(--text-tertiary)" />
+                    }
                   </div>
                   <input
                     type="text"
@@ -176,18 +204,31 @@ const InviteModal = ({ isOpen, onClose, type = 'project', entityId, projectId, t
               )}
             </div>
 
-            {/* Role */}
+            {/* Role — locked pill badge when defaultRole is set, otherwise a dropdown */}
             <div>
-              <label style={{ display: 'block', marginBottom: '10px', fontWeight: 600, fontSize: '14px' }}>Role *</label>
-              <select
-                value={role}
-                onChange={e => setRole(e.target.value)}
-                required
-                style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid var(--border-default)', background: 'var(--bg-raised)', color: role ? 'var(--text-primary)' : 'var(--text-tertiary)', fontSize: '15px' }}
-              >
-                <option value="">Select a role...</option>
-                {roles.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
-              </select>
+              <label style={{ display: 'block', marginBottom: '10px', fontWeight: 600, fontSize: '14px' }}>Role</label>
+              {defaultRole ? (
+                <div style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '8px',
+                  padding: '10px 18px', borderRadius: '100px',
+                  background: 'var(--brand-orange-subtle)',
+                  border: '1px solid var(--brand-orange)',
+                  color: 'var(--brand-orange)', fontWeight: 600, fontSize: '14px'
+                }}>
+                  {roleIcons[defaultRole]}
+                  {roleLabels[defaultRole] || defaultRole}
+                </div>
+              ) : (
+                <select
+                  value={role}
+                  onChange={e => setRole(e.target.value)}
+                  required
+                  style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid var(--border-default)', background: 'var(--bg-raised)', color: role ? 'var(--text-primary)' : 'var(--text-tertiary)', fontSize: '15px' }}
+                >
+                  <option value="">Select a role...</option>
+                  {roles.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
+                </select>
+              )}
             </div>
 
             {/* Message */}

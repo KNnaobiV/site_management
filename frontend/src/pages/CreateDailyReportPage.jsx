@@ -14,7 +14,7 @@ const CreateDailyReportPage = () => {
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [jobItem, setJobItem] = useState(null);
-  
+
   const [formData, setFormData] = useState({
     report_date: new Date().toISOString().split('T')[0],
     priority: 'Normal',
@@ -83,7 +83,7 @@ const CreateDailyReportPage = () => {
         navigate(-1);
       } else {
         const d = await res.json();
-        setError(Object.entries(d).map(([k,v]) => `${k}: ${Array.isArray(v)?v.join(', '):v}`).join(' | '));
+        setError(Object.entries(d).map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(', ') : v}`).join(' | '));
       }
     } catch (err) {
       setError("Connection error.");
@@ -117,9 +117,9 @@ const CreateDailyReportPage = () => {
 
       {error && <div style={{ background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.2)', color: '#dc2626', padding: '16px', borderRadius: '12px', marginBottom: '24px', maxWidth: '800px' }}>{error}</div>}
 
-      <form onSubmit={handleSubmit} className="mobile-padding" style={{ 
-        background: 'var(--bg-card)', 
-        borderRadius: '24px', 
+      <form onSubmit={handleSubmit} className="mobile-padding" style={{
+        background: 'var(--bg-card)',
+        borderRadius: '24px',
         border: '1px solid var(--border-default)',
         padding: '48px',
         maxWidth: '1000px',
@@ -136,19 +136,19 @@ const CreateDailyReportPage = () => {
           <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
             <div>
               <label style={labelStyle}>Report Date *</label>
-              <input 
-                type="date" required 
-                value={formData.report_date} 
-                onChange={e => setFormData({...formData, report_date: e.target.value})} 
-                style={inputStyle} 
+              <input
+                type="date" required
+                value={formData.report_date}
+                onChange={e => setFormData({ ...formData, report_date: e.target.value })}
+                style={inputStyle}
               />
             </div>
             <div>
               <label style={labelStyle}>Priority Level *</label>
-              <select 
-                required 
-                value={formData.priority} 
-                onChange={e => setFormData({...formData, priority: e.target.value})} 
+              <select
+                required
+                value={formData.priority}
+                onChange={e => setFormData({ ...formData, priority: e.target.value })}
                 style={inputStyle}
               >
                 <option value="Normal">Normal</option>
@@ -169,11 +169,11 @@ const CreateDailyReportPage = () => {
             <div>
               <label style={labelStyle}>Job Progress (%) *</label>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '8px 0' }}>
-                <input 
-                  type="range" min="0" max="100" step="5" 
-                  value={formData.percentage_job_progress} 
-                  onChange={e => setFormData({...formData, percentage_job_progress: e.target.value})} 
-                  style={{ flex: 1, accentColor: 'var(--brand-orange)' }} 
+                <input
+                  type="range" min="0" max="100" step="5"
+                  value={formData.percentage_job_progress}
+                  onChange={e => setFormData({ ...formData, percentage_job_progress: e.target.value })}
+                  style={{ flex: 1, accentColor: 'var(--brand-orange)' }}
                 />
                 <span style={{ fontSize: '24px', fontWeight: 800, color: 'var(--brand-orange)', minWidth: '60px' }}>
                   {formData.percentage_job_progress}%
@@ -182,11 +182,11 @@ const CreateDailyReportPage = () => {
             </div>
             <div>
               <label style={labelStyle}>Target Completion Date *</label>
-              <input 
-                type="date" required 
-                value={formData.expected_completion_date} 
-                onChange={e => setFormData({...formData, expected_completion_date: e.target.value})} 
-                style={inputStyle} 
+              <input
+                type="date" required
+                value={formData.expected_completion_date}
+                onChange={e => setFormData({ ...formData, expected_completion_date: e.target.value })}
+                style={inputStyle}
               />
             </div>
           </div>
@@ -201,19 +201,19 @@ const CreateDailyReportPage = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <div>
               <label style={labelStyle}>Issues Encountered</label>
-              <textarea 
+              <textarea
                 placeholder="Describe any blockers, weather issues, or material shortages..."
                 value={formData.issues_encountered}
-                onChange={e => setFormData({...formData, issues_encountered: e.target.value})}
+                onChange={e => setFormData({ ...formData, issues_encountered: e.target.value })}
                 style={{ ...inputStyle, minHeight: '80px' }}
               />
             </div>
             <div>
               <label style={labelStyle}>General Observations</label>
-              <textarea 
+              <textarea
                 placeholder="What was accomplished today? Any specific wins or notes..."
                 value={formData.notes}
-                onChange={e => setFormData({...formData, notes: e.target.value})}
+                onChange={e => setFormData({ ...formData, notes: e.target.value })}
                 style={{ ...inputStyle, minHeight: '80px' }}
               />
             </div>
@@ -225,19 +225,19 @@ const CreateDailyReportPage = () => {
           <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
             <div>
               <label style={labelStyle}>External Comments <span style={{ fontWeight: 400, color: 'var(--text-tertiary)' }}>(for Client)</span></label>
-              <textarea 
+              <textarea
                 placeholder="Publicly visible comments for stakeholders..."
                 value={formData.external_comments}
-                onChange={e => setFormData({...formData, external_comments: e.target.value})}
+                onChange={e => setFormData({ ...formData, external_comments: e.target.value })}
                 style={{ ...inputStyle, minHeight: '80px' }}
               />
             </div>
             <div>
               <label style={labelStyle}>Internal Comments <span style={{ fontWeight: 400, color: 'var(--text-tertiary)' }}>(for Office)</span></label>
-              <textarea 
+              <textarea
                 placeholder="Internal team notes and sensitive information..."
                 value={formData.internal_comments}
-                onChange={e => setFormData({...formData, internal_comments: e.target.value})}
+                onChange={e => setFormData({ ...formData, internal_comments: e.target.value })}
                 style={{ ...inputStyle, minHeight: '80px' }}
               />
             </div>
@@ -250,7 +250,7 @@ const CreateDailyReportPage = () => {
             <Camera size={20} color="var(--brand-orange)" />
             Progress Photos
           </h3>
-          <ImageUploader files={reportImages} onChange={setReportImages} label="Upload site photos" max={12} />
+          <ImageUploader files={reportImages} onChange={setReportImages} label="Upload site photos" max={4} />
         </section>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--border-default)', paddingTop: '40px', marginTop: '12px' }}>

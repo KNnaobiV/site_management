@@ -16,7 +16,7 @@ const CreateProjectPage = () => {
   const [error, setError] = useState(null);
   const [users, setUsers] = useState([]);
   const [clientUpdated, setClientUpdated] = useState(false);
-  
+
   const [formData, setFormData] = useState({
     project_name: '',
     client: '',
@@ -25,7 +25,7 @@ const CreateProjectPage = () => {
     target_end_date: '',
     project_manager: '',
     address: '',
-    cover_image: null
+    project_status: 'Planned'
   });
 
   useEffect(() => {
@@ -48,10 +48,9 @@ const CreateProjectPage = () => {
           start_date: project.start_date || new Date().toISOString().split('T')[0],
           target_end_date: project.target_end_date || '',
           project_manager: project.project_manager?.id || '',
-          address: project.address || '',
-          cover_image: null
+          address: project.address || ''
         });
-        
+
         // Ensure the selected users are prepopulated in the searchable options
         const initialUsers = [];
         if (project.client) {
@@ -102,16 +101,7 @@ const CreateProjectPage = () => {
       client: formData.client || null,
     };
 
-    let bodyData;
-    if (formData.cover_image) {
-      bodyData = new FormData();
-      Object.keys(payload).forEach(key => {
-        if (payload[key] !== null) bodyData.append(key, payload[key]);
-      });
-      bodyData.append('cover_image', formData.cover_image);
-    } else {
-      bodyData = JSON.stringify(payload);
-    }
+    const bodyData = JSON.stringify(payload);
 
     try {
       const res = await apiFetch(isEditing ? `/projects/${projectId}/` : '/projects/', {
@@ -143,9 +133,9 @@ const CreateProjectPage = () => {
         <h1 style={{ fontSize: '64px', marginTop: '12px' }}>{isEditing ? 'Edit Project' : 'Create Project'}</h1>
       </div>
 
-      <form onSubmit={handleSubmit} className="mobile-padding" style={{ 
-        background: 'var(--bg-card)', 
-        borderRadius: '24px', 
+      <form onSubmit={handleSubmit} className="mobile-padding" style={{
+        background: 'var(--bg-card)',
+        borderRadius: '24px',
         border: '1px solid var(--border-default)',
         padding: '48px',
         maxWidth: '1200px'
@@ -155,22 +145,22 @@ const CreateProjectPage = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <div>
               <label style={labelStyle}>Project Name</label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 placeholder="Enter project name"
                 required
                 value={formData.project_name}
-                onChange={e => setFormData({...formData, project_name: e.target.value})}
+                onChange={e => setFormData({ ...formData, project_name: e.target.value })}
                 style={inputStyle}
               />
             </div>
 
             <div>
               <label style={labelStyle}>Address</label>
-              <textarea 
+              <textarea
                 placeholder="Enter project address"
                 value={formData.address}
-                onChange={e => setFormData({...formData, address: e.target.value})}
+                onChange={e => setFormData({ ...formData, address: e.target.value })}
                 disabled={isEditing && clientUpdated}
                 style={{ ...inputStyle, minHeight: '120px', resize: 'vertical' }}
               />
@@ -179,22 +169,22 @@ const CreateProjectPage = () => {
             <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div>
                 <label style={labelStyle}>Start Date *</label>
-                <input 
+                <input
                   type="date"
                   required
                   value={formData.start_date}
-                  onChange={e => setFormData({...formData, start_date: e.target.value})}
+                  onChange={e => setFormData({ ...formData, start_date: e.target.value })}
                   disabled={isEditing && clientUpdated}
                   style={inputStyle}
                 />
               </div>
               <div>
                 <label style={labelStyle}>Target End Date *</label>
-                <input 
+                <input
                   type="date"
                   required
                   value={formData.target_end_date}
-                  onChange={e => setFormData({...formData, target_end_date: e.target.value})}
+                  onChange={e => setFormData({ ...formData, target_end_date: e.target.value })}
                   style={inputStyle}
                 />
               </div>
@@ -202,19 +192,15 @@ const CreateProjectPage = () => {
 
             <div>
               <label style={labelStyle}>Status</label>
-              <select 
+              <select
                 value={formData.project_status}
-                onChange={e => setFormData({...formData, project_status: e.target.value})}
+                onChange={e => setFormData({ ...formData, project_status: e.target.value })}
                 style={inputStyle}
               >
-                <option value="Planned">Planning</option>
-                <option value="In Progress">Active</option>
-                <option value="On Hold">On Hold</option>
-                <option value="Completed">Completed</option>
+                {['Planned', 'In Progress', 'Completed', 'On Hold', 'Delayed', 'Cancelled'].map(s => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
               </select>
-              <p style={{ fontSize: '12px', color: 'var(--text-tertiary)', marginTop: '8px' }}>
-                Planning / Active / On Hold / Completed
-              </p>
             </div>
           </div>
 
@@ -222,30 +208,14 @@ const CreateProjectPage = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <div>
               <label style={labelStyle}>Description</label>
-              <textarea 
+              <textarea
                 placeholder="Enter project description"
                 value={formData.project_description}
-                onChange={e => setFormData({...formData, project_description: e.target.value})}
+                onChange={e => setFormData({ ...formData, project_description: e.target.value })}
                 style={{ ...inputStyle, minHeight: '120px', resize: 'vertical' }}
               />
             </div>
 
-            <div>
-              <label style={labelStyle}>Cover Image</label>
-              <input 
-                type="file" 
-                accept="image/*"
-                onChange={e => {
-                  if (e.target.files.length > 0) {
-                    setFormData({...formData, cover_image: e.target.files[0]});
-                  }
-                }}
-                style={inputStyle}
-              />
-              <p style={{ fontSize: '12px', color: 'var(--text-tertiary)', marginTop: '8px' }}>
-                Optional. JPG, PNG or WEBP up to 10MB
-              </p>
-            </div>
           </div>
         </div>
 
