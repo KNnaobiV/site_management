@@ -80,6 +80,7 @@ jobs:
         key: ${{ secrets.VPS_SSH_KEY }}
         port: ${{ secrets.VPS_PORT }}
         script: |
+          nc -zv -w 5 ${{ secrets.VPS_HOST }} 22
           cd /home/app && git pull origin main
           cd infra
           docker compose pull
