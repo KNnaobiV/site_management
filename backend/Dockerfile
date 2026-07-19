@@ -23,7 +23,11 @@ EXPOSE 8000
 
 COPY entrypoint.sh /entrypoint.sh
 
+USER root
+
 RUN chmod +x /entrypoint.sh
+
+USER appuser
 
 ENTRYPOINT ["/entrypoint.sh"]
 
