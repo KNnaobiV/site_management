@@ -65,9 +65,12 @@ jobs:
         POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
       
       run: |
-        echo pwd
+        pwd
+        find . -name "*prod.env*"
+        ls -l backend
+        ls -l backend/env
         mkdir -p output
-        envsubst < backend/env/prod.env > output/prod.env
+        envsubst < ./backend/env/prod.env > output/prod.env
 
     - name: Deploy
       uses: appleboy/ssh-action@v1
