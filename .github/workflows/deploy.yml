@@ -66,6 +66,7 @@ jobs:
       
       run: |
         echo pwd
+        ls -l .
         mkdir -p output
         envsubst < backend/env/prod.env > output/prod.env
 
