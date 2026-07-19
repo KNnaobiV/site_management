@@ -38,7 +38,7 @@ jobs:
       with:
         context: ./frontend
         push: true
-        tags: ghcr.io/constuction/site_management_frontend:latest
+        tags: ghcr.io/knnaobiv/site_management_frontend:latest
         build-args: |
           VITE_API_URL=${{ secrets.VITE_API_URL }}
 
