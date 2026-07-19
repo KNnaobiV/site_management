@@ -31,14 +31,14 @@ jobs:
       with:
         context: ./backend
         push: true
-        tags: ghcr.io/constuction/site_management_backend:latest
+        tags: ghcr.io/knnaobiv/site_management_backend:latest
     
     - name: Build frontend
       uses: docker/build-push-action@v6
       with:
         context: ./frontend
         push: true
-        tags: ghcr.io/constuction/site_management_frontend:latest
+        tags: ghcr.io/knnaobiv/site_management_frontend:latest
         build-args: |
           VITE_API_URL=${{ secrets.VITE_API_URL }}
 
