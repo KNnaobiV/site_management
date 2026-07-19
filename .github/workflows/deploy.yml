@@ -65,6 +65,7 @@ jobs:
         POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
       
       run: |
+        echo pwd
         mkdir -p output
         envsubst < backend/env/prod.env > output/prod.env
 
