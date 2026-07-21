@@ -1,34 +1,42 @@
-FROM python:3.12-slim
-
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONBUFFERED=1
+FROM python:3.12-slim AS builder
 
 WORKDIR /app
 
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libpq-dev gcc curl postgresql-client \
+    libpq-dev gcc \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt gunicorn
+RUN pip wheel --no-cache-dir --no-deps --wheel-dir /app/wheels -r requirements.txt gunicorn
+
+FROM python:3.12-slim AS runner
+
+WORKDIR /app
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq5 curl postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /app/wheels /tmp/wheels
+RUN pip install --no-cache-dir /tmp/wheels/* && rm -rf /tmp/wheels
 
 COPY . .
 RUN mkdir -p /app/logs /app/media /app/staticfiles
 
 RUN useradd -m appuser && chown -R appuser:appuser /app
 
-USER appuser
-
-EXPOSE 8000
-
 COPY entrypoint.sh /entrypoint.sh
-
-USER root
-
 RUN chmod +x /entrypoint.sh
 
 USER appuser
 
-ENTRYPOINT ["/entrypoint.sh"]
+EXPOSE 8000
 
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["gunicorn", "site_base.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "2", "--timeout", "60", "--access-logfile", "-", "--error-logfile", "-"]
