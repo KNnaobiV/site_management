@@ -82,7 +82,7 @@ jobs:
         port: ${{ secrets.VPS_PORT }}
         script: |
           echo ${{ vars.FRONTEND_URL}}
-          cd /home/app && git pull origin main
+          cd /server/apps/site_management && git pull -ff origin dev
           echo 'done pulling'
           cd infra
           docker compose pull
