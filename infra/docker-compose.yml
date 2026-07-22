@@ -1,20 +1,70 @@
-netdata:
-  image: netdata/netdata
-  restart: unless-stopped
-  hostname: "${DOCKER_HOST_IP:-[IP_ADDRESS]}"
-  ports:
-    - "19999:19999"
-  cap_add:
-    - SYS_PTRACE
-  security_opt:
-    - apparmor:unconfined
-  volumes:
-    - /etc/netdata:/etc/netdata
-    - /var/run/docker.sock:/var/run/docker.sock
-    - netdata-storage:/var/lib/netdata
+# services:
+#   netdata:
+#     image: netdata/netdata
+#     restart: unless-stopped
+#     hostname: "${DOCKER_HOST_IP:-[IP_ADDRESS]}"
+#     ports:
+#       - "19999:19999"
+#     cap_add:
+#       - SYS_PTRACE
+#     security_opt:
+#       - apparmor:unconfined
+#     volumes:
+#       - /etc/netdata:/etc/netdata
+#       - /var/run/docker.sock:/var/run/docker.sock
+#       - netdata-storage:/var/lib/netdata
 
-healthcheck:
-  test: ["CMD", "curl", "http://localhost:8000/api/health/"]
-  interval: 30s
-  timeout: 10s
-  retries: 3
+#   postgres:
+#     image: postgres:15-alpine
+#     container_name: site_management_db
+#     restart: unless-stopped
+#     environment:
+#       POSTGRES_DB: ${{ POSTGRES_DB }}
+#       POSTGRES_USER: ${{ POSTGRES_USER }}
+#       POSTGRES_PASSWORD: ${{ POSTGRES_PASSWORD }}
+#     ports:
+#       - "5432:5432"
+#     volumes:
+#       - postgres-data:/var/lib/postgresql/data
+
+#   redis:
+#     image: redis:7-alpine
+#     container_name: site_management_redis
+#     restart: unless-stopped
+#     ports:
+#       - "6379:6379"
+#     volumes:
+#       - redis-data:/data
+
+#   backend:
+#     image: ghcr.io/${{ secrets.ECR_REPOSITORY_NAME }}/site_management_backend:latest
+#     container_name: site_management_backend
+#     restart: unless-stopped
+#     env_file:
+#       - backend/env/prod.env
+#     depends_on:
+#       postgres:
+#         condition: service_healthy
+#       redis:
+#         condition: service_healthy
+#     volumes:
+#       - /server/apps/site_management/media
+#     ports:
+#       - "8000:8000"
+#     healthcheck:
+#       test: [ "CMD", "curl", "http://localhost:8000/api/health/" ]
+#       interval: 30s
+#       timeout: 10s
+#       retries: 3
+
+#   frontend:
+#     image: ghcr.io/${{ secrets.ECR_REPOSITORY_NAME }}/site_management_frontend:latest
+#     container_name: site_management_frontend
+#     restart: unless-stopped
+#     ports:
+#       - "80:80"
+
+# volumes:
+#   postgres-data:
+#   redis-data:
+#   netdata-storage:
