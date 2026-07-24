@@ -90,8 +90,6 @@ jobs:
         username: ${{ secrets.VPS_USER }}
         key: ${{ secrets.VPS_SSH_KEY }}
         port: ${{ secrets.VPS_PORT }}
-        source: "output/prod.env"
-        target: "/server/apps/site_management/env/"
         script: |
           echo ${{ vars.FRONTEND_URL}}
           cd /server/apps/site_management && git pull -ff origin dev
