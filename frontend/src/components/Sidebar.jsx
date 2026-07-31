@@ -7,6 +7,10 @@ import {
   CheckSquare,
   ClipboardList,
   Bell,
+  Menu,
+  HardHat,
+  ChevronRight,
+  LogOut,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import Avatar from './Avatar';
@@ -18,9 +22,12 @@ const Sidebar = ({ isOpen, toggleSidebar, isMobile }) => {
   const projectMatch = location.pathname.match(/^\/projects\/(\d+)/);
 
   const navItems = [
+    { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
+    { to: '/projects', icon: Briefcase, label: 'Projects' },
     { to: '/plots', icon: MapIcon, label: 'Plots' },
     { to: '/work-items', icon: CheckSquare, label: 'Work Items' },
     { to: '/job-items', icon: ClipboardList, label: 'Job Items' },
+    { to: '/notifications', icon: Bell, label: 'Notifications' },
   ];
 
   return (
