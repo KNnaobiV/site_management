@@ -25,11 +25,11 @@ DATABASES = {
     #     'HOST': 'localhost',
     #     'PORT': 'port_number'
     # }
-    'default': dj_database_url.config(
-        default=AIVEN_DB_URL,
-        conn_max_age=600,
-        ssl_require=True,
-    )
+    # 'default': dj_database_url.config(
+    #     default=AIVEN_DB_URL,
+    #     conn_max_age=600,
+    #     ssl_require=True,
+    # )
 }
 
 

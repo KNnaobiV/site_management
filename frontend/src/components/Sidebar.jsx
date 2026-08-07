@@ -7,6 +7,10 @@ import {
   CheckSquare,
   ClipboardList,
   Bell,
+  Menu,
+  HardHat,
+  ChevronRight,
+  LogOut,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import Avatar from './Avatar';
