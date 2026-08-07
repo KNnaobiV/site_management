@@ -4,11 +4,11 @@ from .base import BASE_DIR, CFG
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': CFG.get("POSTGRES", "POSTGRES_DB"),
-        'USER': CFG.get("POSTGRES", "POSTGRES_USER"),
-        'PASSWORD': CFG.get("POSTGRES", "POSTGRES_PASSWORD"),
-        'HOST': CFG.get("POSTGRES","POSTGRES_HOST"),  # Or your DB host address
-        'PORT': CFG.get("POSTGRES", "POSTGRES_PORT"),       # Default MySQL port
+        'NAME': CFG.get("DATABASE", "POSTGRES_DB"),
+        'USER': CFG.get("DATABASE", "POSTGRES_USER"),
+        'PASSWORD': CFG.get("DATABASE", "POSTGRES_PASSWORD"),
+        'HOST': CFG.get("DATABASE","POSTGRES_HOST"),  # Or your DB host address
+        'PORT': CFG.get("DATABASE", "POSTGRES_PORT"),       # Default MySQL port
     }
 }
 
@@ -17,20 +17,20 @@ ADMIN_URL = CFG.get("SITE", "DJANGO_ADMIN_URL")
 ALLOWED_HOSTS = ast.literal_eval(CFG.get(
     'SITE',
     'ALLOWED_HOSTS',
-    fallback="['127.0.0.1:8000','https://constropal.alwaysdata.net']"
+    fallback="['127.0.0.1:8000']"
 ))
 CORS_ALLOWED_ORIGINS = ast.literal_eval(CFG.get(
     'SITE',
     'CORS_ALLOWED_ORIGINS',
-    fallback="['http://localhost:8000', 'http://localhost:5173', 'https://maccaferra.vercel.app']"
+    fallback="['http://localhost:8000', 'http://localhost:5173']"
 ))
 
 CSRF_TRUSTED_ORIGINS = ast.literal_eval(CFG.get(
     'SITE',
     'CSRF_TRUSTED_ORIGINS', 
-    fallback="['http://localhost:8000', 'http://localhost:5173', 'https://maccaferra.vercel.app']"
+    fallback="['http://localhost:8000', 'http://localhost:5173']"
 ))
-FRONTEND_URL = CFG.get("SITE", "FRONTEND_URL", fallback="https://maccaferra.vercel.app")
+FRONTEND_URL = CFG.get("SITE", "FRONTEND_URL", fallback="http://localhost:5173")
 SECRET_KEY = CFG.get("SITE", "DJANGO_SECRET_KEY")
 SITE_NAME = CFG.get("SITE", "SITE_NAME", fallback="http://localhost:8000")
 
