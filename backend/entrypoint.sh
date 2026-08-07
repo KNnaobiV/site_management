@@ -2,7 +2,7 @@
 set -e 
 
 echo "Waiting for postgres..."
-until pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER"; do
+until pg_isready -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" -U "$POSTGRES_USER"; do
     sleep 1
 done 
 
