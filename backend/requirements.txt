@@ -16,6 +16,7 @@ django-q2==1.10.0
 djangorestframework==3.17.1
 djangorestframework_simplejwt==5.5.1
 drf-nested-routers==0.95.0
+gunicorn
 idna==3.15
 pillow==12.2.0
 psycopg==3.3.4
