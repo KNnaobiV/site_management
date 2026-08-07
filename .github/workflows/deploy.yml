@@ -67,6 +67,7 @@ jobs:
       run: |
         mkdir -p output
         envsubst < ./backend/env/prod.env > output/prod.env
+        pwd
 
 
     - name: Copy production env
@@ -76,8 +77,8 @@ jobs:
         username: ${{ secrets.VPS_USER }}
         key: ${{ secrets.VPS_SSH_KEY }}
         port: ${{ secrets.VPS_PORT }}
-        source: "/server/apps/site_management/backend/output/prod.env"
-        target: "/server/apps/site_management/backend/env"
+        source: "output/prod.env"
+        target: "/server/apps/site_management/backend/env/"
         strip_components: 1
 
     - name: Deploy
