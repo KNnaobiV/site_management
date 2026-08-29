@@ -37,9 +37,6 @@ RUN pip install --no-cache-dir /tmp/wheels/* && rm -rf /tmp/wheels
 COPY . .
 RUN mkdir -p /app/logs /app/media /app/staticfiles
 
-# Bake static files directly into the Docker image
-RUN python manage.py collectstatic --noinput
-
 RUN useradd -m appuser && chown -R appuser:appuser /app
 
 COPY entrypoint.sh /entrypoint.sh
