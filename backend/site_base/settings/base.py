@@ -49,7 +49,6 @@ DJANGO_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
-    "cloudinary_storage",
     "django.contrib.staticfiles",
     "django.contrib.sites",
 ]
@@ -74,6 +73,7 @@ THIRD_PARTY_APPS = [
     "allauth.socialaccount.providers.apple",
     "dj_rest_auth",
     "dj_rest_auth.registration",
+    "cloudinary_storage",
     "cloudinary",
 ]
 
@@ -81,6 +81,7 @@ INSTALLED_APPS = DJANGO_APPS + CUSTOM_USER_APPS + THIRD_PARTY_APPS
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -159,8 +160,11 @@ STATICFILES_DIRS = [
     BASE_DIR / "site_base" / "static",
 ]
 
-STATIC_URL = "static/"
-STATIC_ROOT = BASE_DIR / "site_base" / "staticfiles"
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# Prevent collectstatic failures if referenced assets (e.g. fonts/external icons) are missing
+WHITENOISE_MANIFEST_STRICT = False
 
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "site_base" / "media"
@@ -185,7 +189,7 @@ STORAGES = {
         "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
     },
     "staticfiles": {
-        "BACKEND": "cloudinary_storage.storage.StaticHashedCloudinaryStorage",
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
 
