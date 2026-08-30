@@ -41,6 +41,7 @@ jobs:
         tags: ghcr.io/knnaobiv/site_management_frontend:latest
         build-args: |
           VITE_API_URL=${{ secrets.VITE_API_URL }}
+          VITE_API_BASE=${{ secrets.VITE_API_BASE }}
 
     - name: Generate env file
       env:
