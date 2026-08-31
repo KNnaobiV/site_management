@@ -54,8 +54,6 @@ EMAIL_HOST_PASSWORD = CFG.get('EMAIL', 'EMAIL_HOST_PASSWORD', fallback='')
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
-ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1"]
-
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
