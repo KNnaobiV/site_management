@@ -66,10 +66,19 @@ THIRD_PARTY_APPS = [
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
     "django_browser_reload",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
+    "allauth.socialaccount.providers.apple",
+    "dj_rest_auth",
+    "dj_rest_auth.registration",
+    # "cloudinary",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    #"whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -148,8 +157,11 @@ STATICFILES_DIRS = [
     BASE_DIR / "site_base" / "static",
 ]
 
-STATIC_URL = "static/"
-STATIC_ROOT = BASE_DIR / "site_base" / "staticfiles"
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# Prevent collectstatic failures if referenced assets (e.g. fonts/external icons) are missing
+#WHITENOISE_MANIFEST_STRICT = False
 
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "site_base" / "media"
