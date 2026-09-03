@@ -13,8 +13,6 @@ const CreateJobItemPage = () => {
   const [loading, setLoading] = useState(false);
   const isEdit = !!jobItemId;
   const [fetchingWorkItem, setFetchingWorkItem] = useState(!!workItemId || !!jobItemId);
-  const isEdit = !!jobItemId;
-  const [fetchingWorkItem, setFetchingWorkItem] = useState(!!workItemId || !!jobItemId);
   const [workItem, setWorkItem] = useState(null);
   const [error, setError] = useState(null);
   const [workItemsList, setWorkItemsList] = useState([]);
@@ -34,14 +32,13 @@ const CreateJobItemPage = () => {
 
   useEffect(() => {
     if (jobItemId) {
-      if (jobItemId) {
-        fetchJobItem();
-      } else if (workItemId) {
-        fetchWorkItem();
-      } else {
-        fetchWorkItems();
-      }
-    }, [workItemId, jobItemId]);
+      fetchJobItem();
+    } else if (workItemId) {
+      fetchWorkItem();
+    } else {
+      fetchWorkItems();
+    }
+  }, [workItemId, jobItemId]);
 
   const fetchJobItem = async () => {
     try {
@@ -265,10 +262,8 @@ const CreateJobItemPage = () => {
             <div>
               <label style={labelStyle}>Description</label>
               <textarea
-              <textarea
                 placeholder="Describe the scope of work..."
                 value={formData.job_description}
-                onChange={e => setFormData({ ...formData, job_description: e.target.value })}
                 onChange={e => setFormData({ ...formData, job_description: e.target.value })}
                 style={{ ...inputStyle, minHeight: '120px', resize: 'vertical' }}
               />
@@ -282,56 +277,53 @@ const CreateJobItemPage = () => {
             <div>
               <label style={labelStyle}>Estimated Hours <span style={{ fontWeight: 400, color: 'var(--text-tertiary)' }}>(Optional)</span></label>
               <input
-              <input
                 type="number"
                 step="0.5"
                 min="0"
                 placeholder="e.g. 12.5"
                 value={formData.estimated_hours}
                 onChange={e => setFormData({ ...formData, estimated_hours: e.target.value })}
-                onChange={e => setFormData({ ...formData, estimated_hours: e.target.value })}
                 style={inputStyle}
               />
             </div>
 
             <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-              <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                <div>
-                  <label style={labelStyle}>Start Date *</label>
-                  <input
-                    type="date"
-                    required
-                    value={formData.start_date}
-                    onChange={e => setFormData({ ...formData, start_date: e.target.value })}
-                    style={inputStyle}
-                  />
-                </div>
-                <div>
-                  <label style={labelStyle}>Target End Date *</label>
-                  <input
-                    type="date"
-                    required
-                    value={formData.target_end_date}
-                    onChange={e => setFormData({ ...formData, target_end_date: e.target.value })}
-                    style={inputStyle}
-                  />
-                </div>
+              <div>
+                <label style={labelStyle}>Start Date *</label>
+                <input
+                  type="date"
+                  required
+                  value={formData.start_date}
+                  onChange={e => setFormData({ ...formData, start_date: e.target.value })}
+                  style={inputStyle}
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>Target End Date *</label>
+                <input
+                  type="date"
+                  required
+                  value={formData.target_end_date}
+                  onChange={e => setFormData({ ...formData, target_end_date: e.target.value })}
+                  style={inputStyle}
+                />
               </div>
             </div>
           </div>
+        </div>
 
-          {error && (
-            <div style={{ marginTop: '24px', color: 'var(--status-delayed)', fontSize: '14px' }}>
-              {error}
-            </div>
-          )}
-
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '48px' }}>
-            <button type="button" onClick={() => navigate(-1)} className="btn-ghost" style={{ padding: '12px 32px' }}>Cancel</button>
-            <button type="submit" className="btn-primary" style={{ padding: '12px 48px' }} disabled={loading}>
-              {loading ? <Spinner size={20} /> : (typeof window !== 'undefined' && window.location.pathname.includes('/edit') ? 'Update Job Item' : 'Create Job Item')}
-            </button>
+        {error && (
+          <div style={{ marginTop: '24px', color: 'var(--status-delayed)', fontSize: '14px' }}>
+            {error}
           </div>
+        )}
+
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '48px' }}>
+          <button type="button" onClick={() => navigate(-1)} className="btn-ghost" style={{ padding: '12px 32px' }}>Cancel</button>
+          <button type="submit" className="btn-primary" style={{ padding: '12px 48px' }} disabled={loading}>
+            {loading ? <Spinner size={20} /> : (typeof window !== 'undefined' && window.location.pathname.includes('/edit') ? 'Update Job Item' : 'Create Job Item')}
+          </button>
+        </div>
       </form>
     </div>
   );

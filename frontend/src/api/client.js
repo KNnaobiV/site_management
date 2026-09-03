@@ -9,8 +9,6 @@ function buildUrl(path) {
 
 // export const buildUrl = (path) => path.startsWith("http") ? path : `${API_BASE}${path}`;
 
-export const buildUrl = (path) => path.startsWith("http") ? path : `${API_BASE}${path}`;
-
 export async function apiFetch(path, { token, ...options } = {}) {
     const headers = {
         ...(options.body instanceof FormData ? {} : { "Content-Type": "application/json" }),

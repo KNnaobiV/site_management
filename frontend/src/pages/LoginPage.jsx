@@ -21,22 +21,6 @@ function loadScript(src, id) {
     });
 }
 
-const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
-const APPLE_CLIENT_ID = import.meta.env.VITE_APPLE_CLIENT_ID || "";
-
-function loadScript(src, id) {
-    return new Promise((resolve, reject) => {
-        if (document.getElementById(id)) return resolve();
-        const script = document.createElement("script");
-        script.src = src;
-        script.async = true;
-        script.id = id;
-        script.onload = () => resolve();
-        script.onerror = () => reject(new Error(`Failed to load script ${src}`));
-        document.body.appendChild(script);
-    });
-}
-
 export default function LoginPage() {
     const { login } = useAuth();
     const [searchParams] = useSearchParams();
@@ -45,9 +29,6 @@ export default function LoginPage() {
 
     const [tab, setTab] = useState(confirmState === "success" ? "success" : "login");
     const [loading, setLoading] = useState(false);
-    const [socialLoading, setSocialLoading] = useState(false);
-    const [googleReady, setGoogleReady] = useState(false);
-    const [appleReady, setAppleReady] = useState(false);
     const [socialLoading, setSocialLoading] = useState(false);
     const [googleReady, setGoogleReady] = useState(false);
     const [appleReady, setAppleReady] = useState(false);
@@ -62,8 +43,6 @@ export default function LoginPage() {
         first_name: "",
         last_name: "",
     });
-
-    const [socialInitialized, setSocialInitialized] = useState(false);
 
     const [socialInitialized, setSocialInitialized] = useState(false);
 

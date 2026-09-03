@@ -76,78 +76,77 @@ const NewJobItemForm = ({ projectId, plotId, workItemId, token, onSuccess, onClo
       {error && <div style={{ background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.2)', color: '#dc2626', padding: '12px 16px', borderRadius: '12px', marginBottom: '20px', fontSize: '14px' }}>{error}</div>}
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-          <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-            <div>
-              <label style={labelStyle}>Job Name *</label>
-              <input type="text" required value={form.job_name} onChange={e => set('job_name', e.target.value)} placeholder="e.g. Install Conduit" style={inputStyle} />
-            </div>
-            <div>
-              <label style={labelStyle}>Artisan Type *</label>
-              <select required value={form.job_artisan} onChange={e => set('job_artisan', e.target.value)} style={inputStyle}>
-                <option value="">Select artisan...</option>
-                {ARTISANS.map(a => <option key={a} value={a}>{a}</option>)}
-              </select>
-            </div>
+          <div>
+            <label style={labelStyle}>Job Name *</label>
+            <input type="text" required value={form.job_name} onChange={e => set('job_name', e.target.value)} placeholder="e.g. Install Conduit" style={inputStyle} />
           </div>
           <div>
-            <label style={labelStyle}>Description</label>
-            <textarea value={form.job_description} onChange={e => set('job_description', e.target.value)} placeholder="Describe scope of work..." style={{ ...inputStyle, minHeight: '90px', resize: 'vertical' }} />
+            <label style={labelStyle}>Artisan Type *</label>
+            <select required value={form.job_artisan} onChange={e => set('job_artisan', e.target.value)} style={inputStyle}>
+              <option value="">Select artisan...</option>
+              {ARTISANS.map(a => <option key={a} value={a}>{a}</option>)}
+            </select>
           </div>
-          <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-            <div>
-              <label style={labelStyle}>Status *</label>
-              <select required value={form.job_status} onChange={e => set('job_status', e.target.value)} style={inputStyle}>
-                {['Planned', 'In Progress', 'Completed', 'On Hold', 'Delayed', 'Cancelled'].map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
-            </div>
-            <div>
-              <label style={labelStyle}>Priority *</label>
-              <select required value={form.priority} onChange={e => set('priority', e.target.value)} style={inputStyle}>
-                {['Low', 'Medium', 'High', 'Urgent'].map(p => <option key={p} value={p}>{p}</option>)}
-              </select>
-            </div>
-          </div>
-          <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-            <div>
-              <label style={labelStyle}>Estimated Hours <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>(optional)</span></label>
-              <input type="number" step="0.5" min="0" value={form.estimated_hours} onChange={e => set('estimated_hours', e.target.value)} placeholder="e.g. 12.5" style={inputStyle} />
-            </div>
-          </div>
-          <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-            <div>
-              <label style={labelStyle}>Start Date *</label>
-              <input type="date" required value={form.start_date} onChange={e => set('start_date', e.target.value)} style={inputStyle} />
-            </div>
-            <div>
-              <label style={labelStyle}>Target End Date *</label>
-              <input type="date" required value={form.target_end_date} onChange={e => set('target_end_date', e.target.value)} style={inputStyle} />
-            </div>
-          </div>
-          <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-            <div>
-              <label style={labelStyle}>Actual Start <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>(optional)</span></label>
-              <input type="date" value={form.actual_start_date} onChange={e => set('actual_start_date', e.target.value)} style={inputStyle} />
-            </div>
-            <div>
-              <label style={labelStyle}>Actual End <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>(optional)</span></label>
-              <input type="date" value={form.actual_end_date} onChange={e => set('actual_end_date', e.target.value)} style={inputStyle} />
-            </div>
-          </div>
-
-          {/* Material Requirements */}
+        </div>
+        <div>
+          <label style={labelStyle}>Description</label>
+          <textarea value={form.job_description} onChange={e => set('job_description', e.target.value)} placeholder="Describe scope of work..." style={{ ...inputStyle, minHeight: '90px', resize: 'vertical' }} />
+        </div>
+        <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
           <div>
-            <label style={{ ...labelStyle, marginBottom: '14px' }}>
-              Material Requirements <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>(optional)</span>
-            </label>
-            <MaterialsEditor items={materials} onChange={setMaterials} />
+            <label style={labelStyle}>Status *</label>
+            <select required value={form.job_status} onChange={e => set('job_status', e.target.value)} style={inputStyle}>
+              {['Planned', 'In Progress', 'Completed', 'On Hold', 'Delayed', 'Cancelled'].map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
           </div>
+          <div>
+            <label style={labelStyle}>Priority *</label>
+            <select required value={form.priority} onChange={e => set('priority', e.target.value)} style={inputStyle}>
+              {['Low', 'Medium', 'High', 'Urgent'].map(p => <option key={p} value={p}>{p}</option>)}
+            </select>
+          </div>
+        </div>
+        <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          <div>
+            <label style={labelStyle}>Estimated Hours <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>(optional)</span></label>
+            <input type="number" step="0.5" min="0" value={form.estimated_hours} onChange={e => set('estimated_hours', e.target.value)} placeholder="e.g. 12.5" style={inputStyle} />
+          </div>
+        </div>
+        <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          <div>
+            <label style={labelStyle}>Start Date *</label>
+            <input type="date" required value={form.start_date} onChange={e => set('start_date', e.target.value)} style={inputStyle} />
+          </div>
+          <div>
+            <label style={labelStyle}>Target End Date *</label>
+            <input type="date" required value={form.target_end_date} onChange={e => set('target_end_date', e.target.value)} style={inputStyle} />
+          </div>
+        </div>
+        <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          <div>
+            <label style={labelStyle}>Actual Start <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>(optional)</span></label>
+            <input type="date" value={form.actual_start_date} onChange={e => set('actual_start_date', e.target.value)} style={inputStyle} />
+          </div>
+          <div>
+            <label style={labelStyle}>Actual End <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>(optional)</span></label>
+            <input type="date" value={form.actual_end_date} onChange={e => set('actual_end_date', e.target.value)} style={inputStyle} />
+          </div>
+        </div>
 
-          <div style={{ display: 'flex', gap: '12px', paddingTop: '12px', borderTop: '1px solid var(--border-subtle)' }}>
-            <button type="button" className="btn-ghost" onClick={onClose} style={{ flex: 1 }}>Cancel</button>
-            <button type="submit" disabled={saving} className="btn-primary" style={{ flex: 2, justifyContent: 'center' }}>
-              {saving ? (typeof window !== 'undefined' && window.location.pathname.includes('/edit') ? 'Editing...' : 'Creating...') : (typeof window !== 'undefined' && window.location.pathname.includes('/edit') ? 'Edit' : '+ Create Job Item')}
-            </button>
-          </div>
+        {/* Material Requirements */}
+        <div>
+          <label style={{ ...labelStyle, marginBottom: '14px' }}>
+            Material Requirements <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>(optional)</span>
+          </label>
+          <MaterialsEditor items={materials} onChange={setMaterials} />
+        </div>
+
+        <div style={{ display: 'flex', gap: '12px', paddingTop: '12px', borderTop: '1px solid var(--border-subtle)' }}>
+          <button type="button" className="btn-ghost" onClick={onClose} style={{ flex: 1 }}>Cancel</button>
+          <button type="submit" disabled={saving} className="btn-primary" style={{ flex: 2, justifyContent: 'center' }}>
+            {saving ? (typeof window !== 'undefined' && window.location.pathname.includes('/edit') ? 'Editing...' : 'Creating...') : (typeof window !== 'undefined' && window.location.pathname.includes('/edit') ? 'Edit' : '+ Create Job Item')}
+          </button>
+        </div>
       </form>
     </div>
   );

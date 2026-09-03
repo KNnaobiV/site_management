@@ -136,64 +136,49 @@ const CreateWorkItemPage = () => {
 
       const res = await apiFetch(url, {
         method,
-        const url = isEdit ? `/workitems/${workItemId}/` : `/projects/${targetProjectId}/plots/${targetPlotId}/workitems/`;
-        const method = isEdit ? 'PUT' : 'POST';
+        token,
+        body: JSON.stringify(payload),
+      });
 
-        const res = await apiFetch(url, {
-          method,
-          token,
-          body: JSON.stringify(payload),
-        });
-
-        if(res.ok) {
-          showSuccessMessage(isEdit ? "Work item updated successfully!" : "Work item created successfully!");
-      if (isEdit) {
-        navigate(`/work-items/${workItemId}`);
+      if (res.ok) {
+        showSuccessMessage(isEdit ? "Work item updated successfully!" : "Work item created successfully!");
+        if (isEdit) {
+          navigate(`/work-items/${workItemId}`);
+        } else {
+          navigate(`/plots/${targetPlotId}`);
+        }
       } else {
-        navigate(`/plots/${targetPlotId}`);
+        const data = await res.json();
+        setError(Object.entries(data).map(([k, v]) => `${k}: ${v}`).join(', '));
       }
-      showSuccessMessage(isEdit ? "Work item updated successfully!" : "Work item created successfully!");
-      if (isEdit) {
-        navigate(`/work-items/${workItemId}`);
-      } else {
-        navigate(`/plots/${targetPlotId}`);
-      }
-    } else {
-      const data = await res.json();
-      setError(Object.entries(data).map(([k, v]) => `${k}: ${v}`).join(', '));
+    } catch (err) {
+      setError("A connection error occurred.");
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    setError("A connection error occurred.");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
-if (fetchingPlot) return <div style={{ display: 'flex', justifyContent: 'center', padding: '100px' }}><Spinner /></div>;
+  if (fetchingPlot) return <div style={{ display: 'flex', justifyContent: 'center', padding: '100px' }}><Spinner /></div>;
 
-return (
-  <div className="fade-up" style={{ padding: '0 0 80px' }}>
-    <div style={{ marginBottom: '32px' }}>
-      <Breadcrumb items={[
-        { label: 'Projects', path: '/projects' },
-        { label: plot?.project_name || 'Project', path: `/projects/${plot?.construction_project}` },
-        { label: plot?.address || 'Plot', path: `/plots/${plotId}` },
-        { label: isEdit ? 'Edit Work Item' : 'New Work Item' }
+  return (
+    <div className="fade-up" style={{ padding: '0 0 80px' }}>
+      <div style={{ marginBottom: '32px' }}>
+        <Breadcrumb items={[
+          { label: 'Projects', path: '/projects' },
+          { label: plot?.project_name || 'Project', path: `/projects/${plot?.construction_project}` },
+          { label: plot?.address || 'Plot', path: `/plots/${plotId}` },
           { label: isEdit ? 'Edit Work Item' : 'New Work Item' }
-      ]} />
-      <h1 style={{ fontSize: '64px', marginTop: '12px' }}>{isEdit ? 'Edit Work Item' : 'Create Work Item'}</h1>
-      <h1 style={{ fontSize: '64px', marginTop: '12px' }}>{isEdit ? 'Edit Work Item' : 'Create Work Item'}</h1>
-    </div>
+        ]} />
+        <h1 style={{ fontSize: '64px', marginTop: '12px' }}>{isEdit ? 'Edit Work Item' : 'Create Work Item'}</h1>
+      </div>
 
-    <form onSubmit={handleSubmit} className="mobile-padding" style={{
-      < form onSubmit={handleSubmit} className="mobile-padding" style={{
+      <form onSubmit={handleSubmit} className="mobile-padding" style={{
         background: 'var(--bg-card)',
         borderRadius: '24px',
         border: '1px solid var(--border-default)',
         padding: '48px',
         maxWidth: '1200px'
       }}>
-      <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '48px' }}>
         <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '48px' }}>
           {/* Left Column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -215,7 +200,6 @@ return (
                 <SearchableSelect
                   options={users}
                   value={formData.foreman}
-                  onChange={val => setFormData({ ...formData, foreman: val })}
                   onChange={val => setFormData({ ...formData, foreman: val })}
                   onSearch={handleSearchUsers}
                   placeholder="Select foreman"
@@ -256,170 +240,151 @@ return (
             </div>
 
             <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-              <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                <div>
-                  <label style={labelStyle}>Start Date *</label>
-                  <input
-                    type="date"
-                    required
-                    value={formData.start_date}
-                    onChange={e => setFormData({ ...formData, start_date: e.target.value })}
-                    style={inputStyle}
-                  />
-                </div>
-                <div>
-                  <label style={labelStyle}>Target End Date *</label>
-                  <input
-                    type="date"
-                    required
-                    value={formData.target_end_date}
-                    onChange={e => setFormData({ ...formData, target_end_date: e.target.value })}
-                    style={inputStyle}
-                  />
-                </div>
-              </div>
-
               <div>
-                <label style={labelStyle}>Priority *</label>
-                <div style={{ display: 'flex', gap: '10px' }}>
-                  {['Low', 'Medium', 'High', 'Urgent'].map(p => (
-                    <button
-                      key={p}
-                      type="button"
-                      onClick={() => setFormData({ ...formData, priority: p })}
-                      onClick={() => setFormData({ ...formData, priority: p })}
-                      style={{
-                        flex: 1,
-                        padding: '12px 0',
-                        borderRadius: '10px',
-                        border: '1px solid var(--border-default)',
-                        background: formData.priority === p ? 'var(--brand-orange)' : 'var(--bg-raised)',
-                        color: formData.priority === p ? 'white' : 'var(--text-primary)',
-                        fontWeight: 600,
-                        fontSize: '14px',
-                        transition: 'all 0.2s'
-                      }}
-                    >
-                      {p}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                  <label style={{ ...labelStyle, marginBottom: 0 }}>Initial Progress *</label>
-                  <span style={{ fontWeight: 600 }}>{formData.initial_progress}%</span>
-                </div>
+                <label style={labelStyle}>Start Date *</label>
                 <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={formData.initial_progress}
-                  onChange={e => setFormData({ ...formData, initial_progress: parseInt(e.target.value) })}
-                  style={{ width: '100%', accentColor: 'var(--brand-orange)' }}
-                />
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px', fontSize: '11px', color: 'var(--text-tertiary)' }}>
-                  <span>0%</span>
-                  <span>100%</span>
-                  <input
-                    type="range"
-                    min="0"
-                    max="100"
-                    value={formData.initial_progress}
-                    onChange={e => setFormData({ ...formData, initial_progress: parseInt(e.target.value) })}
-                    style={{ width: '100%', accentColor: 'var(--brand-orange)' }}
-                  />
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px', fontSize: '11px', color: 'var(--text-tertiary)' }}>
-                    <span>0%</span>
-                    <span>100%</span>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <label style={labelStyle}>Status *</label>
-                <select
+                  type="date"
                   required
-                  value={formData.work_status}
-                  onChange={e => setFormData({ ...formData, work_status: e.target.value })}
+                  value={formData.start_date}
+                  onChange={e => setFormData({ ...formData, start_date: e.target.value })}
                   style={inputStyle}
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>Target End Date *</label>
+                <input
+                  type="date"
+                  required
+                  value={formData.target_end_date}
+                  onChange={e => setFormData({ ...formData, target_end_date: e.target.value })}
+                  style={inputStyle}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label style={labelStyle}>Priority *</label>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                {['Low', 'Medium', 'High', 'Urgent'].map(p => (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => setFormData({ ...formData, priority: p })}
+                    style={{
+                      flex: 1,
+                      padding: '12px 0',
+                      borderRadius: '10px',
+                      border: '1px solid var(--border-default)',
+                      background: formData.priority === p ? 'var(--brand-orange)' : 'var(--bg-raised)',
+                      color: formData.priority === p ? 'white' : 'var(--text-primary)',
+                      fontWeight: 600,
+                      fontSize: '14px',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    {p}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                <label style={{ ...labelStyle, marginBottom: 0 }}>Initial Progress *</label>
+                <span style={{ fontWeight: 600 }}>{formData.initial_progress}%</span>
+              </div>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={formData.initial_progress}
+                onChange={e => setFormData({ ...formData, initial_progress: parseInt(e.target.value) })}
+                style={{ width: '100%', accentColor: 'var(--brand-orange)' }}
+              />
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px', fontSize: '11px', color: 'var(--text-tertiary)' }}>
+                <span>0%</span>
+                <span>100%</span>
+              </div>
+            </div>
+
+            <div>
+              <label style={labelStyle}>Status *</label>
+              <select
+                required
+                value={formData.work_status}
+                onChange={e => setFormData({ ...formData, work_status: e.target.value })}
+                style={inputStyle}
+              >
+                {['Planned', 'In Progress', 'Completed', 'On Hold', 'Delayed', 'Cancelled'].map(s => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Budget */}
+            <div>
+              <label style={labelStyle}>Budget <span style={{ fontWeight: 400, color: 'var(--text-tertiary)' }}>(Optional)</span></label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '10px' }}>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="e.g. 2,000,000"
+                  value={formData.budget_amount}
+                  onChange={e => setFormData({ ...formData, budget_amount: e.target.value })}
+                  style={inputStyle}
+                />
+                <select
+                  value={formData.budget_currency}
+                  onChange={e => setFormData({ ...formData, budget_currency: e.target.value })}
+                  style={{ ...inputStyle, width: '90px' }}
                 >
-                  {['Planned', 'In Progress', 'Completed', 'On Hold', 'Delayed', 'Cancelled'].map(s => (
-                    <option key={s} value={s}>{s}</option>
-                  ))}
+                  {['NGN', 'USD', 'GBP', 'EUR'].map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
-
-              {/* Budget */}
-              <div>
-                <label style={labelStyle}>Budget <span style={{ fontWeight: 400, color: 'var(--text-tertiary)' }}>(Optional)</span></label>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '10px' }}>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    placeholder="e.g. 2,000,000"
-                    value={formData.budget_amount}
-                    onChange={e => setFormData({ ...formData, budget_amount: e.target.value })}
-                    style={inputStyle}
-                  />
-                  <select
-                    value={formData.budget_currency}
-                    onChange={e => setFormData({ ...formData, budget_currency: e.target.value })}
-                    style={{ ...inputStyle, width: '90px' }}
-                  >
-                    {['NGN', 'USD', 'GBP', 'EUR'].map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                </div>
-              </div>
-
-
             </div>
+
+
           </div>
+        </div>
 
-          {error && (
-            <div style={{ marginTop: '24px', color: 'var(--status-delayed)', fontSize: '14px' }}>
-              {error}
-            </div>
-          )}
-          {error && (
-            <div style={{ marginTop: '24px', color: 'var(--status-delayed)', fontSize: '14px' }}>
-              {error}
-            </div>
-          )}
-
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '48px' }}>
-            <button type="button" onClick={() => navigate(-1)} className="btn-ghost" style={{ padding: '12px 32px' }}>Cancel</button>
-            <button type="submit" className="btn-primary" style={{ padding: '12px 48px' }} disabled={loading}>
-              {loading ? <Spinner size={20} /> : (typeof window !== 'undefined' && window.location.pathname.includes('/edit') ? 'Update Work Item' : 'Create Work Item')}
-            </button>
+        {error && (
+          <div style={{ marginTop: '24px', color: 'var(--status-delayed)', fontSize: '14px' }}>
+            {error}
           </div>
-        </form>
-      </div>
-      );
+        )}
+
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '48px' }}>
+          <button type="button" onClick={() => navigate(-1)} className="btn-ghost" style={{ padding: '12px 32px' }}>Cancel</button>
+          <button type="submit" className="btn-primary" style={{ padding: '12px 48px' }} disabled={loading}>
+            {loading ? <Spinner size={20} /> : (typeof window !== 'undefined' && window.location.pathname.includes('/edit') ? 'Update Work Item' : 'Create Work Item')}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
 };
 
-      const labelStyle = {
-        display: 'block',
-      marginBottom: '10px',
-      fontWeight: 600,
-      fontSize: '15px',
-      color: 'var(--text-primary)'
+const labelStyle = {
+  display: 'block',
+  marginBottom: '10px',
+  fontWeight: 600,
+  fontSize: '15px',
+  color: 'var(--text-primary)'
 };
 
-      const inputStyle = {
-        width: '100%',
-      padding: '16px',
-      borderRadius: '12px',
-      border: '1px solid var(--border-default)',
-      background: 'var(--bg-raised)',
-      color: 'var(--text-primary)',
-      fontSize: '15px',
-      outline: 'none',
-      transition: 'border-color 0.2s'
+const inputStyle = {
+  width: '100%',
+  padding: '16px',
+  borderRadius: '12px',
+  border: '1px solid var(--border-default)',
+  background: 'var(--bg-raised)',
+  color: 'var(--text-primary)',
+  fontSize: '15px',
+  outline: 'none',
+  transition: 'border-color 0.2s'
 };
 
 
 
-      export default CreateWorkItemPage;
+export default CreateWorkItemPage;
