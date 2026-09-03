@@ -1,12 +1,12 @@
 import React from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard,
   Briefcase,
   Map as MapIcon,
   CheckSquare,
   ClipboardList,
-  Bell,
+  UserPlus,
   Menu,
   HardHat,
   ChevronRight,
@@ -17,14 +17,14 @@ import Avatar from './Avatar';
 
 const Sidebar = ({ isOpen, toggleSidebar, isMobile }) => {
   const { user, logout } = useAuth();
-  const location = useLocation();
-
-  const projectMatch = location.pathname.match(/^\/projects\/(\d+)/);
 
   const navItems = [
+    { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
+    { to: '/projects', icon: Briefcase, label: 'Projects' },
     { to: '/plots', icon: MapIcon, label: 'Plots' },
     { to: '/work-items', icon: CheckSquare, label: 'Work Items' },
     { to: '/job-items', icon: ClipboardList, label: 'Job Items' },
+    { to: '/invitations', icon: UserPlus, label: 'Invitations' },
   ];
 
   return (
@@ -97,6 +97,7 @@ const Sidebar = ({ isOpen, toggleSidebar, isMobile }) => {
             <li key={item.label} style={{ marginBottom: '8px' }}>
               <NavLink
                 to={item.to}
+                end={item.to === '/'}
                 style={({ isActive }) => ({
                   display: 'flex',
                   alignItems: 'center',
