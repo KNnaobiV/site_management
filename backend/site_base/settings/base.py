@@ -49,7 +49,6 @@ DJANGO_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
-    # "cloudinary_storage",
     "django.contrib.staticfiles",
     "django.contrib.sites",
 ]
@@ -76,8 +75,6 @@ THIRD_PARTY_APPS = [
     "dj_rest_auth.registration",
     # "cloudinary",
 ]
-
-INSTALLED_APPS = DJANGO_APPS + CUSTOM_USER_APPS + THIRD_PARTY_APPS
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
