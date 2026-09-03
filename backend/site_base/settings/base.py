@@ -49,7 +49,6 @@ DJANGO_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
-    # "cloudinary_storage",
     "django.contrib.staticfiles",
     "django.contrib.sites",
 ]
@@ -67,17 +66,7 @@ THIRD_PARTY_APPS = [
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
     "django_browser_reload",
-    "allauth",
-    "allauth.account",
-    "allauth.socialaccount",
-    "allauth.socialaccount.providers.google",
-    "allauth.socialaccount.providers.apple",
-    "dj_rest_auth",
-    "dj_rest_auth.registration",
-    # "cloudinary",
 ]
-
-INSTALLED_APPS = DJANGO_APPS + CUSTOM_USER_APPS + THIRD_PARTY_APPS
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

@@ -99,34 +99,35 @@ const NewWorkItemForm = ({ projectId, plotId, token, onSuccess, onClose }) => {
           </select>
         </div>
         <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-          <div>
-            <label style={labelStyle}>Start Date</label>
-            <input type="date" required value={form.start_date} onChange={e => set('start_date', e.target.value)} style={inputStyle} />
+          <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            <div>
+              <label style={labelStyle}>Start Date</label>
+              <input type="date" required value={form.start_date} onChange={e => set('start_date', e.target.value)} style={inputStyle} />
+            </div>
+            <div>
+              <label style={labelStyle}>Target End Date</label>
+              <input type="date" required value={form.target_end_date} onChange={e => set('target_end_date', e.target.value)} style={inputStyle} />
+            </div>
           </div>
+
+
+          {/* Checklist */}
           <div>
-            <label style={labelStyle}>Target End Date</label>
-            <input type="date" required value={form.target_end_date} onChange={e => set('target_end_date', e.target.value)} style={inputStyle} />
+            <label style={{ ...labelStyle, marginBottom: '14px' }}>
+              Checklist <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>(optional)</span>
+            </label>
+            <ChecklistEditor items={checklist} onChange={setChecklist} />
           </div>
-        </div>
 
+          {/* Photos */}
+          <ImageUploader files={images} onChange={setImages} label="Photos" max={8} />
 
-        {/* Checklist */}
-        <div>
-          <label style={{ ...labelStyle, marginBottom: '14px' }}>
-            Checklist <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>(optional)</span>
-          </label>
-          <ChecklistEditor items={checklist} onChange={setChecklist} />
-        </div>
-
-        {/* Photos */}
-        <ImageUploader files={images} onChange={setImages} label="Photos" max={8} />
-
-        <div style={{ display: 'flex', gap: '12px', paddingTop: '12px', borderTop: '1px solid var(--border-subtle)' }}>
-          <button type="button" className="btn-ghost" onClick={onClose} style={{ flex: 1 }}>Cancel</button>
-          <button type="submit" disabled={saving} className="btn-primary" style={{ flex: 2, justifyContent: 'center' }}>
-            {saving ? 'Creating...' : '+ Create Work Item'}
-          </button>
-        </div>
+          <div style={{ display: 'flex', gap: '12px', paddingTop: '12px', borderTop: '1px solid var(--border-subtle)' }}>
+            <button type="button" className="btn-ghost" onClick={onClose} style={{ flex: 1 }}>Cancel</button>
+            <button type="submit" disabled={saving} className="btn-primary" style={{ flex: 2, justifyContent: 'center' }}>
+              {saving ? 'Creating...' : '+ Create Work Item'}
+            </button>
+          </div>
       </form>
     </div>
   );

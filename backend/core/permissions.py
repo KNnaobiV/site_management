@@ -544,4 +544,4 @@ class CanManageDocuments(BasePermission):
             project = obj.plot.construction_project
         if project is None:
             return False
-        return get_project_role(request.user, project) in {"owner", "project_manager", "consultant"}
+        return get_project_role(request.user, project) in {"owner", "project_manager", "consultant"}
