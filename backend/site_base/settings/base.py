@@ -76,6 +76,8 @@ THIRD_PARTY_APPS = [
     # "cloudinary",
 ]
 
+INSTALLED_APPS = DJANGO_APPS + CUSTOM_USER_APPS + THIRD_PARTY_APPS
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     #"whitenoise.middleware.WhiteNoiseMiddleware",
