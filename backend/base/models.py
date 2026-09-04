@@ -23,6 +23,59 @@ class Multimedia(models.Model):
     created_at = models.DateTimeField(auto_now=True)
 
 
+class HasPictureMixin:
+    """
+    Mixin for models referencing Picture via ForeignKey:
+    - Accepts optional upload_to at instance creation (__init__)
+    - Intercepts raw file uploads in kwargs before ForeignKey descriptor check
+    - Automatically creates and associates Picture instances on save()
+    """
+    default_upload_to = 'images/%Y/%m/%d/'
+    picture_fields = {}
+
+    def __init__(self, *args, upload_to=None, **kwargs):
+        self.upload_to = upload_to
+        self._pending_pictures = {}
+
+        from django.core.files.base import File
+        from django.core.files.uploadedfile import UploadedFile
+
+        fields = self.picture_fields if isinstance(self.picture_fields, (list, tuple, set)) else self.picture_fields.keys()
+        for field in fields:
+            if field in kwargs:
+                val = kwargs.get(field)
+                if val is not None and isinstance(val, (UploadedFile, File)):
+                    self._pending_pictures[field] = kwargs.pop(field)
+
+        super().__init__(*args, **kwargs)
+
+    def save(self, *args, **kwargs):
+        for field, file_obj in list(getattr(self, '_pending_pictures', {}).items()):
+            target_path = getattr(self, 'upload_to', None)
+            if not target_path:
+                if isinstance(self.picture_fields, dict):
+                    target_path = self.picture_fields.get(field, self.default_upload_to)
+                else:
+                    target_path = getattr(self, 'default_upload_to', 'images/%Y/%m/%d/')
+
+            pic = Picture.objects.create(
+                img=file_obj,
+                upload_to=target_path
+            )
+            setattr(self, field, pic)
+            del self._pending_pictures[field]
+
+        fields = self.picture_fields if isinstance(self.picture_fields, (list, tuple, set)) else self.picture_fields.keys()
+        for field in fields:
+            val = getattr(self, field, None)
+            if isinstance(val, Picture) and not val.pk:
+                if getattr(self, 'upload_to', None):
+                    val.upload_to = self.upload_to
+                val.save()
+
+        super().save(*args, **kwargs)
+
+
 class Picture(Multimedia):
     upload_to = models.CharField(max_length=255, default='images/%Y/%m/%d/', blank=True)
     img = models.ImageField(

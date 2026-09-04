@@ -13,7 +13,7 @@ import sys
 from io import BytesIO
 from PIL import Image
 
-from base.models import Picture, Video
+from base.models import Picture, Video, HasPictureMixin
 from .groups import create_company_group, create_project_group
 # Create your models here.
 
@@ -72,11 +72,12 @@ class InvitationStatus(models.TextChoices):
     EXPIRED = "expired", "Expired"
 
 
-class ConstructionProject(TimestampedModel):
+class ConstructionProject(HasPictureMixin, TimestampedModel):
     """
-    Represents a construction project with associated client 
-    and project manager
+    Core project model for a site (e.g. "Lekki Phase 1 Residential")
     """
+    picture_fields = {"cover_image": "projects/covers/"}
+
     created_by = models.ForeignKey(
         User, on_delete=models.DO_NOTHING, related_name="created_projects"
     )
@@ -101,7 +102,6 @@ class ConstructionProject(TimestampedModel):
     start_date = models.DateField(default=date.today)
     target_end_date = models.DateField(default=date.today)
     number_of_plots = models.PositiveSmallIntegerField(default=1)
-    default_upload_to = "projects/covers/"
     cover_image = models.ForeignKey(
         Picture,
         on_delete=models.SET_NULL,
@@ -123,17 +123,6 @@ class ConstructionProject(TimestampedModel):
             ),
         ]
 
-    def __init__(self, *args, upload_to=None, **kwargs):
-        self.upload_to = upload_to or self.default_upload_to
-        from django.core.files.base import File
-        from django.core.files.uploadedfile import UploadedFile
-        self._pending_cover_image = None
-        if 'cover_image' in kwargs:
-            raw_cover = kwargs.get('cover_image')
-            if raw_cover is not None and isinstance(raw_cover, (UploadedFile, File)):
-                self._pending_cover_image = kwargs.pop('cover_image')
-        super().__init__(*args, **kwargs)
-
     def save(self, *args, **kwargs):
         if self.target_end_date and self.start_date and \
                 self.target_end_date < self.start_date:
@@ -142,34 +131,6 @@ class ConstructionProject(TimestampedModel):
             client_name = self.client.username if self.client else "Unknown Client"
             pm_name = self.project_manager.username if self.project_manager else "Unknown PM"
             self.project_name = f"Project for {client_name} with {pm_name}"
-
-        from django.core.files.base import File
-        from django.core.files.uploadedfile import UploadedFile
-        target_upload_to = getattr(self, 'upload_to', self.default_upload_to)
-        file_to_process = getattr(self, '_pending_cover_image', None)
-        if file_to_process:
-            try:
-                img = Image.open(file_to_process)
-                if img.mode != 'RGB':
-                    img = img.convert('RGB')
-                img.thumbnail((1200, 1200), Image.Resampling.LANCZOS)
-                output = BytesIO()
-                img.save(output, format='JPEG', quality=75)
-                output.seek(0)
-                file_name = f"{getattr(file_to_process, 'name', 'cover').split('.')[0]}.jpg"
-                processed_file = ContentFile(output.read(), name=file_name)
-            except Exception:
-                processed_file = file_to_process
-
-            self.cover_image = Picture.objects.create(
-                img=processed_file,
-                upload_to=target_upload_to
-            )
-            self._pending_cover_image = None
-        elif isinstance(self.cover_image, Picture) and not self.cover_image.pk:
-            if getattr(self, 'upload_to', None):
-                self.cover_image.upload_to = self.upload_to
-            self.cover_image.save()
 
         super().save(*args, **kwargs)
 
@@ -465,10 +426,12 @@ class ConstructionPlot(TimestampedModel):
         storekeeper_group.user_set.add(self.storekeeper)
 
 
-class WorkItem(TimestampedModel):
+class WorkItem(HasPictureMixin, TimestampedModel):
     """
     Represents a specific work item or phase of construction at a plot
     """
+    picture_fields = {"work_item_image": "work_items/%Y/%m/%d/"}
+
     construction_plot = models.ForeignKey(
         ConstructionPlot, on_delete=models.CASCADE
     )
@@ -483,7 +446,6 @@ class WorkItem(TimestampedModel):
     target_end_date = models.DateField(default=date.today)
     # Checklist: [{"text": "Pour footings", "done": false}, ...]
     checklist = models.JSONField(default=list, blank=True)
-    default_upload_to = "work_items/%Y/%m/%d/"
     work_item_image = models.ForeignKey(
         Picture,
         on_delete=models.CASCADE,
@@ -495,17 +457,6 @@ class WorkItem(TimestampedModel):
     class Meta:
         ordering = ['-updated_at']
 
-    def __init__(self, *args, upload_to=None, **kwargs):
-        self.upload_to = upload_to or self.default_upload_to
-        from django.core.files.base import File
-        from django.core.files.uploadedfile import UploadedFile
-        self._pending_work_item_image = None
-        if 'work_item_image' in kwargs:
-            raw_img = kwargs.get('work_item_image')
-            if raw_img is not None and isinstance(raw_img, (UploadedFile, File)):
-                self._pending_work_item_image = kwargs.pop('work_item_image')
-        super().__init__(*args, **kwargs)
-
     def save(self, *args, **kwargs):
         if (
             self.target_end_date and self.start_date and 
@@ -516,20 +467,6 @@ class WorkItem(TimestampedModel):
             )
         if not self.name:
             raise ValueError("Work item must have a name.")
-
-        from django.core.files.base import File
-        from django.core.files.uploadedfile import UploadedFile
-        target_upload_to = getattr(self, 'upload_to', self.default_upload_to)
-        if getattr(self, '_pending_work_item_image', None):
-            self.work_item_image = Picture.objects.create(
-                img=self._pending_work_item_image,
-                upload_to=target_upload_to
-            )
-            self._pending_work_item_image = None
-        elif isinstance(self.work_item_image, Picture) and not self.work_item_image.pk:
-            if getattr(self, 'upload_to', None):
-                self.work_item_image.upload_to = self.upload_to
-            self.work_item_image.save()
 
         super().save(*args, **kwargs)
 
@@ -599,7 +536,7 @@ class JobItem(TimestampedModel):
         super().save(*args, **kwargs)
 
 
-class JobReport(TimestampedModel):
+class JobReport(HasPictureMixin, TimestampedModel):
     """Daily construction plot report tracking work progress and materials"""
 
     class ReportStatusChoices(models.TextChoices):
@@ -612,7 +549,8 @@ class JobReport(TimestampedModel):
         URGENT = "Urgent"
         CRITICAL = "Critical"
 
-    default_upload_to = "reports/%Y/%m/%d/"
+    picture_fields = {"job_image": "reports/%Y/%m/%d/"}
+
     job_item = models.ForeignKey(
         JobItem, on_delete=models.CASCADE, related_name="daily_reports"
     )
@@ -661,17 +599,6 @@ class JobReport(TimestampedModel):
         ordering = ['-updated_at']
         verbose_name = "Daily Job Report"
         verbose_name_plural = "Daily Job Reports"
-    
-    def __init__(self, *args, upload_to=None, **kwargs):
-        self.upload_to = upload_to or self.default_upload_to
-        from django.core.files.base import File
-        from django.core.files.uploadedfile import UploadedFile
-        self._pending_job_image = None
-        if 'job_image' in kwargs:
-            raw_img = kwargs.get('job_image')
-            if raw_img is not None and isinstance(raw_img, (UploadedFile, File)):
-                self._pending_job_image = kwargs.pop('job_image')
-        super().__init__(*args, **kwargs)
 
     def __str__(self):
         return (f"{self.job_item.job_name.title()} for "
@@ -700,20 +627,6 @@ class JobReport(TimestampedModel):
             raise ValueError(
                 "Report date cannot be before job item start date."
             )
-
-        from django.core.files.base import File
-        from django.core.files.uploadedfile import UploadedFile
-        target_upload_to = getattr(self, 'upload_to', self.default_upload_to)
-        if getattr(self, '_pending_job_image', None):
-            self.job_image = Picture.objects.create(
-                img=self._pending_job_image,
-                upload_to=target_upload_to
-            )
-            self._pending_job_image = None
-        elif isinstance(self.job_image, Picture) and not self.job_image.pk:
-            if getattr(self, 'upload_to', None):
-                self.job_image.upload_to = self.upload_to
-            self.job_image.save()
         
         super().save(*args, **kwargs)
 
