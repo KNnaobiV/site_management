@@ -15,6 +15,7 @@ from core.models import ConstructionProject, ConstructionPlot
 from core.roles import (
     get_project_role,
     get_plot_role,
+    is_creator_without_pm,
     PROJECT_READ_ROLES,
     PROJECT_MANAGE_ROLES,
     PLOT_READ_ROLES,
@@ -199,19 +200,23 @@ CanManageSite = CanManagePlot
 # ---------------------------------------------------------------------------
 
 class CanCreateWorkItem(BasePermission):
-    """PM, owner, and foreman can create work items."""
+    """PM, or creator if no PM, can create work items."""
     message = "You do not have permission to create work items."
 
     def has_permission(self, request, view):
         if not request.user or not request.user.is_authenticated:
             return False
         plot = _get_plot(view)
+        if is_creator_without_pm(request.user, plot or view):
+            return True
         if plot is None:
             return True
         return get_plot_role(request.user, plot) in WORK_ITEM_CREATE_ROLES
 
     def has_object_permission(self, request, view, obj):
         plot = getattr(obj, "construction_plot", None)
+        if is_creator_without_pm(request.user, plot or obj):
+            return True
         if plot is None:
             return False
         return get_plot_role(request.user, plot) in WORK_ITEM_CREATE_ROLES
@@ -256,19 +261,23 @@ class CanDeleteWorkItem(BasePermission):
 
 
 class CanApproveWorkItem(BasePermission):
-    """Only the project manager can approve or reject work items."""
+    """Only the project manager (or creator if no PM) can approve or reject work items."""
     message = "Only the project manager can approve work items."
 
     def has_permission(self, request, view):
         if not request.user or not request.user.is_authenticated:
             return False
         plot = _get_plot(view)
+        if is_creator_without_pm(request.user, plot or view):
+            return True
         if plot is None:
             return True
         return get_plot_role(request.user, plot) in WORK_ITEM_APPROVE_ROLES
 
     def has_object_permission(self, request, view, obj):
         plot = getattr(obj, "construction_plot", None)
+        if is_creator_without_pm(request.user, plot or obj):
+            return True
         if plot is None:
             return False
         return get_plot_role(request.user, plot) in WORK_ITEM_APPROVE_ROLES
@@ -279,13 +288,15 @@ class CanApproveWorkItem(BasePermission):
 # ---------------------------------------------------------------------------
 
 class CanCreateJobItem(BasePermission):
-    """PM, owner, and foreman can create job items."""
+    """PM, or creator if no PM, can create job items."""
     message = "You do not have permission to create job items."
 
     def has_permission(self, request, view):
         if not request.user or not request.user.is_authenticated:
             return False
         plot = _get_plot(view)
+        if is_creator_without_pm(request.user, plot or view):
+            return True
         if plot is None:
             return True
         return get_plot_role(request.user, plot) in JOB_ITEM_CREATE_ROLES
@@ -293,6 +304,8 @@ class CanCreateJobItem(BasePermission):
     def has_object_permission(self, request, view, obj):
         plot = getattr(obj, "work_item", None)
         plot = getattr(plot, "construction_plot", None) if plot else None
+        if is_creator_without_pm(request.user, plot or obj):
+            return True
         if plot is None:
             return False
         return get_plot_role(request.user, plot) in JOB_ITEM_CREATE_ROLES
@@ -339,13 +352,15 @@ class CanDeleteJobItem(BasePermission):
 
 
 class CanApproveJobItem(BasePermission):
-    """Only the project manager can approve or reject job items."""
+    """Only the project manager (or creator if no PM) can approve or reject job items."""
     message = "Only the project manager can approve job items."
 
     def has_permission(self, request, view):
         if not request.user or not request.user.is_authenticated:
             return False
         plot = _get_plot(view)
+        if is_creator_without_pm(request.user, plot or view):
+            return True
         if plot is None:
             return True
         return get_plot_role(request.user, plot) in JOB_ITEM_APPROVE_ROLES
@@ -353,6 +368,8 @@ class CanApproveJobItem(BasePermission):
     def has_object_permission(self, request, view, obj):
         plot = getattr(obj, "work_item", None)
         plot = getattr(plot, "construction_plot", None) if plot else None
+        if is_creator_without_pm(request.user, plot or obj):
+            return True
         if plot is None:
             return False
         return get_plot_role(request.user, plot) in JOB_ITEM_APPROVE_ROLES
@@ -364,20 +381,26 @@ class CanApproveJobItem(BasePermission):
  
 class CanSubmitReport(BasePermission):
     """
-    Project manager, foremen and storekeepers can create/update reports.
+    Project manager, foremen and storekeepers (or creator if no PM) can create/update reports.
     """
-    message = "Only plot staff (foreman/storekeeper) can submit reports."
+    message = "Only plot staff or project manager can submit reports."
  
     def has_permission(self, request, view):
         if not request.user or not request.user.is_authenticated:
             return False
         plot = _get_plot(view)
+        if is_creator_without_pm(request.user, plot or view):
+            return True
         if plot is None:
             return True
         return get_plot_role(request.user, plot) in REPORT_WRITE_ROLES
  
     def has_object_permission(self, request, view, obj):
-        plot = obj.job_item.work_item.construction_plot
+        plot = getattr(getattr(getattr(obj, "job_item", None), "work_item", None), "construction_plot", None)
+        if is_creator_without_pm(request.user, plot or obj):
+            return True
+        if plot is None:
+            return False
         return get_plot_role(request.user, plot) in REPORT_WRITE_ROLES
  
  

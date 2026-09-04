@@ -77,6 +77,63 @@ def get_plot_role(user, plot) -> PlotRoleLabel:
 
 # Backwards compat alias
 get_site_role = get_plot_role
+
+
+def get_project_from_object(obj):
+    """Resolve ConstructionProject from any related domain object or return None."""
+    if obj is None:
+        return None
+    if hasattr(obj, "construction_project"):
+        return obj.construction_project
+    if hasattr(obj, "construction_plot"):
+        plot = obj.construction_plot
+        return getattr(plot, "construction_project", None) if plot else None
+    if hasattr(obj, "work_item"):
+        work_item = obj.work_item
+        plot = getattr(work_item, "construction_plot", None) if work_item else None
+        return getattr(plot, "construction_project", None) if plot else None
+    if hasattr(obj, "job_item"):
+        job_item = obj.job_item
+        work_item = getattr(job_item, "work_item", None) if job_item else None
+        plot = getattr(work_item, "construction_plot", None) if work_item else None
+        return getattr(plot, "construction_project", None) if plot else None
+    if hasattr(obj, "project"):
+        return obj.project
+    if hasattr(obj, "plot"):
+        plot = obj.plot
+        return getattr(plot, "construction_project", None) if plot else None
+    if hasattr(obj, "created_by") and hasattr(obj, "project_manager"):
+        return obj
+    return None
+
+
+def is_creator_without_pm(user, obj_or_view) -> bool:
+    """
+    Return True if `user` is the creator of the project, and either:
+    1. No project manager is assigned (project.project_manager is None), OR
+    2. The creator is also the assigned project manager (project.project_manager == user).
+    """
+    if not user or not getattr(user, "is_authenticated", False):
+        return False
+
+    project = None
+    if hasattr(obj_or_view, "get_project"):
+        project = obj_or_view.get_project()
+    elif hasattr(obj_or_view, "get_plot"):
+        plot = obj_or_view.get_plot()
+        project = getattr(plot, "construction_project", None) if plot else None
+
+    if project is None:
+        project = get_project_from_object(obj_or_view)
+
+    if not project or not hasattr(project, "created_by"):
+        return False
+
+    if user != project.created_by:
+        return False
+
+    return project.project_manager is None or project.project_manager == user
+
  
  
 # ---------------------------------------------------------------------------

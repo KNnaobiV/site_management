@@ -1113,7 +1113,7 @@ class JobReportViewSet(PlotScopedMixin, viewsets.ModelViewSet):
                 message=f"New {report.priority} report for {job_item.job_name} in {job_item.work_item.name}",
                 priority=prio,
                 target_url=(f"/job-items/{job_item.pk}?report={report.pk}")
-            ) for m in members if m
+            ) for m in members if m and m != self.request.user
         ]
         Notification.objects.bulk_create(notifications)
 

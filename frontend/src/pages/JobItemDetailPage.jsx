@@ -715,7 +715,7 @@ const JobItemDetailPage = () => {
                     {selectedReport.report_date}
                   </p>
                 </div>
-                {plot?.role === 'project_manager' && (
+                {(plot?.role === 'project_manager' || plot?.role === 'owner') && (
                   <button
                     onClick={() => handleDeleteReport(selectedReport.id)}
                     className="btn-ghost"
