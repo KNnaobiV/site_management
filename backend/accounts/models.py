@@ -6,8 +6,13 @@ from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 
 
-class UserModel(AbstractUser):
+from base.models import HasPictureMixin
+
+
+class UserModel(HasPictureMixin, AbstractUser):
     """Custom user model that can be extended in the future if needed."""
+    picture_fields = {'profile_picture': 'profiles/'}
+
     username = models.CharField(max_length=150, unique=True)
     email = models.EmailField(unique=True)
     first_name = models.CharField(max_length=30, blank=True)
@@ -15,8 +20,13 @@ class UserModel(AbstractUser):
     is_staff = models.BooleanField(default=False)
     
     display_name = models.CharField(max_length=50, blank=True, null=True)
-    profile_picture = models.ImageField(upload_to='profiles/', null=True, blank=True)
-    
+    profile_picture = models.ForeignKey(
+        'base.Picture',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='user_profiles'
+    )
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email']

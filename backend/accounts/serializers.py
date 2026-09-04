@@ -6,9 +6,37 @@ User = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
+    profile_picture = serializers.SerializerMethodField()
+
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'first_name', 'last_name', 'display_name', 'profile_picture']
+
+    def get_profile_picture(self, obj):
+        if obj.profile_picture and obj.profile_picture.img:
+            request = self.context.get('request')
+            url = obj.profile_picture.img.url
+            if request:
+                return request.build_absolute_uri(url)
+            return url
+        return None
+
+    def update(self, instance, validated_data):
+        profile_picture_data = self.initial_data.get('profile_picture')
+        from django.core.files.base import File
+        from django.core.files.uploadedfile import UploadedFile
+        from base.models import Picture
+
+        if profile_picture_data and isinstance(profile_picture_data, (UploadedFile, File)):
+            pic = Picture.objects.create(
+                img=profile_picture_data,
+                upload_to=getattr(instance, 'upload_to', instance.default_upload_to)
+            )
+            instance.profile_picture = pic
+        elif isinstance(profile_picture_data, (int, str)) and str(profile_picture_data).isdigit():
+            instance.profile_picture_id = int(profile_picture_data)
+
+        return super().update(instance, validated_data)
 
 
 class RegisterSerializer(serializers.ModelSerializer):

@@ -13,7 +13,7 @@ import sys
 from io import BytesIO
 from PIL import Image
 
-from base.models import Picture, Video
+from base.models import Picture, Video, HasPictureMixin
 from .groups import create_company_group, create_project_group
 # Create your models here.
 
@@ -72,11 +72,12 @@ class InvitationStatus(models.TextChoices):
     EXPIRED = "expired", "Expired"
 
 
-class ConstructionProject(TimestampedModel):
+class ConstructionProject(HasPictureMixin, TimestampedModel):
     """
-    Represents a construction project with associated client 
-    and project manager
+    Core project model for a site (e.g. "Lekki Phase 1 Residential")
     """
+    picture_fields = {"cover_image": "projects/covers/"}
+
     created_by = models.ForeignKey(
         User, on_delete=models.DO_NOTHING, related_name="created_projects"
     )
@@ -101,7 +102,13 @@ class ConstructionProject(TimestampedModel):
     start_date = models.DateField(default=date.today)
     target_end_date = models.DateField(default=date.today)
     number_of_plots = models.PositiveSmallIntegerField(default=1)
-    cover_image = models.ImageField(upload_to="projects/covers/", blank=True, null=True)
+    cover_image = models.ForeignKey(
+        Picture,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name="project_covers"
+    )
 
     class Meta:
         constraints = [
@@ -116,7 +123,6 @@ class ConstructionProject(TimestampedModel):
             ),
         ]
 
-
     def save(self, *args, **kwargs):
         if self.target_end_date and self.start_date and \
                 self.target_end_date < self.start_date:
@@ -125,23 +131,7 @@ class ConstructionProject(TimestampedModel):
             client_name = self.client.username if self.client else "Unknown Client"
             pm_name = self.project_manager.username if self.project_manager else "Unknown PM"
             self.project_name = f"Project for {client_name} with {pm_name}"
-            
-        if self.cover_image and isinstance(self.cover_image.file, UploadedFile):
-            try:
-                img = Image.open(self.cover_image)
-                if img.mode != 'RGB':
-                    img = img.convert('RGB')
-                img.thumbnail((1200, 1200), Image.Resampling.LANCZOS)
-                
-                output = BytesIO()
-                img.save(output, format='JPEG', quality=75)
-                output.seek(0)
-                
-                self.cover_image.file = ContentFile(output.read())
-                self.cover_image.name = f"{self.cover_image.name.split('.')[0]}.jpg"
-            except Exception as e:
-                pass
-                
+
         super().save(*args, **kwargs)
 
     @receiver(post_save, sender='core.ConstructionProject')
@@ -436,10 +426,12 @@ class ConstructionPlot(TimestampedModel):
         storekeeper_group.user_set.add(self.storekeeper)
 
 
-class WorkItem(TimestampedModel):
+class WorkItem(HasPictureMixin, TimestampedModel):
     """
     Represents a specific work item or phase of construction at a plot
     """
+    picture_fields = {"work_item_image": "work_items/%Y/%m/%d/"}
+
     construction_plot = models.ForeignKey(
         ConstructionPlot, on_delete=models.CASCADE
     )
@@ -454,6 +446,13 @@ class WorkItem(TimestampedModel):
     target_end_date = models.DateField(default=date.today)
     # Checklist: [{"text": "Pour footings", "done": false}, ...]
     checklist = models.JSONField(default=list, blank=True)
+    work_item_image = models.ForeignKey(
+        Picture,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        related_name="work_item_pictures"
+    )
 
     class Meta:
         ordering = ['-updated_at']
@@ -468,6 +467,7 @@ class WorkItem(TimestampedModel):
             )
         if not self.name:
             raise ValueError("Work item must have a name.")
+
         super().save(*args, **kwargs)
 
 
@@ -536,7 +536,7 @@ class JobItem(TimestampedModel):
         super().save(*args, **kwargs)
 
 
-class JobReport(TimestampedModel):
+class JobReport(HasPictureMixin, TimestampedModel):
     """Daily construction plot report tracking work progress and materials"""
 
     class ReportStatusChoices(models.TextChoices):
@@ -548,6 +548,8 @@ class JobReport(TimestampedModel):
         NORMAL = "Normal"
         URGENT = "Urgent"
         CRITICAL = "Critical"
+
+    picture_fields = {"job_image": "reports/%Y/%m/%d/"}
 
     job_item = models.ForeignKey(
         JobItem, on_delete=models.CASCADE, related_name="daily_reports"
@@ -597,7 +599,7 @@ class JobReport(TimestampedModel):
         ordering = ['-updated_at']
         verbose_name = "Daily Job Report"
         verbose_name_plural = "Daily Job Reports"
-    
+
     def __str__(self):
         return (f"{self.job_item.job_name.title()} for "
                 f"{self.job_item.work_item.name} - {self.report_date}"
@@ -606,17 +608,24 @@ class JobReport(TimestampedModel):
     @property
     def days_elapsed(self):
         """Calculate days elapsed since the job item started"""
-        if self.job_item.actual_start_date:
-            return (self.report_date - self.job_item.actual_start_date).days
+        start = getattr(self.job_item, 'actual_start_date', None) or getattr(self.job_item, 'start_date', None)
+        report_dt = self.report_date.date() if hasattr(self.report_date, 'date') else self.report_date
+        start_dt = start.date() if hasattr(start, 'date') else start
+        if start_dt and report_dt:
+            return (report_dt - start_dt).days
+        return 0
     
     def save(self, *args, **kwargs):
         """Calculate days elapsed when saving"""
+        start = getattr(self.job_item, 'actual_start_date', None) or getattr(self.job_item, 'start_date', None)
+        report_dt = self.report_date.date() if hasattr(self.report_date, 'date') else self.report_date
+        start_dt = start.date() if hasattr(start, 'date') else start
         if (
-            self.job_item.actual_start_date and \
-            self.report_date < self.job_item.actual_start_date
+            start_dt and report_dt and \
+            report_dt < start_dt
             ):
             raise ValueError(
-                "Report date cannot be before job item actual start date."
+                "Report date cannot be before job item start date."
             )
         
         super().save(*args, **kwargs)
@@ -666,32 +675,6 @@ class JobReportComment(models.Model):
 ConstructionSite = ConstructionPlot
 SiteRole = PlotRole
 SiteInvitation = PlotInvitation
-
-
-class WorkItemImage(models.Model):
-    """Photo attached to a WorkItem."""
-    work_item = models.ForeignKey(
-        WorkItem, on_delete=models.CASCADE, related_name="images"
-    )
-    image = models.ImageField(upload_to="work_items/%Y/%m/%d/")
-    caption = models.CharField(max_length=255, blank=True)
-    uploaded_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"Image for {self.work_item.name}"
-
-
-class JobReportImage(models.Model):
-    """Photo attached to a JobReport (daily report)."""
-    report = models.ForeignKey(
-        JobReport, on_delete=models.CASCADE, related_name="images"
-    )
-    image = models.ImageField(upload_to="reports/%Y/%m/%d/")
-    caption = models.CharField(max_length=255, blank=True)
-    uploaded_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"Image for report {self.report.id} ({self.report.report_date})"
 
 
 @receiver(post_save, sender=ProjectInvitation)

@@ -7,4 +7,6 @@ venv/
 *.log
 */migrations/*
 /media/*
+media/
+site_base/media/
 *.md

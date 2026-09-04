@@ -33,10 +33,10 @@ from core.models import (
     PlotInvitation,
     ProjectRole,
     PlotRole,
-    WorkItemImage,
-    JobReportImage,
     Document,
 )
+from base.models import Picture, Video
+from base.serializers import PictureSerializer, VideoSerializer
 from core.roles import get_project_role, get_plot_role
  
 User = get_user_model()
@@ -87,10 +87,21 @@ class RoleFilteredSerializer(serializers.ModelSerializer):
 # ===========================================================================
  
 class UserSummarySerializer(serializers.ModelSerializer):
+    profile_picture = serializers.SerializerMethodField()
+
     class Meta:
         model = User
         fields = ["id", "username", "first_name", "last_name", "email", "display_name", "profile_picture"]
         read_only_fields = ["id", "username", "email"]
+
+    def get_profile_picture(self, obj):
+        if obj.profile_picture and obj.profile_picture.img:
+            request = self.context.get('request')
+            url = obj.profile_picture.img.url
+            if request:
+                return request.build_absolute_uri(url)
+            return url
+        return None
  
  
 # ===========================================================================
@@ -117,7 +128,8 @@ class ConstructionProjectSerializer(RoleFilteredSerializer):
     role = serializers.SerializerMethodField()
     
     def get_role(self, obj):
-        user = self.context.get("request").user
+        request = self.context.get("request")
+        user = getattr(request, 'user', None) if request else None
         if not user or not user.is_authenticated:
             return "none"
         from core.roles import get_project_role
@@ -137,6 +149,11 @@ class ConstructionProjectSerializer(RoleFilteredSerializer):
         required=False
     )
  
+    cover_image = PictureSerializer(read_only=True)
+    cover_image_id = serializers.PrimaryKeyRelatedField(
+        queryset=Picture.objects.all(), source="cover_image", write_only=True, required=False, allow_null=True
+    )
+
     ALWAYS_VISIBLE = {
         "id",
         "project_name",
@@ -146,6 +163,8 @@ class ConstructionProjectSerializer(RoleFilteredSerializer):
         "target_end_date",
         "number_of_plots",
         "role",
+        "cover_image",
+        "cover_image_id",
     }
  
     ROLE_EXTRA = {
@@ -183,6 +202,8 @@ class ConstructionProjectSerializer(RoleFilteredSerializer):
             "number_of_plots",
             "is_deleted",
             "role",
+            "cover_image",
+            "cover_image_id",
         ]
         read_only_fields = ["id", "start_date", "created_by", "is_deleted"]
  
@@ -316,10 +337,23 @@ class ConstructionPlotSerializer(RoleFilteredSerializer):
 # ===========================================================================
 
 class WorkItemImageSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+    caption = serializers.CharField(source="description", read_only=True)
+    uploaded_at = serializers.DateTimeField(source="created_at", read_only=True)
+
     class Meta:
-        model = WorkItemImage
-        fields = ["id", "work_item", "image", "caption", "uploaded_at"]
-        read_only_fields = ["id", "work_item", "uploaded_at"]
+        model = Picture
+        fields = ["id", "img", "image", "caption", "upload_to", "uploaded_at"]
+        read_only_fields = ["id", "uploaded_at"]
+
+    def get_image(self, obj):
+        if obj.img:
+            request = self.context.get('request')
+            url = obj.img.url
+            if request:
+                return request.build_absolute_uri(url)
+            return url
+        return None
 
 
 # ===========================================================================
@@ -345,6 +379,8 @@ class WorkItemSerializer(RoleFilteredSerializer):
         "target_end_date",
         "checklist",
         "updated_at",
+        "work_item_image",
+        "work_item_image_id",
         "images",
         "construction_plot_name",
         "construction_project",
@@ -361,11 +397,20 @@ class WorkItemSerializer(RoleFilteredSerializer):
  
     construction_plot_name = serializers.ReadOnlyField(source="construction_plot.address")
     construction_project = serializers.ReadOnlyField(source="construction_plot.construction_project.id")
-    images = WorkItemImageSerializer(many=True, read_only=True)
+    work_item_image = PictureSerializer(read_only=True)
+    work_item_image_id = serializers.PrimaryKeyRelatedField(
+        queryset=Picture.objects.all(), source="work_item_image", required=False, allow_null=True
+    )
+    images = serializers.SerializerMethodField()
     foreman = UserSummarySerializer(read_only=True)
     foreman_id = serializers.PrimaryKeyRelatedField(
         queryset=User.objects.all(), source="foreman", required=False, allow_null=True
     )
+
+    def get_images(self, obj):
+        if obj.work_item_image:
+            return [PictureSerializer(obj.work_item_image, context=self.context).data]
+        return []
  
     class Meta:
         model = WorkItem
@@ -382,6 +427,8 @@ class WorkItemSerializer(RoleFilteredSerializer):
             "updated_at",
             "construction_plot_name",
             "construction_project",
+            "work_item_image",
+            "work_item_image_id",
             "images",
             "foreman",
             "foreman_id",
@@ -410,10 +457,23 @@ class WorkItemSerializer(RoleFilteredSerializer):
 # ===========================================================================
 
 class JobReportImageSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+    caption = serializers.CharField(source="description", read_only=True)
+    uploaded_at = serializers.DateTimeField(source="created_at", read_only=True)
+
     class Meta:
-        model = JobReportImage
-        fields = ["id", "report", "image", "caption", "uploaded_at"]
-        read_only_fields = ["id", "report", "uploaded_at"]
+        model = Picture
+        fields = ["id", "img", "image", "caption", "upload_to", "uploaded_at"]
+        read_only_fields = ["id", "uploaded_at"]
+
+    def get_image(self, obj):
+        if obj.img:
+            request = self.context.get('request')
+            url = obj.img.url
+            if request:
+                return request.build_absolute_uri(url)
+            return url
+        return None
 
 
 # ===========================================================================
@@ -516,10 +576,20 @@ class JobReportSerializer(RoleFilteredSerializer):
     """
  
     reported_by = UserSummarySerializer(read_only=True)
-    images = JobReportImageSerializer(many=True, read_only=True)
+    job_image = PictureSerializer(read_only=True)
+    job_image_id = serializers.PrimaryKeyRelatedField(
+        queryset=Picture.objects.all(), source="job_image", required=False, allow_null=True
+    )
+    job_video_data = VideoSerializer(source="job_video", read_only=True)
+    images = serializers.SerializerMethodField()
     job_item_name = serializers.ReadOnlyField(source='job_item.job_name')
     work_item_name = serializers.ReadOnlyField(source='job_item.work_item.name')
     construction_plot = serializers.ReadOnlyField(source='job_item.work_item.construction_plot.address')
+
+    def get_images(self, obj):
+        if obj.job_image:
+            return [PictureSerializer(obj.job_image, context=self.context).data]
+        return []
 
     ALWAYS_VISIBLE = {
         "id",
@@ -542,9 +612,9 @@ class JobReportSerializer(RoleFilteredSerializer):
     }
  
     ROLE_EXTRA = {
-        "project_manager": {"internal_comments", "job_image", "job_video"},
-        "foreman":         {"job_image", "job_video"},
-        "storekeeper":     {"job_image", "job_video"},
+        "project_manager": {"internal_comments", "job_image", "job_image_id", "job_video", "job_video_data"},
+        "foreman":         {"job_image", "job_image_id", "job_video", "job_video_data"},
+        "storekeeper":     {"job_image", "job_image_id", "job_video", "job_video_data"},
         "consultant":      set(),
     }
  
@@ -568,7 +638,9 @@ class JobReportSerializer(RoleFilteredSerializer):
             "internal_comments",
             "days_elapsed",
             "job_image",
+            "job_image_id",
             "job_video",
+            "job_video_data",
             "images",
             "updated_at",
         ]
@@ -710,18 +782,24 @@ SiteInvitationSerializer = PlotInvitationSerializer
 
 class WorkItemImageUploadSerializer(serializers.ModelSerializer):
     """Used for POST /workitems/{pk}/images/ — expects multipart form data."""
+    image = serializers.ImageField(source="img", required=False)
+    caption = serializers.CharField(source="description", required=False, allow_blank=True)
+
     class Meta:
-        model = WorkItemImage
-        fields = ["id", "image", "caption", "uploaded_at"]
-        read_only_fields = ["id", "uploaded_at"]
+        model = Picture
+        fields = ["id", "img", "image", "caption", "upload_to", "created_at"]
+        read_only_fields = ["id", "created_at"]
 
 
 class JobReportImageUploadSerializer(serializers.ModelSerializer):
     """Used for POST /reports/{pk}/images/ — expects multipart form data."""
+    image = serializers.ImageField(source="img", required=False)
+    caption = serializers.CharField(source="description", required=False, allow_blank=True)
+
     class Meta:
-        model = JobReportImage
-        fields = ["id", "image", "caption", "uploaded_at"]
-        read_only_fields = ["id", "uploaded_at"]
+        model = Picture
+        fields = ["id", "img", "image", "caption", "upload_to", "created_at"]
+        read_only_fields = ["id", "created_at"]
 
 
 # ===========================================================================
