@@ -44,10 +44,9 @@ from core.models import (
     JobReportComment,
     ProjectInvitation, 
     PlotInvitation,
-    WorkItemImage,
-    JobReportImage,
     Document,
 )
+from base.models import Picture
 from core.roles import get_project_role, get_plot_role, SEES_UNAPPROVED_ROLES
 from core.services import (
     invite_to_project,
@@ -756,13 +755,21 @@ class WorkItemViewSet(PlotScopedMixin, viewsets.ModelViewSet):
         work_item = self.get_object()
         if request.method == "GET":
             from .serializers import WorkItemImageSerializer
-            qs = WorkItemImage.objects.filter(work_item=work_item)
-            return Response(WorkItemImageSerializer(qs, many=True, context=self.get_serializer_context()).data)
+            pics = [work_item.work_item_image] if work_item.work_item_image else []
+            return Response(WorkItemImageSerializer(pics, many=True, context=self.get_serializer_context()).data)
         # POST
-        serializer = WorkItemImageUploadSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save(work_item=work_item)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        file_obj = request.FILES.get("img") or request.FILES.get("image")
+        caption = request.data.get("caption") or request.data.get("description", "")
+        upload_to = request.data.get("upload_to") or getattr(work_item, "upload_to", work_item.default_upload_to)
+        pic = Picture.objects.create(
+            img=file_obj,
+            description=caption,
+            upload_to=upload_to
+        )
+        work_item.work_item_image = pic
+        work_item.save(update_fields=["work_item_image"])
+        from .serializers import WorkItemImageSerializer
+        return Response(WorkItemImageSerializer(pic, context=self.get_serializer_context()).data, status=status.HTTP_201_CREATED)
 
 
 # ---------------------------------------------------------------------------
@@ -1142,13 +1149,21 @@ class JobReportViewSet(PlotScopedMixin, viewsets.ModelViewSet):
         report = self.get_object()
         if request.method == "GET":
             from .serializers import JobReportImageSerializer
-            qs = JobReportImage.objects.filter(report=report)
-            return Response(JobReportImageSerializer(qs, many=True, context=self.get_serializer_context()).data)
+            pics = [report.job_image] if report.job_image else []
+            return Response(JobReportImageSerializer(pics, many=True, context=self.get_serializer_context()).data)
         # POST
-        serializer = JobReportImageUploadSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save(report=report)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        file_obj = request.FILES.get("img") or request.FILES.get("image")
+        caption = request.data.get("caption") or request.data.get("description", "")
+        upload_to = request.data.get("upload_to") or getattr(report, "upload_to", report.default_upload_to)
+        pic = Picture.objects.create(
+            img=file_obj,
+            description=caption,
+            upload_to=upload_to
+        )
+        report.job_image = pic
+        report.save(update_fields=["job_image"])
+        from .serializers import JobReportImageSerializer
+        return Response(JobReportImageSerializer(pic, context=self.get_serializer_context()).data, status=status.HTTP_201_CREATED)
 
 
 # ---------------------------------------------------------------------------
