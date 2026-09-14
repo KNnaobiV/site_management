@@ -634,9 +634,7 @@ export default function ReportsPage() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
           {/* 1. Project Selector */}
           <div>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '6px' }}>
-              Project
-            </label>
+            <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '6px' }}>Project <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
             <select
               value={selectedProjectId}
               onChange={(e) => {
@@ -667,9 +665,7 @@ export default function ReportsPage() {
 
           {/* 2. Granularity Level */}
           <div>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '6px' }}>
-              Granularity Level
-            </label>
+            <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '6px' }}>Granularity Level <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
             <select
               value={selectedGranularity}
               onChange={(e) => {
@@ -712,9 +708,7 @@ export default function ReportsPage() {
           {/* 3. Cascading Plot Selector */}
           {selectedGranularity !== 'project' && (
             <div>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '6px' }}>
-                Plot
-              </label>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '6px' }}>Plot <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
               <select
                 value={selectedPlotId}
                 onChange={(e) => {
@@ -748,9 +742,7 @@ export default function ReportsPage() {
           {/* 4. Cascading Work Selector */}
           {(selectedGranularity === 'workitem' || selectedGranularity === 'jobitem') && (
             <div>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '6px' }}>
-                Work
-              </label>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '6px' }}>Work <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
               <select
                 value={selectedWorkItemId}
                 onChange={(e) => {
@@ -783,9 +775,7 @@ export default function ReportsPage() {
           {/* 5. Cascading Job Selector */}
           {selectedGranularity === 'jobitem' && (
             <div>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '6px' }}>
-                Job
-              </label>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '6px' }}>Job <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
               <select
                 value={selectedJobItemId}
                 onChange={(e) => updateQuery({ jobitem: e.target.value })}
@@ -812,9 +802,7 @@ export default function ReportsPage() {
 
           {/* Date Range Inputs */}
           <div>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '6px' }}>
-              From Date
-            </label>
+            <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '6px' }}>From Date <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
             <input
               type="date"
               value={startDateParam}
@@ -833,9 +821,7 @@ export default function ReportsPage() {
           </div>
 
           <div>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '6px' }}>
-              To Date
-            </label>
+            <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '6px' }}>To Date <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
             <input
               type="date"
               value={endDateParam}
@@ -1232,6 +1218,14 @@ export default function ReportsPage() {
                         </td>
                         <td style={{ padding: '14px', color: 'var(--text-secondary)', maxWidth: '340px' }}>
                           <div>{report.notes || '—'}</div>
+                          {report.video_link && (
+                            <div style={{ marginTop: '8px' }}>
+                              <a href={report.video_link} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '13px', color: 'var(--brand-orange)', textDecoration: 'none', fontWeight: 600 }}>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+                                View Video
+                              </a>
+                            </div>
+                          )}
                           {report.figRefs && report.figRefs.length > 0 && (
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginTop: '6px' }}>
                               <span style={{ fontSize: '11px', color: 'var(--text-tertiary)' }}>Evidence:</span>

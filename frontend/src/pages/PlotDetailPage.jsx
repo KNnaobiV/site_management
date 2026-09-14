@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Edit2, Plus, FileText, UserPlus, MapPin, Clock, Image as ImageIcon, DollarSign, Download, BarChart3 } from 'lucide-react';
+import { Edit2, Plus, FileText, UserPlus, MoreHorizontal, MapPin, Calendar, Clock, ArrowLeft, Loader, Search, Info, DollarSign, HelpCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { apiFetch, unwrapList, formatApiError, getMediaUrl } from '../api/client';
-import { Breadcrumb, Tabs, Avatar, Spinner, ProgressDonut, InviteModal, ChecklistEditor, ImageUploader, DocumentList } from '../components';
+import { Breadcrumb, Tabs, Avatar, Spinner, ProgressDonut, InviteModal, ChecklistEditor, ImageUploader, DocumentList, Modal } from '../components';
 import BudgetModal from '../components/BudgetModal';
 import ExpensesTable from '../components/ExpensesTable';
 import { showSuccessMessage } from '../utils/successMessage';
@@ -93,26 +93,26 @@ const NewWorkItemForm = ({ projectId, plotId, token, onSuccess, onClose }) => {
       {error && <div style={{ background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.2)', color: '#dc2626', padding: '12px 16px', borderRadius: '12px', marginBottom: '20px', fontSize: '14px' }}>{error}</div>}
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         <div>
-          <label style={labelStyle}>Work Name <span style={{ color: '#dc2626' }}>*</span></label>
+          <label style={labelStyle}>Work Name <span style={{ color: "var(--brand-orange)" }}>*</span></label>
           <input type="text" required value={form.name} onChange={e => set('name', e.target.value)} placeholder="e.g. Foundation Work" style={inputStyle} />
         </div>
         <div>
-          <label style={labelStyle}>Description <span style={{ color: '#dc2626' }}>*</span></label>
+          <label style={labelStyle}>Description <span style={{ color: "var(--brand-orange)" }}>*</span></label>
           <textarea required value={form.description} onChange={e => set('description', e.target.value)} placeholder="Describe the scope..." style={{ ...inputStyle, minHeight: '100px', resize: 'vertical' }} />
         </div>
         <div>
-          <label style={labelStyle}>Status <span style={{ color: '#dc2626' }}>*</span></label>
+          <label style={labelStyle}>Status <span style={{ color: "var(--brand-orange)" }}>*</span></label>
           <select required value={form.work_status} onChange={e => set('work_status', e.target.value)} style={inputStyle}>
             {['Planned', 'In Progress', 'Completed', 'On Hold', 'Delayed', 'Cancelled'].map(s => <option key={s} value={s}>{s}</option>)}
           </select>
         </div>
         <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
           <div>
-            <label style={labelStyle}>Start Date <span style={{ color: '#dc2626' }}>*</span></label>
+            <label style={labelStyle}>Start Date <span style={{ color: "var(--brand-orange)" }}>*</span></label>
             <input type="date" required value={form.start_date} onChange={e => set('start_date', e.target.value)} style={inputStyle} />
           </div>
           <div>
-            <label style={labelStyle}>Target End Date <span style={{ color: '#dc2626' }}>*</span></label>
+            <label style={labelStyle}>Target End Date <span style={{ color: "var(--brand-orange)" }}>*</span></label>
             <input type="date" required value={form.target_end_date} onChange={e => set('target_end_date', e.target.value)} style={inputStyle} />
           </div>
         </div>
@@ -120,9 +120,7 @@ const NewWorkItemForm = ({ projectId, plotId, token, onSuccess, onClose }) => {
 
         {/* Checklist */}
         <div>
-          <label style={{ ...labelStyle, marginBottom: '14px' }}>
-            Checklist <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>(optional)</span>
-          </label>
+          <label style={{ ...labelStyle, marginBottom: '14px' }}>Checklist <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
           <ChecklistEditor items={checklist} onChange={setChecklist} />
         </div>
 
@@ -157,6 +155,8 @@ const PlotDetailPage = () => {
   const [showBudgetModal, setShowBudgetModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
+  const [showWorkHelp, setShowWorkHelp] = useState(false);
+  const [showReportHelp, setShowReportHelp] = useState(false);
   const [showNewWorkItem, setShowNewWorkItem] = useState(false);
   const [showInvite, setShowInvite] = useState(false);
   const [inviteRole, setInviteRole] = useState('foreman');
@@ -401,7 +401,7 @@ const PlotDetailPage = () => {
             </button>
           )}
           <button className="btn-ghost" onClick={() => { setInviteRole('foreman'); setShowInvite(true); }}>
-            <UserPlus size={16} /> {plot.foreman ? 'Change Foreman' : 'Assign Foreman'}
+            <UserPlus size={16} /> Assign Foreman
           </button>
           {(plot.role === 'owner' || plot.role === 'project_manager') && plot.status !== 'Completed' && (
             <button className="btn-primary" onClick={() => navigate(`/plots/${id}/work-items/new`)}>
@@ -435,15 +435,19 @@ const PlotDetailPage = () => {
                   <p style={{ margin: 0, fontWeight: 600, color: 'var(--text-primary)', fontSize: '15px' }}>{plot.plot_opening_date}</p>
                 </div>
               </div>
-              {/* Foreman */}
-              {plot.foreman && (
+              {/* Foremen */}
+              {(plot.foremen && plot.foremen.length > 0) && (
                 <div>
-                  <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', color: 'var(--text-tertiary)', textTransform: 'uppercase', margin: '0 0 8px' }}>Foreman</p>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <Avatar name={plot.foreman.display_name || plot.foreman.username} size={36} />
-                    <div>
-                      <p style={{ margin: 0, fontWeight: 600, fontSize: '14px', color: 'var(--text-primary)' }}>{plot.foreman.display_name || plot.foreman.username}</p>
-                    </div>
+                  <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', color: 'var(--text-tertiary)', textTransform: 'uppercase', margin: '0 0 8px' }}>Foremen</p>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {plot.foremen.map(f => (
+                      <div key={f.id || f.username} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <Avatar name={f.display_name || f.username} size={36} />
+                        <div>
+                          <p style={{ margin: 0, fontWeight: 600, fontSize: '14px', color: 'var(--text-primary)' }}>{f.display_name || f.username}</p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
@@ -541,8 +545,16 @@ const PlotDetailPage = () => {
           </div>
           {workItems.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '60px', color: 'var(--text-tertiary)' }}>
-              <p style={{ fontWeight: 600 }}>No works yet</p>
-              <p style={{ fontSize: '14px' }}>Add the first work to begin tracking progress.</p>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '4px' }}>
+                <p style={{ fontWeight: 600, margin: 0 }}>No works yet</p>
+                <div 
+                  onClick={() => setShowWorkHelp(true)} 
+                  style={{ display: 'flex', alignItems: 'center', color: 'var(--brand-orange)', cursor: 'pointer' }}
+                >
+                  <HelpCircle size={16} />
+                </div>
+              </div>
+              <p style={{ fontSize: '14px', margin: 0 }}>Add the first work to begin tracking progress.</p>
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -782,36 +794,42 @@ const PlotDetailPage = () => {
             <h2 style={{ fontSize: '24px', margin: 0 }}>Plot Team</h2>
             <div style={{ display: 'flex', gap: '10px' }}>
               <button className="btn-primary" onClick={() => { setInviteRole('foreman'); setShowInvite(true); }}>
-                <UserPlus size={16} /> {plot.foreman ? 'Change Foreman' : 'Invite Foreman'}
+                <UserPlus size={16} /> Invite Foreman
               </button>
             </div>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
-            {/* Foreman slot */}
-            {plot.foreman ? (
-              <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '20px', padding: '24px' }}>
-                <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', color: 'var(--text-tertiary)', textTransform: 'uppercase', margin: '0 0 16px' }}>Foreman</p>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                  <Avatar name={plot.foreman.display_name || plot.foreman.username} size={48} />
-                  <div style={{ flex: 1 }}>
-                    <p style={{ margin: '0 0 4px', fontWeight: 700, fontSize: '16px', color: 'var(--text-primary)' }}>{plot.foreman.display_name || plot.foreman.username}</p>
-                    <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-secondary)' }}>{plot.foreman.email}</p>
+            {/* Foremen slot */}
+            <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '20px', padding: '24px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', color: 'var(--text-tertiary)', textTransform: 'uppercase', margin: 0 }}>Foremen</p>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {plot.foremen && plot.foremen.length > 0 ? (
+                  plot.foremen.map(f => (
+                    <div key={f.id || f.username} style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                      <Avatar name={f.display_name || f.username} size={48} />
+                      <div style={{ flex: 1 }}>
+                        <p style={{ margin: '0 0 4px', fontWeight: 700, fontSize: '16px', color: 'var(--text-primary)' }}>{f.display_name || f.username}</p>
+                        <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-secondary)' }}>{f.email}</p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div
+                    onClick={() => { setInviteRole('foreman'); setShowInvite(true); }}
+                    style={{ background: 'var(--bg-raised)', border: '2px dashed var(--border-default)', borderRadius: '12px', padding: '20px', cursor: 'pointer', textAlign: 'center', transition: 'border-color 0.2s' }}
+                    onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--brand-orange)'}
+                    onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border-default)'}
+                  >
+                    <UserPlus size={24} color="var(--text-tertiary)" style={{ margin: '0 auto 8px', display: 'block' }} />
+                    <p style={{ margin: '0 0 4px', fontWeight: 600, fontSize: '14px', color: 'var(--text-primary)' }}>No Foreman Assigned</p>
+                    <p style={{ margin: 0, fontSize: '12px', color: 'var(--brand-orange)' }}>Tap to invite a foreman →</p>
                   </div>
-                </div>
+                )}
               </div>
-            ) : (
-              <div
-                onClick={() => { setInviteRole('foreman'); setShowInvite(true); }}
-                style={{ background: 'var(--bg-raised)', border: '2px dashed var(--border-default)', borderRadius: '20px', padding: '28px 24px', cursor: 'pointer', textAlign: 'center', transition: 'border-color 0.2s' }}
-                onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--brand-orange)'}
-                onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border-default)'}
-              >
-                <UserPlus size={28} color="var(--text-tertiary)" style={{ margin: '0 auto 10px', display: 'block' }} />
-                <p style={{ margin: '0 0 4px', fontWeight: 600, fontSize: '15px', color: 'var(--text-primary)' }}>No Foreman Assigned</p>
-                <p style={{ margin: 0, fontSize: '13px', color: 'var(--brand-orange)' }}>Tap to invite a foreman →</p>
-              </div>
-            )}
+            </div>
           </div>
         </div>
       )}
@@ -872,7 +890,7 @@ const PlotDetailPage = () => {
               <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '20px', padding: '22px' }}>
                 <div className="mobile-grid-1" style={{ display: 'grid', gap: '18px', gridTemplateColumns: '1fr 1fr', alignItems: 'end' }}>
                   <div>
-                    <label style={labelStyle}>Export scope</label>
+                    <label style={labelStyle}>Export scope <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
                     <select
                       value={exportScope}
                       onChange={e => {
@@ -889,7 +907,7 @@ const PlotDetailPage = () => {
                   </div>
                   {exportScope === 'workitem' && (
                     <div>
-                      <label style={labelStyle}>Work</label>
+                      <label style={labelStyle}>Work <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
                       <select
                         value={exportWorkItemId}
                         onChange={e => setExportWorkItemId(e.target.value)}
@@ -904,7 +922,7 @@ const PlotDetailPage = () => {
                   )}
                   {exportScope === 'jobitem' && (
                     <div>
-                      <label style={labelStyle}>Job</label>
+                      <label style={labelStyle}>Job <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
                       <select
                         value={exportJobItemId}
                         onChange={e => setExportJobItemId(e.target.value)}
@@ -918,7 +936,7 @@ const PlotDetailPage = () => {
                     </div>
                   )}
                   <div>
-                    <label style={labelStyle}>From</label>
+                    <label style={labelStyle}>From <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
                     <input
                       type="date"
                       value={exportRange.from}
@@ -927,7 +945,7 @@ const PlotDetailPage = () => {
                     />
                   </div>
                   <div>
-                    <label style={labelStyle}>To</label>
+                    <label style={labelStyle}>To <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
                     <input
                       type="date"
                       value={exportRange.to}
@@ -952,7 +970,15 @@ const PlotDetailPage = () => {
               {reports.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '60px', color: 'var(--text-tertiary)' }}>
                   <FileText size={40} style={{ margin: '0 auto 16px', display: 'block', opacity: 0.3 }} />
-                  <p style={{ fontWeight: 600 }}>No reports for this plot yet</p>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '4px' }}>
+                    <p style={{ fontWeight: 600, margin: 0 }}>No reports for this plot yet</p>
+                    <div 
+                      onClick={() => setShowWorkHelp(true)} 
+                      style={{ display: 'flex', alignItems: 'center', color: 'var(--brand-orange)', cursor: 'pointer' }}
+                    >
+                      <HelpCircle size={16} />
+                    </div>
+                  </div>
                   <p style={{ fontSize: '14px' }}>Daily reports for works on this plot will appear here.</p>
                 </div>
               ) : (
@@ -979,6 +1005,14 @@ const PlotDetailPage = () => {
                         </div>
                       </div>
                       {report.notes && <p style={{ margin: '16px 0 0', fontSize: '14px', color: 'var(--text-secondary)', lineHeight: 1.7 }}>{report.notes}</p>}
+                      {report.video_link && (
+                        <div style={{ marginTop: '8px' }}>
+                          <a href={report.video_link} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '13px', color: 'var(--brand-orange)', textDecoration: 'none', fontWeight: 600 }}>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+                            View Video
+                          </a>
+                        </div>
+                      )}
                       {report.issues_encountered && <p style={{ margin: '10px 0 0', fontSize: '13px', color: 'var(--status-delayed)' }}>⚠ {report.issues_encountered}</p>}
                       {report.images?.length > 0 && (
                         <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
@@ -1213,6 +1247,26 @@ const PlotDetailPage = () => {
           }}
         />
       )}
+
+      <Modal isOpen={showWorkHelp} onClose={() => setShowWorkHelp(false)} title="What is a Work Item?">
+        <p style={{ lineHeight: '1.6', color: 'var(--text-secondary)' }}>
+          <strong>Works</strong> (or Work Items) represent major activities, tasks, or components that need to be completed within a Plot.
+        </p>
+        <p style={{ marginTop: '16px', lineHeight: '1.6', color: 'var(--text-secondary)' }}>
+          <strong>Example:</strong> "Foundation Laying", "Roofing", "Electrical First Fix", or "Plumbing".
+          <br /><br />
+          Inside a Work Item, you create Job Items (the day-to-day tasks).
+        </p>
+      </Modal>
+
+      <Modal isOpen={showReportHelp} onClose={() => setShowReportHelp(false)} title="What is a Report?">
+        <p style={{ lineHeight: '1.6', color: 'var(--text-secondary)' }}>
+          <strong>Reports</strong> track daily updates and site conditions for active jobs.
+        </p>
+        <p style={{ marginTop: '16px', lineHeight: '1.6', color: 'var(--text-secondary)' }}>
+          <strong>Example:</strong> A daily log stating "Poured 50 cubic meters of concrete, faced weather delays", along with photos of the progress.
+        </p>
+      </Modal>
     </div>
   );
 };

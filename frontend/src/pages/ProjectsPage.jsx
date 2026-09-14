@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ProjectCard, StatCard, Spinner } from '../components';
-import { Filter, SortAsc, Plus } from 'lucide-react';
+import { ProjectCard, StatCard, Spinner, Modal } from '../components';
+import { Filter, SortAsc, Plus, HelpCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { apiFetch, unwrapList } from '../api/client';
 
@@ -10,6 +10,7 @@ const ProjectsPage = () => {
   const navigate = useNavigate();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showHelpModal, setShowHelpModal] = useState(false);
 
   useEffect(() => {
     fetchProjects();
@@ -93,7 +94,15 @@ const ProjectsPage = () => {
             padding: '40px',
             color: 'var(--text-tertiary)'
           }}>
-            <h2 style={{ margin: 0, fontSize: '28px' }}>No projects yet</h2>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <h2 style={{ margin: 0, fontSize: '28px' }}>No projects yet</h2>
+              <div 
+                onClick={() => setShowHelpModal(true)} 
+                style={{ display: 'flex', alignItems: 'center', color: 'var(--brand-orange)', cursor: 'pointer' }}
+              >
+                <HelpCircle size={20} />
+              </div>
+            </div>
             <p style={{ maxWidth: '420px', textAlign: 'center' }}>Create a project to start managing your site activity, teams, and daily reports.</p>
             <button className="btn-primary" onClick={() => navigate('/projects/new')} style={{ padding: '14px 40px', height: 'auto' }}>
               Create project to start
@@ -101,6 +110,17 @@ const ProjectsPage = () => {
           </div>
         )}
       </div>
+
+      <Modal isOpen={showHelpModal} onClose={() => setShowHelpModal(false)} title="What is a Project?">
+        <p style={{ lineHeight: '1.6', color: 'var(--text-secondary)' }}>
+          <strong>Projects</strong> are the highest-level containers in your workspace. They represent the overall site or development area.
+        </p>
+        <p style={{ marginTop: '16px', lineHeight: '1.6', color: 'var(--text-secondary)' }}>
+          <strong>Example:</strong> "Lekki Phase 1 Residential Estate" or "Downtown Commercial Plaza". 
+          <br /><br />
+          Inside a Project, you will create Plots (e.g., Block A, Block B), which in turn house Works and Job Items.
+        </p>
+      </Modal>
     </div>
   );
 };

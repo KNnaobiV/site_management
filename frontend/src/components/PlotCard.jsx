@@ -21,7 +21,8 @@ const PlotCard = ({ plot, onClick }) => {
     return full || userObj.username || 'N/A';
   };
 
-  const foremanName = getFullName(plot.foreman);
+  const foremenNames = plot.foremen && plot.foremen.length > 0 ? plot.foremen.map(getFullName).join(', ') : 'N/A';
+  const firstForeman = plot.foremen && plot.foremen.length > 0 ? plot.foremen[0] : null;
   const budget = plot.budget || null;
   const allocated = parseFloat(budget?.allocated_amount ?? 0);
   const spent = parseFloat(budget?.spent_amount ?? 0);
@@ -60,10 +61,10 @@ const PlotCard = ({ plot, onClick }) => {
 
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid var(--border-default)', paddingTop: '12px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Avatar user={plot.foreman} name={foremanName} size={24} />
+              <Avatar user={firstForeman} name={foremenNames} size={24} />
               <div style={{ fontSize: '11px' }}>
-                <p style={{ margin: 0, color: 'var(--text-tertiary)' }}>Foreman</p>
-                <p style={{ margin: 0, fontWeight: 500 }}>{foremanName}</p>
+                <p style={{ margin: 0, color: 'var(--text-tertiary)' }}>Foremen</p>
+                <p style={{ margin: 0, fontWeight: 500 }}>{foremenNames}</p>
               </div>
             </div>
           </div>

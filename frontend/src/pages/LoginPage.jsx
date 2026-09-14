@@ -460,14 +460,14 @@ export default function LoginPage() {
     );
 }
 
-function Field({ label, type = "text", value, onChange }) {
+function Field({ label, type = "text", value, onChange, required = true }) {
     const [showPassword, setShowPassword] = useState(false);
     const isPassword = type === "password";
     const currentType = isPassword ? (showPassword ? "text" : "password") : type;
 
     return (
         <div className="field-group">
-            <label>{label}</label>
+            <label>{label} {required ? <span style={{ color: "var(--brand-orange)" }}>*</span> : <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span>}</label>
             <div style={{ position: 'relative' }}>
                 <input
                     type={currentType}

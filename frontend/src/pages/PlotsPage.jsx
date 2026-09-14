@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { PlotCard, StatCard, Spinner } from '../components';
-import { Filter, Plus, ChevronLeft } from 'lucide-react';
+import { PlotCard, StatCard, Spinner, Modal } from '../components';
+import { Filter, Plus, HelpCircle, ChevronLeft } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { apiFetch, unwrapList } from '../api/client';
 
@@ -14,6 +14,7 @@ const PlotsPage = () => {
   const { token } = useAuth();
   const [plots, setPlots] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showHelpModal, setShowHelpModal] = useState(false);
 
   useEffect(() => {
     fetchAllPlots();
@@ -77,19 +78,48 @@ const PlotsPage = () => {
           <li><StatCard label="Completed" value={plots.filter(p => p.plot_status === 'Completed').length} color="var(--status-completed)" /></li>
         </ul>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "32px" }}>
-          {plots.map(plot => (
-            <PlotCard 
-              key={plot.id} 
-              plot={plot} 
-              onClick={() => {
-                console.log("Navigating to plot:", plot.id);
-                navigate(`/plots/${plot.id}`);
-              }}
-            />
-          ))}
-        </div>
+        {plots.length === 0 && !loading ? (
+          <div style={{
+            minHeight: '320px', border: '1px dashed var(--border-default)', borderRadius: '24px',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', padding: '40px', color: 'var(--text-tertiary)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <h2 style={{ margin: 0, fontSize: '28px' }}>No plots yet</h2>
+              <div 
+                onClick={() => setShowHelpModal(true)} 
+                style={{ display: 'flex', alignItems: 'center', color: 'var(--brand-orange)', cursor: 'pointer' }}
+              >
+                <HelpCircle size={20} />
+              </div>
+            </div>
+            <p style={{ maxWidth: '420px', textAlign: 'center' }}>Create a plot to start tracking works and progress for a specific area.</p>
+            <button className="btn-primary" onClick={() => navigate('/plots/new')} style={{ padding: '14px 40px', height: 'auto' }}>
+              Create plot to start
+            </button>
+          </div>
+        ) : (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "32px" }}>
+            {plots.map(plot => (
+              <PlotCard 
+                key={plot.id} 
+                plot={plot} 
+                onClick={() => navigate(`/plots/${plot.id}`)}
+              />
+            ))}
+          </div>
+        )}
       </div>
+
+      <Modal isOpen={showHelpModal} onClose={() => setShowHelpModal(false)} title="What is a Plot?">
+        <p style={{ lineHeight: '1.6', color: 'var(--text-secondary)' }}>
+          <strong>Plots</strong> represent physical subdivisions or logical phases of a Project.
+        </p>
+        <p style={{ marginTop: '16px', lineHeight: '1.6', color: 'var(--text-secondary)' }}>
+          <strong>Example:</strong> If your project is a housing estate, a Plot could be "Block A" or "Plot 12". If your project is a highway, a Plot could be "Kilometer 1-5".
+          <br /><br />
+          Inside a Plot, you will track specific Work Items (e.g., Foundation, Plumbing).
+        </p>
+      </Modal>
     </div>
   );
 };

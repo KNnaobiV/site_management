@@ -294,8 +294,7 @@ class ConstructionProjectViewSet(viewsets.ModelViewSet):
             models_Q(client=user) |
             models_Q(project_manager=user) |
             models_Q(consultants=user) |
-            models_Q(constructionplot__foreman=user) |
-            models_Q(constructionplot__storekeeper=user)
+            models_Q(constructionplot__foremen=user)
         ).distinct()
         
         if not user.is_superuser:
@@ -717,7 +716,7 @@ class ConstructionPlotViewSet(ProjectScopedMixin, viewsets.ModelViewSet):
             return ConstructionPlot.objects.filter(
                 construction_project=project
             ).filter(
-                models_Q(foreman=user) | models_Q(storekeeper=user)
+                models_Q(foremen=user)
             )
         else:
             # Top-level list: all plots user belongs to across all projects
@@ -726,8 +725,7 @@ class ConstructionPlotViewSet(ProjectScopedMixin, viewsets.ModelViewSet):
                 models_Q(construction_project__client=user) |
                 models_Q(construction_project__project_manager=user) |
                 models_Q(construction_project__consultants=user) |
-                models_Q(foreman=user) |
-                models_Q(storekeeper=user)
+                models_Q(foremen=user)
             ).distinct()
 
     def get_serializer_context(self):
@@ -788,10 +786,8 @@ class ConstructionPlotViewSet(ProjectScopedMixin, viewsets.ModelViewSet):
         user_id = request.data.get("user_id")
         user = get_object_or_404(User, pk=user_id)
         
-        if plot.foreman == user:
-            plot.foreman = None
-        elif plot.storekeeper == user:
-            plot.storekeeper = None
+        if plot.foremen.filter(pk=user.pk).exists():
+            plot.foremen.remove(user)
         else:
             return Response({"detail": "User not in plot."}, status=status.HTTP_400_BAD_REQUEST)
         
@@ -1128,15 +1124,15 @@ class WorkItemViewSet(PlotScopedMixin, viewsets.ModelViewSet):
             models_Q(construction_plot__construction_project__client=user) |
             models_Q(construction_plot__construction_project__project_manager=user) |
             models_Q(construction_plot__construction_project__consultants=user) |
-            models_Q(construction_plot__foreman=user) |
-            models_Q(construction_plot__storekeeper=user)
+            models_Q(construction_plot__foremen=user) |
+            models_Q(construction_plot__foremen=user)
         ).distinct()
 
         # Filter unapproved items unless user is PM/owner/foreman on that plot
         can_see_unapproved = (
             models_Q(construction_plot__construction_project__created_by=user) |
             models_Q(construction_plot__construction_project__project_manager=user) |
-            models_Q(construction_plot__foreman=user)
+            models_Q(construction_plot__foremen=user)
         )
         return base_qs.filter(
             models_Q(is_approved=True) | can_see_unapproved
@@ -1184,10 +1180,8 @@ class WorkItemViewSet(PlotScopedMixin, viewsets.ModelViewSet):
             members = set([project.created_by, project.client, project.project_manager])
             members.update(project.consultants.all())
             for p in project.constructionplot_set.all():
-                if p.foreman:
-                    members.add(p.foreman)
-                if p.storekeeper:
-                    members.add(p.storekeeper)
+                for f in p.foremen.all():
+                    members.add(f)
             notifications = [
                 Notification(
                     user=member,
@@ -1210,9 +1204,9 @@ class WorkItemViewSet(PlotScopedMixin, viewsets.ModelViewSet):
         # Notify the foreman whose item was approved
         plot = work_item.construction_plot
         project = plot.construction_project
-        if plot.foreman:
+        for f in plot.foremen.all():
             Notification.objects.create(
-                user=plot.foreman,
+                user=f,
                 project=project,
                 message=f"Your work item '{work_item.name}' has been approved by the PM.",
                 priority=Notification.Priority.NORMAL,
@@ -1235,9 +1229,9 @@ class WorkItemViewSet(PlotScopedMixin, viewsets.ModelViewSet):
         message = f"Your work item '{work_item.name}' was rejected by the PM."
         if reason:
             message += f" Reason: {reason}"
-        if plot.foreman:
+        for f in plot.foremen.all():
             Notification.objects.create(
-                user=plot.foreman,
+                user=f,
                 project=project,
                 message=message,
                 priority=Notification.Priority.HIGH,
@@ -1599,14 +1593,14 @@ class JobItemViewSet(PlotScopedMixin, viewsets.ModelViewSet):
             models_Q(work_item__construction_plot__construction_project__client=user) |
             models_Q(work_item__construction_plot__construction_project__project_manager=user) |
             models_Q(work_item__construction_plot__construction_project__consultants=user) |
-            models_Q(work_item__construction_plot__foreman=user) |
-            models_Q(work_item__construction_plot__storekeeper=user)
+            models_Q(work_item__construction_plot__foremen=user) |
+            models_Q(work_item__construction_plot__foremen=user)
         ).distinct()
 
         can_see_unapproved = (
             models_Q(work_item__construction_plot__construction_project__created_by=user) |
             models_Q(work_item__construction_plot__construction_project__project_manager=user) |
-            models_Q(work_item__construction_plot__foreman=user)
+            models_Q(work_item__construction_plot__foremen=user)
         )
         qs = base_qs.filter(
             models_Q(is_approved=True) | can_see_unapproved
@@ -1653,8 +1647,8 @@ class JobItemViewSet(PlotScopedMixin, viewsets.ModelViewSet):
         else:
             # Notify plot foreman and stakeholders
             members = set([project.created_by, project.client, project.project_manager])
-            if plot.foreman:
-                members.add(plot.foreman)
+            for f in plot.foremen.all():
+                members.add(f)
             notifications = [
                 Notification(
                     user=m,
@@ -1677,9 +1671,9 @@ class JobItemViewSet(PlotScopedMixin, viewsets.ModelViewSet):
         # Notify the foreman whose item was approved
         plot = job_item.work_item.construction_plot
         project = plot.construction_project
-        if plot.foreman:
+        for f in plot.foremen.all():
             Notification.objects.create(
-                user=plot.foreman,
+                user=f,
                 project=project,
                 message=f"Your job item '{job_item.job_name}' has been approved by the PM.",
                 priority=Notification.Priority.NORMAL,
@@ -1702,9 +1696,9 @@ class JobItemViewSet(PlotScopedMixin, viewsets.ModelViewSet):
         message = f"Your job item '{job_item.job_name}' was rejected by the PM."
         if reason:
             message += f" Reason: {reason}"
-        if plot.foreman:
+        for f in plot.foremen.all():
             Notification.objects.create(
-                user=plot.foreman,
+                user=f,
                 project=project,
                 message=message,
                 priority=Notification.Priority.HIGH,
@@ -2066,10 +2060,8 @@ class JobReportViewSet(PlotScopedMixin, viewsets.ModelViewSet):
         plot = report.job_item.work_item.construction_plot
         members = set([project.created_by, project.client, project.project_manager])
         members.update(project.consultants.all())
-        if plot.foreman:
-            members.add(plot.foreman)
-        if plot.storekeeper:
-            members.add(plot.storekeeper)
+        for f in plot.foremen.all():
+            members.add(f)
         members.discard(comment.user)
 
         notifications = [
@@ -2372,13 +2364,13 @@ class DocumentViewSet(ProjectScopedMixin, viewsets.ModelViewSet):
             return qs.filter(
                 visible_to_foremen=True
             ).filter(
-                models_Q(plot__isnull=True) | models_Q(plot__foreman=user)
+                models_Q(plot__isnull=True) | models_Q(plot__foremen=user)
             )
         elif role == "storekeeper":
             return qs.filter(
                 visible_to_storekeepers=True
             ).filter(
-                models_Q(plot__isnull=True) | models_Q(plot__storekeeper=user)
+                models_Q(plot__isnull=True) | models_Q(plot__foremen=user)
             )
             
         return Document.objects.none()

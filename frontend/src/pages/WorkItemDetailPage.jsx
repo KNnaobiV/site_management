@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Plus, Check, CheckCircle2, Image as ImageIcon, Edit2, X, Trash2, DollarSign, ArrowRight, Download, FileText, BarChart3 } from 'lucide-react';
+import { Plus, Check, CheckCircle2, Image as ImageIcon, Edit2, X, Trash2, DollarSign, ArrowRight, Download, FileText, BarChart3, HelpCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { apiFetch, unwrapList, formatApiError, getMediaUrl } from '../api/client';
-import { Breadcrumb, Tabs, Avatar, Spinner, ProgressDonut, MaterialsEditor, ImageUploader } from '../components';
+import { Breadcrumb, Tabs, Avatar, Spinner, ProgressDonut, MaterialsEditor, ImageUploader, Modal } from '../components';
 import BudgetModal from '../components/BudgetModal';
 import ExpensesTable from '../components/ExpensesTable';
 import { showSuccessMessage } from '../utils/successMessage';
@@ -79,11 +79,11 @@ const NewJobItemForm = ({ projectId, plotId, workItemId, token, onSuccess, onClo
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
           <div>
-            <label style={labelStyle}>Job Name *</label>
+            <label style={labelStyle}>Job Name <span style={{ color: "var(--brand-orange)" }}>*</span></label>
             <input type="text" required value={form.job_name} onChange={e => set('job_name', e.target.value)} placeholder="e.g. Install Conduit" style={inputStyle} />
           </div>
           <div>
-            <label style={labelStyle}>Artisan Type *</label>
+            <label style={labelStyle}>Artisan Type <span style={{ color: "var(--brand-orange)" }}>*</span></label>
             <select required value={form.job_artisan} onChange={e => set('job_artisan', e.target.value)} style={inputStyle}>
               <option value="">Select artisan...</option>
               {ARTISANS.map(a => <option key={a} value={a}>{a}</option>)}
@@ -91,18 +91,18 @@ const NewJobItemForm = ({ projectId, plotId, workItemId, token, onSuccess, onClo
           </div>
         </div>
         <div>
-          <label style={labelStyle}>Description</label>
+          <label style={labelStyle}>Description <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
           <textarea value={form.job_description} onChange={e => set('job_description', e.target.value)} placeholder="Describe scope of work..." style={{ ...inputStyle, minHeight: '90px', resize: 'vertical' }} />
         </div>
         <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
           <div>
-            <label style={labelStyle}>Status *</label>
+            <label style={labelStyle}>Status <span style={{ color: "var(--brand-orange)" }}>*</span></label>
             <select required value={form.job_status} onChange={e => set('job_status', e.target.value)} style={inputStyle}>
               {['Planned', 'In Progress', 'Completed', 'On Hold', 'Delayed', 'Cancelled'].map(s => <option key={s} value={s}>{s}</option>)}
             </select>
           </div>
           <div>
-            <label style={labelStyle}>Priority *</label>
+            <label style={labelStyle}>Priority <span style={{ color: "var(--brand-orange)" }}>*</span></label>
             <select required value={form.priority} onChange={e => set('priority', e.target.value)} style={inputStyle}>
               {['Low', 'Medium', 'High', 'Urgent'].map(p => <option key={p} value={p}>{p}</option>)}
             </select>
@@ -110,36 +110,34 @@ const NewJobItemForm = ({ projectId, plotId, workItemId, token, onSuccess, onClo
         </div>
         <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
           <div>
-            <label style={labelStyle}>Estimated Hours <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>(optional)</span></label>
+            <label style={labelStyle}>Estimated Hours <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
             <input type="number" step="0.5" min="0" value={form.estimated_hours} onChange={e => set('estimated_hours', e.target.value)} placeholder="e.g. 12.5" style={inputStyle} />
           </div>
         </div>
         <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
           <div>
-            <label style={labelStyle}>Start Date *</label>
+            <label style={labelStyle}>Start Date <span style={{ color: "var(--brand-orange)" }}>*</span></label>
             <input type="date" required value={form.start_date} onChange={e => set('start_date', e.target.value)} style={inputStyle} />
           </div>
           <div>
-            <label style={labelStyle}>Target End Date *</label>
+            <label style={labelStyle}>Target End Date <span style={{ color: "var(--brand-orange)" }}>*</span></label>
             <input type="date" required value={form.target_end_date} onChange={e => set('target_end_date', e.target.value)} style={inputStyle} />
           </div>
         </div>
         <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
           <div>
-            <label style={labelStyle}>Actual Start <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>(optional)</span></label>
+            <label style={labelStyle}>Actual Start <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
             <input type="date" value={form.actual_start_date} onChange={e => set('actual_start_date', e.target.value)} style={inputStyle} />
           </div>
           <div>
-            <label style={labelStyle}>Actual End <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>(optional)</span></label>
+            <label style={labelStyle}>Actual End <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
             <input type="date" value={form.actual_end_date} onChange={e => set('actual_end_date', e.target.value)} style={inputStyle} />
           </div>
         </div>
 
         {/* Material Requirements */}
         <div>
-          <label style={{ ...labelStyle, marginBottom: '14px' }}>
-            Material Requirements <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>(optional)</span>
-          </label>
+          <label style={{ ...labelStyle, marginBottom: '14px' }}>Material Requirements <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
           <MaterialsEditor items={materials} onChange={setMaterials} />
         </div>
 
@@ -242,6 +240,7 @@ const WorkItemDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [showNewJobItem, setShowNewJobItem] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
+  const [showJobHelp, setShowJobHelp] = useState(false);
 
   useEffect(() => { fetchAll(); }, [id]);
 
@@ -630,7 +629,16 @@ const WorkItemDetailPage = () => {
         <div>
           {jobItems.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '60px', color: 'var(--text-tertiary)' }}>
-              <p style={{ fontWeight: 600 }}>No jobs yet</p>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '4px' }}>
+                <p style={{ fontWeight: 600, margin: 0 }}>No jobs yet</p>
+                <div 
+                  onClick={() => setShowJobHelp(true)} 
+                  style={{ display: 'flex', alignItems: 'center', color: 'var(--brand-orange)', cursor: 'pointer' }}
+                >
+                  <HelpCircle size={16} />
+                </div>
+              </div>
+              <p style={{ fontSize: '14px', margin: 0 }}>Add the first job to get started.</p>
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -1140,6 +1148,17 @@ const WorkItemDetailPage = () => {
           }}
         />
       )}
+
+      <Modal isOpen={showJobHelp} onClose={() => setShowJobHelp(false)} title="What is a Job Item?">
+        <p style={{ lineHeight: '1.6', color: 'var(--text-secondary)' }}>
+          <strong>Jobs</strong> (or Job Items) are specific tasks assigned to artisans or teams within a Work Item.
+        </p>
+        <p style={{ marginTop: '16px', lineHeight: '1.6', color: 'var(--text-secondary)' }}>
+          <strong>Example:</strong> If the Work is "Foundation Laying", a Job could be "Trench Excavation" or "Pouring Concrete".
+          <br /><br />
+          Jobs are where you submit Daily Reports to update progress and track issues.
+        </p>
+      </Modal>
     </div>
   );
 };

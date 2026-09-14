@@ -48,7 +48,6 @@ class ProjectRole(models.TextChoices):
 
 class PlotRole(models.TextChoices):
     FOREMAN = "foreman", "Foreman"
-    STOREKEEPER = "storekeeper", "Storekeeper"
 
 
 _PROJECT_ROLE_GROUP_SUFFIX = {
@@ -390,14 +389,8 @@ class PlotInvitation(TimestampedModel):
         plot = self.plot
  
         if self.role == PlotRole.FOREMAN:
-            plot.foreman = self.invitee
-            plot.save()
-            plot.add_foreman_to_group()
- 
-        elif self.role == PlotRole.STOREKEEPER:
-            plot.storekeeper = self.invitee
-            plot.save()
-            plot.add_storekeeper_to_group()
+            plot.foremen.add(self.invitee)
+            plot.add_foreman_to_group(self.invitee)
  
         else:
             raise ValueError(f"Unknown plot role: {self.role}")
@@ -428,13 +421,8 @@ class ConstructionPlot(HasPictureMixin, TimestampedModel):
     construction_project = models.ForeignKey(
         ConstructionProject, on_delete=models.CASCADE
     )    
-    foreman = models.ForeignKey(
-        User, on_delete=models.DO_NOTHING, related_name="plot_foreman",
-        null=True, blank=True
-    )
-    storekeeper = models.ForeignKey(
-        User, on_delete=models.DO_NOTHING, related_name="plot_storekeeper",
-        null=True, blank=True
+    foremen = models.ManyToManyField(
+        User, related_name="plot_foremen", blank=True
     )
     address = models.CharField(max_length=255)
     plot_number = models.CharField(max_length=50, blank=True, default="")
@@ -527,15 +515,10 @@ class ConstructionPlot(HasPictureMixin, TimestampedModel):
                     group_suffix=suffix
                 )
     
-    def add_foreman_to_group(self):
+    def add_foreman_to_group(self, user):
         foreman_group_name = f"{self.construction_project.project_name} Foreman"
         foreman_group, _ = Group.objects.get_or_create(name=foreman_group_name)
-        foreman_group.user_set.add(self.foreman)
-    
-    def add_storekeeper_to_group(self):
-        storekeeper_group_name = f"{self.construction_project.project_name} Storekeeper"
-        storekeeper_group, _ = Group.objects.get_or_create(name=storekeeper_group_name)
-        storekeeper_group.user_set.add(self.storekeeper)
+        foreman_group.user_set.add(user)
 
 
 class WorkItem(HasPictureMixin, TimestampedModel):
@@ -576,6 +559,11 @@ class WorkItem(HasPictureMixin, TimestampedModel):
         validators=[MinValueValidator(0), MaxValueValidator(100)],
         help_text="Explicit progress override set by PM or creator (0-100). If null, progress is calculated automatically."
     )
+
+    
+    class Meta:
+        ordering = ['-updated_at']
+        
 
     @property
     def duration_days(self) -> int:
@@ -619,9 +607,6 @@ class WorkItem(HasPictureMixin, TimestampedModel):
             or Decimal('0.00')
         )
         return direct + job_expenses
-
-    class Meta:
-        ordering = ['-updated_at']
 
     def save(self, *args, **kwargs):
         if (
@@ -782,6 +767,7 @@ class JobReport(HasPictureMixin, TimestampedModel):
         related_name="job_report_videos",
         blank=True, null=True
     )
+    video_link = models.URLField(blank=True, null=True)
     reported_by = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     # Report metadata
     report_status = models.CharField(

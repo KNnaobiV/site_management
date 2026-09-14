@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 // Optimized Job Item Detail View
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { Plus, Image as ImageIcon, ArrowLeft, CheckCircle2, Loader as SpinnerIcon, X, DollarSign, Edit2, Trash2, Receipt, Upload, Download, FileText, BarChart3 } from 'lucide-react';
+import { Plus, Image as ImageIcon, ArrowLeft, CheckCircle2, Loader as SpinnerIcon, X, DollarSign, Edit2, Trash2, Receipt, Upload, Download, FileText, BarChart3, HelpCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { apiFetch, unwrapList, formatApiError, getMediaUrl } from '../api/client';
 import { Breadcrumb, Tabs, Avatar, MaterialsEditor, Spinner, CommentsSection, ImageUploader } from '../components';
@@ -102,7 +102,7 @@ const ExpenseModal = ({ onClose, onSave, existing, jobItemId, token, defaultCurr
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
             <div>
-              <label style={labelStyle}>Amount *</label>
+              <label style={labelStyle}>Amount <span style={{ color: "var(--brand-orange)" }}>*</span></label>
               <input
                 type="number"
                 min="0.01"
@@ -115,7 +115,7 @@ const ExpenseModal = ({ onClose, onSave, existing, jobItemId, token, defaultCurr
               />
             </div>
             <div>
-              <label style={labelStyle}>Currency</label>
+              <label style={labelStyle}>Currency <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
               <select
                 value={form.currency}
                 onChange={e => setForm({ ...form, currency: e.target.value })}
@@ -128,7 +128,7 @@ const ExpenseModal = ({ onClose, onSave, existing, jobItemId, token, defaultCurr
 
           <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
             <div>
-              <label style={labelStyle}>Date *</label>
+              <label style={labelStyle}>Date <span style={{ color: "var(--brand-orange)" }}>*</span></label>
               <input
                 type="date"
                 required
@@ -138,7 +138,7 @@ const ExpenseModal = ({ onClose, onSave, existing, jobItemId, token, defaultCurr
               />
             </div>
             <div>
-              <label style={labelStyle}>Category</label>
+              <label style={labelStyle}>Category <span style={{ color: "var(--brand-orange)" }}>*</span></label>
               <select
                 value={form.cost_code_code}
                 onChange={e => setForm({ ...form, cost_code_code: e.target.value })}
@@ -152,7 +152,7 @@ const ExpenseModal = ({ onClose, onSave, existing, jobItemId, token, defaultCurr
           </div>
 
           <div>
-            <label style={labelStyle}>Description</label>
+            <label style={labelStyle}>Description <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
             <textarea
               placeholder="What was this expense for?"
               value={form.description}
@@ -276,9 +276,7 @@ const DeleteExpenseModal = ({ token, jobItemId, expense, onClose, onDeleted }) =
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           <div>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
-              Reason for Deletion <span style={{ color: '#dc2626' }}>*</span>
-            </label>
+            <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>Reason for Deletion <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
             <textarea
               autoFocus
               placeholder="e.g., Duplicate entry, mistaken payment, or wrong cost code..."
@@ -1112,7 +1110,12 @@ const JobItemDetailPage = () => {
               {reports.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '60px', color: 'var(--text-tertiary)', background: 'var(--bg-card)', borderRadius: '20px', border: '1px solid var(--border-subtle)' }}>
                   <FileText size={40} style={{ margin: '0 auto 16px', display: 'block', opacity: 0.3 }} />
-                  <p style={{ fontWeight: 600, fontSize: '16px', margin: '0 0 6px' }}>No reports logged yet</p>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '6px' }}>
+                    <p style={{ fontWeight: 600, fontSize: '16px', margin: 0 }}>No reports logged yet</p>
+                    <div title="Reports track daily progress, issues, and photos of this specific job." style={{ display: 'flex', alignItems: 'center', color: 'var(--brand-orange)', cursor: 'help' }}>
+                      <HelpCircle size={16} />
+                    </div>
+                  </div>
                   <p style={{ fontSize: '14px', margin: '0 0 20px' }}>Start logging daily progress for this job.</p>
                   <button className="btn-primary" onClick={() => navigate(`/job-items/${id}/reports/new`)}>
                     Write First Report

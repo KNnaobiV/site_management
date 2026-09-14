@@ -92,7 +92,7 @@ const UploadDocumentModal = ({ projectId, plotId, token, onSuccess, onClose }) =
 
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         <div>
-          <label style={labelStyle}>File *</label>
+          <label style={labelStyle}>File <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
           <input
             ref={fileInputRef}
             type="file"
@@ -165,7 +165,7 @@ const UploadDocumentModal = ({ projectId, plotId, token, onSuccess, onClose }) =
         </div>
 
         <div>
-          <label style={labelStyle}>Document Name <span style={{ color: '#dc2626' }}>*</span></label>
+          <label style={labelStyle}>Document Name <span style={{ color: "var(--brand-orange)" }}>*</span></label>
           <input
             type="text"
             required
@@ -177,15 +177,13 @@ const UploadDocumentModal = ({ projectId, plotId, token, onSuccess, onClose }) =
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '4px' }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
-            <input
+          <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}><input
               type="checkbox"
               checked={visibleToForemen}
               onChange={e => setVisibleToForemen(e.target.checked)}
               style={{ width: '18px', height: '18px' }}
             />
-            <span style={{ fontSize: '15px', color: 'var(--text-primary)' }}>Visible to Foremen</span>
-          </label>
+            <span style={{ fontSize: '15px', color: 'var(--text-primary)' }}>Visible to Foremen</span> <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
         </div>
 
         <div style={{ display: 'flex', gap: '12px', paddingTop: '16px', borderTop: '1px solid var(--border-subtle)', marginTop: '8px' }}>

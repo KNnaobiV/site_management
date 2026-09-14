@@ -204,3 +204,8 @@ ACCOUNT_LOGIN_METHODS = {'email', 'username'}
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*', 'password1*', 'password2*']
 ACCOUNT_EMAIL_VERIFICATION = 'none'   # Custom email confirmation handled in RegisterView
 SOCIALACCOUNT_QUERY_EMAIL = True
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': '',
+    'API_KEY': '',
+    'API_SECRET': ''
+}

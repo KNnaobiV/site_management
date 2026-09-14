@@ -33,13 +33,12 @@ const CreatePlotPage = () => {
 
   const [formData, setFormData] = useState({
     plot_number: '',
-    plot_name: '',
     construction_project: projectId || '',
     address: '',
     gps_latitude: '',
     gps_longitude: '',
     status: 'Planned',
-    foreman: '',
+    foremen: [],
     start_date: new Date().toISOString().split('T')[0],
     target_end_date: '',
     notes: '',
@@ -72,13 +71,12 @@ const CreatePlotPage = () => {
         setCurrentProgress(plotData.progress || 0);
         setFormData({
           plot_number: plotData.plot_number || '',
-          plot_name: plotData.plot_name || plotData.plot_number || '',
           construction_project: plotData.construction_project?.id || plotData.construction_project || '',
           address: plotData.address || '',
           gps_latitude: plotData.gps_latitude || '',
           gps_longitude: plotData.gps_longitude || '',
           status: plotData.status || 'Planned',
-          foreman: plotData.foreman?.id || '',
+          foremen: plotData.foremen ? plotData.foremen.map(f => f.id) : [],
           start_date: plotData.start_date || new Date().toISOString().split('T')[0],
           target_end_date: plotData.target_end_date || '',
           notes: plotData.notes || '',
@@ -93,16 +91,18 @@ const CreatePlotPage = () => {
           setExistingCoverImage(plotData.cover_image);
         }
 
-        // Prepopulate users select list with the existing foreman
+        // Prepopulate users select list with the existing foremen
         const initialUsers = [];
-        if (plotData.foreman) {
-          initialUsers.push({ id: plotData.foreman.id, label: plotData.foreman.username, avatar: plotData.foreman.avatar_url || null });
+        if (plotData.foremen && Array.isArray(plotData.foremen)) {
+          plotData.foremen.forEach(f => {
+            initialUsers.push({ id: f.id, label: f.username, avatar: f.avatar_url || null });
+          });
         }
         if (initialUsers.length > 0) {
           setUsers(initialUsers);
         }
 
-        const hasValues = !!(plotData.plot_number || plotData.plot_name || plotData.address || plotData.construction_project);
+        const hasValues = !!(plotData.plot_number || plotData.address || plotData.construction_project);
         setFieldsUpdated(hasValues);
       } else {
         setError('Failed to load plot for editing.');
@@ -229,17 +229,16 @@ const CreatePlotPage = () => {
     const canSetProgress = isEditing && (plotData?.role === 'owner' || plotData?.role === 'project_manager');
 
     const payload = {
-      construction_project: formData.construction_project,
-      plot_number: formData.plot_number || formData.plot_name || '',
-      plot_name: formData.plot_name || formData.plot_number || '',
-      address: formData.address,
-      status: formData.status || 'Planned',
-      start_date: formData.start_date,
-      target_end_date: formData.target_end_date,
+      plot_number: formData.plot_number || '',
+      construction_project_id: formData.construction_project || null,
+      address: formData.address || '',
       gps_latitude: formData.gps_latitude || null,
       gps_longitude: formData.gps_longitude || null,
-      notes: formData.notes,
-      foreman_id: formData.foreman || null,
+      status: formData.status || 'Planned',
+      foremen_ids: formData.foremen && formData.foremen.length > 0 ? formData.foremen : [],
+      start_date: formData.start_date || null,
+      target_end_date: formData.target_end_date || null,
+      notes: formData.notes || '',
     };
 
     if (isEditing && canSetProgress) {
@@ -315,32 +314,20 @@ const CreatePlotPage = () => {
         <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '48px' }}>
           {/* Left Column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-              <div>
-                <label style={labelStyle}>Plot Number <span style={{ color: '#dc2626' }}>*</span></label>
-                <input
-                  type="text"
-                  placeholder="Enter plot number"
-                  required
-                  value={formData.plot_number}
-                  onChange={e => setFormData({ ...formData, plot_number: e.target.value })}
-                  style={inputStyle}
-                />
-              </div>
-              <div>
-                <label style={labelStyle}>Plot Name <span style={{ fontWeight: 400, color: 'var(--text-tertiary)' }}>(Optional)</span></label>
-                <input
-                  type="text"
-                  placeholder="Enter plot name"
-                  value={formData.plot_name}
-                  onChange={e => setFormData({ ...formData, plot_name: e.target.value })}
-                  style={inputStyle}
-                />
-              </div>
+            <div>
+              <label style={labelStyle}>Plot Number <span style={{ color: "var(--brand-orange)" }}>*</span></label>
+              <input
+                type="text"
+                placeholder="Enter plot number"
+                required
+                value={formData.plot_number}
+                onChange={e => setFormData({ ...formData, plot_number: e.target.value })}
+                style={inputStyle}
+              />
             </div>
 
             <div>
-              <label style={labelStyle}>Parent Project <span style={{ color: '#dc2626' }}>*</span></label>
+              <label style={labelStyle}>Parent Project <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
               {projectId ? (
                 <input
                   type="text"
@@ -362,18 +349,19 @@ const CreatePlotPage = () => {
             </div>
 
             <div>
-              <label style={labelStyle}>Foreman</label>
+              <label style={labelStyle}>Foremen <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
               <SearchableSelect
+                isMulti={true}
                 options={users}
-                value={formData.foreman}
-                onChange={val => setFormData({ ...formData, foreman: val })}
+                value={formData.foremen}
+                onChange={val => setFormData({ ...formData, foremen: val })}
                 onSearch={handleSearchUsers}
-                placeholder="Select foreman"
+                placeholder="Select foremen"
               />
             </div>
 
             <div>
-              <label style={labelStyle}>Address <span style={{ color: '#dc2626' }}>*</span></label>
+              <label style={labelStyle}>Address <span style={{ color: "var(--brand-orange)" }}>*</span></label>
               <textarea
                 placeholder="Enter site address"
                 required
@@ -384,7 +372,7 @@ const CreatePlotPage = () => {
             </div>
 
             <div>
-              <label style={labelStyle}>Status <span style={{ color: '#dc2626' }}>*</span></label>
+              <label style={labelStyle}>Status <span style={{ color: "var(--brand-orange)" }}>*</span></label>
               <select
                 required
                 value={formData.status}
@@ -401,7 +389,7 @@ const CreatePlotPage = () => {
           {/* Right Column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <div>
-              <label style={labelStyle}>GPS Coordinates</label>
+              <label style={labelStyle}>GPS Coordinates <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
               <div style={{ display: 'flex', gap: '12px' }}>
                 <div style={{ position: 'relative', flex: 1 }}>
                   <MapPin size={16} color="var(--text-tertiary)" style={{ position: 'absolute', left: '16px', top: '18px' }} />
@@ -428,7 +416,7 @@ const CreatePlotPage = () => {
 
             <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div>
-                <label style={labelStyle}>Start Date <span style={{ color: '#dc2626' }}>*</span></label>
+                <label style={labelStyle}>Start Date <span style={{ color: "var(--brand-orange)" }}>*</span></label>
                 <input
                   type="date"
                   required
@@ -438,7 +426,7 @@ const CreatePlotPage = () => {
                 />
               </div>
               <div>
-                <label style={labelStyle}>Target End Date <span style={{ color: '#dc2626' }}>*</span></label>
+                <label style={labelStyle}>Target End Date <span style={{ color: "var(--brand-orange)" }}>*</span></label>
                 <input
                   type="date"
                   required
@@ -450,7 +438,7 @@ const CreatePlotPage = () => {
             </div>
 
             <div>
-              <label style={labelStyle}>Notes</label>
+              <label style={labelStyle}>Notes <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
               <textarea
                 placeholder="Add any additional notes about this plot"
                 value={formData.notes}
@@ -461,9 +449,7 @@ const CreatePlotPage = () => {
 
             {/* Cover Image */}
             <div>
-              <label style={labelStyle}>
-                Cover Image <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>(optional)</span>
-              </label>
+              <label style={labelStyle}>Cover Image <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
               <input
                 type="file"
                 ref={fileInputRef}
@@ -549,7 +535,7 @@ const CreatePlotPage = () => {
 
             {/* Budget */}
             <div>
-              <label style={labelStyle}>Plot Budget <span style={{ fontWeight: 400, color: 'var(--text-tertiary)' }}>(Optional)</span></label>
+              <label style={labelStyle}>Plot Budget <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '10px' }}>
                 <input
                   type="number"
@@ -583,7 +569,7 @@ const CreatePlotPage = () => {
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
-                    <label style={{ ...labelStyle, marginBottom: '4px' }}>Plot Progress</label>
+                    <label style={{ ...labelStyle, marginBottom: '4px' }}>Plot Progress <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
                     <span style={{ fontSize: '13px', color: 'var(--text-tertiary)' }}>
                       {isProgressManual ? 'Manual Override active' : 'Calculated automatically from works'}
                     </span>

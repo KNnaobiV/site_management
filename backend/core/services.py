@@ -214,7 +214,7 @@ def _check_not_already_assigned_project(project, invitee, role):
  
  
 def _check_not_already_assigned_plot(plot, invitee, role):
-    if role == PlotRole.FOREMAN and plot.foreman == invitee:
+    if role == PlotRole.FOREMAN and plot.foremen.filter(pk=invitee.pk).exists():
         raise ValidationError(
             f"{invitee.username} is already the foreman on this plot."
         )

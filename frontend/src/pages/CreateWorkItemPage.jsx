@@ -202,7 +202,7 @@ const CreateWorkItemPage = () => {
           {/* Left Column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <div>
-              <label style={labelStyle}>Title <span style={{ color: '#dc2626' }}>*</span></label>
+              <label style={labelStyle}>Title <span style={{ color: "var(--brand-orange)" }}>*</span></label>
               <input
                 type="text"
                 placeholder="Enter work title"
@@ -215,7 +215,7 @@ const CreateWorkItemPage = () => {
 
             <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px' }}>
               <div>
-                <label style={labelStyle}>Assigned Foreman <span style={{ color: '#dc2626' }}>*</span></label>
+                <label style={labelStyle}>Assigned Foreman <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
                 <SearchableSelect
                   options={users}
                   value={formData.foreman}
@@ -227,7 +227,7 @@ const CreateWorkItemPage = () => {
             </div>
 
             <div>
-              <label style={labelStyle}>Description <span style={{ color: '#dc2626' }}>*</span></label>
+              <label style={labelStyle}>Description <span style={{ color: "var(--brand-orange)" }}>*</span></label>
               <textarea
                 required
                 placeholder="Describe the work, scope, materials, and any important details..."
@@ -241,7 +241,7 @@ const CreateWorkItemPage = () => {
           {/* Right Column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <div>
-              <label style={labelStyle}>Parent Plot <span style={{ color: '#dc2626' }}>*</span></label>
+              <label style={labelStyle}>Parent Plot <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
               {plotId ? (
                 <input
                   type="text"
@@ -261,7 +261,7 @@ const CreateWorkItemPage = () => {
 
             <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div>
-                <label style={labelStyle}>Start Date <span style={{ color: '#dc2626' }}>*</span></label>
+                <label style={labelStyle}>Start Date <span style={{ color: "var(--brand-orange)" }}>*</span></label>
                 <input
                   type="date"
                   required
@@ -271,7 +271,7 @@ const CreateWorkItemPage = () => {
                 />
               </div>
               <div>
-                <label style={labelStyle}>Target End Date <span style={{ color: '#dc2626' }}>*</span></label>
+                <label style={labelStyle}>Target End Date <span style={{ color: "var(--brand-orange)" }}>*</span></label>
                 <input
                   type="date"
                   required
@@ -283,7 +283,7 @@ const CreateWorkItemPage = () => {
             </div>
 
             <div>
-              <label style={labelStyle}>Priority *</label>
+              <label style={labelStyle}>Priority <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
               <div style={{ display: 'flex', gap: '10px' }}>
                 {['Low', 'Medium', 'High', 'Urgent'].map(p => (
                   <button
@@ -321,7 +321,7 @@ const CreateWorkItemPage = () => {
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
-                    <label style={{ ...labelStyle, marginBottom: '4px' }}>Work Progress</label>
+                    <label style={{ ...labelStyle, marginBottom: '4px' }}>Work Progress <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
                     <span style={{ fontSize: '13px', color: 'var(--text-tertiary)' }}>
                       {isProgressManual ? 'Manual Override active' : 'Calculated automatically from jobs'}
                     </span>
@@ -412,7 +412,7 @@ const CreateWorkItemPage = () => {
             )}
 
             <div>
-              <label style={labelStyle}>Status *</label>
+              <label style={labelStyle}>Status <span style={{ color: "var(--brand-orange)" }}>*</span></label>
               <select
                 required
                 value={formData.work_status}
@@ -427,7 +427,7 @@ const CreateWorkItemPage = () => {
 
             {/* Budget */}
             <div>
-              <label style={labelStyle}>Budget <span style={{ fontWeight: 400, color: 'var(--text-tertiary)' }}>(Optional)</span></label>
+              <label style={labelStyle}>Budget <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '10px' }}>
                 <input
                   type="number"

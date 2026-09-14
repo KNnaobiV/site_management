@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { WorkItemCard, Spinner } from '../components';
-import { Filter, Plus } from 'lucide-react';
+import { WorkItemCard, Spinner, Modal } from '../components';
+import { Filter, Plus, HelpCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { apiFetch, unwrapList } from '../api/client';
 
@@ -15,6 +15,7 @@ const WorkItemsPage = () => {
   const { token } = useAuth();
   const [workItems, setWorkItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showHelpModal, setShowHelpModal] = useState(false);
 
   useEffect(() => {
     fetchAllWorkItems();
@@ -73,19 +74,48 @@ const WorkItemsPage = () => {
           </div>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "32px" }}>
-          {workItems.map(item => (
-            <WorkItemCard 
-              key={item.id} 
-              item={item} 
-              onClick={() => {
-                console.log("Navigating to work item:", item.id);
-                navigate(`/work-items/${item.id}`);
-              }}
-            />
-          ))}
-        </div>
+        {workItems.length === 0 && !loading ? (
+          <div style={{
+            minHeight: '320px', border: '1px dashed var(--border-default)', borderRadius: '24px',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', padding: '40px', color: 'var(--text-tertiary)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <h2 style={{ margin: 0, fontSize: '28px' }}>No works yet</h2>
+              <div 
+                onClick={() => setShowHelpModal(true)} 
+                style={{ display: 'flex', alignItems: 'center', color: 'var(--brand-orange)', cursor: 'pointer' }}
+              >
+                <HelpCircle size={20} />
+              </div>
+            </div>
+            <p style={{ maxWidth: '420px', textAlign: 'center' }}>Create a work item to represent a major phase of construction within a plot.</p>
+            <button className="btn-primary" onClick={() => navigate('/work-items/new')} style={{ padding: '14px 40px', height: 'auto' }}>
+              Create work to start
+            </button>
+          </div>
+        ) : (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "32px" }}>
+            {workItems.map(item => (
+              <WorkItemCard 
+                key={item.id} 
+                item={item} 
+                onClick={() => navigate(`/work-items/${item.id}`)}
+              />
+            ))}
+          </div>
+        )}
       </div>
+
+      <Modal isOpen={showHelpModal} onClose={() => setShowHelpModal(false)} title="What is a Work Item?">
+        <p style={{ lineHeight: '1.6', color: 'var(--text-secondary)' }}>
+          <strong>Works</strong> (or Work Items) represent major activities, tasks, or components that need to be completed within a Plot.
+        </p>
+        <p style={{ marginTop: '16px', lineHeight: '1.6', color: 'var(--text-secondary)' }}>
+          <strong>Example:</strong> "Foundation Laying", "Roofing", "Electrical First Fix", or "Plumbing".
+          <br /><br />
+          Inside a Work Item, you create Job Items (the day-to-day tasks).
+        </p>
+      </Modal>
     </div>
   );
 };

@@ -47,7 +47,7 @@ export default function ForgotPasswordPage() {
                     {!message && (
                         <form onSubmit={handleSubmit}>
                             <div className="field-group">
-                                <label>Email Address</label>
+                                <label>Email Address <span style={{ color: "var(--brand-orange)" }}>*</span></label>
                                 <input
                                     type="email"
                                     value={email}

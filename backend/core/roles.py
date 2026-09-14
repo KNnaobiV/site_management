@@ -24,7 +24,6 @@ PlotRoleLabel = Literal[
     "client",       # project client
     "project_manager",
     "foreman",
-    "storekeeper",
     "consultant",
     "none",
 ]
@@ -48,9 +47,8 @@ def get_project_role(user, project) -> ProjectRoleLabel:
     # Check if user is a foreman/storekeeper on any plot under this project
     from core.models import ConstructionPlot
     if ConstructionPlot.objects.filter(
-        construction_project=project
-    ).filter(
-        models.Q(foreman=user) | models.Q(storekeeper=user)
+        construction_project=project,
+        foremen=user
     ).exists():
         return "plot_member"
     return "none"
@@ -70,10 +68,8 @@ def get_plot_role(user, plot) -> PlotRoleLabel:
         return "client"
     if user == project.project_manager:
         return "project_manager"
-    if user == plot.foreman:
+    if plot.foremen.filter(pk=user.pk).exists():
         return "foreman"
-    if user == plot.storekeeper:
-        return "storekeeper"
     if project.consultants.filter(pk=user.pk).exists():
         return "consultant"
     return "none"
@@ -151,7 +147,7 @@ PROJECT_READ_ROLES = {"owner", "client", "project_manager", "consultant", "plot_
 PROJECT_MANAGE_ROLES = {"owner", "project_manager"}
 
 #: Roles that may read a plot
-PLOT_READ_ROLES = {"owner", "client", "project_manager", "foreman", "storekeeper", "consultant"}
+PLOT_READ_ROLES = {"owner", "client", "project_manager", "foreman", "consultant"}
 SITE_READ_ROLES = PLOT_READ_ROLES  # compat alias
 
 #: Roles that may manage a plot
@@ -159,7 +155,7 @@ PLOT_MANAGE_ROLES = {"owner", "project_manager", "foreman"}
 SITE_MANAGE_ROLES = PLOT_MANAGE_ROLES  # compat alias
 
 #: Roles that may write job reports
-REPORT_WRITE_ROLES = {"project_manager", "foreman", "storekeeper"}
+REPORT_WRITE_ROLES = {"project_manager", "foreman"}
 
 #: Roles that may approve/reject reports
 REPORT_REVIEW_ROLES = {"owner", "client", "project_manager", "consultant"}
@@ -230,13 +226,13 @@ def can_view_finance(user, obj) -> bool:
     if isinstance(obj, ConstructionProject):
         if user == obj.created_by or user == obj.project_manager:
             return True
-        return obj.constructionplot_set.filter(foreman=user).exists()
+        return obj.constructionplot_set.filter(foremen=user).exists()
 
     if isinstance(obj, ConstructionPlot):
         if obj.construction_project:
             if user == obj.construction_project.created_by or user == obj.construction_project.project_manager:
                 return True
-        return user == obj.foreman
+        return obj.foremen.filter(pk=user.pk).exists()
 
     if isinstance(obj, WorkItem):
         plot = getattr(obj, "construction_plot", None)

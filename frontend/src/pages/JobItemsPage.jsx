@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { JobItemCard, Spinner } from '../components';
-import { Filter, Plus } from 'lucide-react';
+import { JobItemCard, Spinner, Modal } from '../components';
+import { Filter, Plus, HelpCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { apiFetch, unwrapList } from '../api/client';
 
@@ -16,6 +16,7 @@ const JobItemsPage = () => {
   const { token } = useAuth();
   const [jobItems, setJobItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showHelpModal, setShowHelpModal] = useState(false);
 
   useEffect(() => {
     fetchAllJobItems();
@@ -74,19 +75,48 @@ const JobItemsPage = () => {
           </div>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "32px" }}>
-          {jobItems.map(job => (
-            <JobItemCard 
-              key={job.id} 
-              job={job} 
-              onClick={() => {
-                console.log("Navigating to job item:", job.id);
-                navigate(`/job-items/${job.id}`);
-              }}
-            />
-          ))}
-        </div>
+        {jobItems.length === 0 && !loading ? (
+          <div style={{
+            minHeight: '320px', border: '1px dashed var(--border-default)', borderRadius: '24px',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', padding: '40px', color: 'var(--text-tertiary)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <h2 style={{ margin: 0, fontSize: '28px' }}>No jobs yet</h2>
+              <div 
+                onClick={() => setShowHelpModal(true)} 
+                style={{ display: 'flex', alignItems: 'center', color: 'var(--brand-orange)', cursor: 'pointer' }}
+              >
+                <HelpCircle size={20} />
+              </div>
+            </div>
+            <p style={{ maxWidth: '420px', textAlign: 'center' }}>Create a job item to assign tasks to artisans and teams within a work item.</p>
+            <button className="btn-primary" onClick={() => navigate('/job-items/new')} style={{ padding: '14px 40px', height: 'auto' }}>
+              Create job to start
+            </button>
+          </div>
+        ) : (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "32px" }}>
+            {jobItems.map(job => (
+              <JobItemCard 
+                key={job.id} 
+                job={job} 
+                onClick={() => navigate(`/job-items/${job.id}`)}
+              />
+            ))}
+          </div>
+        )}
       </div>
+
+      <Modal isOpen={showHelpModal} onClose={() => setShowHelpModal(false)} title="What is a Job Item?">
+        <p style={{ lineHeight: '1.6', color: 'var(--text-secondary)' }}>
+          <strong>Jobs</strong> (or Job Items) are specific tasks assigned to artisans or teams within a Work Item.
+        </p>
+        <p style={{ marginTop: '16px', lineHeight: '1.6', color: 'var(--text-secondary)' }}>
+          <strong>Example:</strong> If the Work is "Foundation Laying", a Job could be "Trench Excavation" or "Pouring Concrete".
+          <br /><br />
+          Jobs are where you submit Daily Reports to update progress and track issues.
+        </p>
+      </Modal>
     </div>
   );
 };

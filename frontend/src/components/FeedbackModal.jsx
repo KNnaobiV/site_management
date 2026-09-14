@@ -222,7 +222,7 @@ const FeedbackModal = ({ isOpen, onClose }) => {
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
               {/* Category selector */}
               <div>
-                <label style={labelStyle}>Category *</label>
+                <label style={labelStyle}>Category <span style={{ color: "var(--brand-orange)" }}>*</span></label>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '8px' }}>
                   {CATEGORIES.map((cat) => {
                     const isSelected = category === cat.id;
@@ -258,7 +258,7 @@ const FeedbackModal = ({ isOpen, onClose }) => {
 
               {/* Subject */}
               <div>
-                <label style={labelStyle}>Subject</label>
+                <label style={labelStyle}>Subject <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
                 <input
                   type="text"
                   placeholder="e.g., Export button on jobs or Plot report issue"
@@ -271,7 +271,7 @@ const FeedbackModal = ({ isOpen, onClose }) => {
               {/* Submitter Name & Email */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div>
-                  <label style={labelStyle}>Your Name</label>
+                  <label style={labelStyle}>Your Name <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
                   <input
                     type="text"
                     placeholder="Full name"
@@ -281,7 +281,7 @@ const FeedbackModal = ({ isOpen, onClose }) => {
                   />
                 </div>
                 <div>
-                  <label style={labelStyle}>Your Email *</label>
+                  <label style={labelStyle}>Your Email <span style={{ color: "var(--brand-orange)" }}>*</span></label>
                   <input
                     type="email"
                     required
@@ -295,7 +295,7 @@ const FeedbackModal = ({ isOpen, onClose }) => {
 
               {/* Message */}
               <div>
-                <label style={labelStyle}>Description / Details *</label>
+                <label style={labelStyle}>Description / Details <span style={{ color: "var(--brand-orange)" }}>*</span></label>
                 <textarea
                   required
                   rows={4}

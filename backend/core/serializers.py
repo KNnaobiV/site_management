@@ -224,10 +224,8 @@ class ConstructionProjectSerializer(RoleFilteredSerializer):
             user_dict[c.id] = c
 
         for plot in obj.constructionplot_set.all():
-            if plot.foreman:
-                user_dict[plot.foreman.id] = plot.foreman
-            if plot.storekeeper:
-                user_dict[plot.storekeeper.id] = plot.storekeeper
+            for f in plot.foremen.all():
+                user_dict[f.id] = f
 
         users_list = list(user_dict.values())[:7]
         return UserSummarySerializer(users_list, many=True, context=self.context).data
@@ -358,20 +356,12 @@ class ConstructionPlotSerializer(RoleFilteredSerializer):
     consultant          : address, dates, project link only
     """
  
-    foreman = UserSummarySerializer(read_only=True)
-    storekeeper = UserSummarySerializer(read_only=True)
-    foreman_id = serializers.PrimaryKeyRelatedField(
+    foremen = UserSummarySerializer(many=True, read_only=True)
+    foremen_ids = serializers.PrimaryKeyRelatedField(
         queryset=User.objects.all(), 
-        source="foreman", 
+        source="foremen", 
         write_only=True,
-        allow_null=True,
-        required=False
-    )
-    storekeeper_id = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all(), 
-        source="storekeeper", 
-        write_only=True,
-        allow_null=True,
+        many=True,
         required=False
     )
     
@@ -435,15 +425,11 @@ class ConstructionPlotSerializer(RoleFilteredSerializer):
  
     ROLE_EXTRA = {
         "project_manager": {
-            "foreman", "foreman_id",
-            "storekeeper", "storekeeper_id",
+            "foremen", "foremen_ids",
             "budget",
         },
         "foreman": {
-            "foreman", "foreman_id",
-        },
-        "storekeeper": {
-            "storekeeper", "storekeeper_id",
+            "foremen", "foremen_ids",
         },
         "consultant": set(),
     }
@@ -462,10 +448,8 @@ class ConstructionPlotSerializer(RoleFilteredSerializer):
             "gps_latitude",
             "gps_longitude",
             "notes",
-            "foreman",
-            "foreman_id",
-            "storekeeper",
-            "storekeeper_id",
+            "foremen",
+            "foremen_ids",
             "role",
             "project_name",
             "budget",
@@ -1012,12 +996,12 @@ class JobReportSerializer(RoleFilteredSerializer):
         "days_elapsed",
         "updated_at",
         "images",
+        "video_link",
     }
  
     ROLE_EXTRA = {
         "project_manager": {"internal_comments", "job_image", "job_image_id", "job_video", "job_video_data"},
         "foreman":         {"job_image", "job_image_id", "job_video", "job_video_data"},
-        "storekeeper":     {"job_image", "job_image_id", "job_video", "job_video_data"},
         "consultant":      set(),
     }
  
@@ -1045,6 +1029,7 @@ class JobReportSerializer(RoleFilteredSerializer):
             "job_image_id",
             "job_video",
             "job_video_data",
+            "video_link",
             "images",
             "updated_at",
         ]

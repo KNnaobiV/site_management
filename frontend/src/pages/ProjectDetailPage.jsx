@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { Edit2, Plus, FileText, UserPlus, MoreHorizontal, MapPin, Calendar, Users, Search, Loader, X, HardHat, Package, Briefcase, Image as ImageIcon, DollarSign, Download, BarChart3 } from 'lucide-react';
+import { Edit2, Plus, FileText, UserPlus, MoreHorizontal, MapPin, Calendar, Users, Search, Loader, X, HardHat, Package, Briefcase, Image as ImageIcon, DollarSign, Download, BarChart3, HelpCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { apiFetch, unwrapList, formatApiError, getMediaUrl } from '../api/client';
-import { Breadcrumb, Tabs, Avatar, Spinner, RoleBadge, InviteModal, DocumentList, ProgressDonut } from '../components';
+import { Breadcrumb, Tabs, Avatar, Spinner, RoleBadge, InviteModal, DocumentList, ProgressDonut, Modal } from '../components';
 import BudgetModal from '../components/BudgetModal';
 import ExpensesTable from '../components/ExpensesTable';
 import { showSuccessMessage } from '../utils/successMessage';
@@ -45,7 +45,6 @@ const NewPlotForm = ({ projectId, token, onSuccess, onClose }) => {
   const [coverImagePreview, setCoverImagePreview] = useState(null);
   const [form, setForm] = useState({
     plot_number: '',
-    plot_name: '',
     address: '',
     status: 'Planned',
     start_date: new Date().toISOString().split('T')[0],
@@ -71,8 +70,7 @@ const NewPlotForm = ({ projectId, token, onSuccess, onClose }) => {
     setSaving(true); setError(null);
     const payload = {
       address: form.address,
-      plot_number: form.plot_number || form.plot_name || '',
-      plot_name: form.plot_name || form.plot_number || '',
+      plot_number: form.plot_number || '',
       status: form.status || 'Planned',
       start_date: form.start_date,
       target_end_date: form.target_end_date,
@@ -105,54 +103,48 @@ const NewPlotForm = ({ projectId, token, onSuccess, onClose }) => {
       <p style={{ color: 'var(--text-tertiary)', marginBottom: '32px' }}>Add a new construction plot to this project.</p>
       {error && <div style={{ background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.2)', color: '#dc2626', padding: '12px 16px', borderRadius: '12px', marginBottom: '20px', fontSize: '14px' }}>{error}</div>}
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-        <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-          <div>
-            <label style={labelStyle}>Plot Number <span style={{ color: '#dc2626' }}>*</span></label>
-            <input type="text" required value={form.plot_number} onChange={e => set('plot_number', e.target.value)} placeholder="e.g. Plot 101" style={inputStyle} />
-          </div>
-          <div>
-            <label style={labelStyle}>Plot Name <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>(optional)</span></label>
-            <input type="text" value={form.plot_name} onChange={e => set('plot_name', e.target.value)} placeholder="e.g. Block A" style={inputStyle} />
-          </div>
+        <div>
+          <label style={labelStyle}>Plot Number <span style={{ color: "var(--brand-orange)" }}>*</span></label>
+          <input type="text" required value={form.plot_number} onChange={e => set('plot_number', e.target.value)} placeholder="e.g. Plot 101" style={inputStyle} />
         </div>
         <div>
-          <label style={labelStyle}>Address <span style={{ color: '#dc2626' }}>*</span></label>
+          <label style={labelStyle}>Address <span style={{ color: "var(--brand-orange)" }}>*</span></label>
           <input type="text" required value={form.address} onChange={e => set('address', e.target.value)} placeholder="123 Main St, City" style={inputStyle} />
         </div>
         <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
           <div>
-            <label style={labelStyle}>Status <span style={{ color: '#dc2626' }}>*</span></label>
+            <label style={labelStyle}>Status <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
             <select value={form.status} onChange={e => set('status', e.target.value)} style={inputStyle}>
               {['Planned', 'In Progress', 'Completed', 'On Hold', 'Delayed', 'Cancelled'].map(s => <option key={s} value={s}>{s}</option>)}
             </select>
           </div>
           <div>
-            <label style={labelStyle}>Start Date <span style={{ color: '#dc2626' }}>*</span></label>
+            <label style={labelStyle}>Start Date <span style={{ color: "var(--brand-orange)" }}>*</span></label>
             <input type="date" required value={form.start_date} onChange={e => set('start_date', e.target.value)} style={inputStyle} />
           </div>
           <div>
-            <label style={labelStyle}>Target End Date <span style={{ color: '#dc2626' }}>*</span></label>
+            <label style={labelStyle}>Target End Date <span style={{ color: "var(--brand-orange)" }}>*</span></label>
             <input type="date" required value={form.target_end_date} onChange={e => set('target_end_date', e.target.value)} style={inputStyle} />
           </div>
         </div>
         <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
           <div>
-            <label style={labelStyle}>GPS Latitude <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>(optional)</span></label>
+            <label style={labelStyle}>GPS Latitude <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
             <input type="number" step="any" value={form.gps_latitude} onChange={e => set('gps_latitude', e.target.value)} placeholder="e.g. 6.524379" style={inputStyle} />
           </div>
           <div>
-            <label style={labelStyle}>GPS Longitude <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>(optional)</span></label>
+            <label style={labelStyle}>GPS Longitude <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
             <input type="number" step="any" value={form.gps_longitude} onChange={e => set('gps_longitude', e.target.value)} placeholder="e.g. 3.379206" style={inputStyle} />
           </div>
         </div>
         <div>
-          <label style={labelStyle}>Notes <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>(optional)</span></label>
+          <label style={labelStyle}>Notes <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
           <textarea value={form.notes} onChange={e => set('notes', e.target.value)} placeholder="Any notes about this plot..." style={{ ...inputStyle, minHeight: '100px', resize: 'vertical' }} />
         </div>
 
         {/* Cover Image */}
         <div>
-          <label style={labelStyle}>Cover Image <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>(optional)</span></label>
+          <label style={labelStyle}>Cover Image <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
           <input
             type="file"
             ref={coverInputRef}
@@ -258,6 +250,8 @@ const ProjectDetailPage = () => {
   const [showBudgetModal, setShowBudgetModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
+  const [showPlotHelp, setShowPlotHelp] = useState(false);
+  const [showReportHelp, setShowReportHelp] = useState(false);
   const [showNewPlot, setShowNewPlot] = useState(false);
   const [showProjectInvite, setShowProjectInvite] = useState(false);
 
@@ -466,10 +460,7 @@ const ProjectDetailPage = () => {
   const client = project.client;
   const consultants = project.consultants || [];
 
-  const teamMembers = [];
-  if (pm) teamMembers.push({ ...pm, display_role: 'project_manager' });
-  if (client) teamMembers.push({ ...client, display_role: 'client' });
-  consultants.forEach(c => teamMembers.push({ ...c, display_role: 'consultant' }));
+  const owner = project.created_by;
 
   const canManage = project.role === 'owner' || project.role === 'project_manager';
 
@@ -488,6 +479,30 @@ const ProjectDetailPage = () => {
   const hasBudget = activeBudget && parseFloat(activeBudget.allocated_amount) > 0;
   const percentageSpent = hasBudget ? Math.round((totalSpent / parseFloat(activeBudget.allocated_amount)) * 100) : null;
   const isOverBudget = hasBudget && totalSpent > parseFloat(activeBudget.allocated_amount);
+
+  const renderRoleSection = (title, members, displayRole) => (
+    <div style={{ marginBottom: '24px' }}>
+      <p style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.05em', color: 'var(--text-tertiary)', textTransform: 'uppercase', margin: '0 0 12px' }}>{title}</p>
+      {(!members || members.length === 0) ? (
+        <div style={{ padding: '16px 24px', background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '16px', color: 'var(--text-tertiary)' }}>
+          N/A
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {members.map((m, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px 24px', background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '16px' }}>
+              <Avatar name={m.display_name || m.username} size={40} />
+              <div style={{ flex: 1 }}>
+                <p style={{ margin: 0, fontWeight: 700, color: 'var(--text-primary)', fontSize: '15px' }}>{m.display_name || m.username}</p>
+                <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-tertiary)' }}>{m.email}</p>
+              </div>
+              <RoleBadge role={displayRole} />
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 0 60px' }}>
@@ -680,8 +695,16 @@ const ProjectDetailPage = () => {
           {plots.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '60px', color: 'var(--text-tertiary)' }}>
               <MapPin size={40} style={{ margin: '0 auto 16px', display: 'block', opacity: 0.3 }} />
-              <p style={{ fontWeight: 600 }}>No plots yet</p>
-              <p style={{ fontSize: '14px' }}>Add the first plot to get started.</p>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                <p style={{ fontWeight: 600, margin: 0 }}>No plots yet</p>
+                <div 
+                  onClick={() => setShowPlotHelp(true)} 
+                  style={{ display: 'flex', alignItems: 'center', color: 'var(--brand-orange)', cursor: 'pointer' }}
+                >
+                  <HelpCircle size={16} />
+                </div>
+              </div>
+              <p style={{ fontSize: '14px', margin: '8px 0 0' }}>Add the first plot to get started.</p>
             </div>
           ) : (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
@@ -703,9 +726,9 @@ const ProjectDetailPage = () => {
                   </p>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <StatusPill status={'Planned'} />
-                    {plot.foreman && (
+                    {plot.foremen && plot.foremen.length > 0 && (
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <Avatar name={plot.foreman.display_name || plot.foreman.username} size={28} />
+                        <Avatar name={plot.foremen[0].display_name || plot.foremen[0].username} size={28} />
                         <span style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>Foreman</span>
                       </div>
                     )}
@@ -941,24 +964,11 @@ const ProjectDetailPage = () => {
                 </button>
               )}
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {teamMembers.map((m, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '18px 24px', background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '16px' }}>
-                  <Avatar name={m.display_name || m.username} size={48} />
-                  <div style={{ flex: 1 }}>
-                    <p style={{ margin: 0, fontWeight: 700, color: 'var(--text-primary)', fontSize: '15px' }}>{m.display_name || m.username}</p>
-                    <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-tertiary)' }}>{m.email}</p>
-                  </div>
-                  <RoleBadge role={m.display_role} />
-                </div>
-              ))}
-              {teamMembers.length === 0 && (
-                <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-tertiary)' }}>
-                  <Users size={36} style={{ margin: '0 auto 12px', display: 'block', opacity: 0.3 }} />
-                  <p style={{ fontWeight: 600, margin: '0 0 4px' }}>No team members yet</p>
-                  <p style={{ fontSize: '14px', margin: 0 }}>Use the form below to invite your first member.</p>
-                </div>
-              )}
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              {renderRoleSection('Owner', owner ? [owner] : [], 'owner')}
+              {renderRoleSection('Client', client ? [client] : [], 'client')}
+              {renderRoleSection('Project Manager', pm ? [pm] : [], 'project_manager')}
+              {renderRoleSection('Consultants', consultants, 'consultant')}
             </div>
           </div>
 
@@ -1127,7 +1137,15 @@ const ProjectDetailPage = () => {
               {reports.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '60px', color: 'var(--text-tertiary)' }}>
                   <FileText size={40} style={{ margin: '0 auto 16px', display: 'block', opacity: 0.3 }} />
-                  <p style={{ fontWeight: 600 }}>No reports available yet</p>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '4px' }}>
+                    <p style={{ fontWeight: 600, margin: 0 }}>No reports available yet</p>
+                    <div 
+                      onClick={() => setShowReportHelp(true)} 
+                      style={{ display: 'flex', alignItems: 'center', color: 'var(--brand-orange)', cursor: 'pointer' }}
+                    >
+                      <HelpCircle size={16} />
+                    </div>
+                  </div>
                   <p style={{ fontSize: '14px' }}>Daily reports from works will appear here once created.</p>
                 </div>
               ) : (
@@ -1154,6 +1172,14 @@ const ProjectDetailPage = () => {
                         </div>
                       </div>
                       {report.notes && <p style={{ margin: '16px 0 0', fontSize: '14px', color: 'var(--text-secondary)', lineHeight: 1.7 }}>{report.notes}</p>}
+                      {report.video_link && (
+                        <div style={{ marginTop: '8px' }}>
+                          <a href={report.video_link} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '13px', color: 'var(--brand-orange)', textDecoration: 'none', fontWeight: 600 }}>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+                            View Video
+                          </a>
+                        </div>
+                      )}
                       {report.issues_encountered && <p style={{ margin: '10px 0 0', fontSize: '13px', color: 'var(--status-delayed)' }}>⚠ {report.issues_encountered}</p>}
                       {report.images?.length > 0 && (
                         <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
@@ -1390,6 +1416,26 @@ const ProjectDetailPage = () => {
           }}
         />
       )}
+
+      <Modal isOpen={showPlotHelp} onClose={() => setShowPlotHelp(false)} title="What is a Plot?">
+        <p style={{ lineHeight: '1.6', color: 'var(--text-secondary)' }}>
+          <strong>Plots</strong> represent physical subdivisions or logical phases of a Project.
+        </p>
+        <p style={{ marginTop: '16px', lineHeight: '1.6', color: 'var(--text-secondary)' }}>
+          <strong>Example:</strong> If your project is a housing estate, a Plot could be "Block A" or "Plot 12". If your project is a highway, a Plot could be "Kilometer 1-5".
+          <br /><br />
+          Inside a Plot, you will track specific Work Items (e.g., Foundation, Plumbing).
+        </p>
+      </Modal>
+
+      <Modal isOpen={showReportHelp} onClose={() => setShowReportHelp(false)} title="What is a Report?">
+        <p style={{ lineHeight: '1.6', color: 'var(--text-secondary)' }}>
+          <strong>Reports</strong> track daily updates and site conditions for active jobs.
+        </p>
+        <p style={{ marginTop: '16px', lineHeight: '1.6', color: 'var(--text-secondary)' }}>
+          <strong>Example:</strong> A daily log stating "Poured 50 cubic meters of concrete, faced weather delays", along with photos of the progress.
+        </p>
+      </Modal>
     </div>
   );
 };

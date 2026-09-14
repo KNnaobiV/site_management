@@ -244,7 +244,7 @@ const CreateProjectPage = () => {
           {/* Left Column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <div>
-              <label style={labelStyle}>Project Name</label>
+              <label style={labelStyle}>Project Name <span style={{ color: "var(--brand-orange)" }}>*</span></label>
               <input
                 type="text"
                 placeholder="Enter project name"
@@ -256,7 +256,7 @@ const CreateProjectPage = () => {
             </div>
 
             <div>
-              <label style={labelStyle}>Address</label>
+              <label style={labelStyle}>Address <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
               <textarea
                 placeholder="Enter project address"
                 value={formData.address}
@@ -268,7 +268,7 @@ const CreateProjectPage = () => {
 
             <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div>
-                <label style={labelStyle}>Start Date *</label>
+                <label style={labelStyle}>Start Date <span style={{ color: "var(--brand-orange)" }}>*</span></label>
                 <input
                   type="date"
                   required
@@ -279,7 +279,7 @@ const CreateProjectPage = () => {
                 />
               </div>
               <div>
-                <label style={labelStyle}>Target End Date *</label>
+                <label style={labelStyle}>Target End Date <span style={{ color: "var(--brand-orange)" }}>*</span></label>
                 <input
                   type="date"
                   required
@@ -291,7 +291,7 @@ const CreateProjectPage = () => {
             </div>
 
             <div>
-              <label style={labelStyle}>Status</label>
+              <label style={labelStyle}>Status <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
               <select
                 value={formData.project_status}
                 onChange={e => setFormData({ ...formData, project_status: e.target.value })}
@@ -307,9 +307,7 @@ const CreateProjectPage = () => {
           {/* Right Column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <div>
-              <label style={labelStyle}>
-                Cover Image <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>(optional)</span>
-              </label>
+              <label style={labelStyle}>Cover Image <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
               <input
                 type="file"
                 ref={fileInputRef}
@@ -394,8 +392,9 @@ const CreateProjectPage = () => {
             </div>
 
             <div>
-              <label style={labelStyle}>Description</label>
+              <label style={labelStyle}>Description <span style={{ color: "var(--brand-orange)" }}>*</span></label>
               <textarea
+                required
                 placeholder="Enter project description"
                 value={formData.project_description}
                 onChange={e => setFormData({ ...formData, project_description: e.target.value })}
@@ -416,7 +415,7 @@ const CreateProjectPage = () => {
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
-                    <label style={{ ...labelStyle, marginBottom: '4px' }}>Project Progress</label>
+                    <label style={{ ...labelStyle, marginBottom: '4px' }}>Project Progress <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
                     <span style={{ fontSize: '13px', color: 'var(--text-tertiary)' }}>
                       {isProgressManual ? 'Manual Override active' : 'Calculated automatically from plots'}
                     </span>

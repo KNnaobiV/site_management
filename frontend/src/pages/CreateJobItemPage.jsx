@@ -214,7 +214,7 @@ const CreateJobItemPage = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div>
-                <label style={labelStyle}>Title</label>
+                <label style={labelStyle}>Title <span style={{ color: "var(--brand-orange)" }}>*</span></label>
                 <input
                   type="text"
                   placeholder="Enter job title"
@@ -225,7 +225,7 @@ const CreateJobItemPage = () => {
                 />
               </div>
               <div>
-                <label style={labelStyle}>Parent Work *</label>
+                <label style={labelStyle}>Parent Work <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
                 {workItemId ? (
                   <input
                     type="text"
@@ -246,7 +246,7 @@ const CreateJobItemPage = () => {
 
             <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div>
-                <label style={labelStyle}>Artisan Type *</label>
+                <label style={labelStyle}>Artisan Type <span style={{ color: "var(--brand-orange)" }}>*</span></label>
                 <select
                   required
                   value={formData.job_artisan}
@@ -260,7 +260,7 @@ const CreateJobItemPage = () => {
                 </select>
               </div>
               <div>
-                <label style={labelStyle}>Status *</label>
+                <label style={labelStyle}>Status <span style={{ color: "var(--brand-orange)" }}>*</span></label>
                 <select
                   required
                   value={formData.job_status}
@@ -275,7 +275,7 @@ const CreateJobItemPage = () => {
             </div>
 
             <div>
-              <label style={labelStyle}>Description</label>
+              <label style={labelStyle}>Description <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
               <textarea
                 placeholder="Describe the scope of work..."
                 value={formData.job_description}
@@ -290,7 +290,7 @@ const CreateJobItemPage = () => {
           {/* Right Column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <div>
-              <label style={labelStyle}>Estimated Hours <span style={{ fontWeight: 400, color: 'var(--text-tertiary)' }}>(Optional)</span></label>
+              <label style={labelStyle}>Estimated Hours <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
               <input
                 type="number"
                 step="0.5"
@@ -304,7 +304,7 @@ const CreateJobItemPage = () => {
 
             <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div>
-                <label style={labelStyle}>Start Date *</label>
+                <label style={labelStyle}>Start Date <span style={{ color: "var(--brand-orange)" }}>*</span></label>
                 <input
                   type="date"
                   required
@@ -314,7 +314,7 @@ const CreateJobItemPage = () => {
                 />
               </div>
               <div>
-                <label style={labelStyle}>Target End Date *</label>
+                <label style={labelStyle}>Target End Date <span style={{ color: "var(--brand-orange)" }}>*</span></label>
                 <input
                   type="date"
                   required
@@ -338,7 +338,7 @@ const CreateJobItemPage = () => {
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
-                    <label style={{ ...labelStyle, marginBottom: '4px' }}>Job Progress</label>
+                    <label style={{ ...labelStyle, marginBottom: '4px' }}>Job Progress <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
                     <span style={{ fontSize: '13px', color: 'var(--text-tertiary)' }}>
                       {isProgressManual ? 'Manual Override active' : 'Calculated automatically from daily reports'}
                     </span>

@@ -172,9 +172,7 @@ const BudgetModal = ({
                 letterSpacing: '0.05em',
                 marginBottom: '8px',
               }}
-            >
-              Currency
-            </label>
+            >Currency <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
             <select
               value={currency}
               onChange={(e) => setCurrency(e.target.value)}
@@ -208,9 +206,7 @@ const BudgetModal = ({
                 letterSpacing: '0.05em',
                 marginBottom: '8px',
               }}
-            >
-              Allocated Budget Amount
-            </label>
+            >Allocated Budget Amount <span style={{ color: "var(--brand-orange)" }}>*</span></label>
             <div style={{ position: 'relative' }}>
               <input
                 type="number"

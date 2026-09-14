@@ -115,7 +115,7 @@ class JobItemExpenseViewSet(viewsets.ModelViewSet):
         return Expense.objects.filter(
             Q(job_item__work_item__construction_plot__construction_project__created_by=user) |
             Q(job_item__work_item__construction_plot__construction_project__project_manager=user) |
-            Q(job_item__work_item__construction_plot__foreman=user),
+            Q(job_item__work_item__construction_plot__foremen=user),
             is_deleted=False
         ).distinct().select_related("cost_code").order_by("-incurred_at", "-created_at")
 
@@ -249,13 +249,13 @@ class GeneralExpenseViewSet(viewsets.ModelViewSet):
             Q(project__project_manager=user) |
             Q(plot__construction_project__created_by=user) |
             Q(plot__construction_project__project_manager=user) |
-            Q(plot__foreman=user) |
+            Q(plot__foremen=user) |
             Q(work_item__construction_plot__construction_project__created_by=user) |
             Q(work_item__construction_plot__construction_project__project_manager=user) |
-            Q(work_item__construction_plot__foreman=user) |
+            Q(work_item__construction_plot__foremen=user) |
             Q(job_item__work_item__construction_plot__construction_project__created_by=user) |
             Q(job_item__work_item__construction_plot__construction_project__project_manager=user) |
-            Q(job_item__work_item__construction_plot__foreman=user),
+            Q(job_item__work_item__construction_plot__foremen=user),
             is_deleted=False
         ).distinct().select_related("cost_code")
 
