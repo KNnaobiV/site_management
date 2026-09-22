@@ -1981,7 +1981,6 @@ class JobReportViewSet(PlotScopedMixin, viewsets.ModelViewSet):
         report = serializer.save(
             job_item=job_item, 
             reported_by=self.request.user,
-            report_status="Approved"
         )
         
         # Notify stakeholders (PM and Owner)
@@ -1996,12 +1995,62 @@ class JobReportViewSet(PlotScopedMixin, viewsets.ModelViewSet):
             Notification(
                 user=m, 
                 project=project, 
-                message=f"New {report.priority} report for {job_item.job_name} in {job_item.work_item.name}",
+                message=f"New {report.priority} report submitted for {job_item.job_name} in {job_item.work_item.name}",
                 priority=prio,
                 target_url=(f"/job-items/{job_item.pk}?report={report.pk}")
             ) for m in members if m and m != self.request.user
         ]
         Notification.objects.bulk_create(notifications)
+
+    @action(detail=True, methods=["post"])
+    def approve(self, request, **kwargs):
+        """POST .../reports/{pk}/approve/ — approve a job report."""
+        report = self.get_object()
+        self.check_object_permissions(request, report)
+        report.report_status = JobReport.ReportStatusChoices.approved
+        report.save(update_fields=["report_status", "updated_at"])
+
+        plot = report.job_item.work_item.construction_plot
+        project = plot.construction_project
+        message_opt = request.data.get("message", request.data.get("reason", ""))
+        base_msg = f"Report for '{report.job_item.job_name}' has been approved."
+        if message_opt:
+            base_msg += f" Message: {message_opt}"
+
+        if report.reported_by and report.reported_by != request.user:
+            Notification.objects.create(
+                user=report.reported_by,
+                project=project,
+                message=base_msg,
+                priority=Notification.Priority.NORMAL,
+                target_url=f"/job-items/{report.job_item.pk}?report={report.pk}"
+            )
+        return Response({"status": "approved", "report_status": report.report_status})
+
+    @action(detail=True, methods=["post"])
+    def reject(self, request, **kwargs):
+        """POST .../reports/{pk}/reject/ — reject a job report."""
+        report = self.get_object()
+        self.check_object_permissions(request, report)
+        report.report_status = JobReport.ReportStatusChoices.rejected
+        report.save(update_fields=["report_status", "updated_at"])
+
+        plot = report.job_item.work_item.construction_plot
+        project = plot.construction_project
+        reason = request.data.get("message", request.data.get("reason", ""))
+        message = f"Report for '{report.job_item.job_name}' was rejected."
+        if reason:
+            message += f" Reason: {reason}"
+
+        if report.reported_by and report.reported_by != request.user:
+            Notification.objects.create(
+                user=report.reported_by,
+                project=project,
+                message=message,
+                priority=Notification.Priority.HIGH,
+                target_url=f"/job-items/{report.job_item.pk}?report={report.pk}"
+            )
+        return Response({"status": "rejected", "report_status": report.report_status})
 
     def destroy(self, request, *args, **kwargs):
         report = self.get_object()
@@ -2275,18 +2324,12 @@ class DocumentViewSet(ProjectScopedMixin, viewsets.ModelViewSet):
         if role in {"owner", "project_manager", "consultant", "client"}:
             return qs
 
-        # Foreman and Storekeeper logic
+        # Foreman, Storekeeper, and Plot Member logic
         # They can see project-level docs if visibility flag is true
         # They can see plot-level docs if visibility flag is true AND they belong to that plot
-        if role == "foreman":
+        if role in {"foreman", "storekeeper", "plot_member"}:
             return qs.filter(
-                visible_to_foremen=True
-            ).filter(
-                db_Q(plot__isnull=True) | db_Q(plot__foremen=user)
-            )
-        elif role == "storekeeper":
-            return qs.filter(
-                visible_to_storekeepers=True
+                db_Q(visible_to_foremen=True) | db_Q(visible_to_storekeepers=True)
             ).filter(
                 db_Q(plot__isnull=True) | db_Q(plot__foremen=user)
             )

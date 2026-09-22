@@ -437,6 +437,12 @@ class ConstructionPlotSerializer(RoleFilteredSerializer):
         "foreman": {
             "foremen", "foremen_ids",
         },
+        "plot_member": {
+            "foremen", "foremen_ids",
+        },
+        "storekeeper": {
+            "foremen", "foremen_ids",
+        },
         "client": {
             "foremen", "foremen_ids",
         },
@@ -1005,6 +1011,8 @@ class JobReportSerializer(RoleFilteredSerializer):
     ROLE_EXTRA = {
         "project_manager": {"internal_comments", "job_image", "job_image_id", "job_video", "job_video_data"},
         "foreman":         {"job_image", "job_image_id", "job_video", "job_video_data"},
+        "plot_member":     {"job_image", "job_image_id", "job_video", "job_video_data"},
+        "storekeeper":     {"job_image", "job_image_id", "job_video", "job_video_data"},
         "consultant":      set(),
     }
  
@@ -1232,10 +1240,12 @@ class DocumentSerializer(RoleFilteredSerializer):
 
     ROLE_EXTRA = {
         "project_manager": {"visible_to_storekeepers", "visible_to_foremen"},
+        "owner": {"visible_to_storekeepers", "visible_to_foremen"},
         "client": {"visible_to_storekeepers", "visible_to_foremen"},
         "consultant": {"visible_to_storekeepers", "visible_to_foremen"},
         "foreman": set(),
         "storekeeper": set(),
+        "plot_member": set(),
     }
 
     def get_uploaded_by_display_name(self, obj):
