@@ -1806,7 +1806,7 @@ class JobReportViewSet(PlotScopedMixin, viewsets.ModelViewSet):
     serializer_class = JobReportSerializer
 
     def get_permissions(self):
-        if self.action in ("list", "retrieve"):
+        if self.action in ("list", "retrieve", "export_reports"):
             return [IsAuthenticated(), IsPlotMember()]
         if self.action in ("create", "update", "partial_update"):
             return [IsAuthenticated(), CanSubmitReport()]
@@ -1830,6 +1830,10 @@ class JobReportViewSet(PlotScopedMixin, viewsets.ModelViewSet):
         if not plot:
             return Response({"detail": "Plot not found."}, status=status.HTTP_404_NOT_FOUND)
 
+        role = get_plot_role(request.user, plot)
+        if role == "none":
+            raise PermissionDenied("You do not have permission to export reports on this plot.")
+
         def parse_date(value):
             try:
                 return datetime.datetime.strptime(value, "%Y-%m-%d").date()
@@ -1848,7 +1852,10 @@ class JobReportViewSet(PlotScopedMixin, viewsets.ModelViewSet):
             return Response({"detail": "start_date cannot be after end_date."}, status=status.HTTP_400_BAD_REQUEST)
 
         queryset = JobReport.objects.filter(job_item__work_item__construction_plot=plot)
-        if request.GET.get("job_item_id"):
+        jobitem_pk = self.kwargs.get("jobitem_pk")
+        if jobitem_pk:
+            queryset = queryset.filter(job_item__pk=jobitem_pk)
+        elif request.GET.get("job_item_id"):
             queryset = queryset.filter(job_item__pk=request.GET["job_item_id"])
         elif request.GET.get("work_item_id"):
             queryset = queryset.filter(job_item__work_item__pk=request.GET["work_item_id"])

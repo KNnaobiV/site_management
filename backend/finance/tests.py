@@ -211,12 +211,11 @@ class JobItemExpenseAPITest(APITestCase):
         )
         self.plot = ConstructionPlot.objects.create(
             construction_project=self.project,
-            foreman=self.foreman,
-            storekeeper=self.strkpr,
             address='123 Plot Road',
             start_date=date.today(),
             target_end_date=date.today(),
         )
+        self.plot.foremen.add(self.foreman, self.strkpr)
         self.work_item = WorkItem.objects.create(
             construction_plot=self.plot,
             name='Foundation Work',
@@ -456,11 +455,11 @@ class BudgetPermissionsAPITest(APITestCase):
 
         self.plot = ConstructionPlot.objects.create(
             construction_project=self.project,
-            foreman=self.foreman,
             address='456 Plot Boulevard',
             start_date=date.today(),
             target_end_date=date.today(),
         )
+        self.plot.foremen.add(self.foreman)
         self.work_item = WorkItem.objects.create(
             construction_plot=self.plot,
             name='Bricklaying',

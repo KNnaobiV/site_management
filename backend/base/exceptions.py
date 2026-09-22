@@ -349,7 +349,7 @@ def custom_exception_handler(exc, context):
 
     # 3. If unhandled (e.g. 500 server crash)
     if response is None:
-        logger.exception("Unhandled server exception in API: %s", exc)
+        logger.exception("Unhandled server exception in API: %s", exc, exc_info=exc)
         return Response(
             {
                 "detail": "An unexpected server error occurred. Please try again later.",

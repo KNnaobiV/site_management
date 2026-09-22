@@ -72,6 +72,9 @@ const NotificationItem = ({ notification, onView }) => {
       </div>
 
       <div className="notification-actions" style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
+        {notification.message?.toLowerCase().includes('approval') && (
+          <button className="btn-ghost" style={{ fontSize: '12px', padding: '5px 10px', borderColor: 'var(--brand-orange)', color: 'var(--brand-orange)' }}>Approve</button>
+        )}
         <button
           className="btn-ghost"
           style={{ fontSize: '12px', padding: '5px 10px' }}

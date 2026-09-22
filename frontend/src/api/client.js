@@ -78,8 +78,8 @@ export async function apiFetch(path, { token, _isRetry = false, ...options } = {
             const newToken = await refreshAccessToken();
             isRefreshing = false;
 
+            onRefreshed(newToken);
             if (newToken) {
-                onRefreshed(newToken);
                 return apiFetch(path, { ...options, token: newToken, _isRetry: true });
             }
         } else {

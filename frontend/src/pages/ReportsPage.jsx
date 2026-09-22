@@ -1225,6 +1225,7 @@ export default function ReportsPage() {
                   <thead>
                     <tr style={{ borderBottom: '1px solid var(--border-subtle)', color: 'var(--text-tertiary)', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                       <th style={{ padding: '12px 14px' }}>Date</th>
+                      {selectedGranularity === 'project' && <th style={{ padding: '12px 14px' }}>Plot</th>}
                       {(selectedGranularity === 'project' || selectedGranularity === 'plot') && <th style={{ padding: '12px 14px' }}>Work Item</th>}
                       {(selectedGranularity === 'project' || selectedGranularity === 'plot' || selectedGranularity === 'workitem') && <th style={{ padding: '12px 14px' }}>Job Item</th>}
                       <th style={{ padding: '12px 14px' }}>Artisan</th>
@@ -1233,6 +1234,7 @@ export default function ReportsPage() {
                   </thead>
                   <tbody>
                     {(reportData.expenses || []).map((exp) => {
+                      const plotName = exp.plot_name || exp.plot?.plot_name || exp.plot?.address || exp.work_item?.construction_plot?.plot_name || exp.work_item?.construction_plot?.address || exp.job_item?.work_item?.construction_plot?.plot_name || exp.job_item?.work_item?.construction_plot?.address || '—';
                       const workItemName = exp.work_item_name || exp.work_item?.name || exp.job_item?.work_item?.name || '—';
                       const jobItemName = exp.job_item_name || exp.job_item?.job_name || '—';
                       const artisanName = exp.artisan_name || (exp.job_item?.job_artisan === 'Other' && exp.job_item?.custom_artisan ? exp.job_item.custom_artisan : exp.job_item?.job_artisan) || '—';
@@ -1242,6 +1244,11 @@ export default function ReportsPage() {
                           <td style={{ padding: '14px', color: 'var(--text-secondary)' }}>
                             {(exp.incurred_at || exp.created_at || '').slice(0, 10) || '—'}
                           </td>
+                          {selectedGranularity === 'project' && (
+                            <td style={{ padding: '14px', fontWeight: 500, color: 'var(--text-primary)' }}>
+                              {plotName}
+                            </td>
+                          )}
                           {(selectedGranularity === 'project' || selectedGranularity === 'plot') && (
                             <td style={{ padding: '14px', fontWeight: 500, color: 'var(--text-primary)' }}>
                               {workItemName}
@@ -1333,9 +1340,10 @@ export default function ReportsPage() {
                     <tr style={{ borderBottom: '1px solid var(--border-subtle)', color: 'var(--text-tertiary)', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                       <th style={{ padding: '12px 14px' }}>Date</th>
                       <th style={{ padding: '12px 14px' }}>Job</th>
-                      <th style={{ padding: '12px 14px' }}>% Compl</th>
-                      <th style={{ padding: '12px 14px' }}>Notes</th>
-                      <th style={{ padding: '12px 14px' }}>Issues</th>
+                      <th style={{ padding: '12px 14px' }}>Progress</th>
+                      <th style={{ padding: '12px 14px' }}>Notes & Photographic Evidence</th>
+                      <th style={{ padding: '12px 14px' }}>Blockers / Issues</th>
+                      <th style={{ padding: '12px 14px' }}>Reported By</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1388,6 +1396,9 @@ export default function ReportsPage() {
                         </td>
                         <td style={{ padding: '14px', color: report.issues_encountered ? '#dc2626' : 'var(--text-tertiary)' }}>
                           {report.issues_encountered || 'None'}
+                        </td>
+                        <td style={{ padding: '14px', color: 'var(--text-secondary)' }}>
+                          {report.reported_by_name || report.reported_by?.display_name || report.reported_by?.username || '—'}
                         </td>
                       </tr>
                     ))}

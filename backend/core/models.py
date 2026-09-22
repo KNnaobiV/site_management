@@ -512,7 +512,7 @@ class ConstructionPlot(HasPictureMixin, TimestampedModel):
     @receiver(post_save, sender='core.ConstructionPlot')
     def create_plot_groups(sender, instance, created, **kwargs):
         """Create plot-specific groups when a new construction plot is created"""
-        group_suffixes = ["Foreman", "Storekeeper"]
+        group_suffixes = ["Foreman"]
         if created:
             for suffix in group_suffixes:
                 create_project_group(
