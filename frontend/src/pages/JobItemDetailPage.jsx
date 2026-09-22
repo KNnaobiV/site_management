@@ -4,7 +4,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Plus, Image as ImageIcon, ArrowLeft, CheckCircle2, Loader as SpinnerIcon, X, DollarSign, Edit2, Trash2, Receipt, Upload, Download, FileText, BarChart3, HelpCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { apiFetch, unwrapList, formatApiError, getMediaUrl } from '../api/client';
-import { Breadcrumb, Tabs, Avatar, MaterialsEditor, Spinner, CommentsSection, ImageUploader } from '../components';
+import { Breadcrumb, Tabs, Avatar, MaterialsEditor, Spinner, CommentsSection, ImageUploader, CompleteJobModal, ReviewJobModal } from '../components';
 import BudgetModal from '../components/BudgetModal';
 import { showSuccessMessage } from '../utils/successMessage';
 
@@ -357,6 +357,8 @@ const JobItemDetailPage = () => {
   const [selectedReport, setSelectedReport] = useState(null);
   const [showExpenseModal, setShowExpenseModal] = useState(false);
   const [editingExpense, setEditingExpense] = useState(null);
+  const [showCompleteModal, setShowCompleteModal] = useState(false);
+  const [showReviewModal, setShowReviewModal] = useState(false);
   const [deletingExpense, setDeletingExpense] = useState(null);
   const [reportAttachFiles, setReportAttachFiles] = useState([]);
   const [uploadingReportPhotos, setUploadingReportPhotos] = useState(false);
@@ -544,8 +546,11 @@ const JobItemDetailPage = () => {
     }, 350);
   }, [reports, highlightReportId]);
 
-  const handleMarkComplete = async () => {
-    if (!window.confirm("Mark this job as completed?")) return;
+  const handleMarkComplete = () => {
+    setShowCompleteModal(true);
+  };
+
+  const submitCompletion = async () => {
     try {
       const res = await apiFetch(`/jobitems/${id}/`, {
         method: 'PATCH',
@@ -554,6 +559,7 @@ const JobItemDetailPage = () => {
       });
       if (res.ok) {
         showSuccessMessage("Job marked as completed! 🏗️");
+        setShowCompleteModal(false);
         fetchAll();
       } else {
         const d = await res.json().catch(() => null);
@@ -562,34 +568,51 @@ const JobItemDetailPage = () => {
     } catch (err) { console.error(err); }
   };
 
-  const handleApprove = async () => {
+  const handleReview = async (actionType, message) => {
     try {
-      const res = await apiFetch(`/projects/${projectId}/plots/${plotId}/workitems/${workItemId}/jobitems/${id}/approve/`, {
+      const endpoint = actionType === 'approve' ? 'approve' : 'reject';
+      const res = await apiFetch(`/projects/${projectId}/plots/${plotId}/workitems/${workItemId}/jobitems/${id}/${endpoint}/`, {
         method: 'POST',
         token,
+        body: JSON.stringify({ message })
       });
       if (res.ok) {
-        showSuccessMessage("Job approved!");
+        showSuccessMessage(`Job ${actionType === 'approve' ? 'approved' : 'rejected'} successfully.`);
+        setShowReviewModal(false);
         fetchAll();
       } else {
-        const data = await res.json();
-        console.error("Failed to approve job:", data);
-        alert(data.detail || "Failed to approve job");
+        const d = await res.json().catch(() => null);
+        alert(formatApiError(d, `Failed to ${actionType} job.`));
       }
     } catch (err) { console.error(err); }
   };
 
   const handleDeleteReport = async (reportId) => {
-    if (!window.confirm("Delete this daily report?")) return;
+    if (!canDeleteReport) {
+      alert("Only the project manager or project creator can delete a report.");
+      return;
+    }
+    const expectedName = jobItem?.job_name || '';
+    const inputName = window.prompt(`To delete this report, type the exact job item name "${expectedName}":`);
+    if (inputName === null) return;
+    if (inputName.trim() !== expectedName.trim()) {
+      alert(`Job item name does not match "${expectedName}". Deletion cancelled.`);
+      return;
+    }
+
     try {
-      const url = `/projects/${projectId}/plots/${plotId}/workitems/${workItemId}/jobitems/${id}/reports/${reportId}/`;
-      const res = await apiFetch(url, { method: 'DELETE', token });
+      const url = `/projects/${projectId}/plots/${plotId}/workitems/${workItemId}/jobitems/${id}/reports/${reportId}/?job_name=${encodeURIComponent(inputName.trim())}`;
+      const res = await apiFetch(url, {
+        method: 'DELETE',
+        token,
+        body: JSON.stringify({ job_name: inputName.trim() })
+      });
       if (res.ok) {
         showSuccessMessage("Daily report deleted.");
         setSelectedReport(null);
         fetchAll();
       } else {
-        const d = await res.json();
+        const d = await res.json().catch(() => null);
         alert(formatApiError(d, "Failed to delete report."));
       }
     } catch (e) { console.error(e); }
@@ -608,12 +631,37 @@ const JobItemDetailPage = () => {
   const canViewFinance =
     plot?.role === 'owner' ||
     plot?.role === 'project_manager' ||
+    project?.role === 'owner' ||
+    project?.role === 'project_manager';
+
+  const canViewReports =
+    plot?.role === 'owner' ||
+    plot?.role === 'project_manager' ||
+    plot?.role === 'foreman' ||
+    plot?.role === 'consultant' ||
+    project?.role === 'owner' ||
+    project?.role === 'project_manager' ||
+    project?.role === 'consultant';
+
+  const canViewInternalComments =
+    plot?.role === 'owner' ||
+    plot?.role === 'project_manager' ||
     plot?.role === 'foreman' ||
     project?.role === 'owner' ||
     project?.role === 'project_manager';
 
   const canManageBudget = canViewFinance;
   const hasFinanceAccess = canViewFinance;
+
+  const canApprove = (
+    plot?.role === 'owner' ||
+    plot?.role === 'project_manager' ||
+    project?.role === 'owner' ||
+    project?.role === 'project_manager'
+  );
+
+  const canComplete = canApprove;
+  const canDeleteReport = canApprove;
 
 
   return (
@@ -665,12 +713,12 @@ const JobItemDetailPage = () => {
               <Edit2 size={16} /> Edit Job
             </button>
           )}
-          {!jobItem.is_approved && (
-            <button className="btn-ghost" onClick={handleApprove} style={{ color: '#2d5a27', borderColor: '#2d5a27' }}>
-              <CheckCircle2 size={16} /> Approve Job
+          {canApprove && !jobItem.is_approved && (
+            <button className="btn-ghost" onClick={() => setShowReviewModal(true)} style={{ color: '#2d5a27', borderColor: '#2d5a27' }}>
+              <CheckCircle2 size={16} /> Review Job
             </button>
           )}
-          {jobItem.job_status !== 'Completed' && Number(jobItem.progress ?? 0) >= 100 && (
+          {canComplete && jobItem.job_status !== 'Completed' && Number(jobItem.progress ?? 0) >= 100 && (
             <button className="btn-ghost" onClick={handleMarkComplete}>
               <CheckCircle2 size={16} /> Mark Complete
             </button>
@@ -695,10 +743,8 @@ const JobItemDetailPage = () => {
       {(() => {
         const tabs = [
           { id: 'overview', label: 'Overview' },
-          ...(canViewFinance ? [
-            { id: 'finance', label: 'Finance' },
-            { id: 'reports', label: `Reports (${reports.length})` },
-          ] : []),
+          ...(canViewFinance ? [{ id: 'finance', label: 'Finance' }] : []),
+          ...(canViewReports ? [{ id: 'reports', label: `Reports (${reports.length})` }] : []),
         ];
         return <Tabs tabs={tabs} active={activeTab} onChange={setActiveTab} style={{ marginBottom: '36px', marginTop: '24px' }} />;
       })()}
@@ -1037,7 +1083,7 @@ const JobItemDetailPage = () => {
       )}
 
       {/* ─── Reports Tab ─── */}
-      {canViewFinance && activeTab === 'reports' && (
+      {canViewReports && activeTab === 'reports' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           {/* Sub-navigation toggle */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
@@ -1063,27 +1109,29 @@ const JobItemDetailPage = () => {
               >
                 <FileText size={16} /> Daily Reports ({reports.length})
               </button>
-              <button
-                type="button"
-                onClick={() => setReportType('financial')}
-                style={{
-                  padding: '8px 18px',
-                  borderRadius: '10px',
-                  fontSize: '14px',
-                  fontWeight: 600,
-                  border: 'none',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  background: reportType === 'financial' ? 'var(--bg-card)' : 'transparent',
-                  color: reportType === 'financial' ? 'var(--brand-orange)' : 'var(--text-tertiary)',
-                  boxShadow: reportType === 'financial' ? '0 2px 8px rgba(0,0,0,0.08)' : 'none',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                }}
-              >
-                <DollarSign size={16} /> Financial Report
-              </button>
+              {canViewFinance && (
+                <button
+                  type="button"
+                  onClick={() => setReportType('financial')}
+                  style={{
+                    padding: '8px 18px',
+                    borderRadius: '10px',
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    border: 'none',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    background: reportType === 'financial' ? 'var(--bg-card)' : 'transparent',
+                    color: reportType === 'financial' ? 'var(--brand-orange)' : 'var(--text-tertiary)',
+                    boxShadow: reportType === 'financial' ? '0 2px 8px rgba(0,0,0,0.08)' : 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                  }}
+                >
+                  <DollarSign size={16} /> Financial Report
+                </button>
+              )}
             </div>
 
             {reportType === 'job' && (
@@ -1363,7 +1411,7 @@ const JobItemDetailPage = () => {
                     {selectedReport.report_date}
                   </p>
                 </div>
-                {(plot?.role === 'project_manager' || plot?.role === 'owner') && (
+                {canDeleteReport && (
                   <button
                     onClick={() => handleDeleteReport(selectedReport.id)}
                     className="btn-ghost"
@@ -1495,13 +1543,15 @@ const JobItemDetailPage = () => {
               </div>
 
               {/* Comments Section */}
-              <CommentsSection
-                reportId={selectedReport.id}
-                projectId={projectId}
-                plotId={plotId}
-                workitemId={workItemId}
-                jobitemId={id}
-              />
+              {canViewInternalComments && (
+                <CommentsSection
+                  reportId={selectedReport.id}
+                  projectId={projectId}
+                  plotId={plotId}
+                  workitemId={workItemId}
+                  jobitemId={id}
+                />
+              )}
             </div>
           </div>
         )
@@ -1549,6 +1599,22 @@ const JobItemDetailPage = () => {
           />
         )
       }
+      <CompleteJobModal
+        isOpen={showCompleteModal}
+        onClose={() => setShowCompleteModal(false)}
+        onComplete={submitCompletion}
+        itemType="Job"
+        itemName={jobItem?.job_name || ''}
+        expenses={expenses}
+      />
+
+      <ReviewJobModal
+        isOpen={showReviewModal}
+        onClose={() => setShowReviewModal(false)}
+        onReview={handleReview}
+        itemType="Job"
+        itemName={jobItem?.job_name || ''}
+      />
     </div >
   );
 };

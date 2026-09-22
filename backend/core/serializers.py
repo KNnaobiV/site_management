@@ -264,6 +264,12 @@ class ConstructionProjectSerializer(RoleFilteredSerializer):
             "project_manager",
             "consultants",
         },
+        "client": {
+            "created_by",
+            "client",
+            "project_manager",
+            "consultants",
+        },
         "plot_member": set(),  # only ALWAYS_VISIBLE
     }
  
@@ -429,6 +435,9 @@ class ConstructionPlotSerializer(RoleFilteredSerializer):
             "budget",
         },
         "foreman": {
+            "foremen", "foremen_ids",
+        },
+        "client": {
             "foremen", "foremen_ids",
         },
         "consultant": set(),
@@ -607,8 +616,6 @@ class WorkItemSerializer(RoleFilteredSerializer):
         "images",
         "construction_plot_name",
         "construction_project",
-        "foreman",
-        "foreman_id",
         "progress",
         "is_progress_manual",
         "manual_progress",
@@ -631,10 +638,6 @@ class WorkItemSerializer(RoleFilteredSerializer):
         queryset=Picture.objects.all(), source="work_item_image", required=False, allow_null=True
     )
     images = serializers.SerializerMethodField()
-    foreman = UserSummarySerializer(read_only=True)
-    foreman_id = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all(), source="foreman", required=False, allow_null=True
-    )
 
     def get_images(self, obj):
         pics = list(obj.photos.all())
@@ -660,8 +663,6 @@ class WorkItemSerializer(RoleFilteredSerializer):
             "work_item_image",
             "work_item_image_id",
             "images",
-            "foreman",
-            "foreman_id",
             "budget",
             "spent_amount",
             "progress",
@@ -783,6 +784,7 @@ class JobItemSerializer(RoleFilteredSerializer):
         "job_name",
         "job_description",
         "job_artisan",
+        "custom_artisan",
         "job_status",
         "is_approved",
         "priority",
@@ -823,6 +825,7 @@ class JobItemSerializer(RoleFilteredSerializer):
             "job_name",
             "job_description",
             "job_artisan",
+            "custom_artisan",
             "job_status",
             "is_approved",
             "priority",

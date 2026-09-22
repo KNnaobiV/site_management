@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { PlotCard, StatCard, Spinner, Modal } from '../components';
-import { Filter, Plus, HelpCircle, ChevronLeft } from 'lucide-react';
+import { PlotCard, StatCard, Spinner, Modal, FilterSortDropdown } from '../components';
+import { Filter, SortAsc, SortDesc, Plus, HelpCircle, ChevronLeft } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { apiFetch, unwrapList } from '../api/client';
 
@@ -15,6 +15,9 @@ const PlotsPage = () => {
   const [plots, setPlots] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showHelpModal, setShowHelpModal] = useState(false);
+  const [filterStatus, setFilterStatus] = useState('All');
+  const [filterProject, setFilterProject] = useState('All');
+  const [sortOrder, setSortOrder] = useState('recent');
 
   useEffect(() => {
     fetchAllPlots();
@@ -38,6 +41,30 @@ const PlotsPage = () => {
 
   if (loading) return <div style={{ padding: '60px', display: 'flex', justifyContent: 'center' }}><Spinner /></div>;
 
+  const uniqueProjects = Array.from(new Set(plots.map(p => p.project_name))).filter(Boolean);
+  const projectOptions = [
+    { label: 'All Projects', value: 'All' },
+    ...uniqueProjects.map(name => ({ label: name, value: name }))
+  ];
+
+  const filteredPlots = plots.filter(p => {
+    const pStatus = p.status || p.plot_status;
+    if (filterStatus !== 'All' && pStatus !== filterStatus) return false;
+    if (filterProject !== 'All' && p.project_name !== filterProject) return false;
+    return true;
+  });
+
+  const sortedPlots = [...filteredPlots].sort((a, b) => {
+    if (sortOrder === 'recent') return new Date(b.created_at || 0) - new Date(a.created_at || 0);
+    if (sortOrder === 'oldest') return new Date(a.created_at || 0) - new Date(b.created_at || 0);
+    if (sortOrder === 'target_end_date') {
+      const dateA = a.target_end_date ? new Date(a.target_end_date).getTime() : Infinity;
+      const dateB = b.target_end_date ? new Date(b.target_end_date).getTime() : Infinity;
+      return dateA - dateB;
+    }
+    return 0;
+  });
+
   return (
     <div className="fade-up" style={{ height: "100vh", overflow: "auto", position: "relative" }}>
       <div style={{ paddingBottom: "100px" }}>
@@ -50,10 +77,38 @@ const PlotsPage = () => {
           </div>
 
           <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", alignItems: "center" }}>
-            <button className="btn-ghost">
-              <Filter size={16} />
-              <span>Filter</span>
-            </button>
+            <FilterSortDropdown
+              icon={Filter}
+              label="Status"
+              options={[
+                { label: 'All Statuses', value: 'All' },
+                { label: 'Planned', value: 'Planned' },
+                { label: 'In Progress', value: 'In Progress' },
+                { label: 'Completed', value: 'Completed' },
+              ]}
+              value={filterStatus}
+              onChange={setFilterStatus}
+            />
+            {!projectIdFromQuery && projectOptions.length > 1 && (
+              <FilterSortDropdown
+                icon={Filter}
+                label="Project"
+                options={projectOptions}
+                value={filterProject}
+                onChange={setFilterProject}
+              />
+            )}
+            <FilterSortDropdown
+              icon={sortOrder === 'oldest' ? SortAsc : SortDesc}
+              label="Sort"
+              options={[
+                { label: 'Recent First', value: 'recent' },
+                { label: 'Oldest First', value: 'oldest' },
+                { label: 'Target End Date', value: 'target_end_date' }
+              ]}
+              value={sortOrder}
+              onChange={setSortOrder}
+            />
             <button
               className="btn-primary"
               onClick={() => {
@@ -99,11 +154,17 @@ const PlotsPage = () => {
           </div>
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "32px" }}>
-            {plots.map(plot => (
-              <PlotCard 
-                key={plot.id} 
-                plot={plot} 
-                onClick={() => navigate(`/plots/${plot.id}`)}
+            {sortedPlots.map((plot) => (
+              <PlotCard
+                key={plot.id}
+                plot={plot}
+                onClick={() => {
+                  if (projectIdFromQuery) {
+                    navigate(`/projects/${projectIdFromQuery}/plots/${plot.id}`);
+                  } else {
+                    navigate(`/plots/${plot.id}`);
+                  }
+                }}
               />
             ))}
           </div>

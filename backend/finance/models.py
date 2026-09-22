@@ -5,6 +5,8 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import Sum, Q
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.utils import timezone
 
 
@@ -199,4 +201,67 @@ class JobItemBudget(Budget):
         return self.job_item.job_item_expenses.filter(is_deleted=False).aggregate(
             total=Sum('amount')
         )['total'] or Decimal('0.00')
+
+
+def check_job_item_budget_alert(job_item):
+    from core.models import Notification
+
+    if not job_item:
+        return
+
+    try:
+        budget = job_item.job_item_budget
+    except Exception:
+        return
+
+    if not budget or not budget.allocated_amount or budget.allocated_amount <= Decimal('0.00'):
+        return
+
+    total_spent = job_item.job_item_expenses.filter(is_deleted=False).aggregate(
+        total=Sum('amount')
+    )['total'] or Decimal('0.00')
+
+    if total_spent > budget.allocated_amount:
+        work_item = getattr(job_item, 'work_item', None)
+        plot = getattr(work_item, 'construction_plot', None) if work_item else None
+        project = getattr(plot, 'construction_project', None) if plot else None
+
+        if not project:
+            return
+
+        # Target user: PM if assigned, or project creator if no PM
+        target_user = project.project_manager if project.project_manager else project.created_by
+        if not target_user:
+            return
+
+        target_url = f"/job-items/{job_item.id}"
+
+        already_notified = Notification.objects.filter(
+            user=target_user,
+            project=project,
+            target_url=target_url,
+            is_read=False,
+            message__icontains="exceeded its budget"
+        ).exists()
+
+        if not already_notified:
+            Notification.objects.create(
+                user=target_user,
+                project=project,
+                message=f"Budget alert: Job item '{job_item.job_name}' expenses ({total_spent}) have exceeded its allocated budget ({budget.allocated_amount}).",
+                target_url=target_url,
+                priority=Notification.Priority.HIGH
+            )
+
+
+@receiver(post_save, sender=Expense)
+def check_expense_budget_alert(sender, instance, **kwargs):
+    if instance.job_item:
+        check_job_item_budget_alert(instance.job_item)
+
+
+@receiver(post_save, sender=JobItemBudget)
+def check_job_item_budget_saved_alert(sender, instance, **kwargs):
+    if instance.job_item:
+        check_job_item_budget_alert(instance.job_item)
 

@@ -25,6 +25,7 @@ const CreateJobItemPage = () => {
   const [formData, setFormData] = useState({
     job_name: '',
     job_artisan: '',
+    custom_artisan: '',
     job_description: '',
     job_status: 'Planned',
     start_date: new Date().toISOString().split('T')[0],
@@ -57,6 +58,7 @@ const CreateJobItemPage = () => {
           ...f,
           job_name: data.job_name || '',
           job_artisan: data.job_artisan || '',
+          custom_artisan: data.custom_artisan || '',
           job_description: data.job_description || '',
           job_status: data.job_status || 'Planned',
           start_date: data.start_date || f.start_date,
@@ -110,7 +112,7 @@ const CreateJobItemPage = () => {
       // Current route: /work-items/:workItemId/job-items/new
       // I should probably have: /projects/:projectId/plots/:plotId/work-items/:workItemId/job-items/new
 
-      const res = await apiFetch(`/work-items/${workItemId}/`, { token }); // Assuming this exists or I'll fix App.jsx
+      const res = await apiFetch(`/workitems/${workItemId}/`, { token });
       if (res.ok) {
         const data = await res.json();
         setWorkItem(data);
@@ -144,6 +146,7 @@ const CreateJobItemPage = () => {
     const payload = {
       job_name: formData.job_name,
       job_artisan: formData.job_artisan,
+      custom_artisan: formData.job_artisan === 'Other' ? formData.custom_artisan : '',
       job_description: formData.job_description,
       job_status: formData.job_status,
       start_date: formData.start_date,
@@ -170,6 +173,23 @@ const CreateJobItemPage = () => {
       });
 
       if (res.ok) {
+        const data = await res.json();
+        
+        if (formData.budget_amount) {
+          try {
+            await apiFetch(`/jobitems/${data.id}/budget/`, {
+              method: 'PATCH',
+              token,
+              body: JSON.stringify({
+                allocated_amount: formData.budget_amount,
+                currency: formData.budget_currency || 'NGN'
+              })
+            });
+          } catch (e) {
+            console.error("Failed to set budget", e);
+          }
+        }
+
         showSuccessMessage(isEdit ? "Job updated successfully!" : "Job created successfully!");
         if (isEdit) {
           navigate(`/job-items/${jobItemId}`);
@@ -225,7 +245,7 @@ const CreateJobItemPage = () => {
                 />
               </div>
               <div>
-                <label style={labelStyle}>Parent Work <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
+                <label style={labelStyle}>Parent Work <span style={{ color: "var(--brand-orange)" }}>*</span></label>
                 {workItemId ? (
                   <input
                     type="text"
@@ -254,10 +274,22 @@ const CreateJobItemPage = () => {
                   style={inputStyle}
                 >
                   <option value="">Select artisan...</option>
-                  {['Mason', 'Plumber', 'Electrician', 'Carpenter', 'Painter', 'Roofer', 'Iron Bender', 'Tiler', 'Glass Worker', 'Aluminium Worker', 'Other'].map(a => (
+                  {['Mason', 'Plumber', 'Electrician', 'Carpenter', 'Painter', 'Roofer', 'Iron Bender', 'Tiler', 'Glass Worker', 'Aluminium Worker', 'Labourer', 'Other'].map(a => (
                     <option key={a} value={a}>{a}</option>
                   ))}
                 </select>
+                {formData.job_artisan === 'Other' && (
+                  <div style={{ marginTop: '12px' }}>
+                    <input
+                      type="text"
+                      placeholder="Enter custom artisan type..."
+                      required
+                      value={formData.custom_artisan}
+                      onChange={e => setFormData({ ...formData, custom_artisan: e.target.value })}
+                      style={inputStyle}
+                    />
+                  </div>
+                )}
               </div>
               <div>
                 <label style={labelStyle}>Status <span style={{ color: "var(--brand-orange)" }}>*</span></label>
@@ -267,7 +299,7 @@ const CreateJobItemPage = () => {
                   onChange={e => setFormData({ ...formData, job_status: e.target.value })}
                   style={inputStyle}
                 >
-                  {['Planned', 'In Progress', 'Completed', 'On Hold', 'Delayed', 'Cancelled'].map(s => (
+                  {['Planned', 'In Progress', 'On Hold', 'Delayed', 'Cancelled'].map(s => (
                     <option key={s} value={s}>{s}</option>
                   ))}
                 </select>
@@ -300,6 +332,31 @@ const CreateJobItemPage = () => {
                 onChange={e => setFormData({ ...formData, estimated_hours: e.target.value })}
                 style={inputStyle}
               />
+            </div>
+
+            <div>
+              <label style={labelStyle}>Budget <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <select 
+                  value={formData.budget_currency} 
+                  onChange={e => setFormData({ ...formData, budget_currency: e.target.value })}
+                  style={{ ...inputStyle, width: '100px' }}
+                >
+                  <option value="NGN">NGN</option>
+                  <option value="USD">USD</option>
+                  <option value="GBP">GBP</option>
+                  <option value="EUR">EUR</option>
+                </select>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="e.g. 50000"
+                  value={formData.budget_amount}
+                  onChange={e => setFormData({ ...formData, budget_amount: e.target.value })}
+                  style={{ ...inputStyle, flex: 1 }}
+                />
+              </div>
             </div>
 
             <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>

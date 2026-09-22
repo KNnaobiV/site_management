@@ -230,7 +230,7 @@ const CreatePlotPage = () => {
 
     const payload = {
       plot_number: formData.plot_number || '',
-      construction_project_id: formData.construction_project || null,
+      construction_project: formData.construction_project || null,
       address: formData.address || '',
       gps_latitude: formData.gps_latitude || null,
       gps_longitude: formData.gps_longitude || null,
@@ -249,7 +249,13 @@ const CreatePlotPage = () => {
     if (coverImageFile) {
       body = new FormData();
       Object.entries(payload).forEach(([k, v]) => {
-        if (v !== null && v !== undefined) body.append(k, v);
+        if (v !== null && v !== undefined) {
+          if (Array.isArray(v)) {
+            v.forEach(item => body.append(k, item));
+          } else {
+            body.append(k, v);
+          }
+        }
       });
       body.append('cover_image', coverImageFile);
     } else {

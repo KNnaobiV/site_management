@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { WorkItemCard, Spinner, Modal } from '../components';
-import { Filter, Plus, HelpCircle } from 'lucide-react';
+import { WorkItemCard, Spinner, Modal, FilterSortDropdown } from '../components';
+import { Filter, SortAsc, SortDesc, Plus, HelpCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { apiFetch, unwrapList } from '../api/client';
 
@@ -16,6 +16,9 @@ const WorkItemsPage = () => {
   const [workItems, setWorkItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showHelpModal, setShowHelpModal] = useState(false);
+  const [filterStatus, setFilterStatus] = useState('All');
+  const [filterPlot, setFilterPlot] = useState('All');
+  const [sortOrder, setSortOrder] = useState('recent');
 
   useEffect(() => {
     fetchAllWorkItems();
@@ -42,6 +45,30 @@ const WorkItemsPage = () => {
 
   if (loading) return <div style={{ padding: '60px', display: 'flex', justifyContent: 'center' }}><Spinner /></div>;
 
+  const uniquePlots = Array.from(new Set(workItems.map(w => w.construction_plot_name))).filter(Boolean);
+  const plotOptions = [
+    { label: 'All Plots', value: 'All' },
+    ...uniquePlots.map(name => ({ label: name, value: name }))
+  ];
+
+  const filteredWorkItems = workItems.filter(w => {
+    const wStatus = w.status || w.work_status;
+    if (filterStatus !== 'All' && wStatus !== filterStatus) return false;
+    if (filterPlot !== 'All' && w.construction_plot_name !== filterPlot) return false;
+    return true;
+  });
+
+  const sortedWorkItems = [...filteredWorkItems].sort((a, b) => {
+    if (sortOrder === 'recent') return new Date(b.created_at || 0) - new Date(a.created_at || 0);
+    if (sortOrder === 'oldest') return new Date(a.created_at || 0) - new Date(b.created_at || 0);
+    if (sortOrder === 'target_end_date') {
+      const dateA = a.target_end_date ? new Date(a.target_end_date).getTime() : Infinity;
+      const dateB = b.target_end_date ? new Date(b.target_end_date).getTime() : Infinity;
+      return dateA - dateB;
+    }
+    return 0;
+  });
+
   return (
     <div className="fade-up" style={{ height: "100vh", overflow: "auto", position: "relative" }}>
       <div style={{ paddingBottom: "100px" }}>
@@ -54,10 +81,38 @@ const WorkItemsPage = () => {
           </div>
 
           <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", alignItems: "center" }}>
-            <button className="btn-ghost">
-              <Filter size={16} />
-              <span>Filter</span>
-            </button>
+            <FilterSortDropdown
+              icon={Filter}
+              label="Status"
+              options={[
+                { label: 'All Statuses', value: 'All' },
+                { label: 'Planned', value: 'Planned' },
+                { label: 'In Progress', value: 'In Progress' },
+                { label: 'Completed', value: 'Completed' },
+              ]}
+              value={filterStatus}
+              onChange={setFilterStatus}
+            />
+            {!plotIdFromQuery && plotOptions.length > 1 && (
+              <FilterSortDropdown
+                icon={Filter}
+                label="Plot"
+                options={plotOptions}
+                value={filterPlot}
+                onChange={setFilterPlot}
+              />
+            )}
+            <FilterSortDropdown
+              icon={sortOrder === 'oldest' ? SortAsc : SortDesc}
+              label="Sort"
+              options={[
+                { label: 'Recent First', value: 'recent' },
+                { label: 'Oldest First', value: 'oldest' },
+                { label: 'Target End Date', value: 'target_end_date' }
+              ]}
+              value={sortOrder}
+              onChange={setSortOrder}
+            />
             <button
               className="btn-primary"
               onClick={() => {
@@ -94,8 +149,8 @@ const WorkItemsPage = () => {
             </button>
           </div>
         ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "32px" }}>
-            {workItems.map(item => (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "32px" }}>
+            {sortedWorkItems.map(item => (
               <WorkItemCard 
                 key={item.id} 
                 item={item} 

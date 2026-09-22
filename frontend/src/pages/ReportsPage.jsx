@@ -29,6 +29,13 @@ function formatCurrency(amount, currency = 'NGN') {
   return `${currency} ${num.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
+function getSelectScopeErrorMessage(granularity) {
+  if (granularity === 'plot') return 'Please select a plot to export.';
+  if (granularity === 'workitem') return 'Please select a work to export.';
+  if (granularity === 'jobitem') return 'Please select a job to export.';
+  return 'Please select a plot, work item, or job to export.';
+}
+
 export default function ReportsPage() {
   const { token, user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -125,7 +132,13 @@ export default function ReportsPage() {
     }
     async function loadWorkItems() {
       try {
-        const res = await apiFetch(`/plots/${selectedPlotId}/workitems/`, { token });
+        let res = await apiFetch(`/plots/${selectedPlotId}/workitems/`, { token });
+        if (!res.ok && selectedProjectId) {
+          res = await apiFetch(`/projects/${selectedProjectId}/plots/${selectedPlotId}/workitems/`, { token });
+        }
+        if (!res.ok) {
+          res = await apiFetch(`/workitems/?plot=${selectedPlotId}`, { token });
+        }
         if (res.ok) {
           const list = unwrapList(await res.json());
           setWorkItems(list);
@@ -135,7 +148,7 @@ export default function ReportsPage() {
       }
     }
     loadWorkItems();
-  }, [selectedPlotId, token]);
+  }, [selectedPlotId, selectedProjectId, token]);
 
   // Load Job Items when selectedWorkItemId changes
   useEffect(() => {
@@ -145,7 +158,13 @@ export default function ReportsPage() {
     }
     async function loadJobItems() {
       try {
-        const res = await apiFetch(`/workitems/${selectedWorkItemId}/jobitems/`, { token });
+        let res = await apiFetch(`/workitems/${selectedWorkItemId}/jobitems/`, { token });
+        if (!res.ok && selectedProjectId && selectedPlotId) {
+          res = await apiFetch(`/projects/${selectedProjectId}/plots/${selectedPlotId}/workitems/${selectedWorkItemId}/jobitems/`, { token });
+        }
+        if (!res.ok) {
+          res = await apiFetch(`/jobitems/?work_item=${selectedWorkItemId}`, { token });
+        }
         if (res.ok) {
           const list = unwrapList(await res.json());
           setJobItems(list);
@@ -155,7 +174,7 @@ export default function ReportsPage() {
       }
     }
     loadJobItems();
-  }, [selectedWorkItemId, token]);
+  }, [selectedWorkItemId, selectedPlotId, selectedProjectId, token]);
 
   // Load Report Data whenever relevant filters change
   useEffect(() => {
@@ -235,6 +254,13 @@ export default function ReportsPage() {
       if (endDateParam) {
         filteredExpenses = filteredExpenses.filter(e => (e.incurred_at || '').slice(0, 10) <= endDateParam);
       }
+
+      // Sort expenses by date ascending
+      filteredExpenses.sort((a, b) => {
+        const dA = new Date(a.incurred_at || a.created_at || 0);
+        const dB = new Date(b.incurred_at || b.created_at || 0);
+        return dA - dB;
+      });
 
       const allocated = parseFloat(budgetData?.allocated_amount || 0);
       const hasBudget = allocated > 0;
@@ -383,13 +409,71 @@ export default function ReportsPage() {
       }
 
       if (!exportEndpoint) {
-        throw new Error('Please select an entity to export.');
+        throw new Error(getSelectScopeErrorMessage(selectedGranularity));
       }
 
       const res = await apiFetch(exportEndpoint, { token });
       if (!res.ok) {
         const err = await res.json().catch(() => null);
         throw new Error(err?.detail || 'Failed to generate PDF export.');
+      }
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = defaultFileName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setExportError(err.message || 'Export error occurred.');
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const handleExportXLSX = async () => {
+    setExporting(true);
+    setExportError(null);
+
+    try {
+      let exportEndpoint = '';
+      let defaultFileName = '';
+
+      const isFinancial = reportType === 'financial';
+
+      if (selectedGranularity === 'project' && selectedProjectId) {
+        exportEndpoint = isFinancial
+          ? `/projects/${selectedProjectId}/export-financial-report/?format=xlsx`
+          : `/projects/${selectedProjectId}/export-reports/?format=xlsx&start_date=${startDateParam}&end_date=${endDateParam}`;
+        defaultFileName = `project_${selectedProjectId}_${isFinancial ? 'financial' : 'progress'}_report.xlsx`;
+      } else if (selectedGranularity === 'plot' && selectedPlotId) {
+        exportEndpoint = isFinancial
+          ? `/plots/${selectedPlotId}/export-financial-report/?format=xlsx`
+          : `/plots/${selectedPlotId}/export-reports/?format=xlsx&start_date=${startDateParam}&end_date=${endDateParam}`;
+        defaultFileName = `plot_${selectedPlotId}_${isFinancial ? 'financial' : 'progress'}_report.xlsx`;
+      } else if (selectedGranularity === 'workitem' && selectedWorkItemId) {
+        exportEndpoint = isFinancial
+          ? `/workitems/${selectedWorkItemId}/export-financial-report/?format=xlsx`
+          : `/workitems/${selectedWorkItemId}/export-reports/?format=xlsx&start_date=${startDateParam}&end_date=${endDateParam}`;
+        defaultFileName = `workitem_${selectedWorkItemId}_${isFinancial ? 'financial' : 'progress'}_report.xlsx`;
+      } else if (selectedGranularity === 'jobitem' && selectedJobItemId) {
+        exportEndpoint = isFinancial
+          ? `/jobitems/${selectedJobItemId}/export-financial-report/?format=xlsx`
+          : `/jobitems/${selectedJobItemId}/export-reports/?format=xlsx&start_date=${startDateParam}&end_date=${endDateParam}`;
+        defaultFileName = `jobitem_${selectedJobItemId}_${isFinancial ? 'financial' : 'progress'}_report.xlsx`;
+      }
+
+      if (!exportEndpoint) {
+        throw new Error(getSelectScopeErrorMessage(selectedGranularity));
+      }
+
+      const res = await apiFetch(exportEndpoint, { token });
+      if (!res.ok) {
+        const err = await res.json().catch(() => null);
+        throw new Error(err?.detail || 'Failed to generate XLSX export.');
       }
 
       const blob = await res.blob();
@@ -428,6 +512,13 @@ export default function ReportsPage() {
       updateQuery({ start_date: iso(start), end_date: iso(today) });
     }
   };
+
+  const displayProjects = useMemo(() => {
+    if (reportType === 'financial') {
+      return projects.filter(p => p.role === 'owner' || p.role === 'project_manager');
+    }
+    return projects;
+  }, [projects, reportType]);
 
   const activeProject = useMemo(() => {
     return projects.find(p => String(p.id) === String(selectedProjectId));
@@ -504,10 +595,53 @@ export default function ReportsPage() {
             ) : (
               <>
                 <Download size={16} />
-                Export PDF Report
+                Export PDF
               </>
             )}
           </button>
+
+          {reportType === 'financial' && (
+            <button
+              type="button"
+              onClick={handleExportXLSX}
+              disabled={exporting || !selectedProjectId}
+              className="btn-primary"
+              style={{
+                padding: '10px 20px',
+                fontSize: '14px',
+                fontWeight: 600,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                background: '#10b981', // Green for Excel
+                color: '#fff',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: (exporting || !selectedProjectId) ? 'not-allowed' : 'pointer',
+                opacity: (exporting || !selectedProjectId) ? 0.7 : 1,
+                boxShadow: '0 4px 14px rgba(16, 185, 129, 0.25)',
+              }}
+            >
+              {exporting ? (
+                <>
+                  <div style={{
+                    width: 14,
+                    height: 14,
+                    border: '2px solid #fff',
+                    borderTopColor: 'transparent',
+                    borderRadius: '50%',
+                    animation: 'spin 0.6s linear infinite',
+                  }} />
+                  Generating XLSX...
+                </>
+              ) : (
+                <>
+                  <Download size={16} />
+                  Export XLSX
+                </>
+              )}
+            </button>
+          )}
         </div>
       </div>
 
@@ -656,8 +790,8 @@ export default function ReportsPage() {
                 outline: 'none',
               }}
             >
-              {projects.length === 0 && <option value="">No projects found</option>}
-              {projects.map(p => (
+              {displayProjects.length === 0 && <option value="">No projects found</option>}
+              {displayProjects.map(p => (
                 <option key={p.id} value={p.id}>{p.project_name}</option>
               ))}
             </select>
@@ -794,7 +928,7 @@ export default function ReportsPage() {
               >
                 <option value="">Select Job...</option>
                 {jobItems.map(j => (
-                  <option key={j.id} value={j.id}>{j.job_name} ({j.job_artisan || 'General'})</option>
+                  <option key={j.id} value={j.id}>{j.job_name} ({((j.job_artisan === 'Other' && j.custom_artisan) ? j.custom_artisan : j.job_artisan) || 'General'})</option>
                 ))}
               </select>
             </div>
@@ -954,8 +1088,8 @@ export default function ReportsPage() {
                 {!reportData.hasBudget
                   ? 'No budget allocated'
                   : reportData.remaining < 0
-                  ? 'Over budget limit'
-                  : 'Under budget'}
+                    ? 'Over budget limit'
+                    : 'Under budget'}
               </p>
             </div>
 
@@ -1091,41 +1225,42 @@ export default function ReportsPage() {
                   <thead>
                     <tr style={{ borderBottom: '1px solid var(--border-subtle)', color: 'var(--text-tertiary)', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                       <th style={{ padding: '12px 14px' }}>Date</th>
-                      <th style={{ padding: '12px 14px' }}>Description</th>
-                      <th style={{ padding: '12px 14px' }}>Cost Code</th>
-                      <th style={{ padding: '12px 14px' }}>Incurred By</th>
-                      <th style={{ padding: '12px 14px', textAlign: 'right' }}>Amount</th>
+                      {(selectedGranularity === 'project' || selectedGranularity === 'plot') && <th style={{ padding: '12px 14px' }}>Work Item</th>}
+                      {(selectedGranularity === 'project' || selectedGranularity === 'plot' || selectedGranularity === 'workitem') && <th style={{ padding: '12px 14px' }}>Job Item</th>}
+                      <th style={{ padding: '12px 14px' }}>Artisan</th>
+                      <th style={{ padding: '12px 14px', textAlign: 'right' }}>Amount Paid</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {(reportData.expenses || []).map((exp) => (
-                      <tr key={exp.id} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-                        <td style={{ padding: '14px', color: 'var(--text-secondary)' }}>
-                          {(exp.incurred_at || '').slice(0, 10) || '—'}
-                        </td>
-                        <td style={{ padding: '14px', fontWeight: 600, color: 'var(--text-primary)' }}>
-                          {exp.description || '—'}
-                        </td>
-                        <td style={{ padding: '14px' }}>
-                          <span style={{
-                            fontSize: '11px',
-                            fontWeight: 700,
-                            padding: '2px 8px',
-                            borderRadius: '6px',
-                            background: 'rgba(193, 74, 30, 0.1)',
-                            color: 'var(--brand-orange)',
-                          }}>
-                            {exp.cost_code?.code || exp.cost_code_label || 'GENERAL'}
-                          </span>
-                        </td>
-                        <td style={{ padding: '14px', color: 'var(--text-secondary)' }}>
-                          {exp.incurred_by?.display_name || exp.incurred_by?.username || '—'}
-                        </td>
-                        <td style={{ padding: '14px', textAlign: 'right', fontWeight: 700, color: 'var(--text-primary)' }}>
-                          {formatCurrency(exp.amount, exp.currency || reportData.currency)}
-                        </td>
-                      </tr>
-                    ))}
+                    {(reportData.expenses || []).map((exp) => {
+                      const workItemName = exp.work_item_name || exp.work_item?.name || exp.job_item?.work_item?.name || '—';
+                      const jobItemName = exp.job_item_name || exp.job_item?.job_name || '—';
+                      const artisanName = exp.artisan_name || (exp.job_item?.job_artisan === 'Other' && exp.job_item?.custom_artisan ? exp.job_item.custom_artisan : exp.job_item?.job_artisan) || '—';
+
+                      return (
+                        <tr key={exp.id} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                          <td style={{ padding: '14px', color: 'var(--text-secondary)' }}>
+                            {(exp.incurred_at || exp.created_at || '').slice(0, 10) || '—'}
+                          </td>
+                          {(selectedGranularity === 'project' || selectedGranularity === 'plot') && (
+                            <td style={{ padding: '14px', fontWeight: 500, color: 'var(--text-primary)' }}>
+                              {workItemName}
+                            </td>
+                          )}
+                          {(selectedGranularity === 'project' || selectedGranularity === 'plot' || selectedGranularity === 'workitem') && (
+                            <td style={{ padding: '14px', fontWeight: 600, color: 'var(--text-primary)' }}>
+                              {jobItemName}
+                            </td>
+                          )}
+                          <td style={{ padding: '14px', color: 'var(--text-secondary)' }}>
+                            {artisanName}
+                          </td>
+                          <td style={{ padding: '14px', textAlign: 'right', fontWeight: 700, color: 'var(--text-primary)' }}>
+                            {formatCurrency(exp.amount, exp.currency || reportData.currency)}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -1198,10 +1333,9 @@ export default function ReportsPage() {
                     <tr style={{ borderBottom: '1px solid var(--border-subtle)', color: 'var(--text-tertiary)', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                       <th style={{ padding: '12px 14px' }}>Date</th>
                       <th style={{ padding: '12px 14px' }}>Job</th>
-                      <th style={{ padding: '12px 14px' }}>Progress</th>
-                      <th style={{ padding: '12px 14px' }}>Notes & Photographic Evidence</th>
-                      <th style={{ padding: '12px 14px' }}>Blockers / Issues</th>
-                      <th style={{ padding: '12px 14px' }}>Reported By</th>
+                      <th style={{ padding: '12px 14px' }}>% Compl</th>
+                      <th style={{ padding: '12px 14px' }}>Notes</th>
+                      <th style={{ padding: '12px 14px' }}>Issues</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1254,9 +1388,6 @@ export default function ReportsPage() {
                         </td>
                         <td style={{ padding: '14px', color: report.issues_encountered ? '#dc2626' : 'var(--text-tertiary)' }}>
                           {report.issues_encountered || 'None'}
-                        </td>
-                        <td style={{ padding: '14px', color: 'var(--text-secondary)' }}>
-                          {report.reported_by_name || report.reported_by?.display_name || report.reported_by?.username || '—'}
                         </td>
                       </tr>
                     ))}
@@ -1383,7 +1514,7 @@ export default function ReportsPage() {
           color: 'var(--text-tertiary)',
         }}>
           <p style={{ margin: 0, fontSize: '15px', fontWeight: 500 }}>
-            Please select an entity from the filters above to compile the {reportType === 'financial' ? 'financial' : 'daily progress'} report.
+            Please select a plot, work item, or job item from the filters above to compile the {reportType === 'financial' ? 'financial' : 'daily progress'} report.
           </p>
         </div>
       )}

@@ -196,7 +196,13 @@ const CreateProjectPage = () => {
     if (coverImageFile) {
       bodyData = new FormData();
       Object.entries(payload).forEach(([k, v]) => {
-        if (v !== null && v !== undefined) bodyData.append(k, v);
+        if (v !== null && v !== undefined) {
+          if (Array.isArray(v)) {
+            v.forEach(item => bodyData.append(k, item));
+          } else {
+            bodyData.append(k, v);
+          }
+        }
       });
       bodyData.append('cover_image', coverImageFile);
     } else {

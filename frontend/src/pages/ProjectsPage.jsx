@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ProjectCard, StatCard, Spinner, Modal } from '../components';
-import { Filter, SortAsc, Plus, HelpCircle } from 'lucide-react';
+import { ProjectCard, StatCard, Spinner, Modal, FilterSortDropdown } from '../components';
+import { Filter, SortAsc, SortDesc, Plus, HelpCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { apiFetch, unwrapList } from '../api/client';
 
@@ -11,6 +11,8 @@ const ProjectsPage = () => {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showHelpModal, setShowHelpModal] = useState(false);
+  const [filterStatus, setFilterStatus] = useState('All');
+  const [sortOrder, setSortOrder] = useState('recent');
 
   useEffect(() => {
     fetchProjects();
@@ -35,6 +37,22 @@ const ProjectsPage = () => {
 
   if (loading) return <div style={{ padding: '60px', display: 'flex', justifyContent: 'center' }}><Spinner /></div>;
 
+  const filteredProjects = projects.filter(p => {
+    if (filterStatus !== 'All' && p.project_status !== filterStatus) return false;
+    return true;
+  });
+
+  const sortedProjects = [...filteredProjects].sort((a, b) => {
+    if (sortOrder === 'recent') return new Date(b.created_at || 0) - new Date(a.created_at || 0);
+    if (sortOrder === 'oldest') return new Date(a.created_at || 0) - new Date(b.created_at || 0);
+    if (sortOrder === 'target_end_date') {
+      const dateA = a.target_end_date ? new Date(a.target_end_date).getTime() : Infinity;
+      const dateB = b.target_end_date ? new Date(b.target_end_date).getTime() : Infinity;
+      return dateA - dateB;
+    }
+    return 0;
+  });
+
   return (
     <div className="fade-up" style={{ height: "100vh", overflow: "auto", position: "relative" }}>
       <div style={{ transition: "all 0.2s ease", paddingBottom: '100px' }}>
@@ -48,14 +66,29 @@ const ProjectsPage = () => {
           </div>
 
           <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", alignItems: "center" }}>
-            <button className="btn-ghost">
-              <Filter size={16} />
-              <span>Filter</span>
-            </button>
-            <button className="btn-ghost">
-              <SortAsc size={16} />
-              <span>Sort: Recent</span>
-            </button>
+            <FilterSortDropdown
+              icon={Filter}
+              label="Status"
+              options={[
+                { label: 'All Statuses', value: 'All' },
+                { label: 'Planned', value: 'Planned' },
+                { label: 'In Progress', value: 'In Progress' },
+                { label: 'Completed', value: 'Completed' },
+              ]}
+              value={filterStatus}
+              onChange={setFilterStatus}
+            />
+            <FilterSortDropdown
+              icon={sortOrder === 'oldest' ? SortAsc : SortDesc}
+              label="Sort"
+              options={[
+                { label: 'Recent First', value: 'recent' },
+                { label: 'Oldest First', value: 'oldest' },
+                { label: 'Target End Date', value: 'target_end_date' }
+              ]}
+              value={sortOrder}
+              onChange={setSortOrder}
+            />
             <button className="btn-primary" onClick={() => navigate('/projects/new')}>
               <Plus size={16} />
               <span>New project</span>
@@ -71,9 +104,9 @@ const ProjectsPage = () => {
         </div>
 
         {/* Grid */}
-        {projects.length > 0 ? (
+        {sortedProjects.length > 0 ? (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "32px" }}>
-            {projects.map((project) => (
+            {sortedProjects.map((project) => (
               <ProjectCard
                 key={project.id}
                 project={project}

@@ -83,7 +83,13 @@ const NewPlotForm = ({ projectId, token, onSuccess, onClose }) => {
     if (coverImageFile) {
       body = new FormData();
       Object.entries(payload).forEach(([k, v]) => {
-        if (v !== null && v !== undefined) body.append(k, v);
+        if (v !== null && v !== undefined) {
+          if (Array.isArray(v)) {
+            v.forEach(item => body.append(k, item));
+          } else {
+            body.append(k, v);
+          }
+        }
       });
       body.append('cover_image', coverImageFile);
     } else {
@@ -421,18 +427,18 @@ const ProjectDetailPage = () => {
   };
 
   const isForemanOnAnyPlot = plots.some(p => {
-    const foremanId = p.foreman?.id || p.foreman;
-    return foremanId && currentUser && (foremanId === currentUser.id);
+    return p.foremen && currentUser && p.foremen.some(f => (f.id || f) === currentUser.id);
   });
 
   const canViewFinance =
     project?.role === 'owner' ||
-    project?.role === 'project_manager' ||
-    isForemanOnAnyPlot;
+    project?.role === 'project_manager';
 
   const canViewReports =
     project?.role === 'owner' ||
-    project?.role === 'project_manager';
+    project?.role === 'project_manager' ||
+    project?.role === 'foreman' ||
+    project?.role === 'consultant';
 
   useEffect(() => {
     if (activeTab === 'reports' && !canViewReports && !loading) {

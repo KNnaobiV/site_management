@@ -218,10 +218,7 @@ def _check_not_already_assigned_plot(plot, invitee, role):
         raise ValidationError(
             f"{invitee.username} is already the foreman on this plot."
         )
-    if role == PlotRole.STOREKEEPER and plot.storekeeper == invitee:
-        raise ValidationError(
-            f"{invitee.username} is already the storekeeper on this plot."
-        )
+
 
 
 def assign_user_to_role_group(user, project_or_plot, role):

@@ -37,7 +37,7 @@ class ExpenseSerializer(serializers.ModelSerializer):
 
     job_item_id = serializers.ReadOnlyField(source="job_item.id")
     job_item_name = serializers.ReadOnlyField(source="job_item.job_name")
-    artisan_name = serializers.ReadOnlyField(source="job_item.job_artisan")
+    artisan_name = serializers.SerializerMethodField()
     work_item_id = serializers.SerializerMethodField()
     work_item_name = serializers.SerializerMethodField()
     plot_id = serializers.SerializerMethodField()
@@ -95,6 +95,13 @@ class ExpenseSerializer(serializers.ModelSerializer):
             "project_id",
             "project_name",
         ]
+
+    def get_artisan_name(self, obj):
+        if obj.job_item:
+            if obj.job_item.job_artisan == "Other" and obj.job_item.custom_artisan:
+                return obj.job_item.custom_artisan
+            return obj.job_item.job_artisan or "—"
+        return "—"
 
     def get_work_item_id(self, obj):
         if obj.job_item and obj.job_item.work_item:

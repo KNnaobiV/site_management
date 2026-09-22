@@ -24,7 +24,9 @@ import MaterialsEditor from "./MaterialsEditor";
 import { DocumentList } from "./DocumentList";
 import BetaBanner from "./BetaBanner";
 import FeedbackModal from "./FeedbackModal";
-
+import FilterSortDropdown from "./FilterSortDropdown";
+import CompleteJobModal from "./CompleteJobModal";
+import ReviewJobModal from "./ReviewJobModal";
 
 // ---------------------------------------------------------------------------
 // RoleBadge
@@ -122,4 +124,7 @@ export {
     DocumentList,
     BetaBanner,
     FeedbackModal,
+    FilterSortDropdown,
+    CompleteJobModal,
+    ReviewJobModal,
 };

@@ -24,8 +24,6 @@ const CreateWorkItemPage = () => {
 
   const [formData, setFormData] = useState({
     name: '',
-    foreman: '',
-    description: '',
     start_date: new Date().toISOString().split('T')[0],
     target_end_date: new Date().toISOString().split('T')[0],
     priority: 'Medium',
@@ -49,7 +47,6 @@ const CreateWorkItemPage = () => {
             setFormData(f => ({
               ...f,
               name: data.name || '',
-              foreman: data.foreman?.id || '',
               description: data.description || '',
               start_date: data.start_date || f.start_date,
               target_end_date: data.target_end_date || '',
@@ -58,10 +55,6 @@ const CreateWorkItemPage = () => {
               manual_progress: data.manual_progress !== null && data.manual_progress !== undefined ? data.manual_progress : (data.progress || 0),
             }));
 
-            // Prepopulate options with existing foreman
-            if (data.foreman) {
-              setUsers([{ id: data.foreman.id, label: data.foreman.username, avatar: data.foreman.avatar_url || null }]);
-            }
 
             // fetch plot to show address
             const plid = data.construction_plot;
@@ -213,18 +206,7 @@ const CreateWorkItemPage = () => {
               />
             </div>
 
-            <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px' }}>
-              <div>
-                <label style={labelStyle}>Assigned Foreman <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
-                <SearchableSelect
-                  options={users}
-                  value={formData.foreman}
-                  onChange={val => setFormData({ ...formData, foreman: val })}
-                  onSearch={handleSearchUsers}
-                  placeholder="Select foreman"
-                />
-              </div>
-            </div>
+
 
             <div>
               <label style={labelStyle}>Description <span style={{ color: "var(--brand-orange)" }}>*</span></label>
@@ -419,7 +401,7 @@ const CreateWorkItemPage = () => {
                 onChange={e => setFormData({ ...formData, work_status: e.target.value })}
                 style={inputStyle}
               >
-                {['Planned', 'In Progress', 'Completed', 'On Hold', 'Delayed', 'Cancelled'].map(s => (
+                {['Planned', 'In Progress', 'On Hold', 'Delayed', 'Cancelled'].map(s => (
                   <option key={s} value={s}>{s}</option>
                 ))}
               </select>

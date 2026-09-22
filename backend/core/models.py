@@ -13,6 +13,7 @@ import sys
 from io import BytesIO
 from PIL import Image
 
+from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 from base.models import Picture, Video, HasPictureMixin
@@ -454,6 +455,10 @@ class ConstructionPlot(HasPictureMixin, TimestampedModel):
     )
 
     @property
+    def plot_name(self) -> str:
+        return f"{self.plot_number} at {self.address}"
+
+    @property
     def duration_days(self) -> int:
         if self.start_date and self.target_end_date:
             return max(1, (self.target_end_date - self.start_date).days + 1)
@@ -463,7 +468,7 @@ class ConstructionPlot(HasPictureMixin, TimestampedModel):
     def progress(self) -> int:
         if self.manual_progress is not None:
             return self.manual_progress
-        work_items = list(self.workitem_set.all())
+        work_items = list(self.work_items.all())
         if not work_items:
             return 0
         total_duration = sum(wi.duration_days for wi in work_items)
@@ -529,6 +534,13 @@ class WorkItem(HasPictureMixin, TimestampedModel):
 
     construction_plot = models.ForeignKey(
         ConstructionPlot, on_delete=models.CASCADE
+    )
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="created_work_items"
     )
     work_status = models.CharField(
         max_length=20, choices=StatusChoices.choices, 
@@ -640,6 +652,7 @@ class JobItem(TimestampedModel):
         GLASS_WORKER = "Glass Worker"
         ALUMINIUM_WORKER = "Aluminium Worker"
         OTHER = "Other"
+        LABOURER = "Labourer"
 
     class PriorityChoices(models.TextChoices):
         LOW = "Low"
@@ -650,11 +663,19 @@ class JobItem(TimestampedModel):
     work_item = models.ForeignKey(
         WorkItem, on_delete=models.CASCADE, related_name="job_items"
     )
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="created_job_items"
+    )
     job_status = models.CharField(
         max_length=20, choices=StatusChoices.choices, 
         default=StatusChoices.PLANNED
     )
     job_artisan = models.CharField(max_length=20, choices=Artisans.choices)
+    custom_artisan = models.CharField(max_length=100, blank=True, default="", help_text="Used when job_artisan is 'Other'")
     job_name = models.CharField(max_length=50, default="")
     is_approved = models.BooleanField(default=False)
     priority = models.CharField(
@@ -723,13 +744,29 @@ class JobItem(TimestampedModel):
             raise ValueError(
                 "Target end date cannot be before start date."
             )
+        if self.job_artisan == self.Artisans.OTHER and not self.custom_artisan:
+            raise ValueError (
+                "Custom artisan is required when job artisan is 'Other'."
+            )
+        display_artisan = self.custom_artisan if self.job_artisan == self.Artisans.OTHER and self.custom_artisan else self.job_artisan
         if not self.job_name:
-            self.job_name = f"{self.job_artisan} work for {self.work_item.name}"
+            self.job_name = f"{display_artisan} work for {self.work_item.name}"
         if not self.job_description:
             self.job_description = (
-                f"{self.job_name} for {self.work_item.name} by {self.job_artisan}"
+                f"{self.job_name} for {self.work_item.name} by {display_artisan}"
+            )
+        # check that there is no duplicate job
+        qs = JobItem.objects.filter(
+            work_item=self.work_item, 
+            job_artisan=self.job_artisan, 
+            job_name=self.job_name
+        ).exclude(id=self.id)
+        if qs.exists():
+            raise ValueError(
+                "Duplicate job found."
             )
         super().save(*args, **kwargs)
+        
 
 
 class JobReport(HasPictureMixin, TimestampedModel):

@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Plus, Check, CheckCircle2, Image as ImageIcon, Edit2, X, Trash2, DollarSign, ArrowRight, Download, FileText, BarChart3, HelpCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { apiFetch, unwrapList, formatApiError, getMediaUrl } from '../api/client';
-import { Breadcrumb, Tabs, Avatar, Spinner, ProgressDonut, MaterialsEditor, ImageUploader, Modal } from '../components';
+import { Breadcrumb, Tabs, Avatar, Spinner, ProgressDonut, MaterialsEditor, ImageUploader, Modal, CompleteJobModal, ReviewJobModal } from '../components';
 import BudgetModal from '../components/BudgetModal';
 import ExpensesTable from '../components/ExpensesTable';
 import { showSuccessMessage } from '../utils/successMessage';
@@ -237,6 +237,8 @@ const WorkItemDetailPage = () => {
   const [stagedPhotos, setStagedPhotos] = useState([]);
   const [uploadingPhotos, setUploadingPhotos] = useState(false);
   const [showAttachModal, setShowAttachModal] = useState(false);
+  const [showCompleteModal, setShowCompleteModal] = useState(false);
+  const [showReviewModal, setShowReviewModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showNewJobItem, setShowNewJobItem] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
@@ -289,24 +291,30 @@ const WorkItemDetailPage = () => {
     }
   };
 
-  const handleApprove = async () => {
+  const handleReview = async (actionType, message) => {
     try {
-      const res = await apiFetch(`/projects/${projectId}/plots/${plotId}/workitems/${id}/approve/`, {
+      const endpoint = actionType === 'approve' ? 'approve' : 'reject';
+      const res = await apiFetch(`/projects/${projectId}/plots/${plotId}/workitems/${id}/${endpoint}/`, {
         method: 'POST',
         token,
+        body: JSON.stringify({ message })
       });
       if (res.ok) {
-        showSuccessMessage("Work approved!");
+        showSuccessMessage(`Work ${actionType === 'approve' ? 'approved' : 'rejected'} successfully.`);
+        setShowReviewModal(false);
         fetchAll();
       } else {
-        const data = await res.json();
-        console.error("Failed to approve work:", data);
-        alert(data.detail || "Failed to approve work");
+        const data = await res.json().catch(() => null);
+        alert(formatApiError(data, `Failed to ${actionType} work.`));
       }
     } catch (err) { console.error(err); }
   };
 
-  const handleMarkComplete = async () => {
+  const handleMarkComplete = () => {
+    setShowCompleteModal(true);
+  };
+
+  const submitCompletion = async () => {
     try {
       const url = projectId && plotId
         ? `/projects/${projectId}/plots/${plotId}/workitems/${id}/`
@@ -318,6 +326,7 @@ const WorkItemDetailPage = () => {
       });
       if (res.ok) {
         showSuccessMessage("Work marked as completed!");
+        setShowCompleteModal(false);
         fetchAll();
       } else {
         const data = await res.json().catch(() => ({}));
@@ -327,6 +336,8 @@ const WorkItemDetailPage = () => {
       console.error(err);
     }
   };
+
+
 
   const handleSavePhotos = async (filesToUpload = stagedPhotos) => {
     if (!filesToUpload || filesToUpload.length === 0) return;
@@ -409,6 +420,31 @@ const WorkItemDetailPage = () => {
 
   const canManageBudget = canViewFinance;
 
+  const canApprove = (
+    plot?.role === 'owner' ||
+    plot?.role === 'project_manager' ||
+    project?.role === 'owner' ||
+    project?.role === 'project_manager'
+  );
+
+  const canComplete = canApprove;
+
+  const canViewReports =
+    plot?.role === 'owner' ||
+    plot?.role === 'project_manager' ||
+    plot?.role === 'foreman' ||
+    plot?.role === 'consultant' ||
+    project?.role === 'owner' ||
+    project?.role === 'project_manager' ||
+    project?.role === 'consultant';
+
+  const canViewInternalComments =
+    plot?.role === 'owner' ||
+    plot?.role === 'project_manager' ||
+    plot?.role === 'foreman' ||
+    project?.role === 'owner' ||
+    project?.role === 'project_manager';
+
   const [exportingFinancial, setExportingFinancial] = useState(false);
   const [financialExportError, setFinancialExportError] = useState(null);
 
@@ -440,10 +476,8 @@ const WorkItemDetailPage = () => {
   const tabs = [
     { id: 'overview', label: 'Overview' },
     { id: 'jobitems', label: `Jobs (${jobItems.length})` },
-    ...(canViewFinance ? [
-      { id: 'finance', label: 'Finance' },
-      { id: 'reports', label: 'Reports' },
-    ] : []),
+    ...(canViewFinance ? [{ id: 'finance', label: 'Finance' }] : []),
+    ...(canViewReports ? [{ id: 'reports', label: 'Reports' }] : []),
     { id: 'photos', label: 'Photos' },
   ];
 
@@ -482,8 +516,8 @@ const WorkItemDetailPage = () => {
             </button>
           )}
           {(plot?.role === 'owner' || plot?.role === 'project_manager' || project?.role === 'owner' || project?.role === 'project_manager') && !workItem.is_approved && (
-            <button className="btn-ghost" onClick={handleApprove}>
-              <CheckCircle2 size={16} /> Approve Work
+            <button className="btn-ghost" onClick={() => setShowReviewModal(true)}>
+              <CheckCircle2 size={16} /> Review Work
             </button>
           )}
           {canManageBudget && (
@@ -491,7 +525,7 @@ const WorkItemDetailPage = () => {
               <DollarSign size={16} /> {hasBudget ? 'Edit Budget' : 'Set Budget'}
             </button>
           )}
-          {workItem.work_status !== 'Completed' && (
+          {canComplete && workItem.work_status !== 'Completed' && (
             <button className="btn-ghost" onClick={handleMarkComplete}>
               <CheckCircle2 size={16} /> Mark Complete
             </button>
@@ -884,7 +918,7 @@ const WorkItemDetailPage = () => {
       )}
 
       {/* Reports Tab (Financial Report View - Option B) */}
-      {canViewFinance && activeTab === 'reports' && (
+      {canViewReports && activeTab === 'reports' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           {/* Header & Export Action */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
@@ -1159,6 +1193,22 @@ const WorkItemDetailPage = () => {
           Jobs are where you submit Daily Reports to update progress and track issues.
         </p>
       </Modal>
+      <CompleteJobModal
+        isOpen={showCompleteModal}
+        onClose={() => setShowCompleteModal(false)}
+        onComplete={submitCompletion}
+        itemType="Work"
+        itemName={workItem?.work_name || workItem?.name || ''}
+        expenses={expenses}
+      />
+
+      <ReviewJobModal
+        isOpen={showReviewModal}
+        onClose={() => setShowReviewModal(false)}
+        onReview={handleReview}
+        itemType="Work"
+        itemName={workItem?.work_name || workItem?.name || ''}
+      />
     </div>
   );
 };

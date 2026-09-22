@@ -1,5 +1,5 @@
-import React from 'react';
-import { NavLink } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
   Briefcase,
@@ -15,10 +15,36 @@ import {
   LogOut,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { apiFetch, unwrapList } from '../api/client';
 import Avatar from './Avatar';
 
 const Sidebar = ({ isOpen, toggleSidebar, isMobile }) => {
-  const { user, logout } = useAuth();
+  const { user, token, logout } = useAuth();
+  const location = useLocation();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    if (!token) return;
+    let isMounted = true;
+    const fetchUnread = async () => {
+      try {
+        const res = await apiFetch('/notifications/', { token });
+        if (res.ok && isMounted) {
+          const list = unwrapList(await res.json());
+          const unread = list.filter(n => !n.is_read).length;
+          setUnreadCount(unread);
+        }
+      } catch (err) {
+        console.error('Sidebar notification fetch error:', err);
+      }
+    };
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 15000);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, [token, location.pathname]);
 
   const navItems = [
     { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
@@ -174,8 +200,47 @@ const Sidebar = ({ isOpen, toggleSidebar, isMobile }) => {
               >
                 {({ isActive }) => (
                   <>
-                    <item.icon size={20} color={isActive ? 'var(--brand-orange)' : 'currentColor'} style={{ flexShrink: 0 }} />
-                    {isOpen && <span style={{ whiteSpace: 'nowrap' }}>{item.label}</span>}
+                    <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                      <item.icon size={20} color={isActive ? 'var(--brand-orange)' : 'currentColor'} style={{ flexShrink: 0 }} />
+                      {!isOpen && item.to === '/notifications' && unreadCount > 0 && (
+                        <span style={{
+                          position: 'absolute',
+                          top: '-6px',
+                          right: '-8px',
+                          background: 'var(--brand-orange)',
+                          color: '#fff',
+                          borderRadius: '100px',
+                          padding: '1px 5px',
+                          fontSize: '10px',
+                          fontWeight: 700,
+                          minWidth: '16px',
+                          textAlign: 'center',
+                          lineHeight: '14px',
+                          boxShadow: '0 2px 6px rgba(193, 74, 30, 0.5)'
+                        }}>
+                          {unreadCount > 99 ? '99+' : unreadCount}
+                        </span>
+                      )}
+                    </div>
+                    {isOpen && (
+                      <span style={{ whiteSpace: 'nowrap', flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        {item.label}
+                        {item.to === '/notifications' && unreadCount > 0 && (
+                          <span style={{
+                            background: 'var(--brand-orange)',
+                            color: '#fff',
+                            borderRadius: '100px',
+                            padding: '2px 8px',
+                            fontSize: '11px',
+                            fontWeight: 700,
+                            marginLeft: '8px',
+                            boxShadow: '0 2px 6px rgba(193, 74, 30, 0.4)'
+                          }}>
+                            {unreadCount > 99 ? '99+' : unreadCount}
+                          </span>
+                        )}
+                      </span>
+                    )}
                   </>
                 )}
               </NavLink>

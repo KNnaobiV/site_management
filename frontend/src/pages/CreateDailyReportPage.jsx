@@ -147,7 +147,6 @@ const CreateDailyReportPage = () => {
         </p>
       </div>
 
-      {error && <div style={{ background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.2)', color: '#dc2626', padding: '16px', borderRadius: '12px', marginBottom: '24px', maxWidth: '800px' }}>{error}</div>}
 
       <form onSubmit={handleSubmit} className="mobile-padding" style={{
         background: 'var(--bg-card)',
@@ -335,6 +334,8 @@ const CreateDailyReportPage = () => {
             </div>
           )}
         </section>
+
+        {error && <div style={{ background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.2)', color: '#dc2626', padding: '16px', borderRadius: '12px', marginBottom: '24px' }}>{error}</div>}
 
         <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--border-default)', paddingTop: '40px', marginTop: '12px' }}>
           <button type="button" onClick={() => navigate(-1)} className="btn-ghost" style={{ padding: '14px 40px' }}>Cancel</button>

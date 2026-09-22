@@ -41,6 +41,7 @@ const FeedbackModal = ({ isOpen, onClose }) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
+  const [image, setImage] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
@@ -60,18 +61,20 @@ const FeedbackModal = ({ isOpen, onClose }) => {
     setError(null);
 
     try {
-      const payload = {
-        category,
-        subject: subject.trim(),
-        name: name.trim(),
-        email: email.trim(),
-        message: message.trim(),
-      };
+      const formData = new FormData();
+      formData.append('category', category);
+      formData.append('subject', subject.trim());
+      formData.append('name', name.trim());
+      formData.append('email', email.trim());
+      formData.append('message', message.trim());
+      if (image) {
+        formData.append('image', image);
+      }
 
       const res = await apiFetch('/feedback/', {
         method: 'POST',
         token,
-        body: JSON.stringify(payload),
+        body: formData,
       });
 
       if (res.ok) {
@@ -93,6 +96,7 @@ const FeedbackModal = ({ isOpen, onClose }) => {
     setError(null);
     setSubject('');
     setMessage('');
+    setImage(null);
     onClose();
   };
 
@@ -307,6 +311,21 @@ const FeedbackModal = ({ isOpen, onClose }) => {
                     resize: 'vertical',
                     minHeight: '100px',
                     lineHeight: 1.6,
+                  }}
+                />
+              </div>
+
+              {/* Optional Image */}
+              <div>
+                <label style={labelStyle}>Attachment <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional Image)</span></label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setImage(e.target.files[0] || null)}
+                  style={{
+                    ...inputStyle,
+                    padding: '8px',
+                    cursor: 'pointer'
                   }}
                 />
               </div>

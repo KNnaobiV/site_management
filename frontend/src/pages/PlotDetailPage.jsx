@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Edit2, Plus, FileText, UserPlus, MoreHorizontal, MapPin, Calendar, Clock, ArrowLeft, Loader, Search, Info, DollarSign, HelpCircle } from 'lucide-react';
+import { Edit2, Plus, FileText, UserPlus, MoreHorizontal, MapPin, Calendar, Clock, ArrowLeft, Loader, Search, Info, DollarSign, HelpCircle, BarChart3 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { apiFetch, unwrapList, formatApiError, getMediaUrl } from '../api/client';
 import { Breadcrumb, Tabs, Avatar, Spinner, ProgressDonut, InviteModal, ChecklistEditor, ImageUploader, DocumentList, Modal } from '../components';
@@ -342,7 +342,6 @@ const PlotDetailPage = () => {
   const canViewFinance =
     plot?.role === 'owner' ||
     plot?.role === 'project_manager' ||
-    plot?.role === 'foreman' ||
     project?.role === 'owner' ||
     project?.role === 'project_manager';
 
@@ -352,8 +351,10 @@ const PlotDetailPage = () => {
     plot?.role === 'owner' ||
     plot?.role === 'project_manager' ||
     plot?.role === 'foreman' ||
+    plot?.role === 'consultant' ||
     project?.role === 'owner' ||
-    project?.role === 'project_manager';
+    project?.role === 'project_manager' ||
+    project?.role === 'consultant';
 
   useEffect(() => {
     if (activeTab === 'reports' && !canViewReports && !loading) {
@@ -403,7 +404,7 @@ const PlotDetailPage = () => {
           <button className="btn-ghost" onClick={() => { setInviteRole('foreman'); setShowInvite(true); }}>
             <UserPlus size={16} /> Assign Foreman
           </button>
-          {(plot.role === 'owner' || plot.role === 'project_manager') && plot.status !== 'Completed' && (
+          {(plot.role === 'owner' || plot.role === 'project_manager' || plot.role === 'foreman') && plot.status !== 'Completed' && (
             <button className="btn-primary" onClick={() => navigate(`/plots/${id}/work-items/new`)}>
               <Plus size={16} /> Add Work
             </button>
@@ -537,7 +538,7 @@ const PlotDetailPage = () => {
       {activeTab === 'workitems' && (
         <div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
-            {(plot.role === 'owner' || plot.role === 'project_manager') && plot.status !== 'Completed' && (
+            {(plot.role === 'owner' || plot.role === 'project_manager' || plot.role === 'foreman') && plot.status !== 'Completed' && (
               <button className="btn-primary" onClick={() => setShowNewWorkItem(true)}>
                 <Plus size={16} /> Add Work
               </button>
