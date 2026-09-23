@@ -973,7 +973,7 @@ class JobReportSerializer(RoleFilteredSerializer):
             prev = (
                 obj.job_item.daily_reports
                 .exclude(pk=obj.pk)
-                .exclude(report_status=JobReport.ReportStatusChoices.rejected)
+                .filter(report_status=JobReport.ReportStatusChoices.approved)
                 .order_by('-report_date', '-id')
                 .first()
             )
@@ -1044,7 +1044,7 @@ class JobReportSerializer(RoleFilteredSerializer):
             "images",
             "updated_at",
         ]
-        read_only_fields = ["id", "reported_by", "updated_at", "job_item", "previous_report_progress"]
+        read_only_fields = ["id", "reported_by", "updated_at", "job_item", "previous_report_progress", "report_status"]
 
     def validate(self, data):
         if "percentage_job_progress" not in data and not self.instance:

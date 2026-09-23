@@ -86,3 +86,13 @@ CSRF_TRUSTED_ORIGINS = ast.literal_eval(CFG.get(
     'CSRF_TRUSTED_ORIGINS', 
     fallback="['http://localhost:8000', 'http://localhost:5173', 'https://maccaferra.vercel.app']"
 ))
+
+import sys
+if 'test' in sys.argv:
+    MIGRATION_MODULES = {
+        'base': None,
+        'core': None,
+        'finance': None,
+        'accounts': None,
+    }
+

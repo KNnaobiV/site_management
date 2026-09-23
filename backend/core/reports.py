@@ -5,9 +5,17 @@ Centralized service for generating PDF and Excel reports for projects, plots, wo
 """
 
 import datetime
+import html
 import io
 import os
 from decimal import Decimal
+
+def safe_escape(value):
+    if value is None:
+        return ""
+    if not isinstance(value, str):
+        value = str(value)
+    return html.escape(value)
 
 from django.http import FileResponse
 from rest_framework.renderers import BaseRenderer
@@ -87,22 +95,22 @@ class PDFReportBuilder:
         self.story = []
 
     def add_title(self, title_text):
-        self.story.append(Paragraph(title_text, self.styles["Title"]))
+        self.story.append(Paragraph(safe_escape(title_text), self.styles["Title"]))
         self.story.append(Spacer(1, 10))
 
     def add_heading(self, heading_text, level=2, spacer_after=8):
         style_key = "Heading2" if level == 2 else "Heading1"
-        self.story.append(Paragraph(heading_text, self.styles[style_key]))
+        self.story.append(Paragraph(safe_escape(heading_text), self.styles[style_key]))
         if spacer_after > 0:
             self.story.append(Spacer(1, spacer_after))
 
     def add_metadata_lines(self, lines):
         for line in lines:
-            self.story.append(Paragraph(line, self.styles["Normal"]))
+            self.story.append(Paragraph(safe_escape(line), self.styles["Normal"]))
         self.story.append(Spacer(1, 15))
 
     def add_paragraph(self, text, style_name="Normal", spacer_after=8):
-        self.story.append(Paragraph(text, self.styles[style_name]))
+        self.story.append(Paragraph(safe_escape(text), self.styles[style_name]))
         if spacer_after > 0:
             self.story.append(Spacer(1, spacer_after))
 
@@ -153,7 +161,7 @@ class PDFReportBuilder:
                     formatted_row.append(cell)
                     continue
 
-                cell_str = str(cell) if cell is not None else "—"
+                cell_str = safe_escape(cell) if cell is not None else "—"
                 is_right_col = (not is_summary and col_idx == num_cols - 1)
 
                 if is_header_row:
@@ -205,7 +213,7 @@ class PDFReportBuilder:
                     cell_flowables = [
                         PDFImage(image_path, width=2.4 * inch, height=1.6 * inch),
                         Spacer(1, 4),
-                        Paragraph(f"<b>Fig. {fig_num}</b>: {caption}", caption_style)
+                        Paragraph(f"<b>Fig. {fig_num}</b>: {safe_escape(caption)}", caption_style)
                     ]
                     row.append(cell_flowables)
                     if len(row) == 2:

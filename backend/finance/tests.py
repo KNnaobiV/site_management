@@ -215,10 +215,11 @@ class JobItemExpenseAPITest(APITestCase):
             start_date=date.today(),
             target_end_date=date.today(),
         )
-        self.plot.foremen.add(self.foreman, self.strkpr)
+        self.plot.foremen.add(self.foreman)
         self.work_item = WorkItem.objects.create(
             construction_plot=self.plot,
             name='Foundation Work',
+            is_approved=True,
             start_date=date.today(),
             target_end_date=date.today(),
         )
@@ -226,6 +227,7 @@ class JobItemExpenseAPITest(APITestCase):
             work_item=self.work_item,
             job_name='Steel fixing',
             job_artisan=JobItem.Artisans.IRON_BENDER,
+            is_approved=True,
             start_date=date.today(),
             target_end_date=date.today(),
         )

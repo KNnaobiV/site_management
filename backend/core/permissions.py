@@ -5,11 +5,11 @@ All DRF permission classes for the construction management system.
  
 Design principle
 ----------------
-Every permission class resolves the project/plot from the view kwargs
-and delegates to `get_project_role` / `get_plot_role` from core.roles.
-This keeps all role logic in one place.
+Every permission class resolves the project/plot from the view kwargs,
+request params, or payload and delegates to `get_project_role` / `get_plot_role`
+from core.roles. This keeps all role logic in one place.
 """
-from rest_framework.permissions import BasePermission, IsAuthenticated
+from rest_framework.permissions import BasePermission, IsAuthenticated, SAFE_METHODS
 from core.models import ConstructionProject, ConstructionPlot
  
 from core.roles import (
@@ -41,21 +41,103 @@ from core.roles import (
 # ---------------------------------------------------------------------------
  
 def _get_project(view):
-    """Resolve the ConstructionProject from the view, if available."""
-    # ViewSets that are nested under a project expose `project` directly
+    """Resolve the ConstructionProject from the view, query parameters, or request payload, if available."""
     if hasattr(view, "get_project"):
-        return view.get_project()
+        proj = view.get_project()
+        if proj:
+            return proj
+    request = getattr(view, "request", None)
+    if request:
+        project_id = None
+        if isinstance(request.data, dict):
+            project_id = (
+                request.data.get("project")
+                or request.data.get("project_id")
+                or request.data.get("construction_project")
+                or request.data.get("construction_project_id")
+            )
+        if not project_id and request.query_params:
+            project_id = (
+                request.query_params.get("project")
+                or request.query_params.get("project_id")
+                or request.query_params.get("construction_project")
+                or request.query_params.get("construction_project_id")
+            )
+        if project_id:
+            try:
+                return ConstructionProject.objects.filter(pk=project_id).first()
+            except Exception:
+                pass
     return None
  
  
 def _get_plot(view):
-    """Resolve the ConstructionPlot from the view, if available."""
+    """Resolve the ConstructionPlot from the view, query parameters, or request payload, if available."""
     if hasattr(view, "get_plot"):
-        return view.get_plot()
+        plot = view.get_plot()
+        if plot:
+            return plot
     if hasattr(view, "get_job_item"):
         job_item = view.get_job_item()
         if job_item and getattr(job_item, "work_item", None):
             return job_item.work_item.construction_plot
+
+    request = getattr(view, "request", None)
+    if request:
+        plot_id = None
+        if isinstance(request.data, dict):
+            plot_id = (
+                request.data.get("construction_plot")
+                or request.data.get("plot")
+                or request.data.get("construction_plot_id")
+                or request.data.get("plot_id")
+            )
+            if not plot_id and request.data.get("work_item"):
+                from core.models import WorkItem
+                try:
+                    wi = WorkItem.objects.filter(pk=request.data.get("work_item")).first()
+                    if wi:
+                        return wi.construction_plot
+                except Exception:
+                    pass
+            if not plot_id and request.data.get("job_item"):
+                from core.models import JobItem
+                try:
+                    ji = JobItem.objects.filter(pk=request.data.get("job_item")).first()
+                    if ji and ji.work_item:
+                        return ji.work_item.construction_plot
+                except Exception:
+                    pass
+
+        if not plot_id and request.query_params:
+            plot_id = (
+                request.query_params.get("construction_plot")
+                or request.query_params.get("plot")
+                or request.query_params.get("construction_plot_id")
+                or request.query_params.get("plot_id")
+            )
+            if not plot_id and request.query_params.get("work_item"):
+                from core.models import WorkItem
+                try:
+                    wi = WorkItem.objects.filter(pk=request.query_params.get("work_item")).first()
+                    if wi:
+                        return wi.construction_plot
+                except Exception:
+                    pass
+            if not plot_id and request.query_params.get("job_item"):
+                from core.models import JobItem
+                try:
+                    ji = JobItem.objects.filter(pk=request.query_params.get("job_item")).first()
+                    if ji and ji.work_item:
+                        return ji.work_item.construction_plot
+                except Exception:
+                    pass
+
+        if plot_id:
+            try:
+                return ConstructionPlot.objects.filter(pk=plot_id).first()
+            except Exception:
+                pass
     return None
  
  
@@ -72,7 +154,7 @@ class IsProjectMember(BasePermission):
             return False
         project = _get_project(view)
         if project is None:
-            return True  # let object-level check decide
+            return request.method in SAFE_METHODS
         return get_project_role(request.user, project) in PROJECT_READ_ROLES
  
     def has_object_permission(self, request, view, obj):
@@ -96,7 +178,7 @@ class CanManageProject(BasePermission):
             return False
         project = _get_project(view)
         if project is None:
-            return True
+            return request.method in SAFE_METHODS
         return get_project_role(request.user, project) in PROJECT_MANAGE_ROLES
  
     def has_object_permission(self, request, view, obj):
@@ -120,7 +202,7 @@ class IsProjectOwnerOrCreator(BasePermission):
             return False
         project = _get_project(view)
         if project is None:
-            return True
+            return request.method in SAFE_METHODS
         return get_project_role(request.user, project) in {"owner"}
  
     def has_object_permission(self, request, view, obj):
@@ -148,7 +230,7 @@ class IsPlotMember(BasePermission):
             return False
         plot = _get_plot(view)
         if plot is None:
-            return True
+            return request.method in SAFE_METHODS
         return get_plot_role(request.user, plot) in PLOT_READ_ROLES
  
     def has_object_permission(self, request, view, obj):
@@ -177,7 +259,7 @@ class CanManagePlot(BasePermission):
             return False
         plot = _get_plot(view)
         if plot is None:
-            return True
+            return request.method in SAFE_METHODS
         return get_plot_role(request.user, plot) in PLOT_MANAGE_ROLES
  
     def has_object_permission(self, request, view, obj):
@@ -217,7 +299,7 @@ class CanCreateWorkItem(BasePermission):
         if is_creator_without_pm(request.user, plot or view):
             return True
         if plot is None:
-            return True
+            return request.method in SAFE_METHODS
         return get_plot_role(request.user, plot) in WORK_ITEM_CREATE_ROLES
 
     def has_object_permission(self, request, view, obj):
@@ -238,7 +320,7 @@ class CanUpdateWorkItem(BasePermission):
             return False
         plot = _get_plot(view)
         if plot is None:
-            return True
+            return request.method in SAFE_METHODS
         return get_plot_role(request.user, plot) in WORK_ITEM_UPDATE_ROLES
 
     def has_object_permission(self, request, view, obj):
@@ -257,7 +339,7 @@ class CanDeleteWorkItem(BasePermission):
             return False
         plot = _get_plot(view)
         if plot is None:
-            return True
+            return request.method in SAFE_METHODS
         return get_plot_role(request.user, plot) in WORK_ITEM_DELETE_ROLES
 
     def has_object_permission(self, request, view, obj):
@@ -278,7 +360,7 @@ class CanApproveWorkItem(BasePermission):
         if is_creator_without_pm(request.user, plot or view):
             return True
         if plot is None:
-            return True
+            return request.method in SAFE_METHODS
         return get_plot_role(request.user, plot) in WORK_ITEM_APPROVE_ROLES
 
     def has_object_permission(self, request, view, obj):
@@ -305,7 +387,7 @@ class CanCreateJobItem(BasePermission):
         if is_creator_without_pm(request.user, plot or view):
             return True
         if plot is None:
-            return True
+            return request.method in SAFE_METHODS
         return get_plot_role(request.user, plot) in JOB_ITEM_CREATE_ROLES
 
     def has_object_permission(self, request, view, obj):
@@ -327,7 +409,7 @@ class CanUpdateJobItem(BasePermission):
             return False
         plot = _get_plot(view)
         if plot is None:
-            return True
+            return request.method in SAFE_METHODS
         return get_plot_role(request.user, plot) in JOB_ITEM_UPDATE_ROLES
 
     def has_object_permission(self, request, view, obj):
@@ -347,7 +429,7 @@ class CanDeleteJobItem(BasePermission):
             return False
         plot = _get_plot(view)
         if plot is None:
-            return True
+            return request.method in SAFE_METHODS
         return get_plot_role(request.user, plot) in JOB_ITEM_DELETE_ROLES
 
     def has_object_permission(self, request, view, obj):
@@ -369,7 +451,7 @@ class CanApproveJobItem(BasePermission):
         if is_creator_without_pm(request.user, plot or view):
             return True
         if plot is None:
-            return True
+            return request.method in SAFE_METHODS
         return get_plot_role(request.user, plot) in JOB_ITEM_APPROVE_ROLES
 
     def has_object_permission(self, request, view, obj):
@@ -399,7 +481,7 @@ class CanSubmitReport(BasePermission):
         if is_creator_without_pm(request.user, plot or view):
             return True
         if plot is None:
-            return True
+            return request.method in SAFE_METHODS
         return get_plot_role(request.user, plot) in REPORT_WRITE_ROLES
  
     def has_object_permission(self, request, view, obj):
@@ -433,7 +515,7 @@ class CanSendProjectInvitation(BasePermission):
             return False
         project = _get_project(view)
         if project is None:
-            return True
+            return request.method in SAFE_METHODS
         return get_project_role(request.user, project) in \
             {"owner", "project_manager"}
  
@@ -447,7 +529,7 @@ class CanSendPlotInvitation(BasePermission):
             return False
         plot = _get_plot(view)
         if plot is None:
-            return True
+            return request.method in SAFE_METHODS
         return get_plot_role(request.user, plot) in {"owner", "project_manager"}
 
 
@@ -496,7 +578,7 @@ class CanManageFinance(BasePermission):
         project = _get_project(view)
         if project:
             return can_view_finance(request.user, project)
-        return True
+        return request.method in SAFE_METHODS
 
     def has_object_permission(self, request, view, obj):
         if getattr(request.user, "is_superuser", False):
@@ -517,7 +599,7 @@ class CanManageJobFinance(BasePermission):
             return True
         plot = _get_plot(view)
         if plot is None:
-            return True
+            return request.method in SAFE_METHODS
         return get_plot_role(request.user, plot) in FINANCE_ROLES
 
     def has_object_permission(self, request, view, obj):
@@ -548,7 +630,7 @@ class CanManageExpenses(BasePermission):
         if project:
             return can_view_finance(request.user, project)
 
-        return True
+        return request.method in SAFE_METHODS
 
     def has_object_permission(self, request, view, obj):
         # obj is Expense
@@ -572,8 +654,7 @@ class CanManageDocuments(BasePermission):
             return False
         project = _get_project(view)
         if project is None:
-            # If not a project view, allow the object-level permission to decide
-            return True
+            return request.method in SAFE_METHODS
         return get_project_role(request.user, project) in {"owner", "project_manager", "consultant"}
 
     def has_object_permission(self, request, view, obj):

@@ -533,7 +533,7 @@ class WorkItem(HasPictureMixin, TimestampedModel):
     picture_fields = {"work_item_image": "work_items/%Y/%m/%d/"}
 
     construction_plot = models.ForeignKey(
-        ConstructionPlot, on_delete=models.CASCADE
+        ConstructionPlot, on_delete=models.CASCADE, related_name="work_items"
     )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -704,7 +704,7 @@ class JobItem(TimestampedModel):
     def previous_report_progress(self) -> int:
         latest_report = (
             self.daily_reports
-            .exclude(report_status=JobReport.ReportStatusChoices.rejected)
+            .filter(report_status=JobReport.ReportStatusChoices.approved)
             .order_by('-report_date', '-id')
             .first()
         )

@@ -340,6 +340,7 @@ class ReportApiTests(TestCase):
             work_item=self.work_item,
             job_name="Concrete Pouring",
             job_artisan="Mason",
+            is_approved=True,
             start_date=date(2026, 9, 1),
             target_end_date=date(2026, 9, 30),
         )
@@ -533,6 +534,7 @@ class ProgressHierarchyTests(TestCase):
             percentage_job_progress=30,
             expected_completion_date="2026-09-30",
             notes="Foundation dug",
+            report_status=JobReport.ReportStatusChoices.approved,
         )
         self.assertEqual(self.job_item1.progress, 30)
 
@@ -544,6 +546,7 @@ class ProgressHierarchyTests(TestCase):
             percentage_job_progress=60,
             expected_completion_date="2026-09-30",
             notes="Excavation continuing",
+            report_status=JobReport.ReportStatusChoices.approved,
         )
         self.assertEqual(self.job_item1.progress, 60)
 
@@ -556,7 +559,7 @@ class ProgressHierarchyTests(TestCase):
             percentage_job_progress=40,
             expected_completion_date="2026-09-30",
             notes="Valid report",
-            report_status=JobReport.ReportStatusChoices.submitted,
+            report_status=JobReport.ReportStatusChoices.approved,
         )
         # Erroneous rejected report
         JobReport.objects.create(
@@ -580,6 +583,7 @@ class ProgressHierarchyTests(TestCase):
             percentage_job_progress=40,
             expected_completion_date="2026-09-30",
             notes="Job 1 progress",
+            report_status=JobReport.ReportStatusChoices.approved,
         )
         # job_item2: 80%
         JobReport.objects.create(
@@ -589,6 +593,7 @@ class ProgressHierarchyTests(TestCase):
             percentage_job_progress=80,
             expected_completion_date="2026-09-30",
             notes="Job 2 progress",
+            report_status=JobReport.ReportStatusChoices.approved,
         )
         # WorkItem average = (40 + 80) / 2 = 60%
         self.assertEqual(self.work_item.progress, 60)
@@ -639,6 +644,7 @@ class ProgressHierarchyTests(TestCase):
             percentage_job_progress=50,
             expected_completion_date="2026-09-30",
             notes="Auto progress",
+            report_status=JobReport.ReportStatusChoices.approved,
         )
         # Set manual override
         self.job_item1.manual_progress = 95
@@ -681,6 +687,7 @@ class ProgressHierarchyTests(TestCase):
             percentage_job_progress=20,
             expected_completion_date="2026-09-10",
             notes="Job 1",
+            report_status=JobReport.ReportStatusChoices.approved,
         )
         # job_item2 progress = 60% (weight = 30)
         JobReport.objects.create(
@@ -690,6 +697,7 @@ class ProgressHierarchyTests(TestCase):
             percentage_job_progress=60,
             expected_completion_date="2026-09-30",
             notes="Job 2",
+            report_status=JobReport.ReportStatusChoices.approved,
         )
 
         # WorkItem progress weighted by job item duration:
@@ -750,6 +758,7 @@ class ProgressHierarchyTests(TestCase):
             percentage_job_progress=42,
             expected_completion_date="2026-09-30",
             notes="First progress update",
+            report_status=JobReport.ReportStatusChoices.approved,
         )
         self.job_item1.refresh_from_db()
         self.assertEqual(self.job_item1.previous_report_progress, 42)

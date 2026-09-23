@@ -94,7 +94,10 @@ class JobItemExpenseViewSet(viewsets.ModelViewSet):
     def get_job_item(self):
         jobitem_pk = self.kwargs.get("jobitem_pk")
         if jobitem_pk:
-            return get_object_or_404(JobItem, pk=jobitem_pk)
+            try:
+                return JobItem.objects.filter(pk=jobitem_pk).first()
+            except Exception:
+                pass
         return None
 
     def get_plot(self):
@@ -125,17 +128,17 @@ class JobItemExpenseViewSet(viewsets.ModelViewSet):
         job_item = self.get_job_item()
         if not job_item:
             raise ValidationError({"job_item": "Job item is required."})
+        plot = self.get_plot()
+        if not getattr(self.request.user, "is_superuser", False):
+            role = get_plot_role(self.request.user, plot) if plot else "none"
+            if role not in {"owner", "project_manager", "foreman"}:
+                raise PermissionDenied("Only the project manager, creator, or foreman can add expenses.")
         if not job_item.is_approved:
             raise ValidationError({"job_item": ["Cannot add expenses to an unapproved job item."]})
         if job_item.job_status == 'Completed':
             raise ValidationError({"non_field_errors": ["Cannot add expenses to a completed job item."]})
         if job_item.work_item and job_item.work_item.work_status == 'Completed':
             raise ValidationError({"non_field_errors": ["Cannot add expenses because the parent work item is completed."]})
-        plot = self.get_plot()
-        if not getattr(self.request.user, "is_superuser", False):
-            role = get_plot_role(self.request.user, plot) if plot else "none"
-            if role not in {"owner", "project_manager", "foreman"}:
-                raise PermissionDenied("Only the project manager, creator, or foreman can add expenses.")
         serializer.save(job_item=job_item)
 
     def perform_update(self, serializer):
