@@ -144,31 +144,29 @@ const Sidebar = ({ isOpen, toggleSidebar, isMobile }) => {
               </h2>
             </div>
 
-            {!isMobile && (
-              <button
-                onClick={toggleSidebar}
-                style={{
-                  background: 'rgba(255, 255, 255, 0.08)',
-                  border: '1px solid rgba(255, 255, 255, 0.12)',
-                  cursor: 'pointer',
-                  color: '#fff',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: '34px',
-                  height: '34px',
-                  borderRadius: '8px',
-                  padding: 0,
-                  flexShrink: 0,
-                  transition: 'all 0.2s ease'
-                }}
-                title="Collapse sidebar"
-                onMouseOver={(e) => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.16)'; }}
-                onMouseOut={(e) => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)'; }}
-              >
-                <Menu size={18} />
-              </button>
-            )}
+            <button
+              onClick={toggleSidebar}
+              style={{
+                background: 'rgba(255, 255, 255, 0.08)',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
+                cursor: 'pointer',
+                color: '#fff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '34px',
+                height: '34px',
+                borderRadius: '8px',
+                padding: 0,
+                flexShrink: 0,
+                transition: 'all 0.2s ease'
+              }}
+              title={isMobile ? "Close menu" : "Collapse sidebar"}
+              onMouseOver={(e) => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.16)'; }}
+              onMouseOut={(e) => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)'; }}
+            >
+              <Menu size={18} />
+            </button>
           </>
         )}
       </div>

@@ -141,7 +141,7 @@ const CreateJobItemPage = () => {
     setLoading(true);
     setError(null);
 
-    const canSetProgress = isEdit && (workItem?.role === 'owner' || workItem?.role === 'project_manager' || jobItemData?.role === 'owner' || jobItemData?.role === 'project_manager');
+    const canSetProgress = isEdit && (workItem?.role === 'creator' || workItem?.role === 'project_manager' || jobItemData?.role === 'creator' || jobItemData?.role === 'project_manager');
 
     const payload = {
       job_name: formData.job_name,
@@ -405,7 +405,7 @@ const CreateJobItemPage = () => {
                   </span>
                 </div>
 
-                {(workItem?.role === 'owner' || workItem?.role === 'project_manager' || jobItemData?.role === 'owner' || jobItemData?.role === 'project_manager') ? (
+                {(workItem?.role === 'creator' || workItem?.role === 'project_manager' || jobItemData?.role === 'creator' || jobItemData?.role === 'project_manager') ? (
                   <div>
                     <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
                       <button

@@ -154,8 +154,8 @@ class ConstructionProjectSerializer(RoleFilteredSerializer):
         user = getattr(request, 'user', None) if request else None
         if not user or not user.is_authenticated:
             return "0.00"
-        from core.roles import can_view_finance
-        if not can_view_finance(user, obj):
+        from core.services.authorization import AuthorizationService
+        if not AuthorizationService(user).can_manage_finance(obj):
             return "0.00"
         return str(obj.spent_amount)
 
@@ -164,8 +164,8 @@ class ConstructionProjectSerializer(RoleFilteredSerializer):
         user = getattr(request, 'user', None) if request else None
         if not user or not user.is_authenticated:
             return None
-        from core.roles import can_view_finance
-        if not can_view_finance(user, obj):
+        from core.services.authorization import AuthorizationService
+        if not AuthorizationService(user).can_manage_finance(obj):
             return None
         try:
             b = getattr(obj, "project_budget", None)
@@ -529,8 +529,8 @@ class ConstructionPlotSerializer(RoleFilteredSerializer):
         user = getattr(request, 'user', None) if request else None
         if not user or not user.is_authenticated:
             return "0.00"
-        from core.roles import can_view_finance
-        if not can_view_finance(user, obj):
+        from core.services.authorization import AuthorizationService
+        if not AuthorizationService(user).can_manage_finance(obj):
             return "0.00"
         return str(obj.spent_amount)
 
@@ -539,8 +539,8 @@ class ConstructionPlotSerializer(RoleFilteredSerializer):
         user = getattr(request, 'user', None) if request else None
         if not user or not user.is_authenticated:
             return None
-        from core.roles import can_view_finance
-        if not can_view_finance(user, obj):
+        from core.services.authorization import AuthorizationService
+        if not AuthorizationService(user).can_manage_finance(obj):
             return None
         try:
             b = getattr(obj, "plot_budget", None)
@@ -704,8 +704,8 @@ class WorkItemSerializer(RoleFilteredSerializer):
         user = getattr(request, 'user', None) if request else None
         if not user or not user.is_authenticated:
             return "0.00"
-        from core.roles import can_view_finance
-        if not can_view_finance(user, obj):
+        from core.services.authorization import AuthorizationService
+        if not AuthorizationService(user).can_manage_finance(obj):
             return "0.00"
         return str(obj.spent_amount)
 
@@ -714,8 +714,8 @@ class WorkItemSerializer(RoleFilteredSerializer):
         user = getattr(request, 'user', None) if request else None
         if not user or not user.is_authenticated:
             return None
-        from core.roles import can_view_finance
-        if not can_view_finance(user, obj):
+        from core.services.authorization import AuthorizationService
+        if not AuthorizationService(user).can_manage_finance(obj):
             return None
         try:
             b = getattr(obj, "work_item_budget", None)
@@ -898,8 +898,8 @@ class JobItemSerializer(RoleFilteredSerializer):
         user = getattr(request, 'user', None) if request else None
         if not user or not user.is_authenticated:
             return "0.00"
-        from core.roles import can_view_finance
-        if not can_view_finance(user, obj):
+        from core.services.authorization import AuthorizationService
+        if not AuthorizationService(user).can_manage_finance(obj):
             return "0.00"
         return str(obj.spent_amount)
 
@@ -908,8 +908,8 @@ class JobItemSerializer(RoleFilteredSerializer):
         user = getattr(request, 'user', None) if request else None
         if not user or not user.is_authenticated:
             return None
-        from core.roles import can_view_finance
-        if not can_view_finance(user, obj):
+        from core.services.authorization import AuthorizationService
+        if not AuthorizationService(user).can_manage_finance(obj):
             return None
         try:
             b = getattr(obj, "job_item_budget", None)

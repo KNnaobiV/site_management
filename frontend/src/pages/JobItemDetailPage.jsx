@@ -509,18 +509,18 @@ const JobItemDetailPage = () => {
   };
 
   const canDeleteExpense = (
-    plot?.role === 'owner' ||
+    plot?.role === 'creator' ||
     plot?.role === 'project_manager' ||
-    project?.role === 'owner' ||
+    project?.role === 'creator' ||
     project?.role === 'project_manager'
   );
 
   // Only PM, creator (owner), and foreman can add/edit expenses
   const canAddExpense = (
-    plot?.role === 'owner' ||
+    plot?.role === 'creator' ||
     plot?.role === 'project_manager' ||
     plot?.role === 'foreman' ||
-    project?.role === 'owner' ||
+    project?.role === 'creator' ||
     project?.role === 'project_manager'
   );
 
@@ -629,34 +629,34 @@ const JobItemDetailPage = () => {
   const isOverBudget = hasBudget && totalSpent > parseFloat(budget.allocated_amount);
 
   const canViewFinance =
-    plot?.role === 'owner' ||
+    plot?.role === 'creator' ||
     plot?.role === 'project_manager' ||
-    project?.role === 'owner' ||
+    project?.role === 'creator' ||
     project?.role === 'project_manager';
 
   const canViewReports =
-    plot?.role === 'owner' ||
+    plot?.role === 'creator' ||
     plot?.role === 'project_manager' ||
     plot?.role === 'foreman' ||
     plot?.role === 'consultant' ||
-    project?.role === 'owner' ||
+    project?.role === 'creator' ||
     project?.role === 'project_manager' ||
     project?.role === 'consultant';
 
   const canViewInternalComments =
-    plot?.role === 'owner' ||
+    plot?.role === 'creator' ||
     plot?.role === 'project_manager' ||
     plot?.role === 'foreman' ||
-    project?.role === 'owner' ||
+    project?.role === 'creator' ||
     project?.role === 'project_manager';
 
   const canManageBudget = canViewFinance;
   const hasFinanceAccess = canViewFinance;
 
   const canApprove = (
-    plot?.role === 'owner' ||
+    plot?.role === 'creator' ||
     plot?.role === 'project_manager' ||
-    project?.role === 'owner' ||
+    project?.role === 'creator' ||
     project?.role === 'project_manager'
   );
 
@@ -1486,7 +1486,7 @@ const JobItemDetailPage = () => {
                             onClick={() => window.open(imgUrl, '_blank')}
                             style={{ width: '100%', height: '140px', objectFit: 'cover', cursor: 'pointer', display: 'block' }}
                           />
-                          {(plot?.role === 'owner' || plot?.role === 'project_manager' || plot?.role === 'foreman') && (
+                          {(plot?.role === 'creator' || plot?.role === 'project_manager' || plot?.role === 'foreman') && (
                             <button
                               type="button"
                               onClick={(e) => {

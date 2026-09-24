@@ -9,7 +9,7 @@ User = get_user_model()
 
 class AuthorizationServiceTests(TestCase):
     def setUp(self):
-        self.owner = User.objects.create_user(username="owner", email="owner@example.com", password="password")
+        self.owner = User.objects.create_user(username="creator", email="owner@example.com", password="password")
         self.pm = User.objects.create_user(username="pm", email="pm@example.com", password="password")
         self.foreman = User.objects.create_user(username="foreman", email="foreman@example.com", password="password")
         self.bystander = User.objects.create_user(username="bystander", email="bystander@example.com", password="password")
@@ -33,7 +33,7 @@ class AuthorizationServiceTests(TestCase):
 
     def test_role_for_project(self):
         auth_owner = AuthorizationService(self.owner)
-        self.assertEqual(auth_owner.role_for(self.project), "owner")
+        self.assertEqual(auth_owner.role_for(self.project), "creator")
         
         auth_pm = AuthorizationService(self.pm)
         self.assertEqual(auth_pm.role_for(self.project), "project_manager")

@@ -123,7 +123,7 @@ const CreateWorkItemPage = () => {
     const targetPlotId = plotId || formData.construction_plot;
     const targetProjectId = plot?.construction_project?.id || plot?.construction_project || plotsList.find(p => p.id === formData.construction_plot)?.projectId;
 
-    const canSetProgress = isEdit && (plot?.role === 'owner' || plot?.role === 'project_manager');
+    const canSetProgress = isEdit && (plot?.role === 'creator' || plot?.role === 'project_manager');
 
     const payload = {
       name: formData.name,
@@ -313,7 +313,7 @@ const CreateWorkItemPage = () => {
                   </span>
                 </div>
 
-                {(plot?.role === 'owner' || plot?.role === 'project_manager') ? (
+                {(plot?.role === 'creator' || plot?.role === 'project_manager') ? (
                   <div>
                     <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
                       <button

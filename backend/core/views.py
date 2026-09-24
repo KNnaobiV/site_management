@@ -5,20 +5,18 @@ All ViewSets for the construction management system.
 
 Architecture
 ------------
-- Every ViewSet resolves the project or plot from URL kwargs in
-  `get_project()` / `get_plot()` (cached on the instance).
-- `get_serializer_context()` is overridden to inject `role` so
-  RoleFilteredSerializer knows which fields to expose.
-- `get_queryset()` is always scoped to the authenticated user so
-  users cannot enumerate resources they don't belong to.
-- Custom actions (@action) handle invitation workflow endpoints.
+- Scoping logic is abstracted out into `ScopeResolutionMixin` which handles URL kwargs resolution for projects/plots.
+- Mixins are used to reuse ViewSet behavior: `ExportMixin`, `ApprovalMixin`, `ImageHandlingMixin`.
+- Authorization and role resolution are fully delegated to `AuthorizationService`.
+- Custom filter backends like `ApprovalVisibilityFilterBackend` enforce cross-cutting data restrictions (e.g. unapproved items visibility).
+- `NotificationService` handles side-effects like sending notifications when creation/approval happens.
 """
 from __future__ import annotations
 
 import io
 import os
 import datetime
-from core.mixins.scoped import ProjectScopedMixin, PlotScopedMixin
+from core.mixins.scoped import ScopeResolutionMixin
 from core.mixins.export import ExportMixin
 from core.mixins.approval import ApprovalMixin
 from core.mixins.images import ImageHandlingMixin
@@ -59,7 +57,10 @@ from core.models import (
     Document,
 )
 from base.models import Picture
-from core.roles import get_project_role, get_plot_role, SEES_UNAPPROVED_ROLES, can_view_finance
+from core.roles import get_project_role, get_plot_role
+from core.filters.approval_visibility import ApprovalVisibilityFilterBackend
+from core.services.notifications import NotificationService
+from core.services.authorization import AuthorizationService
 from core.services import (
     invite_to_project,
     invite_to_plot,
@@ -199,7 +200,7 @@ def _build_figures_table(figures, styles):
 # ConstructionProject ViewSet
 # ---------------------------------------------------------------------------
 
-class ConstructionProjectViewSet(ProjectScopedMixin, ExportMixin, viewsets.ModelViewSet):
+class ConstructionProjectViewSet(ScopeResolutionMixin, ExportMixin, viewsets.ModelViewSet):
     """
     list    GET  /projects/                     → projects the user belongs to
     create  POST /projects/                     → any authenticated user
@@ -212,6 +213,7 @@ class ConstructionProjectViewSet(ProjectScopedMixin, ExportMixin, viewsets.Model
     POST /projects/{pk}/invite/                → send a project invitation
     GET  /projects/{pk}/invitations/           → list project invitations
     """
+    scope_model = ConstructionProject
     serializer_class = ConstructionProjectSerializer
     parser_classes = [MultiPartParser, FormParser, JSONParser]
     renderer_classes = [JSONRenderer, BrowsableAPIRenderer, XLSXRenderer, PDFRenderer]
@@ -225,7 +227,7 @@ class ConstructionProjectViewSet(ProjectScopedMixin, ExportMixin, viewsets.Model
             return [IsAuthenticated()]
         if self.action in ("retrieve",):
             return [IsAuthenticated(), IsProjectMember()]
-        if self.action in ("update", "partial_update"):
+        if self.action in ("update", "partial_update", "remove_user"):
             return [IsAuthenticated(), CanManageProject()]
         if self.action in ("destroy", "restore"):
             return [IsAuthenticated(), IsProjectOwnerOrCreator()]
@@ -257,7 +259,7 @@ class ConstructionProjectViewSet(ProjectScopedMixin, ExportMixin, viewsets.Model
     def get_serializer_context(self):
         ctx = super().get_serializer_context()
         if self.action in ("list", "create"):
-            ctx["role"] = "owner"
+            ctx["role"] = "creator"
         return ctx
 
     def destroy(self, request, *args, **kwargs):
@@ -324,8 +326,10 @@ class ConstructionProjectViewSet(ProjectScopedMixin, ExportMixin, viewsets.Model
     @action(detail=True, methods=["post"], url_path="remove-user")
     def remove_user(self, request, pk=None):
         project = self.get_project()
-        user_id = request.data.get("user_id")
-        user = get_object_or_404(User, pk=user_id)
+        username = request.data.get("username")
+        if not username:
+            return Response({"detail": "Username is required."}, status=status.HTTP_400_BAD_REQUEST)
+        user = get_object_or_404(User, username=username)
         
         if project.client == user:
             project.client = None
@@ -354,9 +358,9 @@ class ConstructionProjectViewSet(ProjectScopedMixin, ExportMixin, viewsets.Model
         return Response(serializer.data)
 
     @action(detail=True, methods=["get"], url_path="reports")
-    def reports(self, request, pk=None):
-        project = self.get_project()
-        role = get_project_role(request.user, project)
+    def reports(self, request, **kwargs):
+        project = self.get_object()
+        role = AuthorizationService(request.user).role_for(project)
         if role == "none":
             raise PermissionDenied("You do not have permission to view reports on this project.")
         
@@ -377,7 +381,7 @@ class ConstructionProjectViewSet(ProjectScopedMixin, ExportMixin, viewsets.Model
 # ConstructionPlot ViewSet
 # ---------------------------------------------------------------------------
 
-class ConstructionPlotViewSet(ProjectScopedMixin, ExportMixin, viewsets.ModelViewSet):
+class ConstructionPlotViewSet(ScopeResolutionMixin, ExportMixin, viewsets.ModelViewSet):
     """
     Nested under /projects/{project_pk}/plots/
 
@@ -386,6 +390,7 @@ class ConstructionPlotViewSet(ProjectScopedMixin, ExportMixin, viewsets.ModelVie
     POST /projects/{project_pk}/plots/{pk}/invite/
     GET  /projects/{project_pk}/plots/{pk}/invitations/
     """
+    scope_model = ConstructionPlot
     serializer_class = ConstructionPlotSerializer
     parser_classes = [MultiPartParser, FormParser, JSONParser]
     renderer_classes = [JSONRenderer, BrowsableAPIRenderer, XLSXRenderer, PDFRenderer]
@@ -405,7 +410,7 @@ class ConstructionPlotViewSet(ProjectScopedMixin, ExportMixin, viewsets.ModelVie
             return [IsAuthenticated(), IsProjectMember()]
         if self.action == "create":
             return [IsAuthenticated(), CanManageProject()]
-        if self.action in ("update", "partial_update"):
+        if self.action in ("update", "partial_update", "remove_user"):
             return [IsAuthenticated(), CanManagePlot()]
         if self.action == "destroy":
             return [IsAuthenticated(), IsProjectOwnerOrCreator()]
@@ -422,7 +427,7 @@ class ConstructionPlotViewSet(ProjectScopedMixin, ExportMixin, viewsets.ModelVie
         
         if project:
             role = get_project_role(user, project)
-            if role in {"owner", "client", "project_manager", "consultant"}:
+            if role in {"creator", "client", "project_manager", "consultant"}:
                 return ConstructionPlot.objects.filter(construction_project=project)
             # foreman/storekeeper see only their own plot
             return ConstructionPlot.objects.filter(
@@ -430,6 +435,7 @@ class ConstructionPlotViewSet(ProjectScopedMixin, ExportMixin, viewsets.ModelVie
             ).filter(
                 db_Q(foremen=user)
             )
+        
         else:
             # Top-level list: all plots user belongs to across all projects
             return ConstructionPlot.objects.filter(
@@ -441,7 +447,7 @@ class ConstructionPlotViewSet(ProjectScopedMixin, ExportMixin, viewsets.ModelVie
             ).distinct()
 
     def get_serializer_context(self):
-        ctx = super().get_serializer_context()  # ProjectScopedMixin sets role
+        ctx = super().get_serializer_context()  # ScopeResolutionMixin sets role
         
         # For plot detail actions or retrieve, resolve with plot-level role
         plot_pk = self.kwargs.get("pk")
@@ -495,8 +501,10 @@ class ConstructionPlotViewSet(ProjectScopedMixin, ExportMixin, viewsets.ModelVie
     @action(detail=True, methods=["post"], url_path="remove-user")
     def remove_user(self, request, project_pk=None, pk=None):
         plot = self.get_object()
-        user_id = request.data.get("user_id")
-        user = get_object_or_404(User, pk=user_id)
+        username = request.data.get("username")
+        if not username:
+            return Response({"detail": "Username is required."}, status=status.HTTP_400_BAD_REQUEST)
+        user = get_object_or_404(User, username=username)
         
         if plot.foremen.filter(pk=user.pk).exists():
             plot.foremen.remove(user)
@@ -507,10 +515,10 @@ class ConstructionPlotViewSet(ProjectScopedMixin, ExportMixin, viewsets.ModelVie
         return Response({"status": "user removed"})
 
     @action(detail=True, methods=["get"], url_path="reports")
-    def reports(self, request, project_pk=None, pk=None):
+    def reports(self, request, **kwargs):
         """GET /projects/{project_pk}/plots/{pk}/reports/ — all reports for this plot."""
         plot = self.get_object()
-        role = get_plot_role(request.user, plot)
+        role = AuthorizationService(request.user).role_for(plot)
         if role == "none":
             raise PermissionDenied("You do not have permission to view reports on this plot.")
         qs = JobReport.objects.filter(
@@ -527,15 +535,17 @@ class ConstructionPlotViewSet(ProjectScopedMixin, ExportMixin, viewsets.ModelVie
 # WorkItem ViewSet
 # ---------------------------------------------------------------------------
 
-class WorkItemViewSet(PlotScopedMixin, ExportMixin, ApprovalMixin, ImageHandlingMixin, viewsets.ModelViewSet):
+class WorkItemViewSet(ScopeResolutionMixin, ExportMixin, ApprovalMixin, ImageHandlingMixin, viewsets.ModelViewSet):
     cover_image_field = 'work_item_image'
     def get_image_serializer_class(self):
         from .serializers import WorkItemImageSerializer
         return WorkItemImageSerializer
 
     """Nested under /projects/{project_pk}/plots/{plot_pk}/workitems/"""
+    scope_model = WorkItem
     serializer_class = WorkItemSerializer
     renderer_classes = [JSONRenderer, BrowsableAPIRenderer, XLSXRenderer, PDFRenderer]
+    filter_backends = [ApprovalVisibilityFilterBackend]
 
     def get_permissions(self):
         if self.action in ("list", "retrieve", "export_reports", "export_financial_report"):
@@ -562,58 +572,28 @@ class WorkItemViewSet(PlotScopedMixin, ExportMixin, ApprovalMixin, ImageHandling
         user = self.request.user
 
         if plot:
-            role = get_plot_role(user, plot)
-            qs = WorkItem.objects.filter(construction_plot=plot)
-            # Only PM, Owner, and Creator see unapproved items
-            if role not in {"owner", "project_manager"}:
-                qs = qs.filter(db_Q(is_approved=True) | db_Q(created_by=user))
-            return qs.order_by('-updated_at')
+            return WorkItem.objects.filter(construction_plot=plot).order_by('-updated_at')
 
-        # Global access — restrict unapproved items for limited roles
-        base_qs = WorkItem.objects.filter(
+        # Global access — restrict to projects the user is part of
+        return WorkItem.objects.filter(
             db_Q(construction_plot__construction_project__created_by=user) |
             db_Q(construction_plot__construction_project__client=user) |
             db_Q(construction_plot__construction_project__project_manager=user) |
             db_Q(construction_plot__construction_project__consultants=user) |
-            db_Q(construction_plot__foremen=user) |
             db_Q(construction_plot__foremen=user)
-        ).distinct()
-
-        # Filter unapproved items unless user is PM/owner or created it
-        can_see_unapproved = (
-            db_Q(construction_plot__construction_project__created_by=user) |
-            db_Q(construction_plot__construction_project__project_manager=user) |
-            db_Q(created_by=user)
-        )
-        return base_qs.filter(
-            db_Q(is_approved=True) | can_see_unapproved
-        ).order_by('-updated_at')
+        ).distinct().order_by('-updated_at')
 
     def perform_update(self, serializer):
         work_item = self.get_object()
         user = self.request.user
-        role = get_plot_role(user, work_item.construction_plot)
+        auth = AuthorizationService(user)
 
-        if role == "foreman":
+        if not auth.can_approve(work_item.construction_plot):
             updated_work_item = serializer.save(is_approved=False)
             project = updated_work_item.construction_plot.construction_project
-            # Notify PM/Owner about the update requiring approval
+            ns = NotificationService(project=project)
             recipients = {project.project_manager, project.created_by}
-            notifications = [
-                Notification(
-                    user=pm,
-                    project=project,
-                    message=(
-                        f"Approval required: {user.username} updated work item "
-                        f"'{updated_work_item.name}' in plot {updated_work_item.construction_plot.address}"
-                    ),
-                    priority=Notification.Priority.HIGH,
-                    target_url=f"/plots/{updated_work_item.construction_plot.pk}/work-items/{updated_work_item.pk}/"
-                )
-                for pm in recipients if pm
-            ]
-            if notifications:
-                Notification.objects.bulk_create(notifications)
+            ns.send_to(recipients, f"Approval required: {user.username} updated work item '{updated_work_item.name}' in plot {updated_work_item.construction_plot.address}", f"/plots/{updated_work_item.construction_plot.pk}/work-items/{updated_work_item.pk}/")
         else:
             serializer.save()
 
@@ -629,48 +609,20 @@ class WorkItemViewSet(PlotScopedMixin, ExportMixin, ApprovalMixin, ImageHandling
             raise ValidationError("Cannot add work items to a completed plot.")
 
         user = self.request.user
-        role = get_plot_role(user, plot)
+        auth = AuthorizationService(user)
 
-        # Foreman-created items start unapproved; PM/owner items are auto-approved
-        is_approved = role in {"owner", "project_manager"}
+        is_approved = auth.can_approve(plot)
         work_item = serializer.save(construction_plot=plot, is_approved=is_approved, created_by=user)
 
         project = work_item.construction_plot.construction_project
+        ns = NotificationService(project=project)
 
         if not is_approved:
-            # Notify PM that an unapproved user submitted a work item for approval
-            recipients = [project.project_manager, project.created_by]
-            notifications = [
-                Notification(
-                    user=pm,
-                    project=project,
-                    message=(
-                        f"Approval required: {user.username} submitted work item "
-                        f"'{work_item.name}' in plot {plot.address}"
-                    ),
-                    priority=Notification.Priority.HIGH,
-                    target_url=f"/plots/{plot.pk}/work-items/{work_item.pk}/"
-                )
-                for pm in recipients if pm
-            ]
-            Notification.objects.bulk_create(notifications)
+            recipients = {project.project_manager, project.created_by}
+            ns.send_to(recipients, f"Approval required: {user.username} submitted work item '{work_item.name}' in plot {plot.address}", f"/plots/{plot.pk}/work-items/{work_item.pk}/")
         else:
-            # Notify all project members of the new work item
-            members = set([project.created_by, project.client, project.project_manager])
-            members.update(project.consultants.all())
-            for p in project.constructionplot_set.all():
-                for f in p.foremen.all():
-                    members.add(f)
-            notifications = [
-                Notification(
-                    user=member,
-                    project=project,
-                    message=f"New work item '{work_item.name}' added to plot {plot.address}",
-                    priority=Notification.Priority.NORMAL
-                )
-                for member in members if member and member != user
-            ]
-            Notification.objects.bulk_create(notifications)
+            members = ns.project_members()
+            ns.send_to(members, f"New work item '{work_item.name}' added to plot {plot.address}", exclude={user})
 
 
 
@@ -683,7 +635,7 @@ class WorkItemViewSet(PlotScopedMixin, ExportMixin, ApprovalMixin, ImageHandling
     def reports(self, request, **kwargs):
         work_item = self.get_object()
         plot = work_item.construction_plot
-        role = get_plot_role(request.user, plot)
+        role = AuthorizationService(request.user).role_for(plot)
         if role == "none":
             raise PermissionDenied("You do not have permission to view reports on this work item.")
         qs = JobReport.objects.filter(
@@ -698,12 +650,15 @@ class WorkItemViewSet(PlotScopedMixin, ExportMixin, ApprovalMixin, ImageHandling
 # JobItem ViewSet
 # ---------------------------------------------------------------------------
 
-class JobItemViewSet(PlotScopedMixin, ExportMixin, ApprovalMixin, viewsets.ModelViewSet):
+class JobItemViewSet(ScopeResolutionMixin, ExportMixin, ApprovalMixin, viewsets.ModelViewSet):
     """
     Nested under /projects/{project_pk}/plots/{plot_pk}/workitems/{workitem_pk}/jobitems/
     """
+    scope_model = JobItem
+    scope_model = JobItem
     serializer_class = JobItemSerializer
     renderer_classes = [JSONRenderer, BrowsableAPIRenderer, XLSXRenderer, PDFRenderer]
+    filter_backends = [ApprovalVisibilityFilterBackend]
 
     def get_permissions(self):
         if self.action in ("list", "retrieve", "export_reports", "export_financial_report"):
@@ -736,70 +691,34 @@ class JobItemViewSet(PlotScopedMixin, ExportMixin, ApprovalMixin, viewsets.Model
             query_params.get("work_item_id")
         )
 
-        if plot and wi_pk:
-            role = get_plot_role(user, plot)
-            qs = JobItem.objects.filter(
-                work_item__construction_plot=plot,
-                work_item__pk=wi_pk,
-            )
-            # Only PM, Owner, and Creator see unapproved items
-            if role not in {"owner", "project_manager"}:
-                qs = qs.filter(db_Q(is_approved=True) | db_Q(created_by=user))
-            return qs.order_by('-updated_at')
-
+        qs = JobItem.objects.all()
         if plot:
-            role = get_plot_role(user, plot)
-            qs = JobItem.objects.filter(work_item__construction_plot=plot)
-            if role not in {"owner", "project_manager"}:
-                qs = qs.filter(db_Q(is_approved=True) | db_Q(created_by=user))
-            return qs.order_by('-updated_at')
-
-        # Global access — restrict unapproved for limited roles
-        base_qs = JobItem.objects.filter(
-            db_Q(work_item__construction_plot__construction_project__created_by=user) |
-            db_Q(work_item__construction_plot__construction_project__client=user) |
-            db_Q(work_item__construction_plot__construction_project__project_manager=user) |
-            db_Q(work_item__construction_plot__construction_project__consultants=user) |
-            db_Q(work_item__construction_plot__foremen=user)
-        ).distinct()
-
-        can_see_unapproved = (
-            db_Q(work_item__construction_plot__construction_project__created_by=user) |
-            db_Q(work_item__construction_plot__construction_project__project_manager=user) |
-            db_Q(created_by=user)
-        )
-        qs = base_qs.filter(
-            db_Q(is_approved=True) | can_see_unapproved
-        )
+            qs = qs.filter(work_item__construction_plot=plot)
+        else:
+            qs = qs.filter(
+                db_Q(work_item__construction_plot__construction_project__created_by=user) |
+                db_Q(work_item__construction_plot__construction_project__client=user) |
+                db_Q(work_item__construction_plot__construction_project__project_manager=user) |
+                db_Q(work_item__construction_plot__construction_project__consultants=user) |
+                db_Q(work_item__construction_plot__foremen=user)
+            ).distinct()
+            
         if wi_pk:
             qs = qs.filter(work_item__pk=wi_pk)
+            
         return qs.order_by('-updated_at')
 
     def perform_update(self, serializer):
         job_item = self.get_object()
         user = self.request.user
-        role = get_plot_role(user, job_item.work_item.construction_plot)
+        auth = AuthorizationService(user)
 
-        if role == "foreman":
+        if not auth.can_approve(job_item.work_item.construction_plot):
             updated_job_item = serializer.save(is_approved=False)
             project = updated_job_item.work_item.construction_plot.construction_project
-            # Notify PM/Owner about the update requiring approval
+            ns = NotificationService(project=project)
             recipients = {project.project_manager, project.created_by}
-            notifications = [
-                Notification(
-                    user=pm,
-                    project=project,
-                    message=(
-                        f"Approval required: {user.username} updated job item "
-                        f"'{updated_job_item.job_name}' in work item {updated_job_item.work_item.name}"
-                    ),
-                    priority=Notification.Priority.HIGH,
-                    target_url=f"/job-items/{updated_job_item.pk}/"
-                )
-                for pm in recipients if pm
-            ]
-            if notifications:
-                Notification.objects.bulk_create(notifications)
+            ns.send_to(recipients, f"Approval required: {user.username} updated job item '{updated_job_item.job_name}'", f"/job-items/{updated_job_item.pk}/")
         else:
             serializer.save()
 
@@ -809,52 +728,23 @@ class JobItemViewSet(PlotScopedMixin, ExportMixin, ApprovalMixin, viewsets.Model
         work_item = get_object_or_404(
             WorkItem,
             pk=self.kwargs["workitem_pk"],
-            construction_plot=plot,
+            construction_plot=plot
         )
-        if work_item.work_status == 'Completed':
+        if work_item.status == 'Completed':
             raise ValidationError("Cannot add job items to a completed work item.")
-        if not work_item.is_approved:
-            raise ValidationError("Cannot add job items to an unapproved work item.")
 
-        role = get_plot_role(user, plot)
-        is_approved = role in {"owner", "project_manager"}
+        auth = AuthorizationService(user)
+        is_approved = auth.can_approve(plot)
         job_item = serializer.save(work_item=work_item, is_approved=is_approved, created_by=user)
-
         project = work_item.construction_plot.construction_project
-        role = get_plot_role(user, plot)
 
+        ns = NotificationService(project=project)
         if not is_approved:
-            # Notify PM that an unapproved user added a job item
-            recipients = [project.project_manager, project.created_by]
-            notifications = [
-                Notification(
-                    user=pm,
-                    project=project,
-                    message=(
-                        f"Approval required: {user.username} submitted job item '{job_item.job_name}' "
-                        f"({job_item.job_artisan}) to work item '{work_item.name}'"
-                    ),
-                    priority=Notification.Priority.HIGH,
-                    target_url=f"/job-items/{job_item.pk}/"
-                )
-                for pm in recipients if pm
-            ]
-            Notification.objects.bulk_create(notifications)
+            recipients = {project.project_manager, project.created_by}
+            ns.send_to(recipients, f"Approval required: {user.username} submitted job item '{job_item.job_name}'", f"/job-items/{job_item.pk}/")
         else:
-            # Notify plot foreman and stakeholders
-            members = set([project.created_by, project.client, project.project_manager])
-            for f in plot.foremen.all():
-                members.add(f)
-            notifications = [
-                Notification(
-                    user=m,
-                    project=project,
-                    message=f"New job item '{job_item.job_name}' assigned to {job_item.job_artisan}",
-                    priority=Notification.Priority.NORMAL,
-                    target_url=f"/job-items/{job_item.pk}/"
-                ) for m in members if m and m != user
-            ]
-            Notification.objects.bulk_create(notifications)
+            members = ns.project_members()
+            ns.send_to(members, f"New job item '{job_item.job_name}' added to {work_item.name}", exclude={user})
 
 
 
@@ -865,7 +755,7 @@ class JobItemViewSet(PlotScopedMixin, ExportMixin, ApprovalMixin, viewsets.Model
 # JobReport ViewSet
 # ---------------------------------------------------------------------------
 
-class JobReportViewSet(PlotScopedMixin, ExportMixin, ApprovalMixin, ImageHandlingMixin, viewsets.ModelViewSet):
+class JobReportViewSet(ScopeResolutionMixin, ExportMixin, ApprovalMixin, ImageHandlingMixin, viewsets.ModelViewSet):
     cover_image_field = 'job_image'
     def get_image_serializer_class(self):
         from .serializers import JobReportImageSerializer
@@ -880,6 +770,7 @@ class JobReportViewSet(PlotScopedMixin, ExportMixin, ApprovalMixin, ImageHandlin
     POST .../reports/{pk}/approve/
     POST .../reports/{pk}/reject/
     """
+    scope_model = JobReport
     serializer_class = JobReportSerializer
 
     def get_permissions(self):
@@ -904,27 +795,9 @@ class JobReportViewSet(PlotScopedMixin, ExportMixin, ApprovalMixin, ImageHandlin
 
     def _notify_report_comment(self, report, comment):
         project = report.job_item.work_item.construction_plot.construction_project
-        plot = report.job_item.work_item.construction_plot
-        members = set([project.created_by, project.client, project.project_manager])
-        members.update(project.consultants.all())
-        for f in plot.foremen.all():
-            members.add(f)
-        members.discard(comment.user)
-
-        notifications = [
-            Notification(
-                user=member,
-                project=project,
-                message=(
-                    f"New comment on report for {report.job_item.job_name} "
-                    f"in {report.job_item.work_item.name}"
-                ),
-                priority=Notification.Priority.NORMAL,
-                target_url=f"/job-items/{report.job_item.pk}?report={report.pk}"
-            )
-            for member in members if member
-        ]
-        Notification.objects.bulk_create(notifications)
+        ns = NotificationService(project=project)
+        members = ns.project_members()
+        ns.send_to(members, f"New comment on report for {report.job_item.job_name} in {report.job_item.work_item.name}", exclude={comment.user})
 
     def perform_create(self, serializer):
         job_item = get_object_or_404(
@@ -969,12 +842,12 @@ class JobReportViewSet(PlotScopedMixin, ExportMixin, ApprovalMixin, ImageHandlin
         user = request.user
         role_project = get_project_role(user, project)
         role_plot = get_plot_role(user, plot)
-        is_owner_or_pm = (
-            role_project in ("owner", "project_manager") or
-            role_plot in ("owner", "project_manager") or
+        is_creator_or_pm = (
+            role_project in ("creator", "project_manager") or
+            role_plot in ("creator", "project_manager") or
             getattr(user, "is_superuser", False)
         )
-        if not is_owner_or_pm:
+        if not is_creator_or_pm:
             raise PermissionDenied("Only the project manager or project creator can delete a report.")
 
         provided_name = None
@@ -1141,11 +1014,13 @@ class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
 # Document ViewSet
 # ---------------------------------------------------------------------------
 
-class DocumentViewSet(ProjectScopedMixin, viewsets.ModelViewSet):
+class DocumentViewSet(ScopeResolutionMixin, viewsets.ModelViewSet):
     """
     Nested under /projects/{project_pk}/documents/
     Can also filter by plot via query param ?plot_id=
     """
+    scope_model = Document
+    scope_model = Document
     serializer_class = DocumentSerializer
 
     def get_permissions(self):
@@ -1173,8 +1048,8 @@ class DocumentViewSet(ProjectScopedMixin, viewsets.ModelViewSet):
         if plot_id:
             qs = qs.filter(plot_id=plot_id)
 
-        # PM, Consultant, Client, Owner can see all documents
-        if role in {"owner", "project_manager", "consultant", "client"}:
+        # PM, Consultant, Client, Creator can see all documents
+        if role in {"creator", "project_manager", "consultant", "client"}:
             return qs
 
         # Foreman, Storekeeper, and Plot Member logic

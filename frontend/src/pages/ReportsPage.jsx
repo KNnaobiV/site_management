@@ -515,7 +515,7 @@ export default function ReportsPage() {
 
   const displayProjects = useMemo(() => {
     if (reportType === 'financial') {
-      return projects.filter(p => p.role === 'owner' || p.role === 'project_manager');
+      return projects.filter(p => p.role === 'creator' || p.role === 'project_manager');
     }
     return projects;
   }, [projects, reportType]);

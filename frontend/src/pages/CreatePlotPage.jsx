@@ -226,7 +226,7 @@ const CreatePlotPage = () => {
     setLoading(true);
     setError(null);
 
-    const canSetProgress = isEditing && (plotData?.role === 'owner' || plotData?.role === 'project_manager');
+    const canSetProgress = isEditing && (plotData?.role === 'creator' || plotData?.role === 'project_manager');
 
     const payload = {
       plot_number: formData.plot_number || '',
@@ -585,7 +585,7 @@ const CreatePlotPage = () => {
                   </span>
                 </div>
 
-                {(plotData?.role === 'owner' || plotData?.role === 'project_manager') ? (
+                {(plotData?.role === 'creator' || plotData?.role === 'project_manager') ? (
                   <div>
                     <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
                       <button

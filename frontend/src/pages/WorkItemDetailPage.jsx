@@ -412,37 +412,37 @@ const WorkItemDetailPage = () => {
   const isOverBudget = hasBudget && totalSpent > parseFloat(activeBudget.allocated_amount);
 
   const canViewFinance =
-    plot?.role === 'owner' ||
+    plot?.role === 'creator' ||
     plot?.role === 'project_manager' ||
     plot?.role === 'foreman' ||
-    project?.role === 'owner' ||
+    project?.role === 'creator' ||
     project?.role === 'project_manager';
 
   const canManageBudget = canViewFinance;
 
   const canApprove = (
-    plot?.role === 'owner' ||
+    plot?.role === 'creator' ||
     plot?.role === 'project_manager' ||
-    project?.role === 'owner' ||
+    project?.role === 'creator' ||
     project?.role === 'project_manager'
   );
 
   const canComplete = canApprove;
 
   const canViewReports =
-    plot?.role === 'owner' ||
+    plot?.role === 'creator' ||
     plot?.role === 'project_manager' ||
     plot?.role === 'foreman' ||
     plot?.role === 'consultant' ||
-    project?.role === 'owner' ||
+    project?.role === 'creator' ||
     project?.role === 'project_manager' ||
     project?.role === 'consultant';
 
   const canViewInternalComments =
-    plot?.role === 'owner' ||
+    plot?.role === 'creator' ||
     plot?.role === 'project_manager' ||
     plot?.role === 'foreman' ||
-    project?.role === 'owner' ||
+    project?.role === 'creator' ||
     project?.role === 'project_manager';
 
   const [exportingFinancial, setExportingFinancial] = useState(false);
@@ -510,12 +510,12 @@ const WorkItemDetailPage = () => {
         </div>
 
         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-          {(plot?.role === 'owner' || plot?.role === 'project_manager') && (
+          {(plot?.role === 'creator' || plot?.role === 'project_manager') && (
             <button className="btn-ghost" onClick={() => navigate(`/work-items/${id}/edit`)}>
               <Edit2 size={16} /> Edit
             </button>
           )}
-          {(plot?.role === 'owner' || plot?.role === 'project_manager' || project?.role === 'owner' || project?.role === 'project_manager') && !workItem.is_approved && (
+          {(plot?.role === 'creator' || plot?.role === 'project_manager' || project?.role === 'creator' || project?.role === 'project_manager') && !workItem.is_approved && (
             <button className="btn-ghost" onClick={() => setShowReviewModal(true)}>
               <CheckCircle2 size={16} /> Review Work
             </button>
@@ -533,7 +533,7 @@ const WorkItemDetailPage = () => {
           <button className="btn-ghost" onClick={() => setShowAttachModal(true)}>
             <ImageIcon size={16} /> Attach Photos
           </button>
-          {(plot?.role === 'owner' || plot?.role === 'project_manager' || plot?.role === 'foreman') && workItem.work_status !== 'Completed' && (
+          {(plot?.role === 'creator' || plot?.role === 'project_manager' || plot?.role === 'foreman') && workItem.work_status !== 'Completed' && (
             <button className="btn-primary" onClick={() => navigate(`/work-items/${id}/job-items/new`)}>
               <Plus size={16} /> Add Job
             </button>
@@ -649,7 +649,7 @@ const WorkItemDetailPage = () => {
                 </div>
               </div>
             ))}
-            {(plot?.role === 'owner' || plot?.role === 'project_manager' || plot?.role === 'foreman') && workItem.work_status !== 'Completed' && (
+            {(plot?.role === 'creator' || plot?.role === 'project_manager' || plot?.role === 'foreman') && workItem.work_status !== 'Completed' && (
               <button className="btn-ghost" onClick={() => setShowNewJobItem(true)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '13px' }}>
                 <Plus size={14} /> Add Job
               </button>

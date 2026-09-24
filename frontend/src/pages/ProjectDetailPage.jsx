@@ -264,6 +264,9 @@ const ProjectDetailPage = () => {
   // Team tab state
   const [pendingInvites, setPendingInvites] = useState([]);
   const [loadingInvites, setLoadingInvites] = useState(false);
+  const [memberToRemove, setMemberToRemove] = useState(null);
+  const [removeConfirmText, setRemoveConfirmText] = useState('');
+  const [removingMember, setRemovingMember] = useState(false);
 
   // Report sub-navigation & export state
   const [reportType, setReportType] = useState('job'); // 'job' | 'financial'
@@ -281,7 +284,7 @@ const ProjectDetailPage = () => {
 
   useEffect(() => {
     if (activeTab === 'team') fetchInvitations();
-    if (activeTab === 'reports' && (project?.role === 'owner' || project?.role === 'project_manager')) {
+    if (activeTab === 'reports' && (project?.role === 'creator' || project?.role === 'project_manager')) {
       fetchReports();
     }
   }, [activeTab, project?.role]);
@@ -296,7 +299,7 @@ const ProjectDetailPage = () => {
         setProject(p);
         if (p.budget) setBudget(p.budget);
       }
-      const canSeeReports = p?.role === 'owner' || p?.role === 'project_manager';
+      const canSeeReports = p?.role === 'creator' || p?.role === 'project_manager';
 
       const [plotsRes, reportsRes, expRes, bRes] = await Promise.all([
         apiFetch(`/projects/${id}/plots/`, { token }),
@@ -365,6 +368,30 @@ const ProjectDetailPage = () => {
     } finally { setLoadingInvites(false); }
   };
 
+  const handleRemoveMember = async (username) => {
+    setRemovingMember(username);
+    try {
+      const res = await apiFetch(`/projects/${id}/remove-user/`, {
+        method: 'POST',
+        token,
+        body: JSON.stringify({ username })
+      });
+      if (res.ok) {
+        showSuccessMessage('Member removed successfully.');
+        setMemberToRemove(null);
+        fetchAll(); // Refresh project data
+      } else {
+        const err = await res.json();
+        alert(formatApiError(err) || 'Failed to remove member');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error removing member');
+    } finally {
+      setRemovingMember(null);
+    }
+  };
+
   const handleRevoke = async (inv) => {
     if (!window.confirm('Revoke this invitation?')) return;
     const url = inv._type === 'plot'
@@ -431,11 +458,11 @@ const ProjectDetailPage = () => {
   });
 
   const canViewFinance =
-    project?.role === 'owner' ||
+    project?.role === 'creator' ||
     project?.role === 'project_manager';
 
   const canViewReports =
-    project?.role === 'owner' ||
+    project?.role === 'creator' ||
     project?.role === 'project_manager' ||
     project?.role === 'foreman' ||
     project?.role === 'consultant';
@@ -468,7 +495,7 @@ const ProjectDetailPage = () => {
 
   const owner = project.created_by;
 
-  const canManage = project.role === 'owner' || project.role === 'project_manager';
+  const canManage = project.role === 'creator' || project.role === 'project_manager';
 
   const formatCurrency = (amount, currency = 'NGN') => {
     try {
@@ -502,8 +529,19 @@ const ProjectDetailPage = () => {
                 <p style={{ margin: 0, fontWeight: 700, color: 'var(--text-primary)', fontSize: '15px' }}>{m.display_name || m.username}</p>
                 <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-tertiary)' }}>{m.email}</p>
               </div>
-              <RoleBadge role={displayRole} />
-            </div>
+              {canManage && displayRole !== 'creator' ? (
+                  <button 
+                    className="btn-secondary" 
+                    style={{ color: 'var(--danger-main)', borderColor: 'var(--danger-main)', padding: '6px 12px', fontSize: '12px' }}
+                    onClick={() => { setMemberToRemove(m); setRemoveConfirmText(''); }}
+                    disabled={removingMember === m.username}
+                  >
+                    {removingMember === m.username ? 'Removing...' : 'Remove'}
+                  </button>
+                ) : (
+                  <RoleBadge role={displayRole} />
+                )}
+              </div>
           ))}
         </div>
       )}
@@ -962,16 +1000,18 @@ const ProjectDetailPage = () => {
 
           {/* Current Members */}
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', color: 'var(--text-tertiary)', textTransform: 'uppercase', margin: 0 }}>Current Members</p>
-              {canManage && (
-                <button className="btn-primary" onClick={() => setShowProjectInvite(true)}>
-                  <UserPlus size={16} /> Invite
-                </button>
-              )}
-            </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', color: 'var(--text-tertiary)', textTransform: 'uppercase', margin: 0 }}>Current Members</p>
+                {canManage && (
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <button className="btn-primary" onClick={() => setShowProjectInvite(true)}>
+                      <UserPlus size={16} /> Invite
+                    </button>
+                  </div>
+                )}
+              </div>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              {renderRoleSection('Owner', owner ? [owner] : [], 'owner')}
+              {renderRoleSection('Creator', owner ? [owner] : [], 'owner')}
               {renderRoleSection('Client', client ? [client] : [], 'client')}
               {renderRoleSection('Project Manager', pm ? [pm] : [], 'project_manager')}
               {renderRoleSection('Consultants', consultants, 'consultant')}
@@ -1434,14 +1474,40 @@ const ProjectDetailPage = () => {
         </p>
       </Modal>
 
-      <Modal isOpen={showReportHelp} onClose={() => setShowReportHelp(false)} title="What is a Report?">
+            <Modal isOpen={showReportHelp} onClose={() => setShowReportHelp(false)} title="What is a Report?">
         <p style={{ lineHeight: '1.6', color: 'var(--text-secondary)' }}>
           <strong>Reports</strong> track daily updates and site conditions for active jobs.
-        </p>
-        <p style={{ marginTop: '16px', lineHeight: '1.6', color: 'var(--text-secondary)' }}>
           <strong>Example:</strong> A daily log stating "Poured 50 cubic meters of concrete, faced weather delays", along with photos of the progress.
         </p>
       </Modal>
+
+      {/* Remove Member Confirmation Modal */}
+      {memberToRemove && (
+        <Modal isOpen={!!memberToRemove} onClose={() => setMemberToRemove(null)} title="Confirm Removal">
+          <p style={{ marginBottom: '16px', color: 'var(--text-secondary)' }}>
+            To remove <strong>{memberToRemove.display_name || memberToRemove.username}</strong> from this project, please type their name below to confirm.
+          </p>
+          <input 
+            type="text" 
+            className="input-field" 
+            value={removeConfirmText} 
+            onChange={(e) => setRemoveConfirmText(e.target.value)} 
+            placeholder={memberToRemove.display_name || memberToRemove.username}
+            style={{ width: '100%', padding: '10px', marginBottom: '24px' }}
+          />
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+            <button className="btn-ghost" onClick={() => setMemberToRemove(null)}>Cancel</button>
+            <button 
+              className="btn-primary" 
+              style={{ background: 'var(--danger-main)', borderColor: 'var(--danger-main)', color: 'white' }}
+              disabled={removeConfirmText !== (memberToRemove.display_name || memberToRemove.username) || removingMember === memberToRemove.username}
+              onClick={() => handleRemoveMember(memberToRemove.username)}
+            >
+              {removingMember === memberToRemove.username ? 'Removing...' : 'Confirm Remove'}
+            </button>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 };

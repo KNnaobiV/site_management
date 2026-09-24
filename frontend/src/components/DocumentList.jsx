@@ -210,7 +210,7 @@ export const DocumentList = ({ projectId, plotId, role }) => {
   const [showModal, setShowModal] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
 
-  const canManage = ['owner', 'project_manager', 'consultant'].includes(role);
+  const canManage = ['creator', 'project_manager', 'consultant'].includes(role);
 
   const fetchDocuments = async () => {
     setLoading(true);

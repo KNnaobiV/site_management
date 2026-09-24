@@ -171,6 +171,10 @@ const PlotDetailPage = () => {
   const [reportType, setReportType] = useState('job'); // 'job' | 'financial'
   const [exportingFinancial, setExportingFinancial] = useState(false);
   const [financialExportError, setFinancialExportError] = useState(null);
+  
+  const [memberToRemove, setMemberToRemove] = useState(null);
+  const [removeConfirmText, setRemoveConfirmText] = useState('');
+  const [removingMember, setRemovingMember] = useState(false);
 
   useEffect(() => { fetchAll(); }, [projectId, id]);
 
@@ -187,7 +191,7 @@ const PlotDetailPage = () => {
         setProjectId(pid);
 
         const canSeeReports =
-          plotData.role === 'owner' ||
+          plotData.role === 'creator' ||
           plotData.role === 'project_manager' ||
           plotData.role === 'foreman';
 
@@ -248,7 +252,32 @@ const PlotDetailPage = () => {
       from: monday.toISOString().slice(0, 10),
       to: sunday.toISOString().slice(0, 10),
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const handleRemoveMember = async (username) => {
+    setRemovingMember(username);
+    try {
+      const res = await apiFetch(`/projects/${projectId}/plots/${id}/remove-user/`, {
+        method: 'POST',
+        token,
+        body: JSON.stringify({ username })
+      });
+      if (res.ok) {
+        showSuccessMessage('Member removed successfully.');
+        setMemberToRemove(null);
+        fetchAll(); // Refresh plot data
+      } else {
+        const err = await res.json();
+        alert(formatApiError(err) || 'Failed to remove member');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error removing member');
+    } finally {
+      setRemovingMember(null);
+    }
+  };
 
   const handleExportReports = async () => {
     setExportError(null);
@@ -340,19 +369,20 @@ const PlotDetailPage = () => {
   const isOverBudget = hasBudget && totalSpent > parseFloat(activeBudget.allocated_amount);
 
   const canViewFinance =
-    plot?.role === 'owner' ||
+    plot?.role === 'creator' ||
     plot?.role === 'project_manager' ||
-    project?.role === 'owner' ||
+    project?.role === 'creator' ||
     project?.role === 'project_manager';
 
   const canManageBudget = canViewFinance;
+  const canManage = canManageBudget;
 
   const canViewReports =
-    plot?.role === 'owner' ||
+    plot?.role === 'creator' ||
     plot?.role === 'project_manager' ||
     plot?.role === 'foreman' ||
     plot?.role === 'consultant' ||
-    project?.role === 'owner' ||
+    project?.role === 'creator' ||
     project?.role === 'project_manager' ||
     project?.role === 'consultant';
 
@@ -391,7 +421,7 @@ const PlotDetailPage = () => {
           {plot.notes && <p style={{ color: 'var(--text-secondary)', maxWidth: '600px', fontSize: '15px' }}>{plot.notes}</p>}
         </div>
         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
-          {(plot.role === 'owner' || plot.role === 'project_manager') && (
+          {(plot.role === 'creator' || plot.role === 'project_manager') && (
             <button className="btn-ghost" onClick={() => navigate(`/plots/${id}/edit`)}>
               <Edit2 size={16} /> Edit Plot
             </button>
@@ -404,7 +434,7 @@ const PlotDetailPage = () => {
           <button className="btn-ghost" onClick={() => { setInviteRole('foreman'); setShowInvite(true); }}>
             <UserPlus size={16} /> Assign Foreman
           </button>
-          {(plot.role === 'owner' || plot.role === 'project_manager' || plot.role === 'foreman') && plot.status !== 'Completed' && (
+          {(plot.role === 'creator' || plot.role === 'project_manager' || plot.role === 'foreman') && plot.status !== 'Completed' && (
             <button className="btn-primary" onClick={() => navigate(`/plots/${id}/work-items/new`)}>
               <Plus size={16} /> Add Work
             </button>
@@ -538,7 +568,7 @@ const PlotDetailPage = () => {
       {activeTab === 'workitems' && (
         <div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
-            {(plot.role === 'owner' || plot.role === 'project_manager' || plot.role === 'foreman') && plot.status !== 'Completed' && (
+            {(plot.role === 'creator' || plot.role === 'project_manager' || plot.role === 'foreman') && plot.status !== 'Completed' && (
               <button className="btn-primary" onClick={() => setShowNewWorkItem(true)}>
                 <Plus size={16} /> Add Work
               </button>
@@ -793,11 +823,21 @@ const PlotDetailPage = () => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h2 style={{ fontSize: '24px', margin: 0 }}>Plot Team</h2>
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <button className="btn-primary" onClick={() => { setInviteRole('foreman'); setShowInvite(true); }}>
-                <UserPlus size={16} /> Invite Foreman
-              </button>
-            </div>
+            {canManage && (
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                
+                <button className="btn-primary" onClick={() => { setInviteRole('foreman'); setShowInvite(true); }}>
+                  <UserPlus size={16} /> Invite Foreman
+                </button>
+              </div>
+            )}
+            {!canManage && (
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button className="btn-primary" onClick={() => { setInviteRole('foreman'); setShowInvite(true); }}>
+                  <UserPlus size={16} /> Invite Foreman
+                </button>
+              </div>
+            )}
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
@@ -814,8 +854,18 @@ const PlotDetailPage = () => {
                       <div style={{ flex: 1 }}>
                         <p style={{ margin: '0 0 4px', fontWeight: 700, fontSize: '16px', color: 'var(--text-primary)' }}>{f.display_name || f.username}</p>
                         <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-secondary)' }}>{f.email}</p>
+                        </div>
+                        {canManage && (
+                          <button 
+                            className="btn-secondary" 
+                            style={{ color: 'var(--danger-main)', borderColor: 'var(--danger-main)', padding: '6px 12px', fontSize: '12px' }}
+                            onClick={() => { setMemberToRemove(f); setRemoveConfirmText(''); }}
+                            disabled={removingMember === f.username}
+                          >
+                            {removingMember === f.username ? 'Removing...' : 'Remove'}
+                          </button>
+                        )}
                       </div>
-                    </div>
                   ))
                 ) : (
                   <div

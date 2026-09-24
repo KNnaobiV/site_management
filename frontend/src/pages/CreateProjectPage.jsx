@@ -175,7 +175,7 @@ const CreateProjectPage = () => {
     setLoading(true);
     setError(null);
 
-    const canSetProgress = isEditing && (projectData?.role === 'owner' || projectData?.role === 'project_manager');
+    const canSetProgress = isEditing && (projectData?.role === 'creator' || projectData?.role === 'project_manager');
 
     const payload = {
       project_name: formData.project_name,
@@ -431,7 +431,7 @@ const CreateProjectPage = () => {
                   </span>
                 </div>
 
-                {(projectData?.role === 'owner' || projectData?.role === 'project_manager') ? (
+                {(projectData?.role === 'creator' || projectData?.role === 'project_manager') ? (
                   <div>
                     <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
                       <button

@@ -6,7 +6,7 @@ from rest_framework import status
 from django.db.models import Q as db_Q
 
 from finance.models import Expense
-from core.permissions import can_view_finance
+from core.services.authorization import AuthorizationService
 from core.reports import build_financial_report_pdf, build_financial_report_excel
 def get_artisan_name(job_item):
     if not job_item:
@@ -25,7 +25,8 @@ class FinancialReportService:
     def export(self, request):
         from rest_framework.exceptions import PermissionDenied
         
-        if not can_view_finance(self.user, self.obj):
+        auth = AuthorizationService(self.user)
+        if not auth.can_manage_finance(self.obj):
             raise PermissionDenied("You do not have permission to view or export financial reports.")
 
         obj_type = getattr(self.obj.__class__, "__name__", "")

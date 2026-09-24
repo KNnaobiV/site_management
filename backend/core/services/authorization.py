@@ -24,35 +24,37 @@ class AuthorizationService:
         return self.role_for(obj) != "none"
 
     def can_manage_project(self, obj):
-        return self.role_for(obj) in {"owner", "project_manager"}
+        return self.role_for(obj) in {"creator", "project_manager"}
 
     def can_manage_plot(self, obj):
-        return self.role_for(obj) in {"owner", "project_manager", "foreman"}
+        return self.role_for(obj) in {"creator", "project_manager", "foreman"}
 
     def can_create_work_item(self, obj):
+        # PM and Creator can create (auto-approved). Foreman can create (needs approval).
+        # Client cannot create.
         return self.role_for(obj) in {
-            "owner",
+            "creator",
             "project_manager",
             "foreman",
         }
 
     def can_create_job_item(self, obj):
         return self.role_for(obj) in {
-            "owner",
+            "creator",
             "project_manager",
             "foreman",
         }
 
     def can_submit_report(self, obj):
         return self.role_for(obj) in {
-            "owner",
+            "creator",
             "project_manager",
             "foreman",
         }
 
     def can_review_report(self, obj):
         return self.role_for(obj) in {
-            "owner",
+            "creator",
             "project_manager",
             "client",
             "consultant",
@@ -60,7 +62,15 @@ class AuthorizationService:
 
     def can_manage_finance(self, obj):
         return self.role_for(obj) in {
-            "owner",
+            "creator",
             "project_manager",
             "foreman",
         }
+
+    def can_approve(self, obj):
+        """Used to determine if the user can approve/reject items (e.g. Work Items, Job Items)."""
+        return self.role_for(obj) in {"creator", "project_manager"}
+        
+    def can_see_unapproved_items(self, obj):
+        """Only PM and Creator can see unapproved items."""
+        return self.role_for(obj) in {"creator", "project_manager"}
