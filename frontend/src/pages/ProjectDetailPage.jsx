@@ -1,9 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
+<<<<<<< HEAD
 import { Edit2, Plus, FileText, UserPlus, MoreHorizontal, MapPin, Calendar, Users, Search, Loader, X, HardHat, Package, Briefcase, Image as ImageIcon, DollarSign } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { apiFetch, unwrapList, formatApiError, getMediaUrl } from '../api/client';
 import { Breadcrumb, Tabs, Avatar, Spinner, RoleBadge, InviteModal, DocumentList, ProgressDonut } from '../components';
+=======
+import { Edit2, Plus, FileText, UserPlus, MoreHorizontal, MapPin, Calendar, Users, Search, Loader, X, HardHat, Package, Briefcase, Image as ImageIcon, DollarSign, Download, BarChart3, HelpCircle } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { apiFetch, unwrapList, formatApiError, getMediaUrl } from '../api/client';
+import { Breadcrumb, Tabs, Avatar, Spinner, RoleBadge, InviteModal, DocumentList, ProgressDonut, Modal } from '../components';
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
 import BudgetModal from '../components/BudgetModal';
 import ExpensesTable from '../components/ExpensesTable';
 import { showSuccessMessage } from '../utils/successMessage';
@@ -45,7 +52,10 @@ const NewPlotForm = ({ projectId, token, onSuccess, onClose }) => {
   const [coverImagePreview, setCoverImagePreview] = useState(null);
   const [form, setForm] = useState({
     plot_number: '',
+<<<<<<< HEAD
     plot_name: '',
+=======
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
     address: '',
     status: 'Planned',
     start_date: new Date().toISOString().split('T')[0],
@@ -71,8 +81,12 @@ const NewPlotForm = ({ projectId, token, onSuccess, onClose }) => {
     setSaving(true); setError(null);
     const payload = {
       address: form.address,
+<<<<<<< HEAD
       plot_number: form.plot_number || form.plot_name || '',
       plot_name: form.plot_name || form.plot_number || '',
+=======
+      plot_number: form.plot_number || '',
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
       status: form.status || 'Planned',
       start_date: form.start_date,
       target_end_date: form.target_end_date,
@@ -85,7 +99,17 @@ const NewPlotForm = ({ projectId, token, onSuccess, onClose }) => {
     if (coverImageFile) {
       body = new FormData();
       Object.entries(payload).forEach(([k, v]) => {
+<<<<<<< HEAD
         if (v !== null && v !== undefined) body.append(k, v);
+=======
+        if (v !== null && v !== undefined) {
+          if (Array.isArray(v)) {
+            v.forEach(item => body.append(k, item));
+          } else {
+            body.append(k, v);
+          }
+        }
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
       });
       body.append('cover_image', coverImageFile);
     } else {
@@ -105,6 +129,7 @@ const NewPlotForm = ({ projectId, token, onSuccess, onClose }) => {
       <p style={{ color: 'var(--text-tertiary)', marginBottom: '32px' }}>Add a new construction plot to this project.</p>
       {error && <div style={{ background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.2)', color: '#dc2626', padding: '12px 16px', borderRadius: '12px', marginBottom: '20px', fontSize: '14px' }}>{error}</div>}
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+<<<<<<< HEAD
         <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
           <div>
             <label style={labelStyle}>Plot Number <span style={{ color: '#dc2626' }}>*</span></label>
@@ -132,27 +157,54 @@ const NewPlotForm = ({ projectId, token, onSuccess, onClose }) => {
           </div>
           <div>
             <label style={labelStyle}>Target End Date <span style={{ color: '#dc2626' }}>*</span></label>
+=======
+        <div>
+          <label style={labelStyle}>Plot Number <span style={{ color: "var(--brand-orange)" }}>*</span></label>
+          <input type="text" required value={form.plot_number} onChange={e => set('plot_number', e.target.value)} placeholder="e.g. Plot 101" style={inputStyle} />
+        </div>
+        <div>
+          <label style={labelStyle}>Address <span style={{ color: "var(--brand-orange)" }}>*</span></label>
+          <input type="text" required value={form.address} onChange={e => set('address', e.target.value)} placeholder="123 Main St, City" style={inputStyle} />
+        </div>
+        <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
+          <div>
+            <label style={labelStyle}>Status <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
+            <select value={form.status} onChange={e => set('status', e.target.value)} style={inputStyle}>
+              {['Planned', 'In Progress', 'Completed', 'On Hold', 'Delayed', 'Cancelled'].map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </div>
+          <div>
+            <label style={labelStyle}>Start Date <span style={{ color: "var(--brand-orange)" }}>*</span></label>
+            <input type="date" required value={form.start_date} onChange={e => set('start_date', e.target.value)} style={inputStyle} />
+          </div>
+          <div>
+            <label style={labelStyle}>Target End Date <span style={{ color: "var(--brand-orange)" }}>*</span></label>
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
             <input type="date" required value={form.target_end_date} onChange={e => set('target_end_date', e.target.value)} style={inputStyle} />
           </div>
         </div>
         <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
           <div>
-            <label style={labelStyle}>GPS Latitude <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>(optional)</span></label>
+            <label style={labelStyle}>GPS Latitude <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
             <input type="number" step="any" value={form.gps_latitude} onChange={e => set('gps_latitude', e.target.value)} placeholder="e.g. 6.524379" style={inputStyle} />
           </div>
           <div>
-            <label style={labelStyle}>GPS Longitude <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>(optional)</span></label>
+            <label style={labelStyle}>GPS Longitude <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
             <input type="number" step="any" value={form.gps_longitude} onChange={e => set('gps_longitude', e.target.value)} placeholder="e.g. 3.379206" style={inputStyle} />
           </div>
         </div>
         <div>
-          <label style={labelStyle}>Notes <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>(optional)</span></label>
+          <label style={labelStyle}>Notes <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
           <textarea value={form.notes} onChange={e => set('notes', e.target.value)} placeholder="Any notes about this plot..." style={{ ...inputStyle, minHeight: '100px', resize: 'vertical' }} />
         </div>
 
         {/* Cover Image */}
         <div>
+<<<<<<< HEAD
           <label style={labelStyle}>Cover Image <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>(optional)</span></label>
+=======
+          <label style={labelStyle}>Cover Image <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
           <input
             type="file"
             ref={coverInputRef}
@@ -258,12 +310,21 @@ const ProjectDetailPage = () => {
   const [showBudgetModal, setShowBudgetModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
+  const [showPlotHelp, setShowPlotHelp] = useState(false);
+  const [showReportHelp, setShowReportHelp] = useState(false);
   const [showNewPlot, setShowNewPlot] = useState(false);
   const [showProjectInvite, setShowProjectInvite] = useState(false);
 
   // Team tab state
   const [pendingInvites, setPendingInvites] = useState([]);
   const [loadingInvites, setLoadingInvites] = useState(false);
+
+  // Report sub-navigation & export state
+  const [reportType, setReportType] = useState('job'); // 'job' | 'financial'
+  const [exportingJob, setExportingJob] = useState(false);
+  const [jobExportError, setJobExportError] = useState(null);
+  const [exportingFinancial, setExportingFinancial] = useState(false);
+  const [financialExportError, setFinancialExportError] = useState(null);
 
   useEffect(() => { fetchAll(); }, [id]);
 
@@ -274,12 +335,15 @@ const ProjectDetailPage = () => {
 
   useEffect(() => {
     if (activeTab === 'team') fetchInvitations();
-    if (activeTab === 'reports') fetchReports();
-  }, [activeTab]);
+    if (activeTab === 'reports' && (project?.role === 'owner' || project?.role === 'project_manager')) {
+      fetchReports();
+    }
+  }, [activeTab, project?.role]);
 
   const fetchAll = async () => {
     setLoading(true);
     try {
+<<<<<<< HEAD
       const [projRes, plotsRes, reportsRes, expRes, bRes] = await Promise.all([
         apiFetch(`/projects/${id}/`, { token }),
         apiFetch(`/projects/${id}/plots/`, { token }),
@@ -294,6 +358,25 @@ const ProjectDetailPage = () => {
       }
       if (plotsRes.ok) setPlots(unwrapList(await plotsRes.json()));
       if (reportsRes.ok) setReports(unwrapList(await reportsRes.json()));
+=======
+      const projRes = await apiFetch(`/projects/${id}/`, { token });
+      let p = null;
+      if (projRes.ok) {
+        p = await projRes.json();
+        setProject(p);
+        if (p.budget) setBudget(p.budget);
+      }
+      const canSeeReports = p?.role === 'owner' || p?.role === 'project_manager';
+
+      const [plotsRes, reportsRes, expRes, bRes] = await Promise.all([
+        apiFetch(`/projects/${id}/plots/`, { token }),
+        canSeeReports ? apiFetch(`/projects/${id}/reports/`, { token }) : Promise.resolve(null),
+        apiFetch(`/projects/${id}/expenses/`, { token }),
+        apiFetch(`/projects/${id}/budget/`, { token }),
+      ]);
+      if (plotsRes.ok) setPlots(unwrapList(await plotsRes.json()));
+      if (reportsRes && reportsRes.ok) setReports(unwrapList(await reportsRes.json()));
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
       if (expRes.ok) setExpenses(unwrapList(await expRes.json()));
       if (bRes.ok) setBudget(await bRes.json());
     } catch (e) {
@@ -364,21 +447,96 @@ const ProjectDetailPage = () => {
     } catch (e) { console.error(e); }
   };
 
+<<<<<<< HEAD
   const isForemanOnAnyPlot = plots.some(p => {
     const foremanId = p.foreman?.id || p.foreman;
     return foremanId && currentUser && (foremanId === currentUser.id);
+=======
+  const handleExportJobReports = async () => {
+    setExportingJob(true);
+    setJobExportError(null);
+    try {
+      const res = await apiFetch(`/projects/${id}/export-reports/`, { token });
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        throw new Error(data?.detail || 'Unable to export job reports.');
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = `project_${id}_reports_${new Date().toISOString().split('T')[0]}.pdf`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setJobExportError(err.message || 'Job reports export failed.');
+    } finally {
+      setExportingJob(false);
+    }
+  };
+
+  const handleExportFinancialReport = async () => {
+    setExportingFinancial(true);
+    setFinancialExportError(null);
+    try {
+      const res = await apiFetch(`/projects/${id}/export-financial-report/`, { token });
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        throw new Error(data?.detail || 'Unable to export financial report.');
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = `project_${id}_financial_report_${new Date().toISOString().split('T')[0]}.pdf`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setFinancialExportError(err.message || 'Financial report export failed.');
+    } finally {
+      setExportingFinancial(false);
+    }
+  };
+
+  const isForemanOnAnyPlot = plots.some(p => {
+    return p.foremen && currentUser && p.foremen.some(f => (f.id || f) === currentUser.id);
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
   });
 
   const canViewFinance =
     project?.role === 'owner' ||
+<<<<<<< HEAD
     project?.role === 'project_manager' ||
     isForemanOnAnyPlot;
+=======
+    project?.role === 'project_manager';
+
+  const canViewReports =
+    project?.role === 'owner' ||
+    project?.role === 'project_manager' ||
+    project?.role === 'foreman' ||
+    project?.role === 'consultant';
+
+  useEffect(() => {
+    if (activeTab === 'reports' && !canViewReports && !loading) {
+      setActiveTab('overview');
+    }
+  }, [activeTab, canViewReports, loading]);
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
 
   const tabs = [
     { id: 'overview', label: 'Overview' },
     { id: 'plots', label: `Plots (${plots.length})` },
     ...(canViewFinance ? [{ id: 'finance', label: 'Finance' }] : []),
+<<<<<<< HEAD
     { id: 'reports', label: `Reports (${reports.length})` },
+=======
+    ...(canViewReports ? [{ id: 'reports', label: `Reports (${reports.length})` }] : []),
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
     { id: 'documents', label: 'Documents' },
     { id: 'team', label: 'Team' },
   ];
@@ -394,10 +552,7 @@ const ProjectDetailPage = () => {
   const client = project.client;
   const consultants = project.consultants || [];
 
-  const teamMembers = [];
-  if (pm) teamMembers.push({ ...pm, display_role: 'project_manager' });
-  if (client) teamMembers.push({ ...client, display_role: 'client' });
-  consultants.forEach(c => teamMembers.push({ ...c, display_role: 'consultant' }));
+  const owner = project.created_by;
 
   const canManage = project.role === 'owner' || project.role === 'project_manager';
 
@@ -417,6 +572,33 @@ const ProjectDetailPage = () => {
   const percentageSpent = hasBudget ? Math.round((totalSpent / parseFloat(activeBudget.allocated_amount)) * 100) : null;
   const isOverBudget = hasBudget && totalSpent > parseFloat(activeBudget.allocated_amount);
 
+<<<<<<< HEAD
+=======
+  const renderRoleSection = (title, members, displayRole) => (
+    <div style={{ marginBottom: '24px' }}>
+      <p style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.05em', color: 'var(--text-tertiary)', textTransform: 'uppercase', margin: '0 0 12px' }}>{title}</p>
+      {(!members || members.length === 0) ? (
+        <div style={{ padding: '16px 24px', background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '16px', color: 'var(--text-tertiary)' }}>
+          N/A
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {members.map((m, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px 24px', background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '16px' }}>
+              <Avatar name={m.display_name || m.username} size={40} />
+              <div style={{ flex: 1 }}>
+                <p style={{ margin: 0, fontWeight: 700, color: 'var(--text-primary)', fontSize: '15px' }}>{m.display_name || m.username}</p>
+                <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-tertiary)' }}>{m.email}</p>
+              </div>
+              <RoleBadge role={displayRole} />
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
   return (
     <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 0 60px' }}>
       {/* Breadcrumb */}
@@ -543,7 +725,11 @@ const ProjectDetailPage = () => {
                     }} />
                   </div>
                 )}
+<<<<<<< HEAD
                 <div style={{ display: 'flex', gap: '10px', marginTop: '16px', paddingTop: '12px', borderTop: '1px solid var(--border-subtle)' }}>
+=======
+                <div style={{ display: 'flex', gap: '10px', marginTop: '16px', paddingTop: '12px', borderTop: '1px solid var(--border-subtle)', flexWrap: 'wrap' }}>
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
                   <button
                     className="btn-ghost"
                     onClick={() => setActiveTab('finance')}
@@ -551,6 +737,16 @@ const ProjectDetailPage = () => {
                   >
                     View Finance Details →
                   </button>
+<<<<<<< HEAD
+=======
+                  <button
+                    className="btn-ghost"
+                    onClick={() => navigate(`/reports?type=financial&project=${id}&granularity=project`)}
+                    style={{ fontSize: '12px', padding: '4px 8px', color: 'var(--text-secondary)', borderColor: 'transparent' }}
+                  >
+                    Open in Reports Hub →
+                  </button>
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
                 </div>
               </li>
             )}
@@ -601,8 +797,16 @@ const ProjectDetailPage = () => {
           {plots.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '60px', color: 'var(--text-tertiary)' }}>
               <MapPin size={40} style={{ margin: '0 auto 16px', display: 'block', opacity: 0.3 }} />
-              <p style={{ fontWeight: 600 }}>No plots yet</p>
-              <p style={{ fontSize: '14px' }}>Add the first plot to get started.</p>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                <p style={{ fontWeight: 600, margin: 0 }}>No plots yet</p>
+                <div 
+                  onClick={() => setShowPlotHelp(true)} 
+                  style={{ display: 'flex', alignItems: 'center', color: 'var(--brand-orange)', cursor: 'pointer' }}
+                >
+                  <HelpCircle size={16} />
+                </div>
+              </div>
+              <p style={{ fontSize: '14px', margin: '8px 0 0' }}>Add the first plot to get started.</p>
             </div>
           ) : (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
@@ -624,9 +828,9 @@ const ProjectDetailPage = () => {
                   </p>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <StatusPill status={'Planned'} />
-                    {plot.foreman && (
+                    {plot.foremen && plot.foremen.length > 0 && (
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <Avatar name={plot.foreman.display_name || plot.foreman.username} size={28} />
+                        <Avatar name={plot.foremen[0].display_name || plot.foremen[0].username} size={28} />
                         <span style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>Foreman</span>
                       </div>
                     )}
@@ -641,6 +845,18 @@ const ProjectDetailPage = () => {
       {/* Finance Tab */}
       {canViewFinance && activeTab === 'finance' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+<<<<<<< HEAD
+=======
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+            <button
+              className="btn-secondary"
+              onClick={() => navigate(`/reports?type=financial&project=${id}&granularity=project`)}
+              style={{ fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+            >
+              <BarChart3 size={15} /> Open in Reports Hub
+            </button>
+          </div>
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
           {/* Top Metric Cards */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
             <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '16px', padding: '20px' }}>
@@ -821,7 +1037,11 @@ const ProjectDetailPage = () => {
             <div style={{ marginBottom: '16px' }}>
               <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700 }}>Project Expenses</h3>
               <p style={{ margin: '2px 0 0', fontSize: '13px', color: 'var(--text-tertiary)' }}>
+<<<<<<< HEAD
                 Itemized expenses incurred across all plots and work items in this project
+=======
+                Itemized expenses incurred across all plots and works in this project
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
               </p>
             </div>
             <ExpensesTable
@@ -851,6 +1071,7 @@ const ProjectDetailPage = () => {
                 <button className="btn-primary" onClick={() => setShowProjectInvite(true)}>
                   <UserPlus size={16} /> Invite
                 </button>
+<<<<<<< HEAD
               )}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -870,7 +1091,15 @@ const ProjectDetailPage = () => {
                   <p style={{ fontWeight: 600, margin: '0 0 4px' }}>No team members yet</p>
                   <p style={{ fontSize: '14px', margin: 0 }}>Use the form below to invite your first member.</p>
                 </div>
+=======
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
               )}
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              {renderRoleSection('Owner', owner ? [owner] : [], 'owner')}
+              {renderRoleSection('Client', client ? [client] : [], 'client')}
+              {renderRoleSection('Project Manager', pm ? [pm] : [], 'project_manager')}
+              {renderRoleSection('Consultants', consultants, 'consultant')}
             </div>
           </div>
 
@@ -963,36 +1192,92 @@ const ProjectDetailPage = () => {
 
       {/* Reports Tab */}
       {activeTab === 'reports' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          {reports.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '60px', color: 'var(--text-tertiary)' }}>
-              <FileText size={40} style={{ margin: '0 auto 16px', display: 'block', opacity: 0.3 }} />
-              <p style={{ fontWeight: 600 }}>No reports available yet</p>
-              <p style={{ fontSize: '14px' }}>Daily reports from work items will appear here once created.</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          {/* Sub-navigation pill toggle: Job Reports vs Financial Report */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+            <div style={{ display: 'inline-flex', padding: '4px', background: 'var(--bg-raised)', borderRadius: '14px', border: '1px solid var(--border-subtle)' }}>
+              <button
+                type="button"
+                onClick={() => setReportType('job')}
+                style={{
+                  padding: '8px 18px',
+                  borderRadius: '10px',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  border: 'none',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  background: reportType === 'job' ? 'var(--bg-card)' : 'transparent',
+                  color: reportType === 'job' ? 'var(--brand-orange)' : 'var(--text-tertiary)',
+                  boxShadow: reportType === 'job' ? '0 2px 8px rgba(0,0,0,0.08)' : 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                }}
+              >
+                <FileText size={16} /> Job Reports ({reports.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setReportType('financial')}
+                style={{
+                  padding: '8px 18px',
+                  borderRadius: '10px',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  border: 'none',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  background: reportType === 'financial' ? 'var(--bg-card)' : 'transparent',
+                  color: reportType === 'financial' ? 'var(--brand-orange)' : 'var(--text-tertiary)',
+                  boxShadow: reportType === 'financial' ? '0 2px 8px rgba(0,0,0,0.08)' : 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                }}
+              >
+                <DollarSign size={16} /> Financial Report
+              </button>
             </div>
-          ) : (
-            <div style={{ display: 'grid', gap: '16px' }}>
-              {reports.map(report => (
-                <div
-                  key={report.id}
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => navigate(`/job-items/${report.job_item}?report=${report.id}`)}
-                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') navigate(`/job-items/${report.job_item}?report=${report.id}`); }}
-                  style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '18px', padding: '22px', cursor: 'pointer' }}
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '18px', flexWrap: 'wrap' }}>
-                    <div>
-                      <p style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: 'var(--text-primary)' }}>{report.report_date}</p>
-                      <p style={{ margin: '6px 0 0', fontSize: '13px', color: 'var(--text-secondary)' }}>
-                        {report.job_item_name || 'Job report'} • {report.work_item_name || 'Work item'} • {report.construction_plot || project.project_name}
-                      </p>
-                    </div>
-                    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
-                      <span style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>{report.percentage_job_progress}% complete</span>
-                      <StatusPill status={report.priority || 'Planned'} />
+          </div>
+
+          {/* ─── View 1: Job Reports ─── */}
+          {reportType === 'job' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              {/* Job Reports Header & Export Action */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700 }}>Project Job Reports</h3>
+                  <p style={{ margin: '4px 0 0', fontSize: '14px', color: 'var(--text-tertiary)' }}>
+                    Aggregated daily site logs across all plots in this project
+                  </p>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  {jobExportError && <span style={{ color: '#dc2626', fontSize: '13px' }}>{jobExportError}</span>}
+                  <button
+                    className="btn-primary"
+                    onClick={handleExportJobReports}
+                    disabled={exportingJob || reports.length === 0}
+                    style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                  >
+                    <Download size={16} /> {exportingJob ? 'Generating PDF...' : 'Export Job Reports (PDF)'}
+                  </button>
+                </div>
+              </div>
+
+              {reports.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '60px', color: 'var(--text-tertiary)' }}>
+                  <FileText size={40} style={{ margin: '0 auto 16px', display: 'block', opacity: 0.3 }} />
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '4px' }}>
+                    <p style={{ fontWeight: 600, margin: 0 }}>No reports available yet</p>
+                    <div 
+                      onClick={() => setShowReportHelp(true)} 
+                      style={{ display: 'flex', alignItems: 'center', color: 'var(--brand-orange)', cursor: 'pointer' }}
+                    >
+                      <HelpCircle size={16} />
                     </div>
                   </div>
+<<<<<<< HEAD
                   {report.notes && <p style={{ margin: '16px 0 0', fontSize: '14px', color: 'var(--text-secondary)', lineHeight: 1.7 }}>{report.notes}</p>}
                   {report.issues_encountered && <p style={{ margin: '10px 0 0', fontSize: '13px', color: 'var(--status-delayed)' }}>⚠ {report.issues_encountered}</p>}
                   {report.images?.length > 0 && (
@@ -1017,8 +1302,236 @@ const ProjectDetailPage = () => {
                       </div>
                     </div>
                   )}
+=======
+                  <p style={{ fontSize: '14px' }}>Daily reports from works will appear here once created.</p>
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
                 </div>
-              ))}
+              ) : (
+                <div style={{ display: 'grid', gap: '16px' }}>
+                  {reports.map(report => (
+                    <div
+                      key={report.id}
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => navigate(`/job-items/${report.job_item}?report=${report.id}`)}
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') navigate(`/job-items/${report.job_item}?report=${report.id}`); }}
+                      style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '18px', padding: '22px', cursor: 'pointer' }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '18px', flexWrap: 'wrap' }}>
+                        <div>
+                          <p style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: 'var(--text-primary)' }}>{report.report_date}</p>
+                          <p style={{ margin: '6px 0 0', fontSize: '13px', color: 'var(--text-secondary)' }}>
+                            {report.job_item_name || 'Job report'} • {report.work_item_name || 'Work'} • {report.construction_plot || project.project_name}
+                          </p>
+                        </div>
+                        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
+                          <span style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>{report.percentage_job_progress}% complete</span>
+                          <StatusPill status={report.priority || 'Planned'} />
+                        </div>
+                      </div>
+                      {report.notes && <p style={{ margin: '16px 0 0', fontSize: '14px', color: 'var(--text-secondary)', lineHeight: 1.7 }}>{report.notes}</p>}
+                      {report.video_link && (
+                        <div style={{ marginTop: '8px' }}>
+                          <a href={report.video_link} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '13px', color: 'var(--brand-orange)', textDecoration: 'none', fontWeight: 600 }}>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+                            View Video
+                          </a>
+                        </div>
+                      )}
+                      {report.issues_encountered && <p style={{ margin: '10px 0 0', fontSize: '13px', color: 'var(--status-delayed)' }}>⚠ {report.issues_encountered}</p>}
+                      {report.images?.length > 0 && (
+                        <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                          <span style={{ fontSize: '12px', color: 'var(--text-tertiary)', display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: 600 }}>
+                            <ImageIcon size={14} /> {report.images.length} photo{report.images.length > 1 ? 's' : ''}
+                          </span>
+                          <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', padding: '2px 0' }}>
+                            {report.images.slice(0, 5).map(img => (
+                              <img
+                                key={img.id}
+                                src={getMediaUrl(img.image || img.img)}
+                                alt="Report thumbnail"
+                                style={{ width: '44px', height: '44px', borderRadius: '8px', objectFit: 'cover', border: '1px solid var(--border-subtle)', background: 'var(--bg-raised)' }}
+                              />
+                            ))}
+                            {report.images.length > 5 && (
+                              <div style={{ width: '44px', height: '44px', borderRadius: '8px', background: 'var(--bg-raised)', border: '1px solid var(--border-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 700, color: 'var(--text-tertiary)' }}>
+                                +{report.images.length - 5}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ─── View 2: Financial Report ─── */}
+          {reportType === 'financial' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              {/* Header & Export Action */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700 }}>Project Financial Report</h3>
+                  <p style={{ margin: '4px 0 0', fontSize: '14px', color: 'var(--text-tertiary)' }}>
+                    Executive budget utilization, plot breakdowns, and project expenditures
+                  </p>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  {financialExportError && <span style={{ color: '#dc2626', fontSize: '13px' }}>{financialExportError}</span>}
+                  <button
+                    className="btn-primary"
+                    onClick={handleExportFinancialReport}
+                    disabled={exportingFinancial}
+                    style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                  >
+                    <Download size={16} /> {exportingFinancial ? 'Generating PDF...' : 'Download Financial Report (PDF)'}
+                  </button>
+                </div>
+              </div>
+
+              {/* Financial Metric Summary Cards */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+                <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '18px', padding: '20px' }}>
+                  <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', color: 'var(--text-tertiary)', textTransform: 'uppercase', margin: '0 0 6px' }}>Allocated Budget</p>
+                  <p style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
+                    {hasBudget ? formatCurrency(activeBudget.allocated_amount, budgetCurrency) : 'Not Set'}
+                  </p>
+                </div>
+                <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '18px', padding: '20px' }}>
+                  <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', color: 'var(--text-tertiary)', textTransform: 'uppercase', margin: '0 0 6px' }}>Total Incurred</p>
+                  <p style={{ fontSize: '22px', fontWeight: 700, color: isOverBudget ? '#dc2626' : 'var(--brand-orange)', margin: 0 }}>
+                    {formatCurrency(totalSpent, budgetCurrency)}
+                  </p>
+                </div>
+                <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '18px', padding: '20px' }}>
+                  <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', color: 'var(--text-tertiary)', textTransform: 'uppercase', margin: '0 0 6px' }}>Remaining Budget</p>
+                  <p style={{ fontSize: '22px', fontWeight: 700, color: isOverBudget ? '#dc2626' : '#16a34a', margin: 0 }}>
+                    {hasBudget ? formatCurrency(activeBudget.remaining_amount, budgetCurrency) : '—'}
+                  </p>
+                </div>
+                <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '18px', padding: '20px' }}>
+                  <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', color: 'var(--text-tertiary)', textTransform: 'uppercase', margin: '0 0 6px' }}>Budget Utilization</p>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+                    <p style={{ fontSize: '22px', fontWeight: 700, color: isOverBudget ? '#dc2626' : 'var(--text-primary)', margin: 0 }}>
+                      {hasBudget ? `${percentageSpent}%` : 'N/A'}
+                    </p>
+                    {hasBudget && (
+                      <span style={{ fontSize: '12px', fontWeight: 600, color: isOverBudget ? '#dc2626' : '#16a34a' }}>
+                        {isOverBudget ? 'Over Budget' : 'On Track'}
+                      </span>
+                    )}
+                  </div>
+                  {hasBudget && (
+                    <div style={{ height: '6px', borderRadius: '3px', background: 'var(--bg-raised)', overflow: 'hidden', marginTop: '10px' }}>
+                      <div style={{
+                        height: '100%',
+                        width: `${Math.min(100, percentageSpent)}%`,
+                        background: isOverBudget ? '#dc2626' : 'var(--brand-orange)',
+                        borderRadius: '3px',
+                      }} />
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Plots Budget & Spend Breakdown Table */}
+              <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '20px', padding: '24px' }}>
+                <div style={{ marginBottom: '16px' }}>
+                  <h4 style={{ margin: 0, fontSize: '16px', fontWeight: 700 }}>Plots Budget Breakdown</h4>
+                  <p style={{ margin: '2px 0 0', fontSize: '13px', color: 'var(--text-tertiary)' }}>
+                    Comparative allocated budget and spent amounts across project plots
+                  </p>
+                </div>
+                {plots.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '36px', color: 'var(--text-tertiary)' }}>
+                    <p style={{ margin: 0, fontWeight: 500 }}>No plots found for this project.</p>
+                  </div>
+                ) : (
+                  <div style={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px' }}>
+                      <thead>
+                        <tr style={{ borderBottom: '1px solid var(--border-subtle)', color: 'var(--text-tertiary)', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                          <th style={{ padding: '12px 14px' }}>Plot</th>
+                          <th style={{ padding: '12px 14px' }}>Status</th>
+                          <th style={{ padding: '12px 14px', textAlign: 'right' }}>Allocated Budget</th>
+                          <th style={{ padding: '12px 14px', textAlign: 'right' }}>Spent Amount</th>
+                          <th style={{ padding: '12px 14px', textAlign: 'right' }}>% Spent</th>
+                          <th style={{ padding: '12px 14px', textAlign: 'right' }}>Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {plots.map(plot => {
+                          const plotBudget = plot.budget;
+                          const plotAllocated = parseFloat(plotBudget?.allocated_amount || 0);
+                          const plotSpent = parseFloat(plotBudget?.spent_amount ?? plot.spent_amount ?? 0);
+                          const plotHasBudget = plotAllocated > 0;
+                          const plotPercent = plotHasBudget ? Math.round((plotSpent / plotAllocated) * 100) : null;
+                          const plotOver = plotHasBudget && plotSpent > plotAllocated;
+
+                          return (
+                            <tr key={plot.id} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                              <td style={{ padding: '14px', fontWeight: 600, color: 'var(--text-primary)' }}>
+                                {plot.plot_name ? `${plot.plot_name} (${plot.address})` : plot.address}
+                              </td>
+                              <td style={{ padding: '14px' }}>
+                                <StatusPill status={plot.status || 'Planned'} />
+                              </td>
+                              <td style={{ padding: '14px', textAlign: 'right', color: plotHasBudget ? 'var(--text-primary)' : 'var(--text-tertiary)' }}>
+                                {plotHasBudget ? formatCurrency(plotAllocated, plotBudget?.currency || budgetCurrency) : 'N/A'}
+                              </td>
+                              <td style={{ padding: '14px', textAlign: 'right', fontWeight: 600, color: plotOver ? '#dc2626' : 'var(--text-primary)' }}>
+                                {formatCurrency(plotSpent, plotBudget?.currency || budgetCurrency)}
+                              </td>
+                              <td style={{ padding: '14px', textAlign: 'right' }}>
+                                {plotHasBudget ? (
+                                  <span style={{ fontWeight: 600, color: plotOver ? '#dc2626' : plotPercent > 80 ? '#d97706' : '#16a34a' }}>
+                                    {plotPercent}%
+                                  </span>
+                                ) : (
+                                  <span style={{ color: 'var(--text-tertiary)' }}>N/A</span>
+                                )}
+                              </td>
+                              <td style={{ padding: '14px', textAlign: 'right' }}>
+                                <button
+                                  className="btn-ghost"
+                                  onClick={() => navigate(`/plots/${plot.id}`)}
+                                  style={{ fontSize: '12px', padding: '4px 10px' }}
+                                >
+                                  View Plot →
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+
+              {/* Itemized Expenses Table */}
+              <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '20px', padding: '24px' }}>
+                <div style={{ marginBottom: '16px' }}>
+                  <h4 style={{ margin: 0, fontSize: '16px', fontWeight: 700 }}>Project Expenditures</h4>
+                  <p style={{ margin: '2px 0 0', fontSize: '13px', color: 'var(--text-tertiary)' }}>
+                    Itemized expenses logged across all plots in this project
+                  </p>
+                </div>
+                <ExpensesTable
+                  expenses={expenses}
+                  currency={budgetCurrency}
+                  level="project"
+                  canDelete={canManage}
+                  onExpenseDeleted={() => {
+                    fetchExpenses();
+                    fetchAll();
+                  }}
+                  token={token}
+                />
+              </div>
             </div>
           )}
         </div>
@@ -1061,6 +1574,29 @@ const ProjectDetailPage = () => {
           }}
         />
       )}
+<<<<<<< HEAD
+=======
+
+      <Modal isOpen={showPlotHelp} onClose={() => setShowPlotHelp(false)} title="What is a Plot?">
+        <p style={{ lineHeight: '1.6', color: 'var(--text-secondary)' }}>
+          <strong>Plots</strong> represent physical subdivisions or logical phases of a Project.
+        </p>
+        <p style={{ marginTop: '16px', lineHeight: '1.6', color: 'var(--text-secondary)' }}>
+          <strong>Example:</strong> If your project is a housing estate, a Plot could be "Block A" or "Plot 12". If your project is a highway, a Plot could be "Kilometer 1-5".
+          <br /><br />
+          Inside a Plot, you will track specific Work Items (e.g., Foundation, Plumbing).
+        </p>
+      </Modal>
+
+      <Modal isOpen={showReportHelp} onClose={() => setShowReportHelp(false)} title="What is a Report?">
+        <p style={{ lineHeight: '1.6', color: 'var(--text-secondary)' }}>
+          <strong>Reports</strong> track daily updates and site conditions for active jobs.
+        </p>
+        <p style={{ marginTop: '16px', lineHeight: '1.6', color: 'var(--text-secondary)' }}>
+          <strong>Example:</strong> A daily log stating "Poured 50 cubic meters of concrete, faced weather delays", along with photos of the progress.
+        </p>
+      </Modal>
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
     </div>
   );
 };

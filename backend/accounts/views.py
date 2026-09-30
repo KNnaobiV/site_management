@@ -704,8 +704,7 @@ class UserSearchView(APIView):
                 Q(project_owner__id=project_id) |
                 Q(project_manager__id=project_id) |
                 Q(project_consultants__id=project_id) |
-                Q(plot_foreman__construction_project_id=project_id) |
-                Q(plot_storekeeper__construction_project_id=project_id)
+                Q(plot_foremen__construction_project_id=project_id)
             ).distinct()
             if q:
                 users = users.filter(Q(username__icontains=q) | Q(email__icontains=q))

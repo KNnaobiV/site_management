@@ -1,4 +1,5 @@
 import ast
+import os
 from .base import BASE_DIR, CFG
 
 DATABASES = {
@@ -43,6 +44,14 @@ DEFAULT_FROM_EMAIL = CFG.get(
     'EMAIL',
     'DEFAULT_FROM_EMAIL', 
     fallback='no-reply@sitebud.local'
+<<<<<<< HEAD
+=======
+)
+FEEDBACK_EMAIL = CFG.get(
+    'EMAIL',
+    'FEEDBACK_EMAIL',
+    fallback='feedback@constropal.com'
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
 )
 EMAIL_HOST = CFG.get('EMAIL', 'EMAIL_HOST', fallback='')
 EMAIL_PORT = CFG.getint('EMAIL', 'EMAIL_PORT', fallback=None)

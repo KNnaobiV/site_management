@@ -18,22 +18,32 @@ from __future__ import annotations
 import io
 import os
 import datetime
+from decimal import Decimal
 
+import logging
+from django.conf import settings
+from django.core.mail import EmailMessage
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied, ValidationError
+from django.db.models import Q as db_Q
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
-from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.platypus import Image as PDFImage, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 from rest_framework import status, viewsets
 from rest_framework.views import APIView
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+<<<<<<< HEAD
+=======
+
+logger = logging.getLogger(__name__)
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
 
 from core.models import (
     ConstructionProject, 
@@ -48,7 +58,11 @@ from core.models import (
     Document,
 )
 from base.models import Picture
+<<<<<<< HEAD
 from core.roles import get_project_role, get_plot_role, SEES_UNAPPROVED_ROLES
+=======
+from core.roles import get_project_role, get_plot_role, SEES_UNAPPROVED_ROLES, can_view_finance
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
 from core.services import (
     invite_to_project,
     invite_to_plot,
@@ -97,7 +111,25 @@ from .serializers import (
     DocumentSerializer,
 )
 
-from django.db.models import Q as models_Q
+from finance.models import Expense
+from .reports import (
+    parse_report_date_range,
+    build_progress_report_pdf,
+    build_progress_report_excel,
+    build_financial_report_pdf,
+    build_financial_report_excel,
+    XLSXRenderer,
+    PDFRenderer,
+)
+from rest_framework.renderers import JSONRenderer, BrowsableAPIRenderer
+
+
+def get_artisan_name(job_item):
+    if not job_item:
+        return "—"
+    if getattr(job_item, "job_artisan", None) == "Other" and getattr(job_item, "custom_artisan", None):
+        return job_item.custom_artisan
+    return getattr(job_item, "job_artisan", None) or "—"
 
 
 # ---------------------------------------------------------------------------
@@ -105,6 +137,62 @@ from django.db.models import Q as models_Q
 # ---------------------------------------------------------------------------
 
 User = get_user_model()
+
+
+def _build_figures_table(figures, styles):
+    """
+    Given a list of (fig_num, pic_obj, caption_text),
+    builds a compact 2-column Flowable Table containing thumbnail images and captions.
+    """
+    if not figures:
+        return None
+
+    caption_style = ParagraphStyle(
+        "FigureCaption",
+        parent=styles.get("Normal", styles["BodyText"]),
+        fontSize=8,
+        leading=10,
+        textColor=colors.HexColor("#374151"),
+        alignment=1,
+    )
+
+    fig_table_data = []
+    row = []
+    for fig_num, pic, caption in figures:
+        image_path = getattr(pic.img, 'path', None) if getattr(pic, 'img', None) else None
+        if image_path and os.path.exists(image_path):
+            try:
+                cell_flowables = [
+                    PDFImage(image_path, width=2.4 * inch, height=1.6 * inch),
+                    Spacer(1, 4),
+                    Paragraph(f"<b>Fig. {fig_num}</b>: {caption}", caption_style)
+                ]
+                row.append(cell_flowables)
+                if len(row) == 2:
+                    fig_table_data.append(row)
+                    row = []
+            except Exception:
+                continue
+
+    if row:
+        while len(row) < 2:
+            row.append("")
+        fig_table_data.append(row)
+
+    if not fig_table_data:
+        return None
+
+    figures_table = Table(fig_table_data, colWidths=[265, 265])
+    figures_table.setStyle(TableStyle([
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
+        ("TOPPADDING", (0, 0), (-1, -1), 6),
+        ("LEFTPADDING", (0, 0), (-1, -1), 6),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+    ]))
+    return figures_table
+
 
 class ProjectScopedMixin:
     """
@@ -144,16 +232,57 @@ class PlotScopedMixin:
 
     def get_plot(self) -> ConstructionPlot | None:
         if self._plot_cache is None:
-            plot_pk = self.kwargs.get("plot_pk")
-            project_pk = self.kwargs.get("project_pk")
-            if not plot_pk:
-                return None
-            
-            filter_kwargs = {"pk": plot_pk}
-            if project_pk:
-                filter_kwargs["construction_project__pk"] = project_pk
-                
-            self._plot_cache = get_object_or_404(ConstructionPlot, **filter_kwargs)
+            query_params = (
+                getattr(self.request, "query_params", getattr(self.request, "GET", {}))
+                if hasattr(self, "request") and self.request
+                else {}
+            )
+            plot_pk = (
+                self.kwargs.get("plot_pk") or
+                (self.kwargs.get("pk") if self.__class__.__name__ == "ConstructionPlotViewSet" else None) or
+                query_params.get("plot") or
+                query_params.get("plot_id") or
+                query_params.get("construction_plot")
+            )
+            project_pk = (
+                self.kwargs.get("project_pk") or
+                (self.kwargs.get("pk") if self.__class__.__name__ == "ConstructionProjectViewSet" else None) or
+                query_params.get("project") or
+                query_params.get("project_id")
+            )
+            if plot_pk:
+                filter_kwargs = {"pk": plot_pk}
+                if project_pk:
+                    filter_kwargs["construction_project__pk"] = project_pk
+                self._plot_cache = ConstructionPlot.objects.filter(**filter_kwargs).first()
+                if self._plot_cache:
+                    return self._plot_cache
+
+            # Try resolving from jobitem_pk (nested /jobitems/{jobitem_pk}/) or pk (flat /jobitems/{pk}/)
+            jobitem_pk = (
+                self.kwargs.get("jobitem_pk") or
+                (self.kwargs.get("pk") if self.__class__.__name__ == "JobItemViewSet" else None)
+            )
+            if jobitem_pk:
+                ji = JobItem.objects.filter(pk=jobitem_pk).select_related(
+                    "work_item__construction_plot"
+                ).first()
+                if ji and ji.work_item and ji.work_item.construction_plot:
+                    self._plot_cache = ji.work_item.construction_plot
+                    return self._plot_cache
+
+            # Try resolving from workitem_pk (nested /workitems/{workitem_pk}/) or pk (flat /workitems/{pk}/)
+            workitem_pk = (
+                self.kwargs.get("workitem_pk") or
+                (self.kwargs.get("pk") if self.__class__.__name__ == "WorkItemViewSet" else None)
+            )
+            if workitem_pk:
+                wi = WorkItem.objects.filter(pk=workitem_pk).select_related(
+                    "construction_plot"
+                ).first()
+                if wi and wi.construction_plot:
+                    self._plot_cache = wi.construction_plot
+                    return self._plot_cache
         return self._plot_cache
 
     def get_project(self) -> ConstructionProject | None:
@@ -190,6 +319,10 @@ class ConstructionProjectViewSet(viewsets.ModelViewSet):
     """
     serializer_class = ConstructionProjectSerializer
     parser_classes = [MultiPartParser, FormParser, JSONParser]
+<<<<<<< HEAD
+=======
+    renderer_classes = [JSONRenderer, BrowsableAPIRenderer, XLSXRenderer, PDFRenderer]
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
 
     def get_project(self):
         # For actions that run on a single project instance
@@ -210,17 +343,22 @@ class ConstructionProjectViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
+        if self.action in ("export_reports", "export_financial_report"):
+            qs = ConstructionProject.objects.all()
+            if not getattr(user, "is_superuser", False):
+                qs = qs.filter(is_deleted=False)
+            return qs
+
         qs = ConstructionProject.objects.filter(
             # Any role on the project
-            models_Q(created_by=user) |
-            models_Q(client=user) |
-            models_Q(project_manager=user) |
-            models_Q(consultants=user) |
-            models_Q(constructionplot__foreman=user) |
-            models_Q(constructionplot__storekeeper=user)
+            db_Q(created_by=user) |
+            db_Q(client=user) |
+            db_Q(project_manager=user) |
+            db_Q(consultants=user) |
+            db_Q(constructionplot__foremen=user)
         ).distinct()
         
-        if not user.is_superuser:
+        if not getattr(user, "is_superuser", False):
             qs = qs.filter(is_deleted=False)
         return qs
 
@@ -334,11 +472,208 @@ class ConstructionProjectViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=["get"], url_path="reports")
     def reports(self, request, pk=None):
         project = self.get_project()
+        role = get_project_role(request.user, project)
+        if role == "none":
+            raise PermissionDenied("You do not have permission to view reports on this project.")
+        
         qs = JobReport.objects.filter(
             job_item__work_item__construction_plot__construction_project=project
         ).select_related("reported_by", "job_item", "job_item__work_item").order_by('-report_date')
+        
+        if role == "plot_member":
+            qs = qs.filter(job_item__work_item__construction_plot__foremen=request.user)
+
         serializer = JobReportSerializer(qs, many=True, context=self.get_serializer_context())
         return Response(serializer.data)
+
+    @action(detail=True, methods=["get"], url_path="export-reports")
+    def export_reports(self, request, pk=None):
+        project = self.get_project()
+        role = get_project_role(request.user, project)
+        if role == "none":
+            raise PermissionDenied("You do not have permission to export reports on this project.")
+
+        start_date, end_date = parse_report_date_range(request)
+        if start_date > end_date:
+            return Response({"detail": "start_date cannot be after end_date."}, status=status.HTTP_400_BAD_REQUEST)
+
+        queryset = JobReport.objects.filter(
+            job_item__work_item__construction_plot__construction_project=project,
+            report_date__gte=start_date,
+            report_date__lte=end_date
+        )
+        if role == "plot_member":
+            queryset = queryset.filter(job_item__work_item__construction_plot__foremen=request.user)
+
+        queryset = queryset.select_related(
+            "reported_by", "job_item", "job_item__work_item", "job_item__work_item__construction_plot"
+        ).prefetch_related("photos").order_by('report_date')
+
+        title = f"Project Job Reports: {project.project_name}"
+        metadata_lines = [
+            f"Date range: {start_date.isoformat()} — {end_date.isoformat()} | Generated: {datetime.date.today().isoformat()}"
+        ]
+        if request.GET.get("format") == "xlsx":
+            filename = f"project_{project.id}_reports_{start_date.isoformat()}_{end_date.isoformat()}.xlsx"
+            return build_progress_report_excel(title, metadata_lines, queryset, filename)
+
+        filename = f"project_{project.id}_reports_{start_date.isoformat()}_{end_date.isoformat()}.pdf"
+        return build_progress_report_pdf(title, metadata_lines, queryset, filename, entity_level="project")
+
+    @action(detail=True, methods=["get"], url_path="export-financial-report")
+    def export_financial_report(self, request, pk=None):
+        project = self.get_project()
+        if not can_view_finance(request.user, project):
+            raise PermissionDenied("You do not have permission to view or export financial reports for this project.")
+
+        expenses = Expense.objects.filter(
+            db_Q(project=project) |
+            db_Q(plot__construction_project=project) |
+            db_Q(work_item__construction_plot__construction_project=project) |
+            db_Q(job_item__work_item__construction_plot__construction_project=project),
+            is_deleted=False
+        ).select_related(
+            "cost_code", "plot", "work_item", "job_item",
+            "job_item__work_item", "job_item__work_item__construction_plot"
+        ).order_by("incurred_at", "created_at")
+
+        budget = getattr(project, "project_budget", None)
+        allocated = budget.allocated_amount if budget else Decimal("0.00")
+        has_budget = allocated > 0
+        spent = project.spent_amount
+        remaining = allocated - spent if has_budget else None
+        currency = budget.currency if budget else "NGN"
+
+        plots_qs = project.constructionplot_set.all()
+
+        itemized_sheet_title = "Itemized Expenses"
+        itemized_headers = ["Date", "Work Item", "Job Item", "Artisan", "Amount Paid"]
+        itemized_rows_xlsx = []
+        itemized_rows_pdf = []
+        for exp in expenses:
+            d_str = exp.incurred_at.isoformat() if hasattr(exp.incurred_at, "isoformat") else str(exp.incurred_at)
+            w_str = (
+                exp.work_item.name if exp.work_item else
+                exp.job_item.work_item.name if exp.job_item else
+                "General"
+            )
+            j_str = exp.job_item.job_name if exp.job_item else "General"
+            artisan_str = get_artisan_name(exp.job_item)
+
+            itemized_rows_xlsx.append([d_str, w_str, j_str, artisan_str, float(exp.amount)])
+            itemized_rows_pdf.append([d_str, w_str, j_str, artisan_str, f"{exp.currency} {exp.amount:,.2f}"])
+
+        # 1. Plots Breakdown
+        plots_headers_xlsx = ["Plot", "Start Date", "End Date", "Allocated Budget", "Total Spent", "Remaining", "Utilization"]
+        plots_headers_pdf = ["Plot", "Start Date", "End Date", "Allocated Budget", "Total Spent", "Remaining", "Utilization"]
+        plots_rows_xlsx = []
+        plots_rows_pdf = []
+        for plot in plots_qs:
+            p_budget = getattr(plot, "plot_budget", None)
+            p_alloc = p_budget.allocated_amount if p_budget else Decimal("0.00")
+            p_has_b = p_alloc > 0
+            p_spent = plot.spent_amount
+            p_rem = p_alloc - p_spent if p_has_b else None
+            p_rate = f"{(p_spent / p_alloc * 100):.1f}%" if p_has_b else "N/A"
+            s_date = plot.start_date.isoformat() if hasattr(plot.start_date, "isoformat") else str(plot.start_date)
+            e_date = plot.target_end_date.isoformat() if hasattr(plot.target_end_date, "isoformat") else str(plot.target_end_date)
+            p_label = plot.plot_name or plot.address
+
+            plots_rows_xlsx.append([p_label, s_date, e_date, float(p_alloc) if p_has_b else "N/A", float(p_spent), float(p_rem) if p_has_b and p_rem is not None else "N/A", p_rate])
+            plots_rows_pdf.append([p_label, s_date, e_date, f"{currency} {p_alloc:,.2f}" if p_has_b else "N/A", f"{currency} {p_spent:,.2f}", f"{currency} {p_rem:,.2f}" if p_has_b and p_rem is not None else "N/A", p_rate])
+
+        # 2. Work Items Breakdown
+        work_items_qs = WorkItem.objects.filter(construction_plot__construction_project=project).select_related("construction_plot")
+        work_headers_xlsx = ["Work Item", "Plot", "Start Date", "End Date", "Allocated Budget", "Total Spent", "Remaining", "Utilization"]
+        work_headers_pdf = ["Work Item", "Plot", "Start Date", "End Date", "Allocated Budget", "Total Spent", "Remaining", "Utilization"]
+        work_rows_xlsx = []
+        work_rows_pdf = []
+        for wi in work_items_qs:
+            w_budget = getattr(wi, "work_item_budget", None)
+            w_alloc = w_budget.allocated_amount if w_budget else Decimal("0.00")
+            w_has_b = w_alloc > 0
+            w_spent = wi.spent_amount
+            w_rem = w_alloc - w_spent if w_has_b else None
+            w_rate = f"{(w_spent / w_alloc * 100):.1f}%" if w_has_b else "N/A"
+            s_date = wi.start_date.isoformat() if hasattr(wi.start_date, "isoformat") else str(wi.start_date)
+            e_date = wi.target_end_date.isoformat() if hasattr(wi.target_end_date, "isoformat") else str(wi.target_end_date)
+            p_label = wi.construction_plot.plot_name or wi.construction_plot.address
+
+            work_rows_xlsx.append([wi.name, p_label, s_date, e_date, float(w_alloc) if w_has_b else "N/A", float(w_spent), float(w_rem) if w_has_b and w_rem is not None else "N/A", w_rate])
+            work_rows_pdf.append([wi.name, p_label, s_date, e_date, f"{currency} {w_alloc:,.2f}" if w_has_b else "N/A", f"{currency} {w_spent:,.2f}", f"{currency} {w_rem:,.2f}" if w_has_b and w_rem is not None else "N/A", w_rate])
+
+        # 3. Job Items Breakdown
+        job_items_qs = JobItem.objects.filter(work_item__construction_plot__construction_project=project).select_related("work_item")
+        job_headers_xlsx = ["Job Item", "Work Item", "Artisan", "Start Date", "End Date", "Allocated Budget", "Total Spent", "Utilization"]
+        job_headers_pdf = ["Job Item", "Work Item", "Artisan", "Start Date", "End Date", "Allocated Budget", "Total Spent", "Utilization"]
+        job_rows_xlsx = []
+        job_rows_pdf = []
+        for ji in job_items_qs:
+            j_budget = getattr(ji, "job_item_budget", None)
+            j_alloc = j_budget.allocated_amount if j_budget else Decimal("0.00")
+            j_has_b = j_alloc > 0
+            j_spent = ji.spent_amount
+            j_rate = f"{(j_spent / j_alloc * 100):.1f}%" if j_has_b else "N/A"
+            s_date = ji.start_date.isoformat() if hasattr(ji.start_date, "isoformat") else str(ji.start_date)
+            e_date = ji.target_end_date.isoformat() if hasattr(ji.target_end_date, "isoformat") else str(ji.target_end_date)
+            artisan_str = get_artisan_name(ji)
+
+            job_rows_xlsx.append([ji.job_name, ji.work_item.name, artisan_str, s_date, e_date, float(j_alloc) if j_has_b else "N/A", float(j_spent), j_rate])
+            job_rows_pdf.append([ji.job_name, ji.work_item.name, artisan_str, s_date, e_date, f"{currency} {j_alloc:,.2f}" if j_has_b else "N/A", f"{currency} {j_spent:,.2f}", j_rate])
+
+        xlsx_breakdowns = [
+            ("Plots Breakdown", plots_headers_xlsx, plots_rows_xlsx),
+            ("Work Items Breakdown", work_headers_xlsx, work_rows_xlsx),
+            ("Jobs Breakdown", job_headers_xlsx, job_rows_xlsx),
+        ]
+
+        pdf_breakdowns = [
+            ("Plots Breakdown", plots_headers_pdf, plots_rows_pdf, [120, 65, 65, 75, 75, 75, 57]),
+            ("Work Items Breakdown", work_headers_pdf, work_rows_pdf, [105, 95, 60, 60, 58, 58, 58, 38]),
+            ("Jobs Breakdown", job_headers_pdf, job_rows_pdf, [95, 95, 75, 60, 60, 55, 55, 37]),
+        ]
+
+        if request.GET.get("format") == "xlsx":
+            header_title = f"Financial Report: {project.project_name}"
+            metadata_pairs = [("Generated:", datetime.date.today().isoformat()), ("Currency:", currency)]
+            summary_headers = ["Allocated Budget", "Total Expenditures", "Remaining Budget", "Budget Utilization"]
+            summary_values = [
+                float(allocated) if has_budget else "N/A",
+                float(spent),
+                float(remaining) if has_budget and remaining is not None else "N/A",
+                f"{(spent / allocated * 100):.1f}%" if has_budget else "N/A"
+            ]
+            filename = f"financial_report_project_{project.id}_{datetime.date.today().isoformat()}.xlsx"
+            return build_financial_report_excel(
+                header_title, metadata_pairs, summary_headers, summary_values,
+                itemized_sheet_title=itemized_sheet_title,
+                itemized_headers=itemized_headers,
+                itemized_rows=itemized_rows_xlsx,
+                filename=filename,
+                breakdowns=xlsx_breakdowns
+            )
+
+        # PDF output
+        title = f"Financial Report: {project.project_name}"
+        metadata_lines = [f"Generated: {datetime.date.today().isoformat()} | Currency: {currency}"]
+        summary_headers = ["Allocated Budget", "Total Expenditures", "Remaining Budget", "Budget Utilization"]
+        summary_values = [
+            f"{currency} {allocated:,.2f}" if has_budget else "N/A",
+            f"{currency} {spent:,.2f}",
+            f"{currency} {remaining:,.2f}" if has_budget and remaining is not None else "N/A",
+            f"{(spent / allocated * 100):.1f}%" if has_budget else "N/A"
+        ]
+        itemized_heading = "Itemized Expenditures"
+        filename = f"financial_report_project_{project.id}_{datetime.date.today().isoformat()}.pdf"
+        return build_financial_report_pdf(
+            title, metadata_lines, summary_headers, summary_values, [130, 130, 130, 130],
+            itemized_heading=itemized_heading,
+            itemized_headers=itemized_headers,
+            itemized_rows=itemized_rows_pdf[:80],
+            itemized_col_widths=[75, 120, 130, 100, 107],
+            filename=filename,
+            breakdowns=pdf_breakdowns
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -356,6 +691,10 @@ class ConstructionPlotViewSet(ProjectScopedMixin, viewsets.ModelViewSet):
     """
     serializer_class = ConstructionPlotSerializer
     parser_classes = [MultiPartParser, FormParser, JSONParser]
+<<<<<<< HEAD
+=======
+    renderer_classes = [JSONRenderer, BrowsableAPIRenderer, XLSXRenderer, PDFRenderer]
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
 
     def perform_create(self, serializer):
         project = self.get_project()
@@ -381,6 +720,9 @@ class ConstructionPlotViewSet(ProjectScopedMixin, viewsets.ModelViewSet):
         return [IsAuthenticated()]
 
     def get_queryset(self):
+        if self.action in ("export_reports", "export_financial_report"):
+            return ConstructionPlot.objects.all()
+
         project = self.get_project()
         user = self.request.user
         
@@ -392,17 +734,16 @@ class ConstructionPlotViewSet(ProjectScopedMixin, viewsets.ModelViewSet):
             return ConstructionPlot.objects.filter(
                 construction_project=project
             ).filter(
-                models_Q(foreman=user) | models_Q(storekeeper=user)
+                db_Q(foremen=user)
             )
         else:
             # Top-level list: all plots user belongs to across all projects
             return ConstructionPlot.objects.filter(
-                models_Q(construction_project__created_by=user) |
-                models_Q(construction_project__client=user) |
-                models_Q(construction_project__project_manager=user) |
-                models_Q(construction_project__consultants=user) |
-                models_Q(foreman=user) |
-                models_Q(storekeeper=user)
+                db_Q(construction_project__created_by=user) |
+                db_Q(construction_project__client=user) |
+                db_Q(construction_project__project_manager=user) |
+                db_Q(construction_project__consultants=user) |
+                db_Q(foremen=user)
             ).distinct()
 
     def get_serializer_context(self):
@@ -463,10 +804,8 @@ class ConstructionPlotViewSet(ProjectScopedMixin, viewsets.ModelViewSet):
         user_id = request.data.get("user_id")
         user = get_object_or_404(User, pk=user_id)
         
-        if plot.foreman == user:
-            plot.foreman = None
-        elif plot.storekeeper == user:
-            plot.storekeeper = None
+        if plot.foremen.filter(pk=user.pk).exists():
+            plot.foremen.remove(user)
         else:
             return Response({"detail": "User not in plot."}, status=status.HTTP_400_BAD_REQUEST)
         
@@ -477,6 +816,9 @@ class ConstructionPlotViewSet(ProjectScopedMixin, viewsets.ModelViewSet):
     def reports(self, request, project_pk=None, pk=None):
         """GET /projects/{project_pk}/plots/{pk}/reports/ — all reports for this plot."""
         plot = self.get_object()
+        role = get_plot_role(request.user, plot)
+        if role == "none":
+            raise PermissionDenied("You do not have permission to view reports on this plot.")
         qs = JobReport.objects.filter(
             job_item__work_item__construction_plot=plot
         ).select_related("reported_by", "job_item", "job_item__work_item").order_by("-report_date")
@@ -489,21 +831,11 @@ class ConstructionPlotViewSet(ProjectScopedMixin, viewsets.ModelViewSet):
         plot = self.get_object()
         if not plot:
             return Response({"detail": "Plot not found."}, status=status.HTTP_404_NOT_FOUND)
+        role = get_plot_role(request.user, plot)
+        if role == "none":
+            raise PermissionDenied("You do not have permission to export reports on this plot.")
 
-        def parse_date(value):
-            try:
-                return datetime.datetime.strptime(value, "%Y-%m-%d").date()
-            except (ValueError, TypeError):
-                return None
-
-        start_date = parse_date(request.GET.get("start_date"))
-        end_date = parse_date(request.GET.get("end_date"))
-        if not start_date or not end_date:
-            today = datetime.date.today()
-            weekday = today.weekday()
-            start_date = today - datetime.timedelta(days=weekday)
-            end_date = start_date + datetime.timedelta(days=6)
-
+        start_date, end_date = parse_report_date_range(request)
         if start_date > end_date:
             return Response({"detail": "start_date cannot be after end_date."}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -514,24 +846,24 @@ class ConstructionPlotViewSet(ProjectScopedMixin, viewsets.ModelViewSet):
             queryset = queryset.filter(job_item__work_item__pk=request.GET["work_item_id"])
 
         queryset = queryset.filter(report_date__gte=start_date, report_date__lte=end_date).select_related(
+<<<<<<< HEAD
             "reported_by", "job_item", "job_item__work_item"
+=======
+            "reported_by", "job_item", "job_item__work_item", "job_item__work_item__construction_plot"
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
         ).prefetch_related("photos").order_by('report_date')
 
-        buffer = io.BytesIO()
-        doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=40, leftMargin=40, topMargin=40, bottomMargin=40)
-        styles = getSampleStyleSheet()
-        story = []
-
-        story.append(Paragraph(f"Plot Report Export: {plot.address}", styles["Title"]))
-        story.append(Spacer(1, 12))
-        story.append(Paragraph(f"Project: {plot.construction_project.project_name}", styles["Normal"]))
-        story.append(Paragraph(f"Date range: {start_date.isoformat()} — {end_date.isoformat()}", styles["Normal"]))
+        title = f"Plot Report Export: {plot.address}"
+        metadata_lines = [
+            f"Project: {plot.construction_project.project_name}",
+            f"Date range: {start_date.isoformat()} — {end_date.isoformat()}"
+        ]
         if request.GET.get("work_item_id"):
-            story.append(Paragraph(f"Filtered by work item ID: {request.GET['work_item_id']}", styles["Normal"]))
+            metadata_lines.append(f"Filtered by work item ID: {request.GET['work_item_id']}")
         if request.GET.get("job_item_id"):
-            story.append(Paragraph(f"Filtered by job item ID: {request.GET['job_item_id']}", styles["Normal"]))
-        story.append(Spacer(1, 18))
+            metadata_lines.append(f"Filtered by job item ID: {request.GET['job_item_id']}")
 
+<<<<<<< HEAD
         if not queryset.exists():
             story.append(Paragraph("No reports found for the selected scope and date range.", styles["BodyText"]))
         else:
@@ -608,8 +940,176 @@ class ConstructionPlotViewSet(ProjectScopedMixin, viewsets.ModelViewSet):
 
         doc.build(story)
         buffer.seek(0)
+=======
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
         filename = f"plot_{plot.id}_reports_{start_date.isoformat()}_{end_date.isoformat()}.pdf"
-        return FileResponse(buffer, as_attachment=True, filename=filename)
+        if request.GET.get("format") == "xlsx":
+            filename = f"plot_{plot.id}_reports_{start_date.isoformat()}_{end_date.isoformat()}.xlsx"
+            return build_progress_report_excel(title, metadata_lines, queryset, filename)
+
+        return build_progress_report_pdf(title, metadata_lines, queryset, filename, entity_level="plot")
+
+    @action(detail=True, methods=["get"], url_path="export-financial-report")
+    def export_financial_report(self, request, project_pk=None, pk=None):
+        plot = self.get_object()
+        if not plot:
+            return Response({"detail": "Plot not found."}, status=status.HTTP_404_NOT_FOUND)
+        if not can_view_finance(request.user, plot):
+            raise PermissionDenied("You do not have permission to view or export financial reports for this plot.")
+
+        expenses = Expense.objects.filter(
+            db_Q(plot=plot) |
+            db_Q(work_item__construction_plot=plot) |
+            db_Q(job_item__work_item__construction_plot=plot),
+            is_deleted=False
+        ).select_related(
+            "cost_code", "work_item", "job_item", "job_item__work_item"
+        ).order_by("incurred_at", "created_at")
+
+        budget = getattr(plot, "plot_budget", None)
+        allocated = budget.allocated_amount if budget else Decimal("0.00")
+        has_budget = allocated > 0
+        spent = plot.spent_amount
+        remaining = allocated - spent if has_budget else None
+        currency = budget.currency if budget else "NGN"
+
+        plot_label = plot.plot_name or plot.address
+        work_items_qs = plot.workitem_set.all()
+
+        itemized_sheet_title = "Itemized Expenses"
+        itemized_headers = ["Date", "Work Item", "Job Item", "Artisan", "Amount Paid"]
+        itemized_rows_xlsx = []
+        itemized_rows_pdf = []
+        for exp in expenses:
+            d_str = exp.incurred_at.isoformat() if hasattr(exp.incurred_at, "isoformat") else str(exp.incurred_at)
+            w_str = (
+                exp.work_item.name if exp.work_item else
+                exp.job_item.work_item.name if exp.job_item else
+                "Plot-level"
+            )
+            j_str = exp.job_item.job_name if exp.job_item else "General"
+            artisan_str = get_artisan_name(exp.job_item)
+
+            itemized_rows_xlsx.append([d_str, w_str, j_str, artisan_str, float(exp.amount)])
+            itemized_rows_pdf.append([d_str, w_str, j_str, artisan_str, f"{exp.currency} {exp.amount:,.2f}"])
+
+        if request.GET.get("format") == "xlsx":
+            header_title = f"Financial Report: {plot_label}"
+            metadata_pairs = [
+                ("Project:", plot.construction_project.project_name),
+                ("Generated:", datetime.date.today().isoformat()),
+                ("Currency:", currency)
+            ]
+            summary_headers = ["Allocated Budget", "Total Expenditures", "Remaining Budget", "Budget Utilization"]
+            summary_values = [
+                float(allocated) if has_budget else "N/A",
+                float(spent),
+                float(remaining) if has_budget and remaining is not None else "N/A",
+                f"{(spent / allocated * 100):.1f}%" if has_budget else "N/A"
+            ]
+            breakdown_title = "Work Items Breakdown"
+            breakdown_headers = ["Work Item", "Allocated Budget", "Total Spent", "Remaining", "Utilization"]
+            breakdown_rows = []
+            for wi in work_items_qs:
+                w_budget = getattr(wi, "work_item_budget", None)
+                w_alloc = w_budget.allocated_amount if w_budget else Decimal("0.00")
+        # Breakdown tables for Plot Scope: Work Items Breakdown & Jobs Breakdown
+        # 1. Work Items Breakdown
+        work_items_qs = plot.workitem_set.all()
+        work_headers_xlsx = ["Work Item", "Start Date", "End Date", "Allocated Budget", "Total Spent", "Remaining", "Utilization"]
+        work_headers_pdf = ["Work Item", "Start Date", "End Date", "Allocated Budget", "Total Spent", "Remaining", "Utilization"]
+        work_rows_xlsx = []
+        work_rows_pdf = []
+        for wi in work_items_qs:
+            w_budget = getattr(wi, "work_item_budget", None)
+            w_alloc = w_budget.allocated_amount if w_budget else Decimal("0.00")
+            w_has_b = w_alloc > 0
+            w_spent = wi.spent_amount
+            w_rem = w_alloc - w_spent if w_has_b else None
+            w_rate = f"{(w_spent / w_alloc * 100):.1f}%" if w_has_b else "N/A"
+            s_date = wi.start_date.isoformat() if hasattr(wi.start_date, "isoformat") else str(wi.start_date)
+            e_date = wi.target_end_date.isoformat() if hasattr(wi.target_end_date, "isoformat") else str(wi.target_end_date)
+
+            work_rows_xlsx.append([wi.name, s_date, e_date, float(w_alloc) if w_has_b else "N/A", float(w_spent), float(w_rem) if w_has_b and w_rem is not None else "N/A", w_rate])
+            work_rows_pdf.append([wi.name, s_date, e_date, f"{currency} {w_alloc:,.2f}" if w_has_b else "N/A", f"{currency} {w_spent:,.2f}", f"{currency} {w_rem:,.2f}" if w_has_b and w_rem is not None else "N/A", w_rate])
+
+        # 2. Job Items Breakdown
+        job_items_qs = JobItem.objects.filter(work_item__construction_plot=plot).select_related("work_item")
+        job_headers_xlsx = ["Job Item", "Work Item", "Artisan", "Start Date", "End Date", "Allocated Budget", "Total Spent", "Utilization"]
+        job_headers_pdf = ["Job Item", "Work Item", "Artisan", "Start Date", "End Date", "Allocated Budget", "Total Spent", "Utilization"]
+        job_rows_xlsx = []
+        job_rows_pdf = []
+        for ji in job_items_qs:
+            j_budget = getattr(ji, "job_item_budget", None)
+            j_alloc = j_budget.allocated_amount if j_budget else Decimal("0.00")
+            j_has_b = j_alloc > 0
+            j_spent = ji.spent_amount
+            j_rate = f"{(j_spent / j_alloc * 100):.1f}%" if j_has_b else "N/A"
+            s_date = ji.start_date.isoformat() if hasattr(ji.start_date, "isoformat") else str(ji.start_date)
+            e_date = ji.target_end_date.isoformat() if hasattr(ji.target_end_date, "isoformat") else str(ji.target_end_date)
+            artisan_str = get_artisan_name(ji)
+
+            job_rows_xlsx.append([ji.job_name, ji.work_item.name, artisan_str, s_date, e_date, float(j_alloc) if j_has_b else "N/A", float(j_spent), j_rate])
+            job_rows_pdf.append([ji.job_name, ji.work_item.name, artisan_str, s_date, e_date, f"{currency} {j_alloc:,.2f}" if j_has_b else "N/A", f"{currency} {j_spent:,.2f}", j_rate])
+
+        xlsx_breakdowns = [
+            ("Work Items Breakdown", work_headers_xlsx, work_rows_xlsx),
+            ("Jobs Breakdown", job_headers_xlsx, job_rows_xlsx),
+        ]
+
+        pdf_breakdowns = [
+            ("Work Items Breakdown", work_headers_pdf, work_rows_pdf, [120, 65, 65, 75, 75, 75, 57]),
+            ("Jobs Breakdown", job_headers_pdf, job_rows_pdf, [95, 95, 75, 60, 60, 55, 55, 37]),
+        ]
+
+        if request.GET.get("format") == "xlsx":
+            header_title = f"Financial Report: {plot_label}"
+            metadata_pairs = [
+                ("Project:", plot.construction_project.project_name),
+                ("Generated:", datetime.date.today().isoformat()),
+                ("Currency:", currency)
+            ]
+            summary_headers = ["Allocated Budget", "Total Expenditures", "Remaining Budget", "Budget Utilization"]
+            summary_values = [
+                float(allocated) if has_budget else "N/A",
+                float(spent),
+                float(remaining) if has_budget and remaining is not None else "N/A",
+                f"{(spent / allocated * 100):.1f}%" if has_budget else "N/A"
+            ]
+            filename = f"financial_report_plot_{plot.id}_{datetime.date.today().isoformat()}.xlsx"
+            return build_financial_report_excel(
+                header_title, metadata_pairs, summary_headers, summary_values,
+                itemized_sheet_title=itemized_sheet_title,
+                itemized_headers=itemized_headers,
+                itemized_rows=itemized_rows_xlsx,
+                filename=filename,
+                breakdowns=xlsx_breakdowns
+            )
+
+        # PDF output
+        title = f"Financial Report: {plot_label}"
+        metadata_lines = [
+            f"Project: {plot.construction_project.project_name}",
+            f"Generated: {datetime.date.today().isoformat()} | Currency: {currency}"
+        ]
+        summary_headers = ["Allocated Budget", "Total Expenditures", "Remaining Budget", "Budget Utilization"]
+        summary_values = [
+            f"{currency} {allocated:,.2f}" if has_budget else "N/A",
+            f"{currency} {spent:,.2f}",
+            f"{currency} {remaining:,.2f}" if has_budget and remaining is not None else "N/A",
+            f"{(spent / allocated * 100):.1f}%" if has_budget else "N/A"
+        ]
+        itemized_heading = "Itemized Expenditures"
+        filename = f"financial_report_plot_{plot.id}_{datetime.date.today().isoformat()}.pdf"
+        return build_financial_report_pdf(
+            title, metadata_lines, summary_headers, summary_values, [130, 130, 130, 130],
+            itemized_heading=itemized_heading,
+            itemized_headers=itemized_headers,
+            itemized_rows=itemized_rows_pdf[:80],
+            itemized_col_widths=[75, 120, 130, 100, 107],
+            filename=filename,
+            breakdowns=pdf_breakdowns
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -619,9 +1119,10 @@ class ConstructionPlotViewSet(ProjectScopedMixin, viewsets.ModelViewSet):
 class WorkItemViewSet(PlotScopedMixin, viewsets.ModelViewSet):
     """Nested under /projects/{project_pk}/plots/{plot_pk}/workitems/"""
     serializer_class = WorkItemSerializer
+    renderer_classes = [JSONRenderer, BrowsableAPIRenderer, XLSXRenderer, PDFRenderer]
 
     def get_permissions(self):
-        if self.action in ("list", "retrieve"):
+        if self.action in ("list", "retrieve", "export_reports", "export_financial_report"):
             return [IsAuthenticated(), IsPlotMember()]
         if self.action == "create":
             return [IsAuthenticated(), CanCreateWorkItem()]
@@ -638,36 +1139,67 @@ class WorkItemViewSet(PlotScopedMixin, viewsets.ModelViewSet):
         return [IsAuthenticated(), CanManagePlot()]
 
     def get_queryset(self):
+        if self.action in ("export_reports", "export_financial_report"):
+            return WorkItem.objects.all()
+
         plot = self.get_plot()
         user = self.request.user
 
         if plot:
             role = get_plot_role(user, plot)
             qs = WorkItem.objects.filter(construction_plot=plot)
-            # Client / consultant / storekeeper only see PM-approved items
-            if role not in SEES_UNAPPROVED_ROLES:
-                qs = qs.filter(is_approved=True)
+            # Only PM, Owner, and Creator see unapproved items
+            if role not in {"owner", "project_manager"}:
+                qs = qs.filter(db_Q(is_approved=True) | db_Q(created_by=user))
             return qs.order_by('-updated_at')
 
         # Global access — restrict unapproved items for limited roles
         base_qs = WorkItem.objects.filter(
-            models_Q(construction_plot__construction_project__created_by=user) |
-            models_Q(construction_plot__construction_project__client=user) |
-            models_Q(construction_plot__construction_project__project_manager=user) |
-            models_Q(construction_plot__construction_project__consultants=user) |
-            models_Q(construction_plot__foreman=user) |
-            models_Q(construction_plot__storekeeper=user)
+            db_Q(construction_plot__construction_project__created_by=user) |
+            db_Q(construction_plot__construction_project__client=user) |
+            db_Q(construction_plot__construction_project__project_manager=user) |
+            db_Q(construction_plot__construction_project__consultants=user) |
+            db_Q(construction_plot__foremen=user) |
+            db_Q(construction_plot__foremen=user)
         ).distinct()
 
-        # Filter unapproved items unless user is PM/owner/foreman on that plot
+        # Filter unapproved items unless user is PM/owner or created it
         can_see_unapproved = (
-            models_Q(construction_plot__construction_project__created_by=user) |
-            models_Q(construction_plot__construction_project__project_manager=user) |
-            models_Q(construction_plot__foreman=user)
+            db_Q(construction_plot__construction_project__created_by=user) |
+            db_Q(construction_plot__construction_project__project_manager=user) |
+            db_Q(created_by=user)
         )
         return base_qs.filter(
-            models_Q(is_approved=True) | can_see_unapproved
+            db_Q(is_approved=True) | can_see_unapproved
         ).order_by('-updated_at')
+
+    def perform_update(self, serializer):
+        work_item = self.get_object()
+        user = self.request.user
+        role = get_plot_role(user, work_item.construction_plot)
+
+        if role == "foreman":
+            updated_work_item = serializer.save(is_approved=False)
+            project = updated_work_item.construction_plot.construction_project
+            # Notify PM/Owner about the update requiring approval
+            recipients = {project.project_manager, project.created_by}
+            notifications = [
+                Notification(
+                    user=pm,
+                    project=project,
+                    message=(
+                        f"Approval required: {user.username} updated work item "
+                        f"'{updated_work_item.name}' in plot {updated_work_item.construction_plot.address}"
+                    ),
+                    priority=Notification.Priority.HIGH,
+                    target_url=f"/plots/{updated_work_item.construction_plot.pk}/work-items/{updated_work_item.pk}/"
+                )
+                for pm in recipients if pm
+            ]
+            if notifications:
+                Notification.objects.bulk_create(notifications)
+        else:
+            serializer.save()
 
     def perform_create(self, serializer):
         plot = self.get_plot()
@@ -685,19 +1217,19 @@ class WorkItemViewSet(PlotScopedMixin, viewsets.ModelViewSet):
 
         # Foreman-created items start unapproved; PM/owner items are auto-approved
         is_approved = role in {"owner", "project_manager"}
-        work_item = serializer.save(construction_plot=plot, is_approved=is_approved)
+        work_item = serializer.save(construction_plot=plot, is_approved=is_approved, created_by=user)
 
         project = work_item.construction_plot.construction_project
 
         if not is_approved:
-            # Notify PM that a foreman submitted a work item for approval
+            # Notify PM that an unapproved user submitted a work item for approval
             recipients = [project.project_manager, project.created_by]
             notifications = [
                 Notification(
                     user=pm,
                     project=project,
                     message=(
-                        f"Approval required: Foreman submitted work item "
+                        f"Approval required: {user.username} submitted work item "
                         f"'{work_item.name}' in plot {plot.address}"
                     ),
                     priority=Notification.Priority.HIGH,
@@ -711,10 +1243,8 @@ class WorkItemViewSet(PlotScopedMixin, viewsets.ModelViewSet):
             members = set([project.created_by, project.client, project.project_manager])
             members.update(project.consultants.all())
             for p in project.constructionplot_set.all():
-                if p.foreman:
-                    members.add(p.foreman)
-                if p.storekeeper:
-                    members.add(p.storekeeper)
+                for f in p.foremen.all():
+                    members.add(f)
             notifications = [
                 Notification(
                     user=member,
@@ -734,14 +1264,23 @@ class WorkItemViewSet(PlotScopedMixin, viewsets.ModelViewSet):
         work_item.is_approved = True
         work_item.save()
 
-        # Notify the foreman whose item was approved
         plot = work_item.construction_plot
         project = plot.construction_project
-        if plot.foreman:
+        message_opt = request.data.get("message", request.data.get("reason", ""))
+        base_msg = f"Your work item '{work_item.name}' has been approved by the PM."
+        if message_opt:
+            base_msg += f" Message: {message_opt}"
+
+        # Notify the creator and foremen
+        users_to_notify = set(plot.foremen.all())
+        if work_item.created_by:
+            users_to_notify.add(work_item.created_by)
+            
+        for u in users_to_notify:
             Notification.objects.create(
-                user=plot.foreman,
+                user=u,
                 project=project,
-                message=f"Your work item '{work_item.name}' has been approved by the PM.",
+                message=base_msg,
                 priority=Notification.Priority.NORMAL,
                 target_url=f"/plots/{plot.pk}/work-items/{work_item.pk}/"
             )
@@ -755,16 +1294,21 @@ class WorkItemViewSet(PlotScopedMixin, viewsets.ModelViewSet):
         work_item.is_approved = False
         work_item.save()
 
-        # Notify the foreman whose item was rejected
         plot = work_item.construction_plot
         project = plot.construction_project
-        reason = request.data.get("reason", "")
+        reason = request.data.get("message", request.data.get("reason", ""))
         message = f"Your work item '{work_item.name}' was rejected by the PM."
         if reason:
             message += f" Reason: {reason}"
-        if plot.foreman:
+            
+        # Notify the creator and foremen
+        users_to_notify = set(plot.foremen.all())
+        if work_item.created_by:
+            users_to_notify.add(work_item.created_by)
+            
+        for u in users_to_notify:
             Notification.objects.create(
-                user=plot.foreman,
+                user=u,
                 project=project,
                 message=message,
                 priority=Notification.Priority.HIGH,
@@ -835,6 +1379,180 @@ class WorkItemViewSet(PlotScopedMixin, viewsets.ModelViewSet):
 
         pic.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+<<<<<<< HEAD
+=======
+
+
+    @action(detail=True, methods=["get"], url_path="export-financial-report")
+    def export_financial_report(self, request, **kwargs):
+        """GET …/workitems/{pk}/export-financial-report/ — PDF financial report."""
+        work_item = self.get_object()
+        plot = work_item.construction_plot
+        if not can_view_finance(request.user, work_item):
+            raise PermissionDenied("You do not have permission to view or export financial reports for this work item.")
+
+        expenses = Expense.objects.filter(
+            db_Q(work_item=work_item) | db_Q(job_item__work_item=work_item),
+            is_deleted=False
+        ).select_related("cost_code", "job_item").order_by("incurred_at", "created_at")
+
+        budget = getattr(work_item, "work_item_budget", None)
+        allocated = budget.allocated_amount if budget else Decimal("0.00")
+        has_budget = allocated > 0
+        spent = work_item.spent_amount
+        remaining = allocated - spent if has_budget else None
+        currency = budget.currency if budget else "NGN"
+
+        job_items_qs = work_item.job_items.all()
+
+        itemized_sheet_title = "Itemized Expenses"
+        itemized_headers = ["Date", "Job Item", "Artisan", "Amount Paid"]
+        itemized_rows_xlsx = []
+        itemized_rows_pdf = []
+        for exp in expenses:
+            d_str = exp.incurred_at.isoformat() if hasattr(exp.incurred_at, "isoformat") else str(exp.incurred_at)
+            j_str = exp.job_item.job_name if exp.job_item else "Work item level"
+            artisan_str = get_artisan_name(exp.job_item)
+
+            itemized_rows_xlsx.append([d_str, j_str, artisan_str, float(exp.amount)])
+            itemized_rows_pdf.append([d_str, j_str, artisan_str, f"{exp.currency} {exp.amount:,.2f}"])
+
+        if request.GET.get("format") == "xlsx":
+            header_title = f"Financial Report: {work_item.name}"
+            metadata_pairs = [
+                ("Plot:", plot.plot_name or plot.address),
+                ("Project:", plot.construction_project.project_name),
+                ("Generated:", datetime.date.today().isoformat()),
+                ("Currency:", currency)
+            ]
+            summary_headers = ["Allocated Budget", "Total Expenditures", "Remaining Budget", "Budget Utilization"]
+            summary_values = [
+                float(allocated) if has_budget else "N/A",
+                float(spent),
+                float(remaining) if has_budget and remaining is not None else "N/A",
+                f"{(spent / allocated * 100):.1f}%" if has_budget else "N/A"
+            ]
+        # Breakdown tables for Work Item Scope: Jobs Breakdown
+        job_headers_xlsx = ["Job Item", "Artisan", "Start Date", "End Date", "Allocated Budget", "Total Spent", "Utilization"]
+        job_headers_pdf = ["Job Item", "Artisan", "Start Date", "End Date", "Allocated Budget", "Total Spent", "Utilization"]
+        job_rows_xlsx = []
+        job_rows_pdf = []
+        for ji in job_items_qs:
+            j_budget = getattr(ji, "job_item_budget", None)
+            j_alloc = j_budget.allocated_amount if j_budget else Decimal("0.00")
+            j_has_b = j_alloc > 0
+            j_spent = ji.spent_amount
+            j_rate = f"{(j_spent / j_alloc * 100):.1f}%" if j_has_b else "N/A"
+            s_date = ji.start_date.isoformat() if hasattr(ji.start_date, "isoformat") else str(ji.start_date)
+            e_date = ji.target_end_date.isoformat() if hasattr(ji.target_end_date, "isoformat") else str(ji.target_end_date)
+            artisan_str = get_artisan_name(ji)
+
+            job_rows_xlsx.append([ji.job_name, artisan_str, s_date, e_date, float(j_alloc) if j_has_b else "N/A", float(j_spent), j_rate])
+            job_rows_pdf.append([ji.job_name, artisan_str, s_date, e_date, f"{currency} {j_alloc:,.2f}" if j_has_b else "N/A", f"{currency} {j_spent:,.2f}", j_rate])
+
+        xlsx_breakdowns = [
+            ("Jobs Breakdown", job_headers_xlsx, job_rows_xlsx),
+        ]
+
+        pdf_breakdowns = [
+            ("Jobs Breakdown", job_headers_pdf, job_rows_pdf, [120, 85, 60, 60, 70, 70, 67]),
+        ]
+
+        if request.GET.get("format") == "xlsx":
+            header_title = f"Financial Report: {work_item.name}"
+            metadata_pairs = [
+                ("Plot:", plot.plot_name or plot.address),
+                ("Project:", plot.construction_project.project_name),
+                ("Generated:", datetime.date.today().isoformat()),
+                ("Currency:", currency)
+            ]
+            summary_headers = ["Allocated Budget", "Total Expenditures", "Remaining Budget", "Budget Utilization"]
+            summary_values = [
+                float(allocated) if has_budget else "N/A",
+                float(spent),
+                float(remaining) if has_budget and remaining is not None else "N/A",
+                f"{(spent / allocated * 100):.1f}%" if has_budget else "N/A"
+            ]
+            filename = f"financial_report_workitem_{work_item.id}_{datetime.date.today().isoformat()}.xlsx"
+            return build_financial_report_excel(
+                header_title, metadata_pairs, summary_headers, summary_values,
+                itemized_sheet_title=itemized_sheet_title,
+                itemized_headers=itemized_headers,
+                itemized_rows=itemized_rows_xlsx,
+                filename=filename,
+                breakdowns=xlsx_breakdowns
+            )
+
+        # PDF output
+        title = f"Financial Report: {work_item.name}"
+        metadata_lines = [
+            f"Plot: {plot.plot_name or plot.address}",
+            f"Project: {plot.construction_project.project_name}",
+            f"Generated: {datetime.date.today().isoformat()} | Currency: {currency}"
+        ]
+        summary_headers = ["Allocated Budget", "Total Expenditures", "Remaining Budget", "Budget Utilization"]
+        summary_values = [
+            f"{currency} {allocated:,.2f}" if has_budget else "N/A",
+            f"{currency} {spent:,.2f}",
+            f"{currency} {remaining:,.2f}" if has_budget and remaining is not None else "N/A",
+            f"{(spent / allocated * 100):.1f}%" if has_budget else "N/A"
+        ]
+        itemized_heading = "Itemized Expenditures"
+        filename = f"financial_report_workitem_{work_item.id}_{datetime.date.today().isoformat()}.pdf"
+        return build_financial_report_pdf(
+            title, metadata_lines, summary_headers, summary_values, [130, 130, 130, 130],
+            itemized_heading=itemized_heading,
+            itemized_headers=itemized_headers,
+            itemized_rows=itemized_rows_pdf[:80],
+            itemized_col_widths=[85, 170, 140, 137],
+            filename=filename,
+            breakdowns=pdf_breakdowns
+        )
+
+    @action(detail=True, methods=["get"], url_path="reports")
+    def reports(self, request, **kwargs):
+        work_item = self.get_object()
+        plot = work_item.construction_plot
+        role = get_plot_role(request.user, plot)
+        if role == "none":
+            raise PermissionDenied("You do not have permission to view reports on this work item.")
+        qs = JobReport.objects.filter(
+            job_item__work_item=work_item
+        ).select_related("reported_by", "job_item", "job_item__work_item").order_by('-report_date')
+        serializer = JobReportSerializer(qs, many=True, context=self.get_serializer_context())
+        return Response(serializer.data)
+
+    @action(detail=True, methods=["get"], url_path="export-reports")
+    def export_reports(self, request, **kwargs):
+        """GET …/workitems/{pk}/export-reports/ — PDF daily progress report for a work item."""
+        work_item = self.get_object()
+        plot = work_item.construction_plot
+        role = get_plot_role(request.user, plot)
+        if role == "none":
+            raise PermissionDenied("You do not have permission to export reports on this work item.")
+
+        start_date, end_date = parse_report_date_range(request)
+        if start_date > end_date:
+            return Response({"detail": "start_date cannot be after end_date."}, status=status.HTTP_400_BAD_REQUEST)
+
+        queryset = JobReport.objects.filter(
+            job_item__work_item=work_item,
+            report_date__gte=start_date,
+            report_date__lte=end_date,
+        ).select_related("reported_by", "job_item", "job_item__work_item").prefetch_related("photos").order_by('report_date')
+
+        title = f"Work Item Report: {work_item.name}"
+        metadata_lines = [
+            f"Plot: {plot.plot_name or plot.address} | Project: {plot.construction_project.project_name}",
+            f"Date range: {start_date.isoformat()} — {end_date.isoformat()}"
+        ]
+        filename = f"workitem_{work_item.id}_reports_{start_date.isoformat()}_{end_date.isoformat()}.pdf"
+        if request.GET.get("format") == "xlsx":
+            filename = f"workitem_{work_item.id}_reports_{start_date.isoformat()}_{end_date.isoformat()}.xlsx"
+            return build_progress_report_excel(title, metadata_lines, queryset, filename)
+
+        return build_progress_report_pdf(title, metadata_lines, queryset, filename, entity_level="workitem")
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
 
 
 # ---------------------------------------------------------------------------
@@ -846,9 +1564,10 @@ class JobItemViewSet(PlotScopedMixin, viewsets.ModelViewSet):
     Nested under /projects/{project_pk}/plots/{plot_pk}/workitems/{workitem_pk}/jobitems/
     """
     serializer_class = JobItemSerializer
+    renderer_classes = [JSONRenderer, BrowsableAPIRenderer, XLSXRenderer, PDFRenderer]
 
     def get_permissions(self):
-        if self.action in ("list", "retrieve"):
+        if self.action in ("list", "retrieve", "export_reports", "export_financial_report"):
             return [IsAuthenticated(), IsPlotMember()]
         if self.action == "create":
             return [IsAuthenticated(), CanCreateJobItem()]
@@ -861,9 +1580,22 @@ class JobItemViewSet(PlotScopedMixin, viewsets.ModelViewSet):
         return [IsAuthenticated(), CanManagePlot()]
 
     def get_queryset(self):
+        if self.action in ("export_reports", "export_financial_report"):
+            return JobItem.objects.all()
+
         plot = self.get_plot()
         user = self.request.user
-        wi_pk = self.kwargs.get("workitem_pk")
+        query_params = (
+            getattr(self.request, "query_params", getattr(self.request, "GET", {}))
+            if hasattr(self, "request") and self.request
+            else {}
+        )
+        wi_pk = (
+            self.kwargs.get("workitem_pk") or
+            query_params.get("work_item") or
+            query_params.get("workitem") or
+            query_params.get("work_item_id")
+        )
 
         if plot and wi_pk:
             role = get_plot_role(user, plot)
@@ -871,32 +1603,73 @@ class JobItemViewSet(PlotScopedMixin, viewsets.ModelViewSet):
                 work_item__construction_plot=plot,
                 work_item__pk=wi_pk,
             )
-            # Client / consultant / storekeeper only see job items that are approved
-            if role not in SEES_UNAPPROVED_ROLES:
-                qs = qs.filter(is_approved=True)
+            # Only PM, Owner, and Creator see unapproved items
+            if role not in {"owner", "project_manager"}:
+                qs = qs.filter(db_Q(is_approved=True) | db_Q(created_by=user))
+            return qs.order_by('-updated_at')
+
+        if plot:
+            role = get_plot_role(user, plot)
+            qs = JobItem.objects.filter(work_item__construction_plot=plot)
+            if role not in {"owner", "project_manager"}:
+                qs = qs.filter(db_Q(is_approved=True) | db_Q(created_by=user))
             return qs.order_by('-updated_at')
 
         # Global access — restrict unapproved for limited roles
         base_qs = JobItem.objects.filter(
-            models_Q(work_item__construction_plot__construction_project__created_by=user) |
-            models_Q(work_item__construction_plot__construction_project__client=user) |
-            models_Q(work_item__construction_plot__construction_project__project_manager=user) |
-            models_Q(work_item__construction_plot__construction_project__consultants=user) |
-            models_Q(work_item__construction_plot__foreman=user) |
-            models_Q(work_item__construction_plot__storekeeper=user)
+            db_Q(work_item__construction_plot__construction_project__created_by=user) |
+            db_Q(work_item__construction_plot__construction_project__client=user) |
+            db_Q(work_item__construction_plot__construction_project__project_manager=user) |
+            db_Q(work_item__construction_plot__construction_project__consultants=user) |
+            db_Q(work_item__construction_plot__foremen=user)
         ).distinct()
 
         can_see_unapproved = (
-            models_Q(work_item__construction_plot__construction_project__created_by=user) |
-            models_Q(work_item__construction_plot__construction_project__project_manager=user) |
-            models_Q(work_item__construction_plot__foreman=user)
+            db_Q(work_item__construction_plot__construction_project__created_by=user) |
+            db_Q(work_item__construction_plot__construction_project__project_manager=user) |
+            db_Q(created_by=user)
         )
         qs = base_qs.filter(
+<<<<<<< HEAD
             models_Q(is_approved=True) | can_see_unapproved
+=======
+            db_Q(is_approved=True) | can_see_unapproved
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
         )
         if wi_pk:
             qs = qs.filter(work_item__pk=wi_pk)
         return qs.order_by('-updated_at')
+<<<<<<< HEAD
+=======
+
+    def perform_update(self, serializer):
+        job_item = self.get_object()
+        user = self.request.user
+        role = get_plot_role(user, job_item.work_item.construction_plot)
+
+        if role == "foreman":
+            updated_job_item = serializer.save(is_approved=False)
+            project = updated_job_item.work_item.construction_plot.construction_project
+            # Notify PM/Owner about the update requiring approval
+            recipients = {project.project_manager, project.created_by}
+            notifications = [
+                Notification(
+                    user=pm,
+                    project=project,
+                    message=(
+                        f"Approval required: {user.username} updated job item "
+                        f"'{updated_job_item.job_name}' in work item {updated_job_item.work_item.name}"
+                    ),
+                    priority=Notification.Priority.HIGH,
+                    target_url=f"/job-items/{updated_job_item.pk}/"
+                )
+                for pm in recipients if pm
+            ]
+            if notifications:
+                Notification.objects.bulk_create(notifications)
+        else:
+            serializer.save()
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
 
     def perform_create(self, serializer):
         plot = self.get_plot()
@@ -908,26 +1681,28 @@ class JobItemViewSet(PlotScopedMixin, viewsets.ModelViewSet):
         )
         if work_item.work_status == 'Completed':
             raise ValidationError("Cannot add job items to a completed work item.")
+        if not work_item.is_approved:
+            raise ValidationError("Cannot add job items to an unapproved work item.")
 
         role = get_plot_role(user, plot)
         is_approved = role in {"owner", "project_manager"}
-        job_item = serializer.save(work_item=work_item, is_approved=is_approved)
+        job_item = serializer.save(work_item=work_item, is_approved=is_approved, created_by=user)
 
         project = work_item.construction_plot.construction_project
         role = get_plot_role(user, plot)
 
-        if role == "foreman":
-            # Notify PM that foreman added a job item
+        if not is_approved:
+            # Notify PM that an unapproved user added a job item
             recipients = [project.project_manager, project.created_by]
             notifications = [
                 Notification(
                     user=pm,
                     project=project,
                     message=(
-                        f"Foreman added job item '{job_item.job_name}' "
+                        f"Approval required: {user.username} submitted job item '{job_item.job_name}' "
                         f"({job_item.job_artisan}) to work item '{work_item.name}'"
                     ),
-                    priority=Notification.Priority.NORMAL,
+                    priority=Notification.Priority.HIGH,
                     target_url=f"/job-items/{job_item.pk}/"
                 )
                 for pm in recipients if pm
@@ -936,8 +1711,8 @@ class JobItemViewSet(PlotScopedMixin, viewsets.ModelViewSet):
         else:
             # Notify plot foreman and stakeholders
             members = set([project.created_by, project.client, project.project_manager])
-            if plot.foreman:
-                members.add(plot.foreman)
+            for f in plot.foremen.all():
+                members.add(f)
             notifications = [
                 Notification(
                     user=m,
@@ -957,14 +1732,22 @@ class JobItemViewSet(PlotScopedMixin, viewsets.ModelViewSet):
         job_item.is_approved = True
         job_item.save()
 
-        # Notify the foreman whose item was approved
         plot = job_item.work_item.construction_plot
         project = plot.construction_project
-        if plot.foreman:
+        message_opt = request.data.get("message", request.data.get("reason", ""))
+        base_msg = f"Your job item '{job_item.job_name}' has been approved by the PM."
+        if message_opt:
+            base_msg += f" Message: {message_opt}"
+            
+        users_to_notify = set(plot.foremen.all())
+        if job_item.created_by:
+            users_to_notify.add(job_item.created_by)
+            
+        for u in users_to_notify:
             Notification.objects.create(
-                user=plot.foreman,
+                user=u,
                 project=project,
-                message=f"Your job item '{job_item.job_name}' has been approved by the PM.",
+                message=base_msg,
                 priority=Notification.Priority.NORMAL,
                 target_url=f"/job-items/{job_item.pk}/"
             )
@@ -978,22 +1761,138 @@ class JobItemViewSet(PlotScopedMixin, viewsets.ModelViewSet):
         job_item.is_approved = False
         job_item.save()
 
-        # Notify the foreman whose item was rejected
         plot = job_item.work_item.construction_plot
         project = plot.construction_project
-        reason = request.data.get("reason", "")
+        reason = request.data.get("message", request.data.get("reason", ""))
         message = f"Your job item '{job_item.job_name}' was rejected by the PM."
         if reason:
             message += f" Reason: {reason}"
-        if plot.foreman:
+            
+        users_to_notify = set(plot.foremen.all())
+        if job_item.created_by:
+            users_to_notify.add(job_item.created_by)
+            
+        for u in users_to_notify:
             Notification.objects.create(
-                user=plot.foreman,
+                user=u,
                 project=project,
                 message=message,
                 priority=Notification.Priority.HIGH,
                 target_url=f"/job-items/{job_item.pk}/"
             )
         return Response({"status": "rejected"})
+
+    @action(detail=True, methods=["get"], url_path="export-financial-report")
+    def export_financial_report(self, request, **kwargs):
+        """GET …/jobitems/{pk}/export-financial-report/ — PDF financial report."""
+        job_item = self.get_object()
+        plot = job_item.work_item.construction_plot
+        if not can_view_finance(request.user, job_item):
+            raise PermissionDenied("You do not have permission to view or export financial reports for this job item.")
+
+        expenses = Expense.objects.filter(
+            job_item=job_item, is_deleted=False
+        ).select_related("cost_code", "job_item").order_by("incurred_at", "created_at")
+
+        budget = getattr(job_item, "job_item_budget", None)
+        allocated = budget.allocated_amount if budget else Decimal("0.00")
+        has_budget = allocated > 0
+        spent = job_item.spent_amount
+        remaining = allocated - spent if has_budget else None
+        currency = budget.currency if budget else "NGN"
+
+        itemized_sheet_title = "Itemized Expenses"
+        itemized_headers = ["Date", "Artisan", "Amount Paid"]
+        itemized_rows_xlsx = []
+        itemized_rows_pdf = []
+        for exp in expenses:
+            d_str = exp.incurred_at.isoformat() if hasattr(exp.incurred_at, "isoformat") else str(exp.incurred_at)
+            artisan_str = get_artisan_name(exp.job_item)
+
+            itemized_rows_xlsx.append([d_str, artisan_str, float(exp.amount)])
+            itemized_rows_pdf.append([d_str, artisan_str, f"{exp.currency} {exp.amount:,.2f}"])
+
+        if request.GET.get("format") == "xlsx":
+            header_title = f"Financial Report: {job_item.job_name}"
+            metadata_pairs = [
+                ("Work Item:", job_item.work_item.name),
+                ("Plot:", plot.plot_name or plot.address),
+                ("Project:", plot.construction_project.project_name),
+                ("Artisan:", get_artisan_name(job_item)),
+                ("Status:", job_item.job_status),
+                ("Generated:", datetime.date.today().isoformat()),
+                ("Currency:", currency)
+            ]
+            summary_headers = ["Allocated Budget", "Total Expenditures", "Remaining Budget", "Budget Utilization"]
+            summary_values = [
+                float(allocated) if has_budget else "N/A",
+                float(spent),
+                float(remaining) if has_budget and remaining is not None else "N/A",
+                f"{(spent / allocated * 100):.1f}%" if has_budget else "N/A"
+            ]
+            filename = f"financial_report_jobitem_{job_item.id}_{datetime.date.today().isoformat()}.xlsx"
+            return build_financial_report_excel(
+                header_title, metadata_pairs, summary_headers, summary_values,
+                None, None, [], itemized_sheet_title, itemized_headers, itemized_rows_xlsx, filename
+            )
+
+        # PDF output
+        title = f"Financial Report: {job_item.job_name}"
+        metadata_lines = [
+            f"Work Item: {job_item.work_item.name}",
+            f"Plot: {plot.plot_name or plot.address}",
+            f"Project: {plot.construction_project.project_name}",
+            f"Artisan: {get_artisan_name(job_item)} | Status: {job_item.job_status}",
+            f"Generated: {datetime.date.today().isoformat()} | Currency: {currency}"
+        ]
+        summary_headers = ["Allocated Budget", "Total Expenditures", "Remaining Budget", "Budget Utilization"]
+        summary_values = [
+            f"{currency} {allocated:,.2f}" if has_budget else "N/A",
+            f"{currency} {spent:,.2f}",
+            f"{currency} {remaining:,.2f}" if has_budget and remaining is not None else "N/A",
+            f"{(spent / allocated * 100):.1f}%" if has_budget else "N/A"
+        ]
+        itemized_heading = "Itemized Expenditures"
+        filename = f"financial_report_jobitem_{job_item.id}_{datetime.date.today().isoformat()}.pdf"
+        return build_financial_report_pdf(
+            title, metadata_lines, summary_headers, summary_values, [130, 130, 130, 130],
+            None, None, [], None,
+            itemized_heading, itemized_headers, itemized_rows_pdf[:80], [120, 230, 182],
+            filename
+        )
+
+    @action(detail=True, methods=["get"], url_path="export-reports")
+    def export_reports(self, request, **kwargs):
+        """GET …/jobitems/{pk}/export-reports/ — PDF daily progress report for a job item."""
+        job_item = self.get_object()
+        plot = job_item.work_item.construction_plot
+        role = get_plot_role(request.user, plot)
+        if role == "none":
+            raise PermissionDenied("You do not have permission to export reports on this job item.")
+
+        start_date, end_date = parse_report_date_range(request)
+        if start_date > end_date:
+            return Response({"detail": "start_date cannot be after end_date."}, status=status.HTTP_400_BAD_REQUEST)
+
+        queryset = JobReport.objects.filter(
+            job_item=job_item,
+            report_date__gte=start_date,
+            report_date__lte=end_date
+        ).select_related("reported_by", "job_item", "job_item__work_item").prefetch_related("photos").order_by('report_date')
+
+        title = f"Job Item Report: {job_item.job_name}"
+        metadata_lines = [
+            f"Work Item: {job_item.work_item.name} | Plot: {plot.plot_name or plot.address}",
+            f"Project: {plot.construction_project.project_name}",
+            f"Artisan: {job_item.job_artisan or '—'} | Status: {job_item.job_status}",
+            f"Date range: {start_date.isoformat()} — {end_date.isoformat()}"
+        ]
+        filename = f"jobitem_{job_item.id}_reports_{start_date.isoformat()}_{end_date.isoformat()}.pdf"
+        if request.GET.get("format") == "xlsx":
+            filename = f"jobitem_{job_item.id}_reports_{start_date.isoformat()}_{end_date.isoformat()}.xlsx"
+            return build_progress_report_excel(title, metadata_lines, queryset, filename)
+
+        return build_progress_report_pdf(title, metadata_lines, queryset, filename, entity_level="jobitem")
 
 
 # ---------------------------------------------------------------------------
@@ -1013,7 +1912,7 @@ class JobReportViewSet(PlotScopedMixin, viewsets.ModelViewSet):
     serializer_class = JobReportSerializer
 
     def get_permissions(self):
-        if self.action in ("list", "retrieve"):
+        if self.action in ("list", "retrieve", "export_reports"):
             return [IsAuthenticated(), IsPlotMember()]
         if self.action in ("create", "update", "partial_update"):
             return [IsAuthenticated(), CanSubmitReport()]
@@ -1037,6 +1936,10 @@ class JobReportViewSet(PlotScopedMixin, viewsets.ModelViewSet):
         if not plot:
             return Response({"detail": "Plot not found."}, status=status.HTTP_404_NOT_FOUND)
 
+        role = get_plot_role(request.user, plot)
+        if role == "none":
+            raise PermissionDenied("You do not have permission to export reports on this plot.")
+
         def parse_date(value):
             try:
                 return datetime.datetime.strptime(value, "%Y-%m-%d").date()
@@ -1055,7 +1958,10 @@ class JobReportViewSet(PlotScopedMixin, viewsets.ModelViewSet):
             return Response({"detail": "start_date cannot be after end_date."}, status=status.HTTP_400_BAD_REQUEST)
 
         queryset = JobReport.objects.filter(job_item__work_item__construction_plot=plot)
-        if request.GET.get("job_item_id"):
+        jobitem_pk = self.kwargs.get("jobitem_pk")
+        if jobitem_pk:
+            queryset = queryset.filter(job_item__pk=jobitem_pk)
+        elif request.GET.get("job_item_id"):
             queryset = queryset.filter(job_item__pk=request.GET["job_item_id"])
         elif request.GET.get("work_item_id"):
             queryset = queryset.filter(job_item__work_item__pk=request.GET["work_item_id"])
@@ -1082,6 +1988,7 @@ class JobReportViewSet(PlotScopedMixin, viewsets.ModelViewSet):
         if not queryset.exists():
             story.append(Paragraph("No reports found for the selected scope and date range.", styles["BodyText"]))
         else:
+            figures = []
             for report in queryset:
                 story.append(Paragraph(f"Report Date: {report.report_date}", styles["Heading2"]))
                 story.append(Paragraph(f"Job Item: {report.job_item.job_name}", styles["Heading3"]))
@@ -1093,9 +2000,26 @@ class JobReportViewSet(PlotScopedMixin, viewsets.ModelViewSet):
                 story.append(Paragraph(f"Expected completion: {report.expected_completion_date}", styles["Normal"]))
                 story.append(Spacer(1, 8))
 
+                pics = list(report.photos.all())
+                if report.job_image and report.job_image not in pics:
+                    pics.insert(0, report.job_image)
+                fig_refs = []
+                for p in pics:
+                    fig_num = len(figures) + 1
+                    caption = f"{report.job_item.job_name} ({report.report_date})"
+                    if p.description:
+                        caption += f" - {p.description}"
+                    figures.append((fig_num, p, caption))
+                    fig_refs.append(f"Fig. {fig_num}")
+
+                notes_val = report.notes or "—"
+                if fig_refs:
+                    ref_str = f" (see {', '.join(fig_refs)})"
+                    notes_val = f"{notes_val}{ref_str}" if notes_val != "—" else f"see {', '.join(fig_refs)}"
+
                 report_table_data = [
                     ["Field", "Value"],
-                    ["Notes", report.notes or "—"],
+                    ["Notes & Evidence", notes_val],
                     ["External comments", report.external_comments or "—"],
                     ["Internal comments", report.internal_comments or "—"],
                     ["Days elapsed", report.days_elapsed if report.days_elapsed is not None else "—"],
@@ -1111,8 +2035,9 @@ class JobReportViewSet(PlotScopedMixin, viewsets.ModelViewSet):
                     ("GRID", (0, 0), (-1, -1), 0.25, colors.grey),
                 ]))
                 story.append(table)
-                story.append(Spacer(1, 12))
+                story.append(Spacer(1, 14))
 
+<<<<<<< HEAD
                 pics = list(report.photos.all())
                 if report.job_image and report.job_image not in pics:
                     pics.insert(0, report.job_image)
@@ -1129,6 +2054,16 @@ class JobReportViewSet(PlotScopedMixin, viewsets.ModelViewSet):
                             except Exception:
                                 continue
                 story.append(Spacer(1, 20))
+=======
+            if figures:
+                story.append(Spacer(1, 15))
+                story.append(Paragraph("Attached Photographic Figures", styles["Heading2"]))
+                story.append(Paragraph("Photos referenced in reports above:", styles["Normal"]))
+                story.append(Spacer(1, 8))
+                fig_table = _build_figures_table(figures, styles)
+                if fig_table:
+                    story.append(fig_table)
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
 
         doc.build(story)
         buffer.seek(0)
@@ -1140,10 +2075,8 @@ class JobReportViewSet(PlotScopedMixin, viewsets.ModelViewSet):
         plot = report.job_item.work_item.construction_plot
         members = set([project.created_by, project.client, project.project_manager])
         members.update(project.consultants.all())
-        if plot.foreman:
-            members.add(plot.foreman)
-        if plot.storekeeper:
-            members.add(plot.storekeeper)
+        for f in plot.foremen.all():
+            members.add(f)
         members.discard(comment.user)
 
         notifications = [
@@ -1167,7 +2100,13 @@ class JobReportViewSet(PlotScopedMixin, viewsets.ModelViewSet):
             pk=self.kwargs["jobitem_pk"],
             work_item__construction_plot=self.get_plot(),
         )
-        report = serializer.save(job_item=job_item, reported_by=self.request.user)
+        if not job_item.is_approved:
+            raise ValidationError("Cannot add reports to an unapproved job item.")
+
+        report = serializer.save(
+            job_item=job_item, 
+            reported_by=self.request.user,
+        )
         
         # Notify stakeholders (PM and Owner)
         project = job_item.work_item.construction_plot.construction_project
@@ -1181,24 +2120,90 @@ class JobReportViewSet(PlotScopedMixin, viewsets.ModelViewSet):
             Notification(
                 user=m, 
                 project=project, 
-                message=f"New {report.priority} report for {job_item.job_name} in {job_item.work_item.name}",
+                message=f"New {report.priority} report submitted for {job_item.job_name} in {job_item.work_item.name}",
                 priority=prio,
                 target_url=(f"/job-items/{job_item.pk}?report={report.pk}")
             ) for m in members if m and m != self.request.user
         ]
         Notification.objects.bulk_create(notifications)
 
-        if project.project_manager and project.project_manager != self.request.user:
+    @action(detail=True, methods=["post"])
+    def approve(self, request, **kwargs):
+        """POST .../reports/{pk}/approve/ — approve a job report."""
+        report = self.get_object()
+        self.check_object_permissions(request, report)
+        report.report_status = JobReport.ReportStatusChoices.approved
+        report.save(update_fields=["report_status", "updated_at"])
+
+        plot = report.job_item.work_item.construction_plot
+        project = plot.construction_project
+        message_opt = request.data.get("message", request.data.get("reason", ""))
+        base_msg = f"Report for '{report.job_item.job_name}' has been approved."
+        if message_opt:
+            base_msg += f" Message: {message_opt}"
+
+        if report.reported_by and report.reported_by != request.user:
             Notification.objects.create(
-                user=project.project_manager,
+                user=report.reported_by,
                 project=project,
-                message=(
-                    f"Approval required: {job_item.job_name} report submitted "
-                    f"for {job_item.work_item.name}"
-                ),
+                message=base_msg,
                 priority=Notification.Priority.NORMAL,
-                target_url=(f"/job-items/{job_item.pk}?report={report.pk}")
+                target_url=f"/job-items/{report.job_item.pk}?report={report.pk}"
             )
+        return Response({"status": "approved", "report_status": report.report_status})
+
+    @action(detail=True, methods=["post"])
+    def reject(self, request, **kwargs):
+        """POST .../reports/{pk}/reject/ — reject a job report."""
+        report = self.get_object()
+        self.check_object_permissions(request, report)
+        report.report_status = JobReport.ReportStatusChoices.rejected
+        report.save(update_fields=["report_status", "updated_at"])
+
+        plot = report.job_item.work_item.construction_plot
+        project = plot.construction_project
+        reason = request.data.get("message", request.data.get("reason", ""))
+        message = f"Report for '{report.job_item.job_name}' was rejected."
+        if reason:
+            message += f" Reason: {reason}"
+
+        if report.reported_by and report.reported_by != request.user:
+            Notification.objects.create(
+                user=report.reported_by,
+                project=project,
+                message=message,
+                priority=Notification.Priority.HIGH,
+                target_url=f"/job-items/{report.job_item.pk}?report={report.pk}"
+            )
+        return Response({"status": "rejected", "report_status": report.report_status})
+
+    def destroy(self, request, *args, **kwargs):
+        report = self.get_object()
+        project = report.job_item.work_item.construction_plot.construction_project
+        plot = report.job_item.work_item.construction_plot
+
+        user = request.user
+        role_project = get_project_role(user, project)
+        role_plot = get_plot_role(user, plot)
+        is_owner_or_pm = (
+            role_project in ("owner", "project_manager") or
+            role_plot in ("owner", "project_manager") or
+            getattr(user, "is_superuser", False)
+        )
+        if not is_owner_or_pm:
+            raise PermissionDenied("Only the project manager or project creator can delete a report.")
+
+        provided_name = None
+        if isinstance(request.data, dict):
+            provided_name = request.data.get("job_name") or request.data.get("confirm_name")
+        if not provided_name:
+            provided_name = request.query_params.get("job_name")
+
+        job_name = report.job_item.job_name
+        if not provided_name or provided_name.strip() != job_name.strip():
+            raise ValidationError({"job_name": f"To delete this report, you must type the exact job item name '{job_name}'."})
+
+        return super().destroy(request, *args, **kwargs)
 
     @action(detail=True, methods=["get", "post"])
     def comments(self, request, **kwargs):
@@ -1292,7 +2297,7 @@ class ProjectInvitationViewSet(viewsets.GenericViewSet):
     def get_queryset(self):
         user = self.request.user
         return ProjectInvitation.objects.filter(
-            models_Q(invitee=user) | models_Q(invited_by=user)
+            db_Q(invitee=user) | db_Q(invited_by=user)
         ).select_related("project", "invitee", "invited_by")
 
     def list(self, request):
@@ -1345,7 +2350,7 @@ class PlotInvitationViewSet(viewsets.GenericViewSet):
     def get_queryset(self):
         user = self.request.user
         return PlotInvitation.objects.filter(
-            models_Q(invitee=user) | models_Q(invited_by=user)
+            db_Q(invitee=user) | db_Q(invited_by=user)
         ).select_related("plot", "invitee", "invited_by")
 
     def list(self, request):
@@ -1431,7 +2436,12 @@ class DocumentViewSet(ProjectScopedMixin, viewsets.ModelViewSet):
         role = get_project_role(user, project)
         qs = Document.objects.filter(project=project)
 
-        plot_id = self.request.query_params.get("plot_id")
+        query_params = (
+            getattr(self.request, "query_params", getattr(self.request, "GET", {}))
+            if hasattr(self, "request") and self.request
+            else {}
+        )
+        plot_id = query_params.get("plot_id")
         if plot_id:
             qs = qs.filter(plot_id=plot_id)
 
@@ -1439,20 +2449,14 @@ class DocumentViewSet(ProjectScopedMixin, viewsets.ModelViewSet):
         if role in {"owner", "project_manager", "consultant", "client"}:
             return qs
 
-        # Foreman and Storekeeper logic
+        # Foreman, Storekeeper, and Plot Member logic
         # They can see project-level docs if visibility flag is true
         # They can see plot-level docs if visibility flag is true AND they belong to that plot
-        if role == "foreman":
+        if role in {"foreman", "storekeeper", "plot_member"}:
             return qs.filter(
-                visible_to_foremen=True
+                db_Q(visible_to_foremen=True) | db_Q(visible_to_storekeepers=True)
             ).filter(
-                models_Q(plot__isnull=True) | models_Q(plot__foreman=user)
-            )
-        elif role == "storekeeper":
-            return qs.filter(
-                visible_to_storekeepers=True
-            ).filter(
-                models_Q(plot__isnull=True) | models_Q(plot__storekeeper=user)
+                db_Q(plot__isnull=True) | db_Q(plot__foremen=user)
             )
             
         return Document.objects.none()
@@ -1473,3 +2477,87 @@ class PublicStatsView(APIView):
             "total_projects": total_projects,
             "avg_report_cycle_hours": avg_report_cycle_hours
         })
+
+
+class FeedbackView(APIView):
+    """
+    POST /api/feedback/
+    Allows beta site users to submit improvements, suggestions, bug reports, and complaints.
+    Dispatches an email to the address configured via the FEEDBACK_EMAIL environment variable.
+    """
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        name = request.data.get("name", "").strip()
+        email = request.data.get("email", "").strip()
+        category = request.data.get("category", "General Feedback").strip()
+        subject = request.data.get("subject", "").strip()
+        message = request.data.get("message", "").strip()
+        image = request.FILES.get("image")
+
+        # Pre-fill from authenticated user if not provided
+        if request.user and request.user.is_authenticated:
+            if not name:
+                name = getattr(request.user, "display_name", None) or request.user.get_full_name() or request.user.username
+            if not email:
+                email = request.user.email
+
+        if not email:
+            return Response(
+                {"detail": "An email address is required so we can follow up with you."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        if not message:
+            return Response(
+                {"detail": "Please provide a description or message."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        recipient = getattr(settings, "FEEDBACK_EMAIL", None) or os.environ.get("FEEDBACK_EMAIL", "feedback@constropal.com")
+        from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "no-reply@constropal.local")
+
+        email_subject = f"[Beta Feedback - {category}] {subject or 'New Submission'}"
+
+        user_info = f"From: {name} <{email}>"
+        if request.user and request.user.is_authenticated:
+            user_info += f" (Authenticated User ID: {request.user.id}, Username: {request.user.username})"
+
+        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S UTC")
+        email_body = f"""New Beta Site Feedback Submission:
+==================================================
+Category: {category}
+Subject: {subject or 'N/A'}
+{user_info}
+Submitted At: {timestamp}
+==================================================
+
+Message:
+{message}
+
+--------------------------------------------------
+This message was sent from the IronWork Beta Site Feedback Form.
+"""
+        try:
+            email_msg = EmailMessage(
+                subject=email_subject,
+                body=email_body,
+                from_email=from_email,
+                to=[recipient],
+                reply_to=[email] if email else None,
+            )
+            if image:
+                email_msg.attach(image.name, image.read(), image.content_type)
+            email_msg.send(fail_silently=False)
+            logger.info("Beta feedback email dispatched to %s from %s", recipient, email)
+        except Exception as exc:
+            logger.exception("Failed to send beta feedback email: %s", exc)
+            return Response(
+                {"detail": "Could not deliver your message due to an email service error. Please try again later."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        return Response({
+            "status": "success",
+            "detail": "Thank you for your feedback! Your message has been sent to our team."
+        }, status=status.HTTP_200_OK)
+

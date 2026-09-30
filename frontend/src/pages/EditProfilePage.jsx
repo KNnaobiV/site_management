@@ -193,7 +193,7 @@ export default function EditProfilePage() {
 
                     <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                         <div>
-                            <label style={labelStyle}>First Name</label>
+                            <label style={labelStyle}>First Name <span style={{ color: "var(--brand-orange)" }}>*</span></label>
                             <input
                                 type="text"
                                 name="first_name"
@@ -203,7 +203,7 @@ export default function EditProfilePage() {
                             />
                         </div>
                         <div>
-                            <label style={labelStyle}>Last Name</label>
+                            <label style={labelStyle}>Last Name <span style={{ color: "var(--brand-orange)" }}>*</span></label>
                             <input
                                 type="text"
                                 name="last_name"
@@ -215,7 +215,7 @@ export default function EditProfilePage() {
                     </div>
 
                     <div>
-                        <label style={labelStyle}>Display Name</label>
+                        <label style={labelStyle}>Display Name <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
                         <input
                             type="text"
                             name="display_name"
@@ -227,7 +227,7 @@ export default function EditProfilePage() {
                     </div>
 
                     <div>
-                        <label style={labelStyle}>Username</label>
+                        <label style={labelStyle}>Username <span style={{ color: "var(--brand-orange)" }}>*</span></label>
                         <input
                             type="text"
                             name="username"

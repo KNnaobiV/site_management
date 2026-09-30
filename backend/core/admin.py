@@ -17,8 +17,8 @@ class ConstructionProjectAdmin(admin.ModelAdmin):
 
 @admin.register(ConstructionPlot)
 class ConstructionPlotAdmin(admin.ModelAdmin):
-    list_display = ('id', 'construction_project', 'foreman', 'storekeeper', 'address', 'start_date', 'target_end_date')
-    search_fields = ('address', 'foreman__username', 'storekeeper__username', 'construction_project__project_name')
+    list_display = ('id', 'construction_project', 'address', 'start_date', 'target_end_date')
+    search_fields = ('address', 'construction_project__project_name')
     list_filter = ('start_date', 'target_end_date', 'construction_project')
 
 

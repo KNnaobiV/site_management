@@ -1,7 +1,7 @@
 import React from 'react';
 import StatusBadge from './StatusBadge';
 import Avatar from './Avatar';
-import { Calendar, Zap, CheckSquare, DollarSign, CheckCircle2 } from 'lucide-react';
+import { Calendar, Zap, ClipboardList, DollarSign, CheckCircle2 } from 'lucide-react';
 
 const formatCurrency = (amount, currency = 'NGN') => {
   try {
@@ -81,17 +81,17 @@ const JobItemCard = ({ job, onClick }) => {
 
       <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
         <div style={{ flex: 1 }}>
-          <h3 style={{ fontSize: '20px', marginBottom: '12px' }}>{job.job_artisan} — {job.job_name}</h3>
+          <h3 style={{ fontSize: '20px', marginBottom: '12px' }}>{(job.job_artisan === 'Other' && job.custom_artisan) ? job.custom_artisan : job.job_artisan} — {job.job_name}</h3>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: 'var(--text-secondary)' }}>
-              <CheckSquare size={14} color="var(--brand-orange)" />
-              <span>{job.work_item_name || 'Work Item N/A'}</span>
+              <ClipboardList size={14} color="var(--brand-orange)" />
+              <span>{job.work_item_name || 'Work N/A'}</span>
             </div>
 
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'var(--bg-raised)', padding: '4px 12px', borderRadius: '8px', fontSize: '13px', width: 'fit-content' }}>
               <Zap size={14} color="var(--brand-orange)" />
-              <span>{job.job_artisan}</span>
+              <span>{(job.job_artisan === 'Other' && job.custom_artisan) ? job.custom_artisan : job.job_artisan}</span>
             </div>
 
             {(hasBudget || spent > 0) && (

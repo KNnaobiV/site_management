@@ -25,6 +25,7 @@ const CreateJobItemPage = () => {
   const [formData, setFormData] = useState({
     job_name: '',
     job_artisan: '',
+    custom_artisan: '',
     job_description: '',
     job_status: 'Planned',
     start_date: new Date().toISOString().split('T')[0],
@@ -57,6 +58,7 @@ const CreateJobItemPage = () => {
           ...f,
           job_name: data.job_name || '',
           job_artisan: data.job_artisan || '',
+          custom_artisan: data.custom_artisan || '',
           job_description: data.job_description || '',
           job_status: data.job_status || 'Planned',
           start_date: data.start_date || f.start_date,
@@ -110,7 +112,7 @@ const CreateJobItemPage = () => {
       // Current route: /work-items/:workItemId/job-items/new
       // I should probably have: /projects/:projectId/plots/:plotId/work-items/:workItemId/job-items/new
 
-      const res = await apiFetch(`/work-items/${workItemId}/`, { token }); // Assuming this exists or I'll fix App.jsx
+      const res = await apiFetch(`/workitems/${workItemId}/`, { token });
       if (res.ok) {
         const data = await res.json();
         setWorkItem(data);
@@ -144,6 +146,7 @@ const CreateJobItemPage = () => {
     const payload = {
       job_name: formData.job_name,
       job_artisan: formData.job_artisan,
+      custom_artisan: formData.job_artisan === 'Other' ? formData.custom_artisan : '',
       job_description: formData.job_description,
       job_status: formData.job_status,
       start_date: formData.start_date,
@@ -170,7 +173,24 @@ const CreateJobItemPage = () => {
       });
 
       if (res.ok) {
-        showSuccessMessage(isEdit ? "Job item updated successfully!" : "Job item created successfully!");
+        const data = await res.json();
+        
+        if (formData.budget_amount) {
+          try {
+            await apiFetch(`/jobitems/${data.id}/budget/`, {
+              method: 'PATCH',
+              token,
+              body: JSON.stringify({
+                allocated_amount: formData.budget_amount,
+                currency: formData.budget_currency || 'NGN'
+              })
+            });
+          } catch (e) {
+            console.error("Failed to set budget", e);
+          }
+        }
+
+        showSuccessMessage(isEdit ? "Job updated successfully!" : "Job created successfully!");
         if (isEdit) {
           navigate(`/job-items/${jobItemId}`);
         } else {
@@ -196,10 +216,10 @@ const CreateJobItemPage = () => {
           { label: 'Projects', path: '/projects' },
           { label: workItem?.project_name || 'Project', path: `/projects/${workItem?.project_id}` },
           { label: workItem?.plot_address || 'Plot', path: `/plots/${workItem?.plot_id}` },
-          { label: workItem?.name || 'Work Item', path: `/work-items/${workItemId}` },
-          { label: isEdit ? 'Edit Job Item' : 'New Job Item' }
+          { label: workItem?.name || 'Work', path: `/work-items/${workItemId}` },
+          { label: isEdit ? 'Edit Job' : 'New Job' }
         ]} />
-        <h1 style={{ fontSize: '64px', marginTop: '12px' }}>{isEdit ? 'Edit Job Item' : 'Create Job Item'}</h1>
+        <h1 style={{ fontSize: '64px', marginTop: '12px' }}>{isEdit ? 'Edit Job' : 'Create Job'}</h1>
       </div>
 
       <form onSubmit={handleSubmit} className="mobile-padding" style={{
@@ -214,10 +234,10 @@ const CreateJobItemPage = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div>
-                <label style={labelStyle}>Title</label>
+                <label style={labelStyle}>Title <span style={{ color: "var(--brand-orange)" }}>*</span></label>
                 <input
                   type="text"
-                  placeholder="Enter job item title"
+                  placeholder="Enter job title"
                   required
                   value={formData.job_name}
                   onChange={e => setFormData({ ...formData, job_name: e.target.value })}
@@ -225,12 +245,12 @@ const CreateJobItemPage = () => {
                 />
               </div>
               <div>
-                <label style={labelStyle}>Parent Work Item *</label>
+                <label style={labelStyle}>Parent Work <span style={{ color: "var(--brand-orange)" }}>*</span></label>
                 {workItemId ? (
                   <input
                     type="text"
                     disabled
-                    value={workItem?.name || 'Work Item Name'}
+                    value={workItem?.name || 'Work Name'}
                     style={{ ...inputStyle, background: 'var(--bg-canvas)', cursor: 'not-allowed' }}
                   />
                 ) : (
@@ -238,7 +258,7 @@ const CreateJobItemPage = () => {
                     options={workItemsList}
                     value={formData.work_item}
                     onChange={val => setFormData({ ...formData, work_item: val })}
-                    placeholder="Select work item"
+                    placeholder="Select work"
                   />
                 )}
               </div>
@@ -246,7 +266,7 @@ const CreateJobItemPage = () => {
 
             <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div>
-                <label style={labelStyle}>Artisan Type *</label>
+                <label style={labelStyle}>Artisan Type <span style={{ color: "var(--brand-orange)" }}>*</span></label>
                 <select
                   required
                   value={formData.job_artisan}
@@ -254,20 +274,32 @@ const CreateJobItemPage = () => {
                   style={inputStyle}
                 >
                   <option value="">Select artisan...</option>
-                  {['Mason', 'Plumber', 'Electrician', 'Carpenter', 'Painter', 'Roofer', 'Iron Bender', 'Tiler', 'Glass Worker', 'Aluminium Worker', 'Other'].map(a => (
+                  {['Mason', 'Plumber', 'Electrician', 'Carpenter', 'Painter', 'Roofer', 'Iron Bender', 'Tiler', 'Glass Worker', 'Aluminium Worker', 'Labourer', 'Other'].map(a => (
                     <option key={a} value={a}>{a}</option>
                   ))}
                 </select>
+                {formData.job_artisan === 'Other' && (
+                  <div style={{ marginTop: '12px' }}>
+                    <input
+                      type="text"
+                      placeholder="Enter custom artisan type..."
+                      required
+                      value={formData.custom_artisan}
+                      onChange={e => setFormData({ ...formData, custom_artisan: e.target.value })}
+                      style={inputStyle}
+                    />
+                  </div>
+                )}
               </div>
               <div>
-                <label style={labelStyle}>Status *</label>
+                <label style={labelStyle}>Status <span style={{ color: "var(--brand-orange)" }}>*</span></label>
                 <select
                   required
                   value={formData.job_status}
                   onChange={e => setFormData({ ...formData, job_status: e.target.value })}
                   style={inputStyle}
                 >
-                  {['Planned', 'In Progress', 'Completed', 'On Hold', 'Delayed', 'Cancelled'].map(s => (
+                  {['Planned', 'In Progress', 'On Hold', 'Delayed', 'Cancelled'].map(s => (
                     <option key={s} value={s}>{s}</option>
                   ))}
                 </select>
@@ -275,7 +307,7 @@ const CreateJobItemPage = () => {
             </div>
 
             <div>
-              <label style={labelStyle}>Description</label>
+              <label style={labelStyle}>Description <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
               <textarea
                 placeholder="Describe the scope of work..."
                 value={formData.job_description}
@@ -290,7 +322,7 @@ const CreateJobItemPage = () => {
           {/* Right Column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <div>
-              <label style={labelStyle}>Estimated Hours <span style={{ fontWeight: 400, color: 'var(--text-tertiary)' }}>(Optional)</span></label>
+              <label style={labelStyle}>Estimated Hours <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
               <input
                 type="number"
                 step="0.5"
@@ -302,9 +334,34 @@ const CreateJobItemPage = () => {
               />
             </div>
 
+            <div>
+              <label style={labelStyle}>Budget <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <select 
+                  value={formData.budget_currency} 
+                  onChange={e => setFormData({ ...formData, budget_currency: e.target.value })}
+                  style={{ ...inputStyle, width: '100px' }}
+                >
+                  <option value="NGN">NGN</option>
+                  <option value="USD">USD</option>
+                  <option value="GBP">GBP</option>
+                  <option value="EUR">EUR</option>
+                </select>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="e.g. 50000"
+                  value={formData.budget_amount}
+                  onChange={e => setFormData({ ...formData, budget_amount: e.target.value })}
+                  style={{ ...inputStyle, flex: 1 }}
+                />
+              </div>
+            </div>
+
             <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div>
-                <label style={labelStyle}>Start Date *</label>
+                <label style={labelStyle}>Start Date <span style={{ color: "var(--brand-orange)" }}>*</span></label>
                 <input
                   type="date"
                   required
@@ -314,7 +371,7 @@ const CreateJobItemPage = () => {
                 />
               </div>
               <div>
-                <label style={labelStyle}>Target End Date *</label>
+                <label style={labelStyle}>Target End Date <span style={{ color: "var(--brand-orange)" }}>*</span></label>
                 <input
                   type="date"
                   required
@@ -338,7 +395,11 @@ const CreateJobItemPage = () => {
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
+<<<<<<< HEAD
                     <label style={{ ...labelStyle, marginBottom: '4px' }}>Job Item Progress</label>
+=======
+                    <label style={{ ...labelStyle, marginBottom: '4px' }}>Job Progress <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
                     <span style={{ fontSize: '13px', color: 'var(--text-tertiary)' }}>
                       {isProgressManual ? 'Manual Override active' : 'Calculated automatically from daily reports'}
                     </span>
@@ -439,7 +500,7 @@ const CreateJobItemPage = () => {
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '48px' }}>
           <button type="button" onClick={() => navigate(-1)} className="btn-ghost" style={{ padding: '12px 32px' }}>Cancel</button>
           <button type="submit" className="btn-primary" style={{ padding: '12px 48px' }} disabled={loading}>
-            {loading ? <Spinner size={20} /> : (typeof window !== 'undefined' && window.location.pathname.includes('/edit') ? 'Update Job Item' : 'Create Job Item')}
+            {loading ? <Spinner size={20} /> : (typeof window !== 'undefined' && window.location.pathname.includes('/edit') ? 'Update Job' : 'Create Job')}
           </button>
         </div>
       </form>

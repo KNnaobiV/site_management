@@ -24,6 +24,7 @@ const CreateDailyReportPage = () => {
     notes: '',
     external_comments: '',
     internal_comments: '',
+    video_link: '',
   });
   const [reportImages, setReportImages] = useState([]);
   const [photosVerified, setPhotosVerified] = useState(false);
@@ -84,6 +85,7 @@ const CreateDailyReportPage = () => {
       notes: formData.notes.trim(),
       external_comments: formData.external_comments,
       internal_comments: formData.internal_comments,
+      video_link: formData.video_link,
     };
 
     try {
@@ -123,13 +125,13 @@ const CreateDailyReportPage = () => {
   };
 
   if (fetching) return <div style={{ display: 'flex', justifyContent: 'center', padding: '100px' }}><Spinner /></div>;
-  if (!jobItem) return <div style={{ padding: '60px', textAlign: 'center' }}>Job Item not found.</div>;
+  if (!jobItem) return <div style={{ padding: '60px', textAlign: 'center' }}>Job not found.</div>;
 
   return (
     <div className="fade-up" style={{ padding: '0 0 80px' }}>
       <div style={{ marginBottom: '32px' }}>
         <Breadcrumb items={[
-          { label: 'Work Items', path: '/work-items' },
+          { label: 'Works', path: '/work-items' },
           { label: jobItem.work_item_name || '...', path: `/work-items/${jobItem.work_item}` },
           { label: jobItem.job_name, path: `/job-items/${jobItem.id}` },
           { label: 'New Report' }
@@ -145,7 +147,6 @@ const CreateDailyReportPage = () => {
         </p>
       </div>
 
-      {error && <div style={{ background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.2)', color: '#dc2626', padding: '16px', borderRadius: '12px', marginBottom: '24px', maxWidth: '800px' }}>{error}</div>}
 
       <form onSubmit={handleSubmit} className="mobile-padding" style={{
         background: 'var(--bg-card)',
@@ -165,7 +166,7 @@ const CreateDailyReportPage = () => {
           </h3>
           <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
             <div>
-              <label style={labelStyle}>Report Date *</label>
+              <label style={labelStyle}>Report Date <span style={{ color: "var(--brand-orange)" }}>*</span></label>
               <input
                 type="date" required
                 value={formData.report_date}
@@ -174,7 +175,7 @@ const CreateDailyReportPage = () => {
               />
             </div>
             <div>
-              <label style={labelStyle}>Priority Level *</label>
+              <label style={labelStyle}>Priority Level <span style={{ color: "var(--brand-orange)" }}>*</span></label>
               <select
                 required
                 value={formData.priority}
@@ -197,7 +198,11 @@ const CreateDailyReportPage = () => {
           </h3>
           <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
             <div>
+<<<<<<< HEAD
               <label style={labelStyle}>Job Progress (%) *</label>
+=======
+              <label style={labelStyle}>Job Progress (%) <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
               <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '8px 0' }}>
                 <input
                   type="range" min="0" max="100" step="1"
@@ -235,7 +240,7 @@ const CreateDailyReportPage = () => {
               </p>
             </div>
             <div>
-              <label style={labelStyle}>Target Completion Date *</label>
+              <label style={labelStyle}>Target Completion Date <span style={{ color: "var(--brand-orange)" }}>*</span></label>
               <input
                 type="date" required
                 value={formData.expected_completion_date}
@@ -254,7 +259,7 @@ const CreateDailyReportPage = () => {
           </h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <div>
-              <label style={labelStyle}>Issues Encountered</label>
+              <label style={labelStyle}>Issues Encountered <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
               <textarea
                 placeholder="Describe any blockers, weather issues, or material shortages..."
                 value={formData.issues_encountered}
@@ -263,7 +268,11 @@ const CreateDailyReportPage = () => {
               />
             </div>
             <div>
+<<<<<<< HEAD
               <label style={labelStyle}>General Observations <span style={{ color: '#dc2626' }}>*</span></label>
+=======
+              <label style={labelStyle}>General Observations <span style={{ color: "var(--brand-orange)" }}>*</span></label>
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
               <textarea
                 required
                 placeholder="What was accomplished today? Any specific wins or notes..."
@@ -279,7 +288,7 @@ const CreateDailyReportPage = () => {
         <section>
           <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
             <div>
-              <label style={labelStyle}>External Comments <span style={{ fontWeight: 400, color: 'var(--text-tertiary)' }}>(for Client)</span></label>
+              <label style={labelStyle}>External Comments <span style={{ fontWeight: 400, color: 'var(--text-tertiary)' }}>(for Client)</span> <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
               <textarea
                 placeholder="Publicly visible comments for stakeholders..."
                 value={formData.external_comments}
@@ -288,7 +297,7 @@ const CreateDailyReportPage = () => {
               />
             </div>
             <div>
-              <label style={labelStyle}>Internal Comments <span style={{ fontWeight: 400, color: 'var(--text-tertiary)' }}>(for Office)</span></label>
+              <label style={labelStyle}>Internal Comments <span style={{ fontWeight: 400, color: 'var(--text-tertiary)' }}>(for Office)</span> <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
               <textarea
                 placeholder="Internal team notes and sensitive information..."
                 value={formData.internal_comments}
@@ -317,12 +326,27 @@ const CreateDailyReportPage = () => {
             uploading={verifyingPhotos}
             uploadButtonText="Upload"
           />
+<<<<<<< HEAD
+=======
+          <div style={{ marginTop: '24px' }}>
+            <label style={labelStyle}>Video Link <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
+            <input
+              type="url"
+              placeholder="https://youtube.com/... or Google Drive link"
+              value={formData.video_link}
+              onChange={e => setFormData({ ...formData, video_link: e.target.value })}
+              style={inputStyle}
+            />
+          </div>
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
           {photosVerified && reportImages.length > 0 && (
             <div style={{ marginTop: '12px', display: 'flex', alignItems: 'center', gap: '8px', color: '#16a34a', fontSize: '14px', fontWeight: 600 }}>
               <CheckCircle2 size={16} /> {reportImages.length} photo{reportImages.length > 1 ? 's' : ''} verified and ready to be uploaded with report
             </div>
           )}
         </section>
+
+        {error && <div style={{ background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.2)', color: '#dc2626', padding: '16px', borderRadius: '12px', marginBottom: '24px' }}>{error}</div>}
 
         <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--border-default)', paddingTop: '40px', marginTop: '12px' }}>
           <button type="button" onClick={() => navigate(-1)} className="btn-ghost" style={{ padding: '14px 40px' }}>Cancel</button>

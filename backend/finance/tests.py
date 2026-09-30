@@ -211,12 +211,19 @@ class JobItemExpenseAPITest(APITestCase):
         )
         self.plot = ConstructionPlot.objects.create(
             construction_project=self.project,
+<<<<<<< HEAD
             foreman=self.foreman,
             storekeeper=self.strkpr,
+=======
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
             address='123 Plot Road',
             start_date=date.today(),
             target_end_date=date.today(),
         )
+<<<<<<< HEAD
+=======
+        self.plot.foremen.add(self.foreman, self.strkpr)
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
         self.work_item = WorkItem.objects.create(
             construction_plot=self.plot,
             name='Foundation Work',
@@ -456,11 +463,18 @@ class BudgetPermissionsAPITest(APITestCase):
 
         self.plot = ConstructionPlot.objects.create(
             construction_project=self.project,
+<<<<<<< HEAD
             foreman=self.foreman,
+=======
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
             address='456 Plot Boulevard',
             start_date=date.today(),
             target_end_date=date.today(),
         )
+<<<<<<< HEAD
+=======
+        self.plot.foremen.add(self.foreman)
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
         self.work_item = WorkItem.objects.create(
             construction_plot=self.plot,
             name='Bricklaying',
@@ -572,4 +586,27 @@ class BudgetPermissionsAPITest(APITestCase):
         self.assertIsNone(res_client.data['budget'])
         self.assertEqual(res_client.data['spent_amount'], '0.00')
 
+<<<<<<< HEAD
+=======
+    def test_job_item_cannot_be_completed_before_100_percent_progress(self):
+        # job_item currently has 0% progress
+        self.client.force_authenticate(user=self.pm)
+        res = self.client.patch(
+            f'/api/jobitems/{self.job_item.pk}/',
+            {"job_status": "Completed"}
+        )
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("job_status", res.data)
+
+        # Set manual_progress to 100% and then mark completed
+        res_ok = self.client.patch(
+            f'/api/jobitems/{self.job_item.pk}/',
+            {"manual_progress": 100, "job_status": "Completed"}
+        )
+        self.assertEqual(res_ok.status_code, status.HTTP_200_OK)
+        self.job_item.refresh_from_db()
+        self.assertEqual(self.job_item.job_status, "Completed")
+
+
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
 

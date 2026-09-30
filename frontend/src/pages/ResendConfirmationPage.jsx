@@ -127,7 +127,7 @@ function Field({ label, type = "text", value, onChange }) {
 
     return (
         <div className="field-group">
-            <label>{label}</label>
+            <label>{label} <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
             <div style={{ position: 'relative' }}>
                 <input
                     type={currentType}

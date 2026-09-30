@@ -115,7 +115,11 @@ class JobItemExpenseViewSet(viewsets.ModelViewSet):
         return Expense.objects.filter(
             Q(job_item__work_item__construction_plot__construction_project__created_by=user) |
             Q(job_item__work_item__construction_plot__construction_project__project_manager=user) |
+<<<<<<< HEAD
             Q(job_item__work_item__construction_plot__foreman=user),
+=======
+            Q(job_item__work_item__construction_plot__foremen=user),
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
             is_deleted=False
         ).distinct().select_related("cost_code").order_by("-incurred_at", "-created_at")
 
@@ -125,8 +129,17 @@ class JobItemExpenseViewSet(viewsets.ModelViewSet):
         job_item = self.get_job_item()
         if not job_item:
             raise ValidationError({"job_item": "Job item is required."})
+<<<<<<< HEAD
         if job_item.job_status == 'Completed':
             raise ValidationError({"non_field_errors": ["Cannot add expenses to a completed job item."]})
+=======
+        if not job_item.is_approved:
+            raise ValidationError({"job_item": ["Cannot add expenses to an unapproved job item."]})
+        if job_item.job_status == 'Completed':
+            raise ValidationError({"non_field_errors": ["Cannot add expenses to a completed job item."]})
+        if job_item.work_item and job_item.work_item.work_status == 'Completed':
+            raise ValidationError({"non_field_errors": ["Cannot add expenses because the parent work item is completed."]})
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
         plot = self.get_plot()
         if not getattr(self.request.user, "is_superuser", False):
             role = get_plot_role(self.request.user, plot) if plot else "none"
@@ -138,8 +151,16 @@ class JobItemExpenseViewSet(viewsets.ModelViewSet):
         from rest_framework.exceptions import ValidationError, PermissionDenied
         from core.roles import get_plot_role
         expense = self.get_object()
+<<<<<<< HEAD
         if expense.job_item and expense.job_item.job_status == 'Completed':
             raise ValidationError({"non_field_errors": ["Cannot update expenses of a completed job item."]})
+=======
+        job_item = expense.job_item
+        if job_item and job_item.job_status == 'Completed':
+            raise ValidationError({"non_field_errors": ["Cannot update expenses on a completed job item."]})
+        if job_item and job_item.work_item and job_item.work_item.work_status == 'Completed':
+            raise ValidationError({"non_field_errors": ["Cannot update expenses because the parent work item is completed."]})
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
         plot = self.get_plot()
         if not getattr(self.request.user, "is_superuser", False):
             role = get_plot_role(self.request.user, plot) if plot else "none"
@@ -175,6 +196,38 @@ class WorkItemExpenseViewSet(viewsets.ModelViewSet):
             "cost_code", "job_item", "work_item", "work_item__construction_plot"
         ).order_by("-incurred_at", "-created_at")
 
+<<<<<<< HEAD
+=======
+    def perform_create(self, serializer):
+        from rest_framework.exceptions import ValidationError, PermissionDenied
+        from core.roles import get_plot_role
+        wi = self.get_work_item()
+        if not wi:
+            raise ValidationError({"work_item": "Work item is required."})
+        if wi.work_status == 'Completed':
+            raise ValidationError({"non_field_errors": ["Cannot add expenses to a completed work item."]})
+        plot = self.get_plot()
+        if not getattr(self.request.user, "is_superuser", False):
+            role = get_plot_role(self.request.user, plot) if plot else "none"
+            if role not in {"owner", "project_manager", "foreman"}:
+                raise PermissionDenied("Only the project manager, creator, or foreman can add expenses.")
+        serializer.save(work_item=wi)
+
+    def perform_update(self, serializer):
+        from rest_framework.exceptions import ValidationError, PermissionDenied
+        from core.roles import get_plot_role
+        expense = self.get_object()
+        wi = expense.work_item
+        if wi and wi.work_status == 'Completed':
+            raise ValidationError({"non_field_errors": ["Cannot update expenses on a completed work item."]})
+        plot = self.get_plot()
+        if not getattr(self.request.user, "is_superuser", False):
+            role = get_plot_role(self.request.user, plot) if plot else "none"
+            if role not in {"owner", "project_manager", "foreman"}:
+                raise PermissionDenied("Only the project manager, creator, or foreman can update expenses.")
+        serializer.save()
+
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
     def perform_destroy(self, instance):
         _soft_delete_expense(self.request, instance)
 
@@ -249,6 +302,7 @@ class GeneralExpenseViewSet(viewsets.ModelViewSet):
             Q(project__project_manager=user) |
             Q(plot__construction_project__created_by=user) |
             Q(plot__construction_project__project_manager=user) |
+<<<<<<< HEAD
             Q(plot__foreman=user) |
             Q(work_item__construction_plot__construction_project__created_by=user) |
             Q(work_item__construction_plot__construction_project__project_manager=user) |
@@ -256,6 +310,15 @@ class GeneralExpenseViewSet(viewsets.ModelViewSet):
             Q(job_item__work_item__construction_plot__construction_project__created_by=user) |
             Q(job_item__work_item__construction_plot__construction_project__project_manager=user) |
             Q(job_item__work_item__construction_plot__foreman=user),
+=======
+            Q(plot__foremen=user) |
+            Q(work_item__construction_plot__construction_project__created_by=user) |
+            Q(work_item__construction_plot__construction_project__project_manager=user) |
+            Q(work_item__construction_plot__foremen=user) |
+            Q(job_item__work_item__construction_plot__construction_project__created_by=user) |
+            Q(job_item__work_item__construction_plot__construction_project__project_manager=user) |
+            Q(job_item__work_item__construction_plot__foremen=user),
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
             is_deleted=False
         ).distinct().select_related("cost_code")
 

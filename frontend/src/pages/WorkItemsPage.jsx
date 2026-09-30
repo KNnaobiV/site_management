@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { WorkItemCard, Spinner } from '../components';
-import { Filter, Plus } from 'lucide-react';
+import { WorkItemCard, Spinner, Modal, FilterSortDropdown } from '../components';
+import { Filter, SortAsc, SortDesc, Plus, HelpCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { apiFetch, unwrapList } from '../api/client';
 
@@ -15,6 +15,10 @@ const WorkItemsPage = () => {
   const { token } = useAuth();
   const [workItems, setWorkItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showHelpModal, setShowHelpModal] = useState(false);
+  const [filterStatus, setFilterStatus] = useState('All');
+  const [filterPlot, setFilterPlot] = useState('All');
+  const [sortOrder, setSortOrder] = useState('recent');
 
   useEffect(() => {
     fetchAllWorkItems();
@@ -41,22 +45,81 @@ const WorkItemsPage = () => {
 
   if (loading) return <div style={{ padding: '60px', display: 'flex', justifyContent: 'center' }}><Spinner /></div>;
 
+  const uniquePlots = Array.from(new Set(workItems.map(w => w.construction_plot_name))).filter(Boolean);
+  const plotOptions = [
+    { label: 'All Plots', value: 'All' },
+    ...uniquePlots.map(name => ({ label: name, value: name }))
+  ];
+
+  const filteredWorkItems = workItems.filter(w => {
+    const wStatus = w.status || w.work_status;
+    if (filterStatus !== 'All' && wStatus !== filterStatus) return false;
+    if (filterPlot !== 'All' && w.construction_plot_name !== filterPlot) return false;
+    return true;
+  });
+
+  const sortedWorkItems = [...filteredWorkItems].sort((a, b) => {
+    if (sortOrder === 'recent') return new Date(b.created_at || 0) - new Date(a.created_at || 0);
+    if (sortOrder === 'oldest') return new Date(a.created_at || 0) - new Date(b.created_at || 0);
+    if (sortOrder === 'target_end_date') {
+      const dateA = a.target_end_date ? new Date(a.target_end_date).getTime() : Infinity;
+      const dateB = b.target_end_date ? new Date(b.target_end_date).getTime() : Infinity;
+      return dateA - dateB;
+    }
+    return 0;
+  });
+
   return (
     <div className="fade-up" style={{ height: "100vh", overflow: "auto", position: "relative" }}>
       <div style={{ paddingBottom: "100px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "40px" }}>
           <div>
-            <h1 style={{ fontSize: "48px", margin: 0 }}>Work Items</h1>
+            <h1 style={{ fontSize: "48px", margin: 0 }}>Works</h1>
             <p style={{ fontSize: "16px", color: "var(--text-tertiary)" }}>
               {workItems.length} active phases across plots
             </p>
           </div>
 
           <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", alignItems: "center" }}>
+<<<<<<< HEAD
             <button className="btn-ghost">
               <Filter size={16} />
               <span>Filter</span>
             </button>
+=======
+            <FilterSortDropdown
+              icon={Filter}
+              label="Status"
+              options={[
+                { label: 'All Statuses', value: 'All' },
+                { label: 'Planned', value: 'Planned' },
+                { label: 'In Progress', value: 'In Progress' },
+                { label: 'Completed', value: 'Completed' },
+              ]}
+              value={filterStatus}
+              onChange={setFilterStatus}
+            />
+            {!plotIdFromQuery && plotOptions.length > 1 && (
+              <FilterSortDropdown
+                icon={Filter}
+                label="Plot"
+                options={plotOptions}
+                value={filterPlot}
+                onChange={setFilterPlot}
+              />
+            )}
+            <FilterSortDropdown
+              icon={sortOrder === 'oldest' ? SortAsc : SortDesc}
+              label="Sort"
+              options={[
+                { label: 'Recent First', value: 'recent' },
+                { label: 'Oldest First', value: 'oldest' },
+                { label: 'Target End Date', value: 'target_end_date' }
+              ]}
+              value={sortOrder}
+              onChange={setSortOrder}
+            />
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
             <button
               className="btn-primary"
               onClick={() => {
@@ -68,24 +131,57 @@ const WorkItemsPage = () => {
               }}
             >
               <Plus size={16} />
+<<<<<<< HEAD
               <span>New Work Item</span>
+=======
+              <span>New Work</span>
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
             </button>
           </div>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "32px" }}>
-          {workItems.map(item => (
-            <WorkItemCard 
-              key={item.id} 
-              item={item} 
-              onClick={() => {
-                console.log("Navigating to work item:", item.id);
-                navigate(`/work-items/${item.id}`);
-              }}
-            />
-          ))}
-        </div>
+        {workItems.length === 0 && !loading ? (
+          <div style={{
+            minHeight: '320px', border: '1px dashed var(--border-default)', borderRadius: '24px',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', padding: '40px', color: 'var(--text-tertiary)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <h2 style={{ margin: 0, fontSize: '28px' }}>No works yet</h2>
+              <div 
+                onClick={() => setShowHelpModal(true)} 
+                style={{ display: 'flex', alignItems: 'center', color: 'var(--brand-orange)', cursor: 'pointer' }}
+              >
+                <HelpCircle size={20} />
+              </div>
+            </div>
+            <p style={{ maxWidth: '420px', textAlign: 'center' }}>Create a work item to represent a major phase of construction within a plot.</p>
+            <button className="btn-primary" onClick={() => navigate('/work-items/new')} style={{ padding: '14px 40px', height: 'auto' }}>
+              Create work to start
+            </button>
+          </div>
+        ) : (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "32px" }}>
+            {sortedWorkItems.map(item => (
+              <WorkItemCard 
+                key={item.id} 
+                item={item} 
+                onClick={() => navigate(`/work-items/${item.id}`)}
+              />
+            ))}
+          </div>
+        )}
       </div>
+
+      <Modal isOpen={showHelpModal} onClose={() => setShowHelpModal(false)} title="What is a Work Item?">
+        <p style={{ lineHeight: '1.6', color: 'var(--text-secondary)' }}>
+          <strong>Works</strong> (or Work Items) represent major activities, tasks, or components that need to be completed within a Plot.
+        </p>
+        <p style={{ marginTop: '16px', lineHeight: '1.6', color: 'var(--text-secondary)' }}>
+          <strong>Example:</strong> "Foundation Laying", "Roofing", "Electrical First Fix", or "Plumbing".
+          <br /><br />
+          Inside a Work Item, you create Job Items (the day-to-day tasks).
+        </p>
+      </Modal>
     </div>
   );
 };

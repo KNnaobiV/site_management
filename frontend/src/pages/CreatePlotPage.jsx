@@ -33,13 +33,20 @@ const CreatePlotPage = () => {
 
   const [formData, setFormData] = useState({
     plot_number: '',
+<<<<<<< HEAD
     plot_name: '',
+=======
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
     construction_project: projectId || '',
     address: '',
     gps_latitude: '',
     gps_longitude: '',
     status: 'Planned',
+<<<<<<< HEAD
     foreman: '',
+=======
+    foremen: [],
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
     start_date: new Date().toISOString().split('T')[0],
     target_end_date: '',
     notes: '',
@@ -72,13 +79,20 @@ const CreatePlotPage = () => {
         setCurrentProgress(plotData.progress || 0);
         setFormData({
           plot_number: plotData.plot_number || '',
+<<<<<<< HEAD
           plot_name: plotData.plot_name || plotData.plot_number || '',
+=======
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
           construction_project: plotData.construction_project?.id || plotData.construction_project || '',
           address: plotData.address || '',
           gps_latitude: plotData.gps_latitude || '',
           gps_longitude: plotData.gps_longitude || '',
           status: plotData.status || 'Planned',
+<<<<<<< HEAD
           foreman: plotData.foreman?.id || '',
+=======
+          foremen: plotData.foremen ? plotData.foremen.map(f => f.id) : [],
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
           start_date: plotData.start_date || new Date().toISOString().split('T')[0],
           target_end_date: plotData.target_end_date || '',
           notes: plotData.notes || '',
@@ -91,6 +105,7 @@ const CreatePlotPage = () => {
           setExistingCoverImage(plotData.cover_image.img);
         } else if (typeof plotData.cover_image === 'string') {
           setExistingCoverImage(plotData.cover_image);
+<<<<<<< HEAD
         }
 
         // Prepopulate users select list with the existing foreman
@@ -98,11 +113,22 @@ const CreatePlotPage = () => {
         if (plotData.foreman) {
           initialUsers.push({ id: plotData.foreman.id, label: plotData.foreman.username, avatar: plotData.foreman.avatar_url || null });
         }
+=======
+        }
+
+        // Prepopulate users select list with the existing foremen
+        const initialUsers = [];
+        if (plotData.foremen && Array.isArray(plotData.foremen)) {
+          plotData.foremen.forEach(f => {
+            initialUsers.push({ id: f.id, label: f.username, avatar: f.avatar_url || null });
+          });
+        }
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
         if (initialUsers.length > 0) {
           setUsers(initialUsers);
         }
 
-        const hasValues = !!(plotData.plot_number || plotData.plot_name || plotData.address || plotData.construction_project);
+        const hasValues = !!(plotData.plot_number || plotData.address || plotData.construction_project);
         setFieldsUpdated(hasValues);
       } else {
         setError('Failed to load plot for editing.');
@@ -229,6 +255,7 @@ const CreatePlotPage = () => {
     const canSetProgress = isEditing && (plotData?.role === 'owner' || plotData?.role === 'project_manager');
 
     const payload = {
+<<<<<<< HEAD
       construction_project: formData.construction_project,
       plot_number: formData.plot_number || formData.plot_name || '',
       plot_name: formData.plot_name || formData.plot_number || '',
@@ -240,6 +267,18 @@ const CreatePlotPage = () => {
       gps_longitude: formData.gps_longitude || null,
       notes: formData.notes,
       foreman_id: formData.foreman || null,
+=======
+      plot_number: formData.plot_number || '',
+      construction_project: formData.construction_project || null,
+      address: formData.address || '',
+      gps_latitude: formData.gps_latitude || null,
+      gps_longitude: formData.gps_longitude || null,
+      status: formData.status || 'Planned',
+      foremen_ids: formData.foremen && formData.foremen.length > 0 ? formData.foremen : [],
+      start_date: formData.start_date || null,
+      target_end_date: formData.target_end_date || null,
+      notes: formData.notes || '',
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
     };
 
     if (isEditing && canSetProgress) {
@@ -250,7 +289,17 @@ const CreatePlotPage = () => {
     if (coverImageFile) {
       body = new FormData();
       Object.entries(payload).forEach(([k, v]) => {
+<<<<<<< HEAD
         if (v !== null && v !== undefined) body.append(k, v);
+=======
+        if (v !== null && v !== undefined) {
+          if (Array.isArray(v)) {
+            v.forEach(item => body.append(k, item));
+          } else {
+            body.append(k, v);
+          }
+        }
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
       });
       body.append('cover_image', coverImageFile);
     } else {
@@ -315,6 +364,7 @@ const CreatePlotPage = () => {
         <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '48px' }}>
           {/* Left Column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+<<<<<<< HEAD
             <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div>
                 <label style={labelStyle}>Plot Number <span style={{ color: '#dc2626' }}>*</span></label>
@@ -341,6 +391,22 @@ const CreatePlotPage = () => {
 
             <div>
               <label style={labelStyle}>Parent Project <span style={{ color: '#dc2626' }}>*</span></label>
+=======
+            <div>
+              <label style={labelStyle}>Plot Number <span style={{ color: "var(--brand-orange)" }}>*</span></label>
+              <input
+                type="text"
+                placeholder="Enter plot number"
+                required
+                value={formData.plot_number}
+                onChange={e => setFormData({ ...formData, plot_number: e.target.value })}
+                style={inputStyle}
+              />
+            </div>
+
+            <div>
+              <label style={labelStyle}>Parent Project <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
               {projectId ? (
                 <input
                   type="text"
@@ -362,6 +428,7 @@ const CreatePlotPage = () => {
             </div>
 
             <div>
+<<<<<<< HEAD
               <label style={labelStyle}>Foreman</label>
               <SearchableSelect
                 options={users}
@@ -369,11 +436,25 @@ const CreatePlotPage = () => {
                 onChange={val => setFormData({ ...formData, foreman: val })}
                 onSearch={handleSearchUsers}
                 placeholder="Select foreman"
+=======
+              <label style={labelStyle}>Foremen <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
+              <SearchableSelect
+                isMulti={true}
+                options={users}
+                value={formData.foremen}
+                onChange={val => setFormData({ ...formData, foremen: val })}
+                onSearch={handleSearchUsers}
+                placeholder="Select foremen"
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
               />
             </div>
 
             <div>
+<<<<<<< HEAD
               <label style={labelStyle}>Address <span style={{ color: '#dc2626' }}>*</span></label>
+=======
+              <label style={labelStyle}>Address <span style={{ color: "var(--brand-orange)" }}>*</span></label>
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
               <textarea
                 placeholder="Enter site address"
                 required
@@ -384,7 +465,11 @@ const CreatePlotPage = () => {
             </div>
 
             <div>
+<<<<<<< HEAD
               <label style={labelStyle}>Status <span style={{ color: '#dc2626' }}>*</span></label>
+=======
+              <label style={labelStyle}>Status <span style={{ color: "var(--brand-orange)" }}>*</span></label>
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
               <select
                 required
                 value={formData.status}
@@ -401,7 +486,7 @@ const CreatePlotPage = () => {
           {/* Right Column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <div>
-              <label style={labelStyle}>GPS Coordinates</label>
+              <label style={labelStyle}>GPS Coordinates <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
               <div style={{ display: 'flex', gap: '12px' }}>
                 <div style={{ position: 'relative', flex: 1 }}>
                   <MapPin size={16} color="var(--text-tertiary)" style={{ position: 'absolute', left: '16px', top: '18px' }} />
@@ -428,7 +513,11 @@ const CreatePlotPage = () => {
 
             <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div>
+<<<<<<< HEAD
                 <label style={labelStyle}>Start Date <span style={{ color: '#dc2626' }}>*</span></label>
+=======
+                <label style={labelStyle}>Start Date <span style={{ color: "var(--brand-orange)" }}>*</span></label>
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
                 <input
                   type="date"
                   required
@@ -438,7 +527,11 @@ const CreatePlotPage = () => {
                 />
               </div>
               <div>
+<<<<<<< HEAD
                 <label style={labelStyle}>Target End Date <span style={{ color: '#dc2626' }}>*</span></label>
+=======
+                <label style={labelStyle}>Target End Date <span style={{ color: "var(--brand-orange)" }}>*</span></label>
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
                 <input
                   type="date"
                   required
@@ -450,7 +543,7 @@ const CreatePlotPage = () => {
             </div>
 
             <div>
-              <label style={labelStyle}>Notes</label>
+              <label style={labelStyle}>Notes <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
               <textarea
                 placeholder="Add any additional notes about this plot"
                 value={formData.notes}
@@ -461,9 +554,13 @@ const CreatePlotPage = () => {
 
             {/* Cover Image */}
             <div>
+<<<<<<< HEAD
               <label style={labelStyle}>
                 Cover Image <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>(optional)</span>
               </label>
+=======
+              <label style={labelStyle}>Cover Image <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
               <input
                 type="file"
                 ref={fileInputRef}
@@ -549,7 +646,7 @@ const CreatePlotPage = () => {
 
             {/* Budget */}
             <div>
-              <label style={labelStyle}>Plot Budget <span style={{ fontWeight: 400, color: 'var(--text-tertiary)' }}>(Optional)</span></label>
+              <label style={labelStyle}>Plot Budget <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '10px' }}>
                 <input
                   type="number"
@@ -583,9 +680,15 @@ const CreatePlotPage = () => {
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
+<<<<<<< HEAD
                     <label style={{ ...labelStyle, marginBottom: '4px' }}>Plot Progress</label>
                     <span style={{ fontSize: '13px', color: 'var(--text-tertiary)' }}>
                       {isProgressManual ? 'Manual Override active' : 'Calculated automatically from work items'}
+=======
+                    <label style={{ ...labelStyle, marginBottom: '4px' }}>Plot Progress <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
+                    <span style={{ fontSize: '13px', color: 'var(--text-tertiary)' }}>
+                      {isProgressManual ? 'Manual Override active' : 'Calculated automatically from works'}
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
                     </span>
                   </div>
                   <span style={{ fontSize: '24px', fontWeight: 700, color: 'var(--brand-orange)' }}>
