@@ -48,7 +48,7 @@ const PlotsPage = () => {
   ];
 
   const filteredPlots = plots.filter(p => {
-    const pStatus = p.status || p.plot_status;
+    const pStatus = p.status;
     if (filterStatus !== 'All' && pStatus !== filterStatus) return false;
     if (filterProject !== 'All' && p.project_name !== filterProject) return false;
     return true;
@@ -129,8 +129,8 @@ const PlotsPage = () => {
 
         <ul className="horizontal-list-mobile stat-cards-row" style={{ marginBottom: "48px" }}>
           <li><StatCard label="Total Plots" value={plots.length} /></li>
-          <li><StatCard label="Active" value={plots.filter(p => p.plot_status !== 'Completed').length} color="var(--brand-orange)" /></li>
-          <li><StatCard label="Completed" value={plots.filter(p => p.plot_status === 'Completed').length} color="var(--status-completed)" /></li>
+          <li><StatCard label="Active" value={plots.filter(p => p.status !== 'Completed').length} color="var(--brand-orange)" /></li>
+          <li><StatCard label="Completed" value={plots.filter(p => p.status === 'Completed').length} color="var(--status-completed)" /></li>
         </ul>
 
         {plots.length === 0 && !loading ? (
@@ -159,11 +159,7 @@ const PlotsPage = () => {
                 key={plot.id}
                 plot={plot}
                 onClick={() => {
-                  if (projectIdFromQuery) {
-                    navigate(`/projects/${projectIdFromQuery}/plots/${plot.id}`);
-                  } else {
-                    navigate(`/plots/${plot.id}`);
-                  }
+                  navigate(`/plots/${plot.id}`);
                 }}
               />
             ))}

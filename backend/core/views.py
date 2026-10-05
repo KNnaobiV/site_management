@@ -93,6 +93,7 @@ from .permissions import (
     CanDeleteJobItem,
     CanApproveJobItem,
     CanManageDocuments,
+    CanAccessReportComments,
 )
 from .serializers import (
     ConstructionProjectSerializer,
@@ -783,7 +784,7 @@ class JobReportViewSet(ScopeResolutionMixin, ExportMixin, ApprovalMixin, ImageHa
         if self.action == "destroy":
             return [IsAuthenticated(), CanManagePlot()]
         if self.action == "comments":
-            return [IsAuthenticated(), IsPlotMember()]
+            return [IsAuthenticated(), CanAccessReportComments()]
         return [IsAuthenticated()]
 
     def get_queryset(self):
@@ -1116,8 +1117,8 @@ class FeedbackView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        recipient = getattr(settings, "FEEDBACK_EMAIL", None) or os.environ.get("FEEDBACK_EMAIL", "feedback@constropal.com")
-        from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "no-reply@constropal.local")
+        recipient = getattr(settings, "FEEDBACK_EMAIL", None) or os.environ.get("FEEDBACK_EMAIL", "feedback@ironwork.com")
+        from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "no-reply@ironwork.local")
 
         email_subject = f"[Beta Feedback - {category}] {subject or 'New Submission'}"
 

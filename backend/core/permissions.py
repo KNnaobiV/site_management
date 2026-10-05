@@ -114,6 +114,18 @@ class CanReviewReport(BaseRolePermission):
     def has_object_permission(self, request, view, obj):
         return self.get_auth_service(request).can_review_report(obj)
 
+class CanAccessReportComments(BaseRolePermission):
+    def has_permission(self, request, view):
+        if not request.user or not request.user.is_authenticated:
+            return False
+        obj = self.get_scope_obj(view)
+        if not obj:
+            return request.method in SAFE_METHODS
+        return self.get_auth_service(request).can_access_report_comments(obj)
+
+    def has_object_permission(self, request, view, obj):
+        return self.get_auth_service(request).can_access_report_comments(obj)
+
 class CanSendProjectInvitation(BaseRolePermission):
     def has_permission(self, request, view):
         if not request.user or not request.user.is_authenticated:

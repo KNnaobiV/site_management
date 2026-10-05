@@ -48,7 +48,7 @@ DEFAULT_FROM_EMAIL = CFG.get(
 FEEDBACK_EMAIL = CFG.get(
     'EMAIL',
     'FEEDBACK_EMAIL',
-    fallback='feedback@constropal.com'
+    fallback='feedback@ironwork.com'
 )
 EMAIL_HOST = CFG.get('EMAIL', 'EMAIL_HOST', fallback='')
 EMAIL_PORT = CFG.getint('EMAIL', 'EMAIL_PORT', fallback=None)

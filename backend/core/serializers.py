@@ -71,8 +71,8 @@ class RoleFilteredSerializer(serializers.ModelSerializer):
         for role_label, extra_fields in self.ROLE_EXTRA.items():
             if role == role_label:
                 allowed |= set(extra_fields)
-        # owner/PM always get everything
-        if role in {"owner", "project_manager"}:
+        # creator/PM always get everything
+        if role in {"creator", "project_manager"}:
             return  # keep all declared fields
         # drop fields not in allowed set
         declared = set(self.fields.keys())
@@ -1001,7 +1001,6 @@ class JobReportSerializer(RoleFilteredSerializer):
         "expected_completion_date",
         "issues_encountered",
         "notes",
-        "external_comments",
         "days_elapsed",
         "updated_at",
         "images",
@@ -1009,11 +1008,11 @@ class JobReportSerializer(RoleFilteredSerializer):
     }
  
     ROLE_EXTRA = {
-        "project_manager": {"internal_comments", "job_image", "job_image_id", "job_video", "job_video_data"},
-        "foreman":         {"job_image", "job_image_id", "job_video", "job_video_data"},
-        "plot_member":     {"job_image", "job_image_id", "job_video", "job_video_data"},
-        "storekeeper":     {"job_image", "job_image_id", "job_video", "job_video_data"},
-        "consultant":      set(),
+        "project_manager": {"internal_comments", "external_comments", "job_image", "job_image_id", "job_video", "job_video_data"},
+        "foreman":         {"external_comments", "job_image", "job_image_id", "job_video", "job_video_data"},
+        "plot_member":     {"external_comments", "job_image", "job_image_id", "job_video", "job_video_data"},
+        "storekeeper":     {"external_comments", "job_image", "job_image_id", "job_video", "job_video_data"},
+        "consultant":      {"external_comments"},
     }
  
     class Meta:

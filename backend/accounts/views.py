@@ -66,10 +66,10 @@ def send_confirmation_email(request, user):
     confirmation_key = build_confirmation_token(user)
     frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:5173').rstrip('/')
     confirm_url = f"{frontend_url}/confirm-email?confirm_key={confirmation_key}"
-    subject = "Confirm your ConstroPal email"
+    subject = "Confirm your Ironwork email"
     message = (
         f"Hello {user.first_name or user.username},\n\n"
-        "Thanks for registering with ConstroPal. Please confirm your email by clicking the link below:\n\n"
+        "Thanks for registering with Ironwork. Please confirm your email by clicking the link below:\n\n"
         f"{confirm_url}\n\n"
         "If you did not register for this account, please ignore this message.\n"
     )
@@ -78,19 +78,19 @@ def send_confirmation_email(request, user):
         f"<html><head><meta charset='utf-8'></head>"
         f"<body style='font-family: Arial, sans-serif; line-height: 1.6; color: #1e293b; max-width: 600px; margin: 0 auto; padding: 20px;'>"
         f"<div style='background-color: #0f172a; padding: 24px; text-align: center; border-radius: 8px 8px 0 0;'>"
-        f"<h1 style='color: #ffffff; margin: 0; font-size: 22px; letter-spacing: 0.5px;'>ConstroPal</h1>"
+        f"<h1 style='color: #ffffff; margin: 0; font-size: 22px; letter-spacing: 0.5px;'>Ironwork</h1>"
         f"</div>"
         f"<div style='background: #ffffff; padding: 32px 24px; border: 1px solid #e2e8f0; border-radius: 0 0 8px 8px;'>"
         f"<h2 style='color: #0f172a; margin-top: 0; font-size: 20px;'>Confirm Your Email Address</h2>"
         f"<p>Hello <strong>{user.first_name or user.username}</strong>,</p>"
-        f"<p>Thanks for registering with ConstroPal. Please confirm your email address to activate your account:</p>"
+        f"<p>Thanks for registering with Ironwork. Please confirm your email address to activate your account:</p>"
         f"<div style='text-align: center; margin: 30px 0;'>"
         f"<a href='{confirm_url}' style='background-color: #e07a5f; color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;'>Confirm Email</a>"
         f"</div>"
         f"<p style='font-size: 13px; color: #64748b;'>If the button above does not work, copy and paste this URL into your browser:</p>"
         f"<p style='font-size: 13px; color: #64748b; word-break: break-all;'><a href='{confirm_url}' style='color: #e07a5f;'>{confirm_url}</a></p>"
         f"<hr style='border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;' />"
-        f"<p style='font-size: 12px; color: #94a3b8;'>If you did not create an account with ConstroPal, please ignore this email.</p>"
+        f"<p style='font-size: 12px; color: #94a3b8;'>If you did not create an account with Ironwork, please ignore this email.</p>"
         f"</div></body></html>"
     )
     try:
@@ -419,7 +419,7 @@ class GoogleSocialLoginView(SocialLoginView):
         id_token = request.data.get('id_token')
         if id_token == "mock-google-token":
             user = get_or_create_social_user(
-                "google@constropal.com",
+                "google@ironwork.com",
                 "Google",
                 "",
             )
@@ -458,7 +458,7 @@ class AppleSocialLoginView(SocialLoginView):
         id_token = request.data.get('id_token')
         if id_token == "mock-apple-token":
             user = get_or_create_social_user(
-                "apple@constropal.com",
+                "apple@ironwork.com",
                 "Apple",
                 "",
             )
@@ -631,7 +631,7 @@ class PasswordResetRequestView(APIView):
             frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:5173')
             reset_url = f"{frontend_url}/reset-password/{uidb64}/{token}"
             
-            subject = "Password Reset Request - ConstroPal"
+            subject = "Password Reset Request - Ironwork"
             message = (
                 f"Hello {user.first_name or user.username},\n\n"
                 "We received a request to reset your password. Please click the link below to set a new password:\n\n"

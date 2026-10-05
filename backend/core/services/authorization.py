@@ -74,3 +74,11 @@ class AuthorizationService:
     def can_see_unapproved_items(self, obj):
         """Only PM and Creator can see unapproved items."""
         return self.role_for(obj) in {"creator", "project_manager"}
+
+    def can_access_report_comments(self, obj):
+        return self.role_for(obj) in {
+            "creator",
+            "project_manager",
+            "foreman",
+            "consultant",
+        }
