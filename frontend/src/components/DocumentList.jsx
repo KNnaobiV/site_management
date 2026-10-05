@@ -92,7 +92,11 @@ const UploadDocumentModal = ({ projectId, plotId, token, onSuccess, onClose }) =
 
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         <div>
+<<<<<<< HEAD
           <label style={labelStyle}>File *</label>
+=======
+          <label style={labelStyle}>File <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
           <input
             ref={fileInputRef}
             type="file"
@@ -165,7 +169,11 @@ const UploadDocumentModal = ({ projectId, plotId, token, onSuccess, onClose }) =
         </div>
 
         <div>
+<<<<<<< HEAD
           <label style={labelStyle}>Document Name <span style={{ color: '#dc2626' }}>*</span></label>
+=======
+          <label style={labelStyle}>Document Name <span style={{ color: "var(--brand-orange)" }}>*</span></label>
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
           <input
             type="text"
             required
@@ -177,15 +185,23 @@ const UploadDocumentModal = ({ projectId, plotId, token, onSuccess, onClose }) =
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '4px' }}>
+<<<<<<< HEAD
           <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
             <input
+=======
+          <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}><input
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
               type="checkbox"
               checked={visibleToForemen}
               onChange={e => setVisibleToForemen(e.target.checked)}
               style={{ width: '18px', height: '18px' }}
             />
+<<<<<<< HEAD
             <span style={{ fontSize: '15px', color: 'var(--text-primary)' }}>Visible to Foremen</span>
           </label>
+=======
+            <span style={{ fontSize: '15px', color: 'var(--text-primary)' }}>Visible to Foremen</span> <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
         </div>
 
         <div style={{ display: 'flex', gap: '12px', paddingTop: '16px', borderTop: '1px solid var(--border-subtle)', marginTop: '8px' }}>

@@ -144,7 +144,11 @@ STATICFILES_DIRS = [
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
+<<<<<<< HEAD
 MEDIA_URL = "media/"
+=======
+MEDIA_URL = "/media/"
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
 MEDIA_ROOT = BASE_DIR / "site_base" / "media"
 
 
@@ -203,4 +207,13 @@ ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_LOGIN_METHODS = {'email', 'username'}
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*', 'password1*', 'password2*']
 ACCOUNT_EMAIL_VERIFICATION = 'none'   # Custom email confirmation handled in RegisterView
+<<<<<<< HEAD
 SOCIALACCOUNT_QUERY_EMAIL = True
+=======
+SOCIALACCOUNT_QUERY_EMAIL = True
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': '',
+    'API_KEY': '',
+    'API_SECRET': ''
+}
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c

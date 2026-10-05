@@ -129,7 +129,7 @@ const InviteTeamMemberPage = () => {
         maxWidth: '1200px'
       }}>
         <div style={{ marginBottom: '32px' }}>
-          <label style={labelStyle}>Search User (Name or Email)</label>
+          <label style={labelStyle}>Search User (Name or Email) <span style={{ color: "var(--brand-orange)" }}>*</span></label>
           <SearchableSelect 
             placeholder="Search for an existing user..."
             options={searchResults}
@@ -140,7 +140,7 @@ const InviteTeamMemberPage = () => {
         </div>
 
         <div style={{ marginBottom: '32px' }}>
-          <label style={labelStyle}>Role</label>
+          <label style={labelStyle}>Role <span style={{ color: "var(--brand-orange)" }}>*</span></label>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
             {roles.map(r => (
               <div 
@@ -178,7 +178,7 @@ const InviteTeamMemberPage = () => {
         </div>
 
         <div style={{ marginBottom: '32px' }}>
-          <label style={labelStyle}>Assign to Projects</label>
+          <label style={labelStyle}>Assign to Projects <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
           <div style={{ ...inputStyle, display: 'flex', flexWrap: 'wrap', gap: '8px', minHeight: '56px' }}>
             {formData.assigned_projects.map(pId => {
               const p = projects.find(proj => proj.id === pId);
@@ -208,7 +208,7 @@ const InviteTeamMemberPage = () => {
 
         <div style={{ marginBottom: '32px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-            <label style={{ ...labelStyle, marginBottom: 0 }}>Personal Message <span style={{ fontWeight: 400, color: 'var(--text-tertiary)' }}>(optional)</span></label>
+            <label style={{ ...labelStyle, marginBottom: 0 }}>Personal Message <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
             <span style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>{formData.message.length}/500</span>
           </div>
           <textarea 

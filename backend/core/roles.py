@@ -24,7 +24,10 @@ PlotRoleLabel = Literal[
     "client",       # project client
     "project_manager",
     "foreman",
+<<<<<<< HEAD
     "storekeeper",
+=======
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
     "consultant",
     "none",
 ]
@@ -48,9 +51,14 @@ def get_project_role(user, project) -> ProjectRoleLabel:
     # Check if user is a foreman/storekeeper on any plot under this project
     from core.models import ConstructionPlot
     if ConstructionPlot.objects.filter(
+<<<<<<< HEAD
         construction_project=project
     ).filter(
         models.Q(foreman=user) | models.Q(storekeeper=user)
+=======
+        construction_project=project,
+        foremen=user
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
     ).exists():
         return "plot_member"
     return "none"
@@ -70,10 +78,15 @@ def get_plot_role(user, plot) -> PlotRoleLabel:
         return "client"
     if user == project.project_manager:
         return "project_manager"
+<<<<<<< HEAD
     if user == plot.foreman:
         return "foreman"
     if user == plot.storekeeper:
         return "storekeeper"
+=======
+    if plot.foremen.filter(pk=user.pk).exists():
+        return "foreman"
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
     if project.consultants.filter(pk=user.pk).exists():
         return "consultant"
     return "none"
@@ -151,7 +164,11 @@ PROJECT_READ_ROLES = {"owner", "client", "project_manager", "consultant", "plot_
 PROJECT_MANAGE_ROLES = {"owner", "project_manager"}
 
 #: Roles that may read a plot
+<<<<<<< HEAD
 PLOT_READ_ROLES = {"owner", "client", "project_manager", "foreman", "storekeeper", "consultant"}
+=======
+PLOT_READ_ROLES = {"owner", "client", "project_manager", "foreman", "consultant"}
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
 SITE_READ_ROLES = PLOT_READ_ROLES  # compat alias
 
 #: Roles that may manage a plot
@@ -159,7 +176,11 @@ PLOT_MANAGE_ROLES = {"owner", "project_manager", "foreman"}
 SITE_MANAGE_ROLES = PLOT_MANAGE_ROLES  # compat alias
 
 #: Roles that may write job reports
+<<<<<<< HEAD
 REPORT_WRITE_ROLES = {"project_manager", "foreman", "storekeeper"}
+=======
+REPORT_WRITE_ROLES = {"project_manager", "foreman"}
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
 
 #: Roles that may approve/reject reports
 REPORT_REVIEW_ROLES = {"owner", "client", "project_manager", "consultant"}
@@ -169,32 +190,57 @@ REPORT_REVIEW_ROLES = {"owner", "client", "project_manager", "consultant"}
 # ---------------------------------------------------------------------------
 
 #: Roles that may create work items
+<<<<<<< HEAD
 WORK_ITEM_CREATE_ROLES = {"owner", "project_manager"}
 
 #: Roles that may update work item status/progress
 WORK_ITEM_UPDATE_ROLES = {"owner", "project_manager", "foreman", "consultant"}
+=======
+WORK_ITEM_CREATE_ROLES = {"owner", "project_manager", "foreman"}
+
+#: Roles that may update work item status/progress
+WORK_ITEM_UPDATE_ROLES = {"owner", "project_manager", "foreman"}
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
 
 #: Roles that may delete work items
 WORK_ITEM_DELETE_ROLES = {"owner", "project_manager"}
 
+<<<<<<< HEAD
 #: Only PM can approve or reject work items submitted by the foreman
 WORK_ITEM_APPROVE_ROLES = {"project_manager"}
+=======
+#: Only PM or owner can approve or reject work items submitted by the foreman
+WORK_ITEM_APPROVE_ROLES = {"project_manager", "owner"}
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
 
 # ---------------------------------------------------------------------------
 # Job item permissions
 # ---------------------------------------------------------------------------
 
+<<<<<<< HEAD
 #: Roles that may create job items (only PM)
 JOB_ITEM_CREATE_ROLES = {"project_manager"}
 
 #: Roles that may update job item status/progress
 JOB_ITEM_UPDATE_ROLES = {"owner", "project_manager", "foreman", "consultant"}
+=======
+#: Roles that may create job items (PM, Foreman)
+JOB_ITEM_CREATE_ROLES = {"project_manager", "foreman"}
+
+#: Roles that may update job item status/progress
+JOB_ITEM_UPDATE_ROLES = {"owner", "project_manager", "foreman"}
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
 
 #: Roles that may delete job items
 JOB_ITEM_DELETE_ROLES = {"owner", "project_manager"}
 
+<<<<<<< HEAD
 #: Only PM can approve or reject job items submitted by the foreman
 JOB_ITEM_APPROVE_ROLES = {"project_manager"}
+=======
+#: Only PM or owner can approve or reject job items submitted by the foreman
+JOB_ITEM_APPROVE_ROLES = {"project_manager", "owner"}
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
 
 # ---------------------------------------------------------------------------
 # Visibility — which roles see unapproved items
@@ -230,13 +276,21 @@ def can_view_finance(user, obj) -> bool:
     if isinstance(obj, ConstructionProject):
         if user == obj.created_by or user == obj.project_manager:
             return True
+<<<<<<< HEAD
         return obj.constructionplot_set.filter(foreman=user).exists()
+=======
+        return obj.constructionplot_set.filter(foremen=user).exists()
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
 
     if isinstance(obj, ConstructionPlot):
         if obj.construction_project:
             if user == obj.construction_project.created_by or user == obj.construction_project.project_manager:
                 return True
+<<<<<<< HEAD
         return user == obj.foreman
+=======
+        return obj.foremen.filter(pk=user.pk).exists()
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
 
     if isinstance(obj, WorkItem):
         plot = getattr(obj, "construction_plot", None)
@@ -265,4 +319,8 @@ def can_view_finance(user, obj) -> bool:
     if project:
         return can_view_finance(user, project)
 
+<<<<<<< HEAD
     return False
+=======
+    return False
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c

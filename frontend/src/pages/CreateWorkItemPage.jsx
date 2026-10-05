@@ -24,8 +24,6 @@ const CreateWorkItemPage = () => {
 
   const [formData, setFormData] = useState({
     name: '',
-    foreman: '',
-    description: '',
     start_date: new Date().toISOString().split('T')[0],
     target_end_date: new Date().toISOString().split('T')[0],
     priority: 'Medium',
@@ -49,7 +47,6 @@ const CreateWorkItemPage = () => {
             setFormData(f => ({
               ...f,
               name: data.name || '',
-              foreman: data.foreman?.id || '',
               description: data.description || '',
               start_date: data.start_date || f.start_date,
               target_end_date: data.target_end_date || '',
@@ -58,10 +55,6 @@ const CreateWorkItemPage = () => {
               manual_progress: data.manual_progress !== null && data.manual_progress !== undefined ? data.manual_progress : (data.progress || 0),
             }));
 
-            // Prepopulate options with existing foreman
-            if (data.foreman) {
-              setUsers([{ id: data.foreman.id, label: data.foreman.username, avatar: data.foreman.avatar_url || null }]);
-            }
 
             // fetch plot to show address
             const plid = data.construction_plot;
@@ -160,7 +153,7 @@ const CreateWorkItemPage = () => {
       });
 
       if (res.ok) {
-        showSuccessMessage(isEdit ? "Work item updated successfully!" : "Work item created successfully!");
+        showSuccessMessage(isEdit ? "Work updated successfully!" : "Work created successfully!");
         if (isEdit) {
           navigate(`/work-items/${workItemId}`);
         } else {
@@ -186,9 +179,9 @@ const CreateWorkItemPage = () => {
           { label: 'Projects', path: '/projects' },
           { label: plot?.project_name || 'Project', path: `/projects/${plot?.construction_project}` },
           { label: plot?.address || 'Plot', path: `/plots/${plotId}` },
-          { label: isEdit ? 'Edit Work Item' : 'New Work Item' }
+          { label: isEdit ? 'Edit Work' : 'New Work' }
         ]} />
-        <h1 style={{ fontSize: '64px', marginTop: '12px' }}>{isEdit ? 'Edit Work Item' : 'Create Work Item'}</h1>
+        <h1 style={{ fontSize: '64px', marginTop: '12px' }}>{isEdit ? 'Edit Work' : 'Create Work'}</h1>
       </div>
 
       <form onSubmit={handleSubmit} className="mobile-padding" style={{
@@ -202,10 +195,14 @@ const CreateWorkItemPage = () => {
           {/* Left Column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <div>
+<<<<<<< HEAD
               <label style={labelStyle}>Title <span style={{ color: '#dc2626' }}>*</span></label>
+=======
+              <label style={labelStyle}>Title <span style={{ color: "var(--brand-orange)" }}>*</span></label>
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
               <input
                 type="text"
-                placeholder="Enter work item title"
+                placeholder="Enter work title"
                 required
                 value={formData.name}
                 onChange={e => setFormData({ ...formData, name: e.target.value })}
@@ -213,6 +210,7 @@ const CreateWorkItemPage = () => {
               />
             </div>
 
+<<<<<<< HEAD
             <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px' }}>
               <div>
                 <label style={labelStyle}>Assigned Foreman <span style={{ color: '#dc2626' }}>*</span></label>
@@ -228,6 +226,12 @@ const CreateWorkItemPage = () => {
 
             <div>
               <label style={labelStyle}>Description <span style={{ color: '#dc2626' }}>*</span></label>
+=======
+
+
+            <div>
+              <label style={labelStyle}>Description <span style={{ color: "var(--brand-orange)" }}>*</span></label>
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
               <textarea
                 required
                 placeholder="Describe the work, scope, materials, and any important details..."
@@ -241,7 +245,11 @@ const CreateWorkItemPage = () => {
           {/* Right Column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <div>
+<<<<<<< HEAD
               <label style={labelStyle}>Parent Plot <span style={{ color: '#dc2626' }}>*</span></label>
+=======
+              <label style={labelStyle}>Parent Plot <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
               {plotId ? (
                 <input
                   type="text"
@@ -261,7 +269,11 @@ const CreateWorkItemPage = () => {
 
             <div className="mobile-grid-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div>
+<<<<<<< HEAD
                 <label style={labelStyle}>Start Date <span style={{ color: '#dc2626' }}>*</span></label>
+=======
+                <label style={labelStyle}>Start Date <span style={{ color: "var(--brand-orange)" }}>*</span></label>
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
                 <input
                   type="date"
                   required
@@ -271,7 +283,11 @@ const CreateWorkItemPage = () => {
                 />
               </div>
               <div>
+<<<<<<< HEAD
                 <label style={labelStyle}>Target End Date <span style={{ color: '#dc2626' }}>*</span></label>
+=======
+                <label style={labelStyle}>Target End Date <span style={{ color: "var(--brand-orange)" }}>*</span></label>
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
                 <input
                   type="date"
                   required
@@ -283,7 +299,7 @@ const CreateWorkItemPage = () => {
             </div>
 
             <div>
-              <label style={labelStyle}>Priority *</label>
+              <label style={labelStyle}>Priority <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
               <div style={{ display: 'flex', gap: '10px' }}>
                 {['Low', 'Medium', 'High', 'Urgent'].map(p => (
                   <button
@@ -321,9 +337,15 @@ const CreateWorkItemPage = () => {
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
+<<<<<<< HEAD
                     <label style={{ ...labelStyle, marginBottom: '4px' }}>Work Item Progress</label>
                     <span style={{ fontSize: '13px', color: 'var(--text-tertiary)' }}>
                       {isProgressManual ? 'Manual Override active' : 'Calculated automatically from job items'}
+=======
+                    <label style={{ ...labelStyle, marginBottom: '4px' }}>Work Progress <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
+                    <span style={{ fontSize: '13px', color: 'var(--text-tertiary)' }}>
+                      {isProgressManual ? 'Manual Override active' : 'Calculated automatically from jobs'}
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
                     </span>
                   </div>
                   <span style={{ fontSize: '24px', fontWeight: 700, color: 'var(--brand-orange)' }}>
@@ -412,14 +434,14 @@ const CreateWorkItemPage = () => {
             )}
 
             <div>
-              <label style={labelStyle}>Status *</label>
+              <label style={labelStyle}>Status <span style={{ color: "var(--brand-orange)" }}>*</span></label>
               <select
                 required
                 value={formData.work_status}
                 onChange={e => setFormData({ ...formData, work_status: e.target.value })}
                 style={inputStyle}
               >
-                {['Planned', 'In Progress', 'Completed', 'On Hold', 'Delayed', 'Cancelled'].map(s => (
+                {['Planned', 'In Progress', 'On Hold', 'Delayed', 'Cancelled'].map(s => (
                   <option key={s} value={s}>{s}</option>
                 ))}
               </select>
@@ -427,7 +449,7 @@ const CreateWorkItemPage = () => {
 
             {/* Budget */}
             <div>
-              <label style={labelStyle}>Budget <span style={{ fontWeight: 400, color: 'var(--text-tertiary)' }}>(Optional)</span></label>
+              <label style={labelStyle}>Budget <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '10px' }}>
                 <input
                   type="number"
@@ -461,7 +483,7 @@ const CreateWorkItemPage = () => {
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '48px' }}>
           <button type="button" onClick={() => navigate(-1)} className="btn-ghost" style={{ padding: '12px 32px' }}>Cancel</button>
           <button type="submit" className="btn-primary" style={{ padding: '12px 48px' }} disabled={loading}>
-            {loading ? <Spinner size={20} /> : (typeof window !== 'undefined' && window.location.pathname.includes('/edit') ? 'Update Work Item' : 'Create Work Item')}
+            {loading ? <Spinner size={20} /> : (typeof window !== 'undefined' && window.location.pathname.includes('/edit') ? 'Update Work' : 'Create Work')}
           </button>
         </div>
       </form>

@@ -149,7 +149,7 @@ const InviteModal = ({ isOpen, onClose, onSuccess, type = 'project', entityId, p
 
             {/* User search */}
             <div>
-              <label style={{ display: 'block', marginBottom: '10px', fontWeight: 600, fontSize: '14px' }}>Search User *</label>
+              <label style={{ display: 'block', marginBottom: '10px', fontWeight: 600, fontSize: '14px' }}>Search User <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
               {selectedUser ? (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', borderRadius: '12px', border: '2px solid var(--brand-orange)', background: 'var(--brand-orange-subtle)' }}>
                   <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--brand-orange)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: '14px', flexShrink: 0 }}>
@@ -203,7 +203,7 @@ const InviteModal = ({ isOpen, onClose, onSuccess, type = 'project', entityId, p
 
             {/* Role — locked pill badge when defaultRole is set, otherwise a dropdown */}
             <div>
-              <label style={{ display: 'block', marginBottom: '10px', fontWeight: 600, fontSize: '14px' }}>Role</label>
+              <label style={{ display: 'block', marginBottom: '10px', fontWeight: 600, fontSize: '14px' }}>Role <span style={{ color: "var(--brand-orange)" }}>*</span></label>
               {defaultRole ? (
                 <div style={{
                   display: 'inline-flex', alignItems: 'center', gap: '8px',
@@ -230,7 +230,7 @@ const InviteModal = ({ isOpen, onClose, onSuccess, type = 'project', entityId, p
 
             {/* Message */}
             <div>
-              <label style={{ display: 'block', marginBottom: '10px', fontWeight: 600, fontSize: '14px' }}>Message <span style={{ fontWeight: 400, color: 'var(--text-tertiary)' }}>(optional)</span></label>
+              <label style={{ display: 'block', marginBottom: '10px', fontWeight: 600, fontSize: '14px' }}>Message <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
               <textarea
                 value={message}
                 onChange={e => setMessage(e.target.value)}

@@ -34,6 +34,7 @@ from core.models import (
     ProjectRole,
     PlotRole,
     Document,
+    StatusChoices,
 )
 from base.models import Picture, Video
 from base.serializers import PictureSerializer, VideoSerializer
@@ -223,10 +224,15 @@ class ConstructionProjectSerializer(RoleFilteredSerializer):
             user_dict[c.id] = c
 
         for plot in obj.constructionplot_set.all():
+<<<<<<< HEAD
             if plot.foreman:
                 user_dict[plot.foreman.id] = plot.foreman
             if plot.storekeeper:
                 user_dict[plot.storekeeper.id] = plot.storekeeper
+=======
+            for f in plot.foremen.all():
+                user_dict[f.id] = f
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
 
         users_list = list(user_dict.values())[:7]
         return UserSummarySerializer(users_list, many=True, context=self.context).data
@@ -261,6 +267,12 @@ class ConstructionProjectSerializer(RoleFilteredSerializer):
             "consultants",
         },
         "consultant": {
+            "client",
+            "project_manager",
+            "consultants",
+        },
+        "client": {
+            "created_by",
             "client",
             "project_manager",
             "consultants",
@@ -357,20 +369,12 @@ class ConstructionPlotSerializer(RoleFilteredSerializer):
     consultant          : address, dates, project link only
     """
  
-    foreman = UserSummarySerializer(read_only=True)
-    storekeeper = UserSummarySerializer(read_only=True)
-    foreman_id = serializers.PrimaryKeyRelatedField(
+    foremen = UserSummarySerializer(many=True, read_only=True)
+    foremen_ids = serializers.PrimaryKeyRelatedField(
         queryset=User.objects.all(), 
-        source="foreman", 
+        source="foremen", 
         write_only=True,
-        allow_null=True,
-        required=False
-    )
-    storekeeper_id = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all(), 
-        source="storekeeper", 
-        write_only=True,
-        allow_null=True,
+        many=True,
         required=False
     )
     
@@ -434,15 +438,20 @@ class ConstructionPlotSerializer(RoleFilteredSerializer):
  
     ROLE_EXTRA = {
         "project_manager": {
-            "foreman", "foreman_id",
-            "storekeeper", "storekeeper_id",
+            "foremen", "foremen_ids",
             "budget",
         },
         "foreman": {
-            "foreman", "foreman_id",
+            "foremen", "foremen_ids",
+        },
+        "plot_member": {
+            "foremen", "foremen_ids",
         },
         "storekeeper": {
-            "storekeeper", "storekeeper_id",
+            "foremen", "foremen_ids",
+        },
+        "client": {
+            "foremen", "foremen_ids",
         },
         "consultant": set(),
     }
@@ -461,10 +470,8 @@ class ConstructionPlotSerializer(RoleFilteredSerializer):
             "gps_latitude",
             "gps_longitude",
             "notes",
-            "foreman",
-            "foreman_id",
-            "storekeeper",
-            "storekeeper_id",
+            "foremen",
+            "foremen_ids",
             "role",
             "project_name",
             "budget",
@@ -622,8 +629,11 @@ class WorkItemSerializer(RoleFilteredSerializer):
         "images",
         "construction_plot_name",
         "construction_project",
+<<<<<<< HEAD
         "foreman",
         "foreman_id",
+=======
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
         "progress",
         "is_progress_manual",
         "manual_progress",
@@ -644,12 +654,17 @@ class WorkItemSerializer(RoleFilteredSerializer):
     work_item_image = PictureSerializer(read_only=True)
     work_item_image_id = serializers.PrimaryKeyRelatedField(
         queryset=Picture.objects.all(), source="work_item_image", required=False, allow_null=True
+<<<<<<< HEAD
     )
     images = serializers.SerializerMethodField()
     foreman = UserSummarySerializer(read_only=True)
     foreman_id = serializers.PrimaryKeyRelatedField(
         queryset=User.objects.all(), source="foreman", required=False, allow_null=True
     )
+=======
+    )
+    images = serializers.SerializerMethodField()
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
 
     def get_images(self, obj):
         pics = list(obj.photos.all())
@@ -675,8 +690,6 @@ class WorkItemSerializer(RoleFilteredSerializer):
             "work_item_image",
             "work_item_image_id",
             "images",
-            "foreman",
-            "foreman_id",
             "budget",
             "spent_amount",
             "progress",
@@ -798,6 +811,7 @@ class JobItemSerializer(RoleFilteredSerializer):
         "job_name",
         "job_description",
         "job_artisan",
+        "custom_artisan",
         "job_status",
         "is_approved",
         "priority",
@@ -838,6 +852,7 @@ class JobItemSerializer(RoleFilteredSerializer):
             "job_name",
             "job_description",
             "job_artisan",
+            "custom_artisan",
             "job_status",
             "is_approved",
             "priority",
@@ -878,6 +893,26 @@ class JobItemSerializer(RoleFilteredSerializer):
                     project = getattr(plot, "construction_project", None) if plot else None
             if project and not can_set_manual_progress(user, project):
                 raise serializers.ValidationError({"manual_progress": "Only the project manager or creator can explicitly set progress."})
+<<<<<<< HEAD
+=======
+
+        # Ensure job item cannot be marked Completed until progress reaches 100%
+        target_status = data.get("job_status")
+        if target_status in ("Completed", StatusChoices.COMPLETED):
+            if not self.instance or self.instance.job_status != StatusChoices.COMPLETED:
+                if "manual_progress" in data and data["manual_progress"] is not None:
+                    current_progress = data["manual_progress"]
+                elif self.instance is not None:
+                    current_progress = self.instance.progress
+                else:
+                    current_progress = 0
+
+                if current_progress < 100:
+                    raise serializers.ValidationError({
+                        "job_status": "Job item cannot be marked as completed until progress reaches 100%."
+                    })
+
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
         return data
 
     budget = serializers.SerializerMethodField()
@@ -994,11 +1029,16 @@ class JobReportSerializer(RoleFilteredSerializer):
         "days_elapsed",
         "updated_at",
         "images",
+        "video_link",
     }
  
     ROLE_EXTRA = {
         "project_manager": {"internal_comments", "job_image", "job_image_id", "job_video", "job_video_data"},
         "foreman":         {"job_image", "job_image_id", "job_video", "job_video_data"},
+<<<<<<< HEAD
+=======
+        "plot_member":     {"job_image", "job_image_id", "job_video", "job_video_data"},
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
         "storekeeper":     {"job_image", "job_image_id", "job_video", "job_video_data"},
         "consultant":      set(),
     }
@@ -1027,6 +1067,10 @@ class JobReportSerializer(RoleFilteredSerializer):
             "job_image_id",
             "job_video",
             "job_video_data",
+<<<<<<< HEAD
+=======
+            "video_link",
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
             "images",
             "updated_at",
         ]
@@ -1226,10 +1270,12 @@ class DocumentSerializer(RoleFilteredSerializer):
 
     ROLE_EXTRA = {
         "project_manager": {"visible_to_storekeepers", "visible_to_foremen"},
+        "owner": {"visible_to_storekeepers", "visible_to_foremen"},
         "client": {"visible_to_storekeepers", "visible_to_foremen"},
         "consultant": {"visible_to_storekeepers", "visible_to_foremen"},
         "foreman": set(),
         "storekeeper": set(),
+        "plot_member": set(),
     }
 
     def get_uploaded_by_display_name(self, obj):

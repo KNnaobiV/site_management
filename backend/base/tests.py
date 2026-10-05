@@ -156,7 +156,10 @@ class PlotApiErrorHandlingTests(TestCase):
 
     def test_create_plot_with_all_fields(self):
         foreman = User.objects.create_user(username="foreman_bob", email="foreman_bob@test.com", password="pw")
+<<<<<<< HEAD
         storekeeper = User.objects.create_user(username="store_alice", email="store_alice@test.com", password="pw")
+=======
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
         url = f"/api/projects/{self.project.pk}/plots/"
         response = self.client.post(url, {
             "plot_number": "PLOT-101",
@@ -168,8 +171,12 @@ class PlotApiErrorHandlingTests(TestCase):
             "gps_latitude": "6.524379",
             "gps_longitude": "3.379206",
             "notes": "Corner plot with generator",
+<<<<<<< HEAD
             "foreman_id": foreman.pk,
             "storekeeper_id": storekeeper.pk,
+=======
+            "foremen_ids": [foreman.pk],
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
         }, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data["plot_number"], "PLOT-101")
@@ -177,8 +184,12 @@ class PlotApiErrorHandlingTests(TestCase):
         self.assertEqual(response.data["status"], "In Progress")
         self.assertEqual(response.data["address"], "456 Sector 7")
         self.assertEqual(response.data["notes"], "Corner plot with generator")
+<<<<<<< HEAD
         self.assertEqual(response.data["foreman"]["id"], foreman.pk)
         self.assertEqual(response.data["storekeeper"]["id"], storekeeper.pk)
+=======
+        self.assertEqual(response.data["foremen"][0]["id"], foreman.pk)
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
         self.assertEqual(response.data["construction_project"], self.project.pk)
 
     def test_create_plot_with_plot_name_fallback(self):
@@ -486,8 +497,13 @@ class ProgressHierarchyTests(TestCase):
             construction_project=self.project,
             address="Plot 1 Progress Way",
             plot_number="Plot 1",
+<<<<<<< HEAD
             foreman=self.foreman,
         )
+=======
+        )
+        self.plot.foremen.add(self.foreman)
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
         self.work_item = WorkItem.objects.create(
             construction_plot=self.plot,
             name="Substructure",

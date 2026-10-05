@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ProjectCard, StatCard, Spinner } from '../components';
-import { Filter, SortAsc, Plus } from 'lucide-react';
+import { ProjectCard, StatCard, Spinner, Modal, FilterSortDropdown } from '../components';
+import { Filter, SortAsc, SortDesc, Plus, HelpCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { apiFetch, unwrapList } from '../api/client';
 
@@ -10,6 +10,9 @@ const ProjectsPage = () => {
   const navigate = useNavigate();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showHelpModal, setShowHelpModal] = useState(false);
+  const [filterStatus, setFilterStatus] = useState('All');
+  const [sortOrder, setSortOrder] = useState('recent');
 
   useEffect(() => {
     fetchProjects();
@@ -34,6 +37,22 @@ const ProjectsPage = () => {
 
   if (loading) return <div style={{ padding: '60px', display: 'flex', justifyContent: 'center' }}><Spinner /></div>;
 
+  const filteredProjects = projects.filter(p => {
+    if (filterStatus !== 'All' && p.project_status !== filterStatus) return false;
+    return true;
+  });
+
+  const sortedProjects = [...filteredProjects].sort((a, b) => {
+    if (sortOrder === 'recent') return new Date(b.created_at || 0) - new Date(a.created_at || 0);
+    if (sortOrder === 'oldest') return new Date(a.created_at || 0) - new Date(b.created_at || 0);
+    if (sortOrder === 'target_end_date') {
+      const dateA = a.target_end_date ? new Date(a.target_end_date).getTime() : Infinity;
+      const dateB = b.target_end_date ? new Date(b.target_end_date).getTime() : Infinity;
+      return dateA - dateB;
+    }
+    return 0;
+  });
+
   return (
     <div className="fade-up" style={{ height: "100vh", overflow: "auto", position: "relative" }}>
       <div style={{ transition: "all 0.2s ease", paddingBottom: '100px' }}>
@@ -47,6 +66,7 @@ const ProjectsPage = () => {
           </div>
 
           <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", alignItems: "center" }}>
+<<<<<<< HEAD
             <button className="btn-ghost">
               <Filter size={16} />
               <span>Filter</span>
@@ -55,6 +75,31 @@ const ProjectsPage = () => {
               <SortAsc size={16} />
               <span>Sort: Recent</span>
             </button>
+=======
+            <FilterSortDropdown
+              icon={Filter}
+              label="Status"
+              options={[
+                { label: 'All Statuses', value: 'All' },
+                { label: 'Planned', value: 'Planned' },
+                { label: 'In Progress', value: 'In Progress' },
+                { label: 'Completed', value: 'Completed' },
+              ]}
+              value={filterStatus}
+              onChange={setFilterStatus}
+            />
+            <FilterSortDropdown
+              icon={sortOrder === 'oldest' ? SortAsc : SortDesc}
+              label="Sort"
+              options={[
+                { label: 'Recent First', value: 'recent' },
+                { label: 'Oldest First', value: 'oldest' },
+                { label: 'Target End Date', value: 'target_end_date' }
+              ]}
+              value={sortOrder}
+              onChange={setSortOrder}
+            />
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
             <button className="btn-primary" onClick={() => navigate('/projects/new')}>
               <Plus size={16} />
               <span>New project</span>
@@ -70,9 +115,9 @@ const ProjectsPage = () => {
         </div>
 
         {/* Grid */}
-        {projects.length > 0 ? (
+        {sortedProjects.length > 0 ? (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "32px" }}>
-            {projects.map((project) => (
+            {sortedProjects.map((project) => (
               <ProjectCard
                 key={project.id}
                 project={project}
@@ -93,7 +138,15 @@ const ProjectsPage = () => {
             padding: '40px',
             color: 'var(--text-tertiary)'
           }}>
-            <h2 style={{ margin: 0, fontSize: '28px' }}>No projects yet</h2>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <h2 style={{ margin: 0, fontSize: '28px' }}>No projects yet</h2>
+              <div 
+                onClick={() => setShowHelpModal(true)} 
+                style={{ display: 'flex', alignItems: 'center', color: 'var(--brand-orange)', cursor: 'pointer' }}
+              >
+                <HelpCircle size={20} />
+              </div>
+            </div>
             <p style={{ maxWidth: '420px', textAlign: 'center' }}>Create a project to start managing your site activity, teams, and daily reports.</p>
             <button className="btn-primary" onClick={() => navigate('/projects/new')} style={{ padding: '14px 40px', height: 'auto' }}>
               Create project to start
@@ -101,6 +154,17 @@ const ProjectsPage = () => {
           </div>
         )}
       </div>
+
+      <Modal isOpen={showHelpModal} onClose={() => setShowHelpModal(false)} title="What is a Project?">
+        <p style={{ lineHeight: '1.6', color: 'var(--text-secondary)' }}>
+          <strong>Projects</strong> are the highest-level containers in your workspace. They represent the overall site or development area.
+        </p>
+        <p style={{ marginTop: '16px', lineHeight: '1.6', color: 'var(--text-secondary)' }}>
+          <strong>Example:</strong> "Lekki Phase 1 Residential Estate" or "Downtown Commercial Plaza". 
+          <br /><br />
+          Inside a Project, you will create Plots (e.g., Block A, Block B), which in turn house Works and Job Items.
+        </p>
+      </Modal>
     </div>
   );
 };

@@ -10,6 +10,10 @@ venv/
 media/
 site_base/media/
 *.md
+<<<<<<< HEAD
 *.env.example
 *.env.example
 *.md
+=======
+*.env.example
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c

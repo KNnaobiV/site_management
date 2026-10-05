@@ -103,7 +103,7 @@ function PasswordField({ label, name, value, onChange }) {
     const [show, setShow] = useState(false);
     return (
         <div>
-            <label style={labelStyle}>{label}</label>
+            <label style={labelStyle}>{label} <span style={{ color: "var(--brand-orange)" }}>*</span></label>
             <div style={{ position: 'relative' }}>
                 <input
                     type={show ? "text" : "password"}

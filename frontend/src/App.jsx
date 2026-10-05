@@ -25,11 +25,13 @@ import InvitationsPage from "./pages/InvitationsPage";
 import EditProfilePage from "./pages/EditProfilePage";
 import UpdatePasswordPage from "./pages/UpdatePasswordPage";
 import ProfilePage from "./pages/ProfilePage";
-import { DashboardShell, Spinner } from "./components";
+import ReportsPage from "./pages/ReportsPage";
+import { DashboardShell, Spinner, BetaBanner, FeedbackModal } from "./components";
 
 export default function App() {
     const { user, ready } = useAuth();
     const location = useLocation();
+    const [isFeedbackOpen, setIsFeedbackOpen] = React.useState(false);
 
     if (!ready) return <BootScreen />;
 
@@ -37,14 +39,23 @@ export default function App() {
 
     if (!user || isResetPassword) {
         return (
-            <Routes>
-                <Route path="/" element={<LandingPage />} />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-                <Route path="/reset-password/:uid/:token" element={<ResetPasswordPage />} />
-                <Route path="/confirm-email" element={<EmailConfirmedPage />} />
-                <Route path="*" element={<Navigate to={user ? "/" : "/login"} />} />
-            </Routes>
+            <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+                <BetaBanner onOpenFeedback={() => setIsFeedbackOpen(true)} />
+                <div style={{ flex: 1 }}>
+                    <Routes>
+                        <Route path="/" element={<LandingPage />} />
+                        <Route path="/login" element={<LoginPage />} />
+                        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                        <Route path="/reset-password/:uid/:token" element={<ResetPasswordPage />} />
+                        <Route path="/confirm-email" element={<EmailConfirmedPage />} />
+                        <Route path="*" element={<Navigate to={user ? "/" : "/login"} />} />
+                    </Routes>
+                </div>
+                <FeedbackModal 
+                    isOpen={isFeedbackOpen} 
+                    onClose={() => setIsFeedbackOpen(false)} 
+                />
+            </div>
         );
     }
 
@@ -63,18 +74,31 @@ export default function App() {
                 <Route path="/plots" element={<PlotsPage />} />
                 <Route path="/plots/:plotId" element={<PlotDetailPage />} />
                 <Route path="/plots/:plotId/work-items/new" element={<CreateWorkItemPage />} />
+                <Route path="/plots/:plotId/works/new" element={<CreateWorkItemPage />} />
                 <Route path="/work-items/new" element={<CreateWorkItemPage />} />
+                <Route path="/works/new" element={<CreateWorkItemPage />} />
 
                 <Route path="/work-items" element={<WorkItemsPage />} />
+                <Route path="/works" element={<WorkItemsPage />} />
                 <Route path="/work-items/:workItemId" element={<WorkItemDetailPage />} />
+                <Route path="/works/:workItemId" element={<WorkItemDetailPage />} />
                 <Route path="/work-items/:workItemId/edit" element={<CreateWorkItemPage />} />
+                <Route path="/works/:workItemId/edit" element={<CreateWorkItemPage />} />
                 <Route path="/work-items/:workItemId/job-items/new" element={<CreateJobItemPage />} />
+                <Route path="/work-items/:workItemId/jobs/new" element={<CreateJobItemPage />} />
+                <Route path="/works/:workItemId/jobs/new" element={<CreateJobItemPage />} />
                 <Route path="/job-items/new" element={<CreateJobItemPage />} />
+                <Route path="/jobs/new" element={<CreateJobItemPage />} />
                 <Route path="/job-items/:jobItemId/edit" element={<CreateJobItemPage />} />
+                <Route path="/jobs/:jobItemId/edit" element={<CreateJobItemPage />} />
 
                 <Route path="/job-items" element={<JobItemsPage />} />
+                <Route path="/jobs" element={<JobItemsPage />} />
                 <Route path="/job-items/:jobItemId" element={<JobItemDetailPage />} />
+                <Route path="/jobs/:jobItemId" element={<JobItemDetailPage />} />
                 <Route path="/job-items/:jobItemId/reports/new" element={<CreateDailyReportPage />} />
+                <Route path="/jobs/:jobItemId/reports/new" element={<CreateDailyReportPage />} />
+                <Route path="/reports" element={<ReportsPage />} />
                 <Route path="/notifications" element={<NotificationsPage />} />
                 <Route path="/invitations" element={<InvitationsPage />} />
                 <Route path="/profile" element={<ProfilePage />} />

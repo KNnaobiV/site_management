@@ -22,7 +22,15 @@ import ImageUploader from "./ImageUploader";
 import ChecklistEditor from "./ChecklistEditor";
 import MaterialsEditor from "./MaterialsEditor";
 import { DocumentList } from "./DocumentList";
+<<<<<<< HEAD
 
+=======
+import BetaBanner from "./BetaBanner";
+import FeedbackModal from "./FeedbackModal";
+import FilterSortDropdown from "./FilterSortDropdown";
+import CompleteJobModal from "./CompleteJobModal";
+import ReviewJobModal from "./ReviewJobModal";
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
 
 // ---------------------------------------------------------------------------
 // RoleBadge
@@ -118,4 +126,12 @@ export {
     ChecklistEditor,
     MaterialsEditor,
     DocumentList,
+<<<<<<< HEAD
+=======
+    BetaBanner,
+    FeedbackModal,
+    FilterSortDropdown,
+    CompleteJobModal,
+    ReviewJobModal,
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
 };

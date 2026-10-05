@@ -13,6 +13,10 @@ import sys
 from io import BytesIO
 from PIL import Image
 
+<<<<<<< HEAD
+=======
+from django.conf import settings
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 from base.models import Picture, Video, HasPictureMixin
@@ -48,7 +52,6 @@ class ProjectRole(models.TextChoices):
 
 class PlotRole(models.TextChoices):
     FOREMAN = "foreman", "Foreman"
-    STOREKEEPER = "storekeeper", "Storekeeper"
 
 
 _PROJECT_ROLE_GROUP_SUFFIX = {
@@ -390,14 +393,8 @@ class PlotInvitation(TimestampedModel):
         plot = self.plot
  
         if self.role == PlotRole.FOREMAN:
-            plot.foreman = self.invitee
-            plot.save()
-            plot.add_foreman_to_group()
- 
-        elif self.role == PlotRole.STOREKEEPER:
-            plot.storekeeper = self.invitee
-            plot.save()
-            plot.add_storekeeper_to_group()
+            plot.foremen.add(self.invitee)
+            plot.add_foreman_to_group(self.invitee)
  
         else:
             raise ValueError(f"Unknown plot role: {self.role}")
@@ -428,13 +425,8 @@ class ConstructionPlot(HasPictureMixin, TimestampedModel):
     construction_project = models.ForeignKey(
         ConstructionProject, on_delete=models.CASCADE
     )    
-    foreman = models.ForeignKey(
-        User, on_delete=models.DO_NOTHING, related_name="plot_foreman",
-        null=True, blank=True
-    )
-    storekeeper = models.ForeignKey(
-        User, on_delete=models.DO_NOTHING, related_name="plot_storekeeper",
-        null=True, blank=True
+    foremen = models.ManyToManyField(
+        User, related_name="plot_foremen", blank=True
     )
     address = models.CharField(max_length=255)
     plot_number = models.CharField(max_length=50, blank=True, default="")
@@ -466,6 +458,13 @@ class ConstructionPlot(HasPictureMixin, TimestampedModel):
     )
 
     @property
+<<<<<<< HEAD
+=======
+    def plot_name(self) -> str:
+        return f"{self.plot_number} at {self.address}"
+
+    @property
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
     def duration_days(self) -> int:
         if self.start_date and self.target_end_date:
             return max(1, (self.target_end_date - self.start_date).days + 1)
@@ -475,7 +474,11 @@ class ConstructionPlot(HasPictureMixin, TimestampedModel):
     def progress(self) -> int:
         if self.manual_progress is not None:
             return self.manual_progress
+<<<<<<< HEAD
         work_items = list(self.workitem_set.all())
+=======
+        work_items = list(self.work_items.all())
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
         if not work_items:
             return 0
         total_duration = sum(wi.duration_days for wi in work_items)
@@ -519,7 +522,7 @@ class ConstructionPlot(HasPictureMixin, TimestampedModel):
     @receiver(post_save, sender='core.ConstructionPlot')
     def create_plot_groups(sender, instance, created, **kwargs):
         """Create plot-specific groups when a new construction plot is created"""
-        group_suffixes = ["Foreman", "Storekeeper"]
+        group_suffixes = ["Foreman"]
         if created:
             for suffix in group_suffixes:
                 create_project_group(
@@ -527,15 +530,10 @@ class ConstructionPlot(HasPictureMixin, TimestampedModel):
                     group_suffix=suffix
                 )
     
-    def add_foreman_to_group(self):
+    def add_foreman_to_group(self, user):
         foreman_group_name = f"{self.construction_project.project_name} Foreman"
         foreman_group, _ = Group.objects.get_or_create(name=foreman_group_name)
-        foreman_group.user_set.add(self.foreman)
-    
-    def add_storekeeper_to_group(self):
-        storekeeper_group_name = f"{self.construction_project.project_name} Storekeeper"
-        storekeeper_group, _ = Group.objects.get_or_create(name=storekeeper_group_name)
-        storekeeper_group.user_set.add(self.storekeeper)
+        foreman_group.user_set.add(user)
 
 
 class WorkItem(HasPictureMixin, TimestampedModel):
@@ -546,6 +544,13 @@ class WorkItem(HasPictureMixin, TimestampedModel):
 
     construction_plot = models.ForeignKey(
         ConstructionPlot, on_delete=models.CASCADE
+    )
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="created_work_items"
     )
     work_status = models.CharField(
         max_length=20, choices=StatusChoices.choices, 
@@ -576,6 +581,57 @@ class WorkItem(HasPictureMixin, TimestampedModel):
         validators=[MinValueValidator(0), MaxValueValidator(100)],
         help_text="Explicit progress override set by PM or creator (0-100). If null, progress is calculated automatically."
     )
+<<<<<<< HEAD
+
+    @property
+    def duration_days(self) -> int:
+        if self.start_date and self.target_end_date:
+            return max(1, (self.target_end_date - self.start_date).days + 1)
+        return 1
+
+    @property
+    def progress(self) -> int:
+        if self.manual_progress is not None:
+            return self.manual_progress
+        jobs = list(self.job_items.all())
+        if not jobs:
+            return 0
+        total_duration = sum(job.duration_days for job in jobs)
+        if total_duration <= 0:
+            return 0
+        weighted_sum = sum(job.progress * job.duration_days for job in jobs)
+        return min(100, max(0, round(weighted_sum / total_duration)))
+
+    @property
+    def is_progress_manual(self) -> bool:
+        return self.manual_progress is not None
+
+    @property
+    def spent_amount(self):
+        from decimal import Decimal
+        from django.db.models import Sum
+        from finance.models import Expense
+        direct = (
+            self.work_item_expenses.filter(is_deleted=False).aggregate(
+                total=Sum('amount')
+            )['total']
+            or Decimal('0.00')
+        )
+        job_expenses = (
+            Expense.objects.filter(
+                job_item__work_item=self,
+                is_deleted=False,
+            ).aggregate(total=Sum('amount'))['total']
+            or Decimal('0.00')
+        )
+        return direct + job_expenses
+=======
+>>>>>>> 71825ce3ef8944da52ab133cde6fbcb6410fd45c
+
+    
+    class Meta:
+        ordering = ['-updated_at']
+        
 
     @property
     def duration_days(self) -> int:
@@ -620,9 +676,6 @@ class WorkItem(HasPictureMixin, TimestampedModel):
         )
         return direct + job_expenses
 
-    class Meta:
-        ordering = ['-updated_at']
-
     def save(self, *args, **kwargs):
         if (
             self.target_end_date and self.start_date and 
@@ -655,6 +708,7 @@ class JobItem(TimestampedModel):
         GLASS_WORKER = "Glass Worker"
         ALUMINIUM_WORKER = "Aluminium Worker"
         OTHER = "Other"
+        LABOURER = "Labourer"
 
     class PriorityChoices(models.TextChoices):
         LOW = "Low"
@@ -665,11 +719,19 @@ class JobItem(TimestampedModel):
     work_item = models.ForeignKey(
         WorkItem, on_delete=models.CASCADE, related_name="job_items"
     )
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="created_job_items"
+    )
     job_status = models.CharField(
         max_length=20, choices=StatusChoices.choices, 
         default=StatusChoices.PLANNED
     )
     job_artisan = models.CharField(max_length=20, choices=Artisans.choices)
+    custom_artisan = models.CharField(max_length=100, blank=True, default="", help_text="Used when job_artisan is 'Other'")
     job_name = models.CharField(max_length=50, default="")
     is_approved = models.BooleanField(default=False)
     priority = models.CharField(
@@ -738,13 +800,29 @@ class JobItem(TimestampedModel):
             raise ValueError(
                 "Target end date cannot be before start date."
             )
+        if self.job_artisan == self.Artisans.OTHER and not self.custom_artisan:
+            raise ValueError (
+                "Custom artisan is required when job artisan is 'Other'."
+            )
+        display_artisan = self.custom_artisan if self.job_artisan == self.Artisans.OTHER and self.custom_artisan else self.job_artisan
         if not self.job_name:
-            self.job_name = f"{self.job_artisan} work for {self.work_item.name}"
+            self.job_name = f"{display_artisan} work for {self.work_item.name}"
         if not self.job_description:
             self.job_description = (
-                f"{self.job_name} for {self.work_item.name} by {self.job_artisan}"
+                f"{self.job_name} for {self.work_item.name} by {display_artisan}"
+            )
+        # check that there is no duplicate job
+        qs = JobItem.objects.filter(
+            work_item=self.work_item, 
+            job_artisan=self.job_artisan, 
+            job_name=self.job_name
+        ).exclude(id=self.id)
+        if qs.exists():
+            raise ValueError(
+                "Duplicate job found."
             )
         super().save(*args, **kwargs)
+        
 
 
 class JobReport(HasPictureMixin, TimestampedModel):
@@ -782,6 +860,7 @@ class JobReport(HasPictureMixin, TimestampedModel):
         related_name="job_report_videos",
         blank=True, null=True
     )
+    video_link = models.URLField(blank=True, null=True)
     reported_by = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     # Report metadata
     report_status = models.CharField(

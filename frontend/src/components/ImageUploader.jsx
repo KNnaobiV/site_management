@@ -38,9 +38,7 @@ const ImageUploader = ({ files = [], onChange, max = 10, label = 'Photos', onUpl
   return (
     <div>
       {label && (
-        <label style={{ display: 'block', marginBottom: '10px', fontWeight: 600, fontSize: '14px', color: 'var(--text-secondary)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-          {label} <span style={{ color: 'var(--text-tertiary)', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>(optional)</span>
-        </label>
+        <label style={{ display: 'block', marginBottom: '10px', fontWeight: 600, fontSize: '14px', color: 'var(--text-secondary)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>{label} <span style={{ color: "var(--text-tertiary)", fontSize: "12px", fontWeight: "normal" }}>(Optional)</span></label>
       )}
 
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: files.length ? '10px' : 0 }}>

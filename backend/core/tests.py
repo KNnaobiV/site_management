@@ -42,11 +42,10 @@ class ConstructionSiteTestCase(TestCase):
         )
         self.site = ConstructionSite.objects.create(
             construction_project=self.project,
-            foreman=self.user,
-            storekeeper=self.user,
             address='123 Test St',
             site_opening_date='2023-01-01',
         )
+        self.site.foremen.add(self.user)
 
     def test_site_creation(self):
         self.assertEqual(self.site.address, '123 Test St')
@@ -82,11 +81,10 @@ class WorkItemTestCase(TestCase):
         )
         self.site = ConstructionSite.objects.create(
             construction_project=self.project,
-            foreman=self.user,
-            storekeeper=self.user,
             address='123 Test St',
             site_opening_date='2023-01-01',
         )
+        self.site.foremen.add(self.user)
         self.work_item = WorkItem.objects.create(
             construction_site=self.site,
             name='Foundation',
@@ -114,11 +112,10 @@ class JobItemTestCase(TestCase):
         )
         self.site = ConstructionSite.objects.create(
             construction_project=self.project,
-            foreman=self.user,
-            storekeeper=self.user,
             address='123 Test St',
             site_opening_date='2023-01-01',
         )
+        self.site.foremen.add(self.user)
         self.work_item = WorkItem.objects.create(
             construction_site=self.site,
             name='Foundation',
@@ -162,11 +159,10 @@ class JobReportTestCase(TestCase):
         )
         self.site = ConstructionSite.objects.create(
             construction_project=self.project,
-            foreman=self.user,
-            storekeeper=self.user,
             address='123 Test St',
             site_opening_date='2023-01-01',
         )
+        self.site.foremen.add(self.user)
         self.work_item = WorkItem.objects.create(
             construction_site=self.site,
             name='Foundation',
