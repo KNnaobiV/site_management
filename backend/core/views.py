@@ -594,7 +594,7 @@ class WorkItemViewSet(ScopeResolutionMixin, ExportMixin, ApprovalMixin, ImageHan
             project = updated_work_item.construction_plot.construction_project
             ns = NotificationService(project=project)
             recipients = {project.project_manager, project.created_by}
-            ns.send_to(recipients, f"Approval required: {user.username} updated work item '{updated_work_item.name}' in plot {updated_work_item.construction_plot.address}", f"/plots/{updated_work_item.construction_plot.pk}/work-items/{updated_work_item.pk}/")
+            ns.send_to(recipients, message=f"Approval required: {user.username} updated work item '{updated_work_item.name}' in plot {updated_work_item.construction_plot.address}", target_url=f"/plots/{updated_work_item.construction_plot.pk}/work-items/{updated_work_item.pk}/")
         else:
             serializer.save()
 
@@ -620,10 +620,10 @@ class WorkItemViewSet(ScopeResolutionMixin, ExportMixin, ApprovalMixin, ImageHan
 
         if not is_approved:
             recipients = {project.project_manager, project.created_by}
-            ns.send_to(recipients, f"Approval required: {user.username} submitted work item '{work_item.name}' in plot {plot.address}", f"/plots/{plot.pk}/work-items/{work_item.pk}/")
+            ns.send_to(recipients, message=f"Approval required: {user.username} submitted work item '{work_item.name}' in plot {plot.address}", target_url=f"/plots/{plot.pk}/work-items/{work_item.pk}/")
         else:
             members = ns.project_members()
-            ns.send_to(members, f"New work item '{work_item.name}' added to plot {plot.address}", exclude={user})
+            ns.send_to(members, message=f"New work item '{work_item.name}' added to plot {plot.address}", exclude={user})
 
 
 
@@ -719,7 +719,7 @@ class JobItemViewSet(ScopeResolutionMixin, ExportMixin, ApprovalMixin, viewsets.
             project = updated_job_item.work_item.construction_plot.construction_project
             ns = NotificationService(project=project)
             recipients = {project.project_manager, project.created_by}
-            ns.send_to(recipients, f"Approval required: {user.username} updated job item '{updated_job_item.job_name}'", f"/job-items/{updated_job_item.pk}/")
+            ns.send_to(recipients, message=f"Approval required: {user.username} updated job item '{updated_job_item.job_name}'", target_url=f"/job-items/{updated_job_item.pk}/")
         else:
             serializer.save()
 
@@ -742,10 +742,10 @@ class JobItemViewSet(ScopeResolutionMixin, ExportMixin, ApprovalMixin, viewsets.
         ns = NotificationService(project=project)
         if not is_approved:
             recipients = {project.project_manager, project.created_by}
-            ns.send_to(recipients, f"Approval required: {user.username} submitted job item '{job_item.job_name}'", f"/job-items/{job_item.pk}/")
+            ns.send_to(recipients, message=f"Approval required: {user.username} submitted job item '{job_item.job_name}'", target_url=f"/job-items/{job_item.pk}/")
         else:
             members = ns.project_members()
-            ns.send_to(members, f"New job item '{job_item.job_name}' added to {work_item.name}", exclude={user})
+            ns.send_to(members, message=f"New job item '{job_item.job_name}' added to {work_item.name}", exclude={user})
 
 
 
@@ -798,7 +798,7 @@ class JobReportViewSet(ScopeResolutionMixin, ExportMixin, ApprovalMixin, ImageHa
         project = report.job_item.work_item.construction_plot.construction_project
         ns = NotificationService(project=project)
         members = ns.project_members()
-        ns.send_to(members, f"New comment on report for {report.job_item.job_name} in {report.job_item.work_item.name}", exclude={comment.user})
+        ns.send_to(members, message=f"New comment on report for {report.job_item.job_name} in {report.job_item.work_item.name}", exclude={comment.user})
 
     def perform_create(self, serializer):
         job_item = get_object_or_404(
