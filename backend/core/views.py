@@ -731,7 +731,7 @@ class JobItemViewSet(ScopeResolutionMixin, ExportMixin, ApprovalMixin, viewsets.
             pk=self.kwargs["workitem_pk"],
             construction_plot=plot
         )
-        if work_item.status == 'Completed':
+        if work_item.work_status == 'Completed':
             raise ValidationError("Cannot add job items to a completed work item.")
 
         auth = AuthorizationService(user)
